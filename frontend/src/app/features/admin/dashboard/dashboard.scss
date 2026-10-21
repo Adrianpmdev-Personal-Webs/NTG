@@ -478,26 +478,6 @@
             text-shadow: 0 0 12px var(--neon-green);
         }
     }
-
-    &.game-card-upcoming {
-        cursor: not-allowed;
-
-        &:hover {
-            transform: none;
-            border-color: var(--border-color);
-            background: var(--bg-card);
-            box-shadow: none;
-        }
-
-        .game-image {
-            opacity: 0.4;
-            filter: grayscale(0.85) brightness(0.5);
-        }
-
-        .game-name {
-            opacity: 0.5;
-        }
-    }
 }
 
 .game-image-wrapper {
@@ -520,55 +500,6 @@
     height: 100%;
     object-fit: cover;
     transition: all 0.25s ease;
-}
-
-.game-upcoming-overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 18px;
-    background: rgba(0, 0, 0, 0.22);
-    pointer-events: none;
-
-    span {
-        position: relative;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: fit-content;
-        max-width: calc(100% - 28px);
-        padding: 7px 2px;
-        color: var(--neon-yellow);
-        font-family: var(--font-display);
-        font-size: 1rem;
-        font-weight: 900;
-        letter-spacing: 2.5px;
-        line-height: 1;
-        text-align: center;
-        text-shadow: 0 0 10px rgba(255, 255, 0, 0.7);
-        transform: rotate(-12deg);
-
-        &::before,
-        &::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            width: 100%;
-            height: 1px;
-            background: var(--neon-yellow);
-            box-shadow: 0 0 8px rgba(255, 255, 0, 0.65);
-        }
-
-        &::before {
-            top: 0;
-        }
-
-        &::after {
-            bottom: 0;
-        }
-    }
 }
 
 .game-name {
@@ -673,10 +604,6 @@
         font-size: 0.9rem;
     }
 
-    .game-upcoming-overlay span {
-        font-size: 0.85rem;
-        letter-spacing: 2px;
-    }
 }
 
 @media (max-width: 640px) {
@@ -863,10 +790,6 @@
         letter-spacing: 2px;
     }
 
-    .game-upcoming-overlay span {
-        font-size: 0.74rem;
-        letter-spacing: 1.6px;
-    }
 }
 
 @media (max-width: 420px) {
@@ -946,8 +869,4 @@
         font-size: 0.78rem;
     }
 
-    .game-upcoming-overlay span {
-        font-size: 0.68rem;
-        letter-spacing: 1.4px;
-    }
 }

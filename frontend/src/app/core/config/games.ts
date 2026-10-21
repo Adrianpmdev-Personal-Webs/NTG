@@ -5,6 +5,8 @@
  * Adding a game means adding one entry here, its feature folder and its routes in app.routes.ts.
  * The id doubles as the tag key: users get access to a game when they have the tag with its id (admins always do).
  * The backend maps the same key to the game's API path, so keep the two in sync.
+ * Set `upcoming: true` to lock a game: players see it as coming soon and cannot open it (the guard checks the flag),
+ * while admins can still open it for development and see it marked with an asterisk.
  *
  * @author @adrianpmdev
  */
@@ -25,6 +27,7 @@ export interface GameEntry {
     /** Route prefix of the game management area (admins only). */
     adminRoute?: string;
     adminItems: readonly GameAdminItem[];
+    /** Coming soon: locked for players, open (and marked with *) for admins. */
     upcoming: boolean;
 }
 
@@ -38,7 +41,7 @@ export const GAMES: readonly GameEntry[] = [
         adminItems: [
             { label: 'GESTIÓN', route: '/admin/pokemon/games', icon: '▣' }
         ],
-        upcoming: false
+        upcoming: true
     },
     {
         id: 'lol',

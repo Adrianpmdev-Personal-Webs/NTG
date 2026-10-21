@@ -1,20 +1,57 @@
 /**
  * Footer styles.
- * Bottom bar of the terminal layout.
+ * Bottom bar of the terminal layout. It stays one line high on every screen size.
  *
  * @author @adrianpmdev
  */
 
+/* ─── HOST ─── */
+
 :host {
     display: block;
+    flex-shrink: 0;
 }
+
+/* ─── FOOTER ─── */
 
 .footer {
     display: flex;
     justify-content: space-between;
+    gap: 12px;
     padding: 8px 24px;
     border-top: 1px solid var(--border-color);
     color: var(--text-dim);
     font-size: 0.7rem;
     letter-spacing: 2px;
+    white-space: nowrap;
+
+    span {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
+
+/* ─── RESPONSIVE ─── */
+
+@media (max-width: 640px) {
+    .footer {
+        gap: 8px;
+        padding: 4px 12px;
+        font-size: 0.6rem;
+        letter-spacing: 1px;
+    }
+}
+
+@media (max-width: 420px) {
+    .footer {
+        letter-spacing: 0.5px;
+    }
+}
+
+/* Landscape phones: give the height back to the content */
+@media (max-height: 480px) {
+    .footer {
+        padding: 2px 12px;
+    }
 }

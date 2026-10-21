@@ -92,7 +92,7 @@
                         <span class="nav-icon">◎</span>
 
                         @if (!sidebarCollapsed()) {
-                            <span class="nav-label">{{ game.name.toUpperCase() }}</span>
+                            <span class="nav-label">{{ game.name.toUpperCase() }}@if (game.upcoming) {<span class="upcoming-mark" title="Próximamente: solo visible para admins">*</span>}</span>
                             <span class="nav-caret">{{ isSubmenuOpen(game.id) ? '▾' : '▸' }}</span>
                         }
                     </button>

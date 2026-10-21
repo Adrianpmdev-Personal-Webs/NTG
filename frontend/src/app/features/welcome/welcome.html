@@ -7,7 +7,7 @@
         </p>
     </div>
 
-    @if (!hasPlayableGames()) {
+    @if (hasNoTags()) {
         <div class="welcome-card terminal-card">
             <p class="welcome-text">
                 [AVISO] Todavía no tienes acceso a ningún juego. Pide a un administrador que te asigne la etiqueta correspondiente.
@@ -17,7 +17,7 @@
 
     <div class="game-grid">
         @for (game of games(); track game.id) {
-            @if (game.upcoming) {
+            @if (game.upcoming && !isAdmin()) {
                 <div class="game-card terminal-card upcoming">
                     <img class="game-image" [src]="game.imageUrl" [alt]="game.name" />
                     <span class="game-name">{{ game.name.toUpperCase() }}</span>
@@ -26,7 +26,12 @@
             } @else {
                 <a class="game-card terminal-card" [routerLink]="game.route">
                     <img class="game-image" [src]="game.imageUrl" [alt]="game.name" />
-                    <span class="game-name">{{ game.name.toUpperCase() }}</span>
+                    <span class="game-name">
+                        {{ game.name.toUpperCase() }}
+                        @if (game.upcoming) {
+                            <span class="upcoming-mark" title="Próximamente: solo visible para admins">*</span>
+                        }
+                    </span>
                     <span class="game-tag">ENTRAR ▶</span>
                 </a>
             }

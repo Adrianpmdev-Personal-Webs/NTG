@@ -7,27 +7,10 @@
 
 .terminal {
     display: block;
-    min-height: 100vh;
+    min-height: 100dvh;
     background: var(--bg-black);
     color: var(--text-primary);
     font-family: var(--font-mono);
-    animation: flicker 8s infinite;
-
-    /* Scanlines effect */
-    &::before {
-        content: '';
-        position: fixed;
-        inset: 0;
-        background: repeating-linear-gradient(
-            0deg,
-            transparent,
-            transparent 2px,
-            rgba(0, 0, 0, 0.08) 2px,
-            rgba(0, 0, 0, 0.08) 4px
-        );
-        pointer-events: none;
-        z-index: 9999;
-    }
 
     ::-webkit-scrollbar {
         width: 6px;
@@ -49,31 +32,6 @@
     ::selection {
         background: var(--neon-green);
         color: var(--bg-black);
-    }
-}
-
-/* CRT flicker animation */
-@keyframes flicker {
-    0%,
-    95%,
-    100% {
-        opacity: 1;
-    }
-
-    96% {
-        opacity: 0.92;
-    }
-
-    97% {
-        opacity: 1;
-    }
-
-    98% {
-        opacity: 0.95;
-    }
-
-    99% {
-        opacity: 1;
     }
 }
 
@@ -176,6 +134,18 @@
         box-shadow: 0 0 10px rgba(0, 255, 65, 0.2), inset 0 0 10px rgba(0, 255, 65, 0.03);
         background: rgba(0, 255, 65, 0.05);
     }
+
+    /* On touch screens a font under 16px makes iOS zoom the page when the field gets focus */
+    @media (pointer: coarse) {
+        font-size: 16px;
+    }
+}
+
+/* Upcoming mark: asterisk next to the name of a game that is coming soon (only admins see those) */
+.upcoming-mark {
+    margin-left: 4px;
+    color: var(--neon-yellow);
+    cursor: help;
 }
 
 /* Card */

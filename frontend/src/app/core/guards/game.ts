@@ -2,6 +2,7 @@
  * gameGuard
  *
  * Builds a guard that allows a game's routes only to admins and to users that have the tag with the game id.
+ * Games flagged `upcoming` in the games list are locked for players, so releasing one is a single flag change.
  * It restores the session itself because guards of one route run in parallel (a page reload would otherwise
  * be evaluated before the user is known). Everyone else goes back to the root.
  *

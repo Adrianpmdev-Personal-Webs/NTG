@@ -225,24 +225,17 @@
         <section class="games-section">
             <div class="games-grid">
                 @for (game of availableGames(); track game.id) {
-                    <a
-                        class="game-card terminal-card animate-fade-up"
-                        [class.game-card-upcoming]="game.upcoming"
-                        [routerLink]="game.route"
-                        [attr.aria-disabled]="game.upcoming"
-                        (click)="handleGameClick($event, game.upcoming)"
-                    >
+                    <a class="game-card terminal-card animate-fade-up" [routerLink]="game.route">
                         <div class="game-image-wrapper">
                             <img class="game-image" [src]="game.imageUrl" [alt]="game.name" loading="lazy" />
-
-                            @if (game.upcoming) {
-                                <div class="game-upcoming-overlay">
-                                    <span>PRÓXIMAMENTE</span>
-                                </div>
-                            }
                         </div>
 
-                        <div class="game-name">{{ game.name }}</div>
+                        <div class="game-name">
+                            {{ game.name }}
+                            @if (game.upcoming) {
+                                <span class="upcoming-mark" title="Próximamente: solo visible para admins">*</span>
+                            }
+                        </div>
                     </a>
                 }
             </div>

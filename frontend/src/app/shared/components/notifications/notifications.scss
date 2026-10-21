@@ -16,7 +16,7 @@
     flex-direction: column;
     gap: 10px;
     width: min(420px, calc(100vw - 40px));
-    max-height: calc(100vh - 40px);
+    max-height: calc(100dvh - 40px);
     overflow-x: hidden;
     overflow-y: auto;
     pointer-events: none;
@@ -169,7 +169,7 @@
         right: 12px;
         left: 12px;
         width: auto;
-        max-height: calc(100vh - 24px);
+        max-height: calc(100dvh - 24px);
         gap: 8px;
     }
 

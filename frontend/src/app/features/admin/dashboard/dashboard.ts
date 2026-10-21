@@ -83,14 +83,6 @@ export class Dashboard implements OnInit {
         return Math.min((numericValue / max) * 100, 100) + '%';
     }
 
-    handleGameClick(event: MouseEvent, upcoming: boolean): void {
-        if (!upcoming) {
-            return;
-        }
-
-        event.preventDefault();
-    }
-
     isAdminRole(role: string): boolean {
         return role.toLowerCase().replace('role_', '') === 'admin';
     }

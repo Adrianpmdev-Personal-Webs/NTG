@@ -27,13 +27,20 @@ export class Welcome implements OnInit {
         initialValue: this.authService.getCurrentUser()
     });
 
-    /** Upcoming games are shown to everyone; playable ones only when the user has the matching tag. */
+    /** Upcoming games are shown to everyone (locked for players); released ones only with the matching tag. */
     readonly games = computed(() => {
         this.currentUser();
 
         return GAMES.filter(game => game.upcoming || this.authService.canAccessGame(game.id));
     });
-    readonly hasPlayableGames = computed(() => this.games().some(game => !game.upcoming));
+    readonly isAdmin = computed(() => {
+        this.currentUser();
+
+        return this.authService.isAdmin();
+    });
+
+    /** Only players with no tag at all are told to ask an admin; the others may just have games not released yet. */
+    readonly hasNoTags = computed(() => !this.isAdmin() && (this.currentUser()?.tags.length ?? 0) === 0);
 
     ngOnInit(): void {
         // Tags may have changed since login, so the list is refreshed when the user comes home.

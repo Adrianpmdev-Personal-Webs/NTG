@@ -34,11 +34,11 @@ export class MainLayout {
         initialValue: this.authService.getCurrentUser()
     });
 
-    /** Playable games the user can open (admins see all of them). */
+    /** Games the user can open: players the released ones they have the tag for, admins all (upcoming marked with *). */
     readonly games = computed(() => {
         this.currentUser();
 
-        return GAMES.filter(game => !game.upcoming && this.authService.canAccessGame(game.id));
+        return GAMES.filter(game => this.authService.canAccessGame(game.id));
     });
 
     private readonly router = inject(Router);

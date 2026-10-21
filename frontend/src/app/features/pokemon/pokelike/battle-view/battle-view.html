@@ -1,0 +1,38 @@
+<section class="battle-panel">
+    <div class="section-heading">
+        <span>// BATTLE</span>
+        <small>Combate automático</small>
+    </div>
+
+    @if (store.battleState().enemy; as enemy) {
+        <div class="battle-stage">
+            @if (store.battleState().playerPokemon; as playerPokemon) {
+                <article class="combatant player-combatant">
+                    <span class="combat-label">YOUR TEAM</span>
+                    <img [src]="playerPokemon.imageUrl" [alt]="playerPokemon.name">
+                    <strong>{{ playerPokemon.name }}</strong>
+                    <div class="health-bar"><span [style.width.%]="store.getHealthPercent(playerPokemon)"></span></div>
+                    <small>LVL {{ playerPokemon.level }} · HP {{ playerPokemon.currentHp }}/{{ playerPokemon.maxHp }}</small>
+                </article>
+            }
+
+            <div class="versus-badge">VS</div>
+
+            <article class="combatant enemy-combatant">
+                <span class="combat-label">ENEMY</span>
+                <img [src]="enemy.imageUrl" [alt]="enemy.name">
+                <strong>{{ enemy.name }}</strong>
+                <div class="health-bar"><span [style.width.%]="store.getHealthPercent(enemy)"></span></div>
+                <small>LVL {{ enemy.level }} · HP {{ enemy.currentHp }}/{{ enemy.maxHp }}</small>
+            </article>
+        </div>
+
+        <div class="battle-log">
+            @for (message of store.battleState().log; track message) {
+                <div>&gt; {{ message }}</div>
+            }
+        </div>
+
+        <button class="primary-action" type="button" [disabled]="store.battleState().resolved" (click)="store.resolveBattle()">RESOLVER</button>
+    }
+</section>

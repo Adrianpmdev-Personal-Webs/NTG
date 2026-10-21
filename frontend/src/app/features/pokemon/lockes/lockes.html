@@ -1,0 +1,54 @@
+<section class="pk-page">
+    <h1 class="pk-heading">Lockes</h1>
+
+    @if (loading()) {
+        <p class="pk-state">Cargando…</p>
+    } @else if (failed()) {
+        <p class="pk-state pk-state-error">No se han podido cargar los lockes.</p>
+    } @else if (groups().length === 0) {
+        <p class="pk-state">Todavía no hay lockes.</p>
+    } @else {
+        @for (group of groups(); track group.game.id) {
+            <div class="game-block">
+                <div class="game-head">
+                    <img class="game-image" [src]="group.game.imageUrl" [alt]="group.game.name" />
+                    <div>
+                        <h2 class="game-name">{{ group.game.name }}</h2>
+                        @if (group.game.description) {
+                            <p class="game-description">{{ group.game.description }}</p>
+                        }
+                    </div>
+                </div>
+
+                <div class="locke-grid">
+                    @for (locke of group.lockes; track locke.id) {
+                        <article class="locke-card">
+                            <h3 class="locke-name">{{ locke.name }}</h3>
+                            @if (locke.description) {
+                                <p class="locke-description">{{ locke.description }}</p>
+                            }
+
+                            @if (locke.rules?.rules?.length) {
+                                <details class="locke-rules">
+                                    <summary>Reglas ({{ locke.rules?.rules?.length }})</summary>
+                                    <ol>
+                                        @for (rule of locke.rules?.rules; track rule.number) {
+                                            <li>
+                                                <strong>{{ rule.title }}</strong>
+                                                <span>{{ rule.description }}</span>
+                                            </li>
+                                        }
+                                    </ol>
+                                </details>
+                            }
+
+                            <a class="locke-link" [routerLink]="['/pokemon/lockes', locke.id, 'tournaments']">
+                                Ver torneos →
+                            </a>
+                        </article>
+                    }
+                </div>
+            </div>
+        }
+    }
+</section>

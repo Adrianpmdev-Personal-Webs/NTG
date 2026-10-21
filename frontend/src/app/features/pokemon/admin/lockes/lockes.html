@@ -1,0 +1,282 @@
+<div class="pokemon-page">
+
+    <!-- Breadcrumb nav -->
+    <nav class="breadcrumb-nav">
+        <button class="bc-btn" (click)="goBack()">◈ JUEGOS</button>
+        <span class="bc-sep">▶</span>
+        <span class="bc-current">{{ game()?.name || 'LOCKES' }}</span>
+    </nav>
+
+    <!-- Game banner -->
+    @if (game()) {
+        <div class="game-banner terminal-card">
+            <div class="banner-img-wrap">
+                <img [src]="game()!.imageUrl" [alt]="game()!.name" class="banner-img"
+                     (error)="$any($event.target).src='https://placehold.co/120x68/040f05/00ff41?text=IMG'" />
+            </div>
+            <div class="banner-info">
+                <div class="banner-name">{{ game()!.name }}</div>
+                @if (game()!.description) {
+                    <div class="banner-desc">{{ game()!.description }}</div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-left">
+            <h1 class="page-title">LOCKES</h1>
+        </div>
+        <div class="header-right">
+            @if (lockes().length == 1) {
+                <span class="total-badge">1 REGISTRO</span>
+            } @else {
+                <span class="total-badge">{{ lockes().length }} REGISTROS</span>
+            }
+            
+
+            @if (authService.isAdmin()) {
+                <button class="btn-neon" (click)="openCreate()">+ NUEVO LOCKE</button>
+            }
+        </div>
+    </div>
+
+    <!-- Loading -->
+    @if (loading()) {
+        <div class="loading-state terminal-card">
+            <span class="loading-spinner">◈</span>
+            <span>CARGANDO LOCKES...</span>
+        </div>
+    }
+
+    <!-- Lockes list -->
+    @if (!loading()) {
+        @if (lockes().length === 0) {
+            <div class="empty-state terminal-card">
+                <div class="empty-icon">◎</div>
+                <div class="empty-title">SIN LOCKES REGISTRADOS</div>
+                <div class="empty-sub">Crea el primer locke para este juego</div>
+            </div>
+        } @else {
+            <div class="lockes-list">
+                @for (locke of lockes(); track locke.id) {
+                    <div class="locke-row terminal-card animate-fade-up" (click)="navigateToTournaments(locke)">
+                        <div class="locke-left">
+                            <div class="locke-icon">⬡</div>
+                            <div class="locke-info">
+                                <div class="locke-name">{{ locke.name }}</div>
+                                @if (locke.description) {
+                                    <div class="locke-desc">{{ locke.description }}</div>
+                                }
+                                @if (locke.rules) {
+                                    <button type="button" class="locke-rules-btn" (click)="openRules(locke); $event.stopPropagation()">
+                                        VER REGLAS
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                        <div class="locke-right">
+                            <span class="locke-date">{{ formatDate(locke.createdAt) }}</span>
+                            <div class="locke-actions" (click)="$event.stopPropagation()">
+                                @if (authService.isAdmin()) {
+                                    <button class="btn-neon btn-sm" (click)="openEdit(locke)">EDITAR</button>
+                                    <button class="btn-neon btn-neon-danger btn-sm" (click)="openDelete(locke)">BORRAR</button>
+                                }
+                            </div>
+                            <span class="enter-arrow">▶</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    }
+
+    <!-- CREATE MODAL -->
+    @if (modalMode() === 'create') {
+        <div class="modal-backdrop" (click)="closeModal()">
+            <div class="modal terminal-card" (click)="$event.stopPropagation()">
+                <div class="modal-header">
+                    <span class="modal-title">// NUEVO LOCKE</span>
+                    <button class="modal-close" (click)="closeModal()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">NOMBRE *</label>
+                        <input class="neon-input" type="text" [(ngModel)]="form.name" placeholder="ej. NuzLocke Clásico" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">DESCRIPCIÓN</label>
+                        <textarea class="neon-input" rows="3" [(ngModel)]="form.description" placeholder="Descripción del locke..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">REGLAS (JSON opcional)</label>
+                        <textarea class="neon-input font-mono" rows="5" [(ngModel)]="rulesText" placeholder='{ "name": "Generationlocke", "rules": [] }'></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-neon" (click)="closeModal()">CANCELAR</button>
+                    <button class="btn-neon btn-neon-success" [disabled]="submitting() || !form.name" (click)="submitCreate()">
+                        {{ submitting() ? 'GUARDANDO...' : 'CREAR LOCKE' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- EDIT MODAL -->
+    @if (modalMode() === 'edit') {
+        <div class="modal-backdrop" (click)="closeModal()">
+            <div class="modal terminal-card" (click)="$event.stopPropagation()">
+                <div class="modal-header">
+                    <span class="modal-title">// EDITAR LOCKE</span>
+                    <button class="modal-close" (click)="closeModal()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">NOMBRE</label>
+                        <input class="neon-input" type="text" [(ngModel)]="editForm.name" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">DESCRIPCIÓN</label>
+                        <textarea class="neon-input" rows="3" [(ngModel)]="editForm.description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">REGLAS (JSON opcional)</label>
+                        <textarea class="neon-input font-mono" rows="5" [(ngModel)]="editRulesText"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-neon" (click)="closeModal()">CANCELAR</button>
+                    <button class="btn-neon btn-neon-success" [disabled]="submitting()" (click)="submitEdit()">
+                        {{ submitting() ? 'GUARDANDO...' : 'GUARDAR' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- DELETE MODAL -->
+    @if (modalMode() === 'delete') {
+        <div class="modal-backdrop" (click)="closeModal()">
+            <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+                <div class="modal-header">
+                    <span class="modal-title danger-title">// CONFIRMAR BORRADO</span>
+                    <button class="modal-close" (click)="closeModal()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <p class="delete-warning">¿Eliminar el locke <strong class="warn-name">{{ selectedLocke()?.name }}</strong> y todos sus torneos?</p>
+                    <p class="delete-note">⚠ Esta acción es irreversible.</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-neon" (click)="closeModal()">CANCELAR</button>
+                    <button class="btn-neon btn-neon-danger" [disabled]="submitting()" (click)="confirmDelete()">
+                        {{ submitting() ? 'ELIMINANDO...' : 'ELIMINAR' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- RULES MODAL -->
+    @if (modalMode() === 'rules') {
+        <div class="modal-backdrop" (click)="closeModal()">
+            <div class="modal rules-modal terminal-card" (click)="$event.stopPropagation()">
+                <div class="modal-header">
+                    <span class="modal-title">// REGLAS DEL LOCKE</span>
+                    <button class="modal-close" (click)="closeModal()">✕</button>
+                </div>
+
+                <div class="modal-body rules-modal-body">
+                    @if (getSelectedRules(); as selectedRules) {
+                        <div class="rules-title">{{ selectedRules.name || selectedLocke()?.name }}</div>
+
+                        <div class="rules-list">
+                            @for (rule of getSelectedRuleItems(); track rule.number) {
+                                <div class="rule-card terminal-card">
+                                    <div class="rule-header">
+                                        <span class="rule-number">#{{ rule.number }}</span>
+                                        <span class="rule-title">{{ rule.title }}</span>
+                                    </div>
+
+                                    <p class="rule-description">{{ rule.description }}</p>
+
+                                    @if (rule.conditions?.length) {
+                                        <div class="rule-block">
+                                            <div class="rule-block-title">CONDICIONES</div>
+                                            <ul class="rule-sublist">
+                                                @for (condition of rule.conditions; track condition) {
+                                                    <li>{{ condition }}</li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    }
+
+                                    @if (rule.exceptions?.length) {
+                                        <div class="rule-block">
+                                            <div class="rule-block-title">EXCEPCIONES</div>
+                                            <ul class="rule-sublist">
+                                                @for (exception of rule.exceptions; track exception) {
+                                                    <li>{{ exception }}</li>
+                                                }
+                                            </ul>
+                                        </div>
+                                    }
+
+                                    @if (rule.levelCaps?.length) {
+                                        <div class="rule-block">
+                                            <div class="rule-block-title">LÍMITES DE NIVEL</div>
+                                            <div class="level-caps-grid">
+                                                @for (cap of rule.levelCaps; track cap.battle) {
+                                                    <div class="level-cap">
+                                                        <span>{{ cap.battle }}</span>
+                                                        <strong>Lv {{ cap.level }}</strong>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+
+                                    @if (rule.tournaments?.length) {
+                                        <div class="rule-block">
+                                            <div class="rule-block-title">TORNEOS</div>
+                                            <div class="tournament-rules-list">
+                                                @for (tournament of rule.tournaments; track tournament.name) {
+                                                    <div class="tournament-rule">
+                                                        <div class="tournament-rule-name">{{ tournament.name }}</div>
+                                                        <div class="tournament-rule-meta">Lv {{ tournament.level }}</div>
+
+                                                        @if (tournament.rewards?.length) {
+                                                            <div class="tournament-rewards">
+                                                                @for (reward of tournament.rewards; track reward) {
+                                                                    <span>{{ reward }}</span>
+                                                                }
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+
+                                    @if (rule.extra) {
+                                        <div class="rule-extra">{{ rule.extra }}</div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    } @else {
+                        <div class="empty-state">
+                            <div class="empty-icon">◎</div>
+                            <div class="empty-title">SIN REGLAS CONFIGURADAS</div>
+                        </div>
+                    }
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn-neon" (click)="closeModal()">CERRAR</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,1595 @@
+<div class="tournament-page">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb-nav">
+        <button class="bc-btn" (click)="goToGames()">◈ JUEGOS</button>
+        <span class="bc-sep">▶</span>
+        <button class="bc-btn" (click)="goToLockes()">{{ game()?.name || 'LOCKES' }}</button>
+        <span class="bc-sep">▶</span>
+        <span class="bc-current">{{ locke()?.name || 'TORNEOS' }}</span>
+        @if (selectedTournament()) {
+            <span class="bc-sep">▶</span>
+            <span class="bc-current bc-tournament">{{ selectedTournament()!.name }}</span>
+        }
+    </nav>
+
+    <!-- Main layout -->
+    <div class="main-layout terminal-card">
+        <div class="shell-body">
+
+            <!-- Tournament list -->
+            <aside class="tournaments-panel">
+                <div class="panel-header">
+                    <span class="panel-title">// TORNEOS ({{ tournaments().length }})</span>
+                    @if (authService.isAdmin()) {
+                        <button class="btn-neon btn-xs" (click)="openTourCreate()">+</button>
+                    }
+                </div>
+
+                @if (tourLoading()) {
+                    <div class="panel-loading">
+                        <span class="loading-spinner">◈</span>
+                    </div>
+                } @else if (tournaments().length === 0) {
+                    <div class="panel-empty">Sin torneos</div>
+                } @else {
+                    <div class="tour-list">
+                        @for (tournament of tournaments(); track tournament.id) {
+                            <div class="tour-item" [class.selected]="selectedTournament()?.id === tournament.id" (click)="selectTournament(tournament)">
+                                <div class="tour-item-top">
+                                    <span class="tour-item-name">{{ tournament.name }}</span>
+                                    <span class="status-pill" [class]="statusClass(tournament.status)">{{ tournament.status }}</span>
+                                </div>
+                                <div class="tour-item-meta">
+                                    <span class="tour-type">{{ tournament.tournamentType }}</span>
+                                </div>
+                                <div class="tour-item-actions" (click)="$event.stopPropagation()">
+                                    @if (authService.isAdmin()) {
+                                        <button class="btn-icon" title="Editar" (click)="openTourEdit(tournament)">✎</button>
+                                        <button class="btn-icon btn-icon-danger" title="Eliminar" (click)="openTourDelete(tournament)">✕</button>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </aside>
+
+            <!-- Detail tabs -->
+            <div class="detail-panel">
+                @if (!selectedTournament()) {
+                    <div class="no-selection">
+                        <div class="no-sel-icon">◈</div>
+                        <div class="no-sel-text">Selecciona un torneo</div>
+                    </div>
+                } @else {
+
+                    <!-- Tabs -->
+                    <div class="tabs-bar">
+                        <button class="tab-btn" [class.active]="activeTab() === 'participants'" (click)="setTab('participants')">◎ PARTICIPANTES</button>
+                        <button class="tab-btn" [class.active]="activeTab() === 'groups'" (click)="setTab('groups')">⬡ GRUPOS</button>
+                        <button class="tab-btn" [class.active]="activeTab() === 'bracket'" (click)="setTab('bracket')">◈ BRACKET</button>
+                        <button class="tab-btn" [class.active]="activeTab() === 'standings'" (click)="setTab('standings')">▲ STANDINGS</button>
+                        <button class="tab-btn" [class.active]="activeTab() === 'rewards'" (click)="setTab('rewards')">★ RECOMPENSAS</button>
+                    </div>
+
+                    <!-- Participants -->
+                    @if (activeTab() === 'participants') {
+                        <div class="tab-content">
+                            <div class="tc-header">
+                                <span class="tc-title">// PARTICIPANTES DEL TORNEO</span>
+                                @if (authService.isAdmin()) {
+                                    <button class="btn-neon btn-sm" (click)="openPartCreate()">+ AÑADIR</button>
+                                }
+                            </div>
+
+                            @if (partLoading()) {
+                                <div class="tab-loading">
+                                    <span class="loading-spinner">◈</span>
+                                </div>
+                            } @else if (participants().length === 0) {
+                                <div class="tab-empty">Sin participantes registrados</div>
+                            } @else {
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>USUARIO</th>
+                                            <th>ESTADO</th>
+                                            <th>INSCRIPCIÓN</th>
+                                            @if (authService.isAdmin()) {
+                                                <th>ACCIONES</th>
+                                            }
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (participant of participants(); track participant.id) {
+                                            <tr>
+                                                <td>
+                                                    <span class="user-cell">◎ {{ getUserName(participant.userId) }}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="status-pill" [class]="statusClass(participant.status)">{{ participant.status }}</span>
+                                                </td>
+                                                <td>{{ formatDate(participant.joinedAt) }}</td>
+                                                @if (authService.isAdmin()) {
+                                                    <td class="action-cell">
+                                                        <button class="btn-icon" (click)="openPartEdit(participant)">✎</button>
+                                                        <button class="btn-icon btn-icon-danger" (click)="openPartDelete(participant)">✕</button>
+                                                    </td>
+                                                }
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+                        </div>
+                    }
+
+                    <!-- Groups -->
+                    @if (activeTab() === 'groups') {
+                        <div class="groups-layout">
+                            <div class="tab-content groups-left">
+                                <div class="tc-header">
+                                    <span class="tc-title">// GRUPOS</span>
+                                    @if (authService.isAdmin()) {
+                                        <button class="btn-neon btn-sm" (click)="openGroupCreate()">+ GRUPO</button>
+                                    }
+                                </div>
+
+                                @if (groupLoading()) {
+                                    <div class="tab-loading">
+                                        <span class="loading-spinner">◈</span>
+                                    </div>
+                                } @else if (groups().length === 0) {
+                                    <div class="tab-empty">Sin grupos</div>
+                                } @else {
+                                    <div class="group-chips">
+                                        @for (group of groups(); track group.id) {
+                                            <div class="group-chip" [class.selected]="selectedGroup()?.id === group.id" (click)="selectGroup(group)">
+                                                <div class="chip-letter">{{ group.groupLetter }}</div>
+                                                <span class="status-pill" [class]="statusClass(group.status)">{{ group.status }}</span>
+
+                                                @if (authService.isAdmin()) {
+                                                    <div class="chip-actions" (click)="$event.stopPropagation()">
+                                                        <button class="btn-icon" (click)="openGroupEdit(group)">✎</button>
+                                                        <button class="btn-icon btn-icon-danger" (click)="openGroupDelete(group)">✕</button>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+
+                            @if (selectedGroup()) {
+                                <div class="groups-right">
+                                    <div class="tab-content">
+                                        <div class="tc-header">
+                                            <span class="tc-title">// GRUPO {{ selectedGroup()!.groupLetter }} — PARTICIPANTES</span>
+                                            @if (authService.isAdmin()) {
+                                                <button class="btn-neon btn-sm" (click)="openGpCreate()">+ AÑADIR</button>
+                                            }
+                                        </div>
+
+                                        @if (groupParticipants().length === 0) {
+                                            <div class="tab-empty">Sin participantes en este grupo</div>
+                                        } @else {
+                                            <table class="data-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>PARTICIPANTE</th>
+                                                        <th>POS</th>
+                                                        <th>V</th>
+                                                        <th>D</th>
+                                                        <th>PTS</th>
+                                                        @if (authService.isAdmin()) {
+                                                            <th></th>
+                                                        }
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @for (groupParticipant of groupParticipants(); track groupParticipant.id) {
+                                                        <tr>
+                                                            <td>{{ getParticipantLabel(groupParticipant.tournamentParticipantId) }}</td>
+                                                            <td>{{ groupParticipant.groupPosition ?? '—' }}</td>
+                                                            <td class="stat-cell green">{{ groupParticipant.wins }}</td>
+                                                            <td class="stat-cell red">{{ groupParticipant.losses }}</td>
+                                                            <td class="stat-cell yellow">{{ groupParticipant.points }}</td>
+                                                            @if (authService.isAdmin()) {
+                                                                <td class="action-cell">
+                                                                    <button class="btn-icon" (click)="openGpEdit(groupParticipant)">✎</button>
+                                                                    <button class="btn-icon btn-icon-danger" (click)="openGpDelete(groupParticipant)">✕</button>
+                                                                </td>
+                                                            }
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        }
+                                    </div>
+
+                                    <div class="tab-content">
+                                        <div class="tc-header">
+                                            <span class="tc-title">// GRUPO {{ selectedGroup()!.groupLetter }} — PARTIDOS</span>
+                                            @if (authService.isAdmin()) {
+                                                <button class="btn-neon btn-sm" (click)="openGmCreate()">+ PARTIDO</button>
+                                            }
+                                        </div>
+
+                                        @if (groupMatches().length === 0) {
+                                            <div class="tab-empty">Sin partidos en este grupo</div>
+                                        } @else {
+                                            <table class="data-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>J1</th>
+                                                        <th>J2</th>
+                                                        <th>GANADOR</th>
+                                                        <th>ESTADO</th>
+                                                        <th>FECHA</th>
+                                                        @if (authService.isAdmin()) {
+                                                            <th></th>
+                                                        }
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @for (groupMatch of groupMatches(); track groupMatch.id) {
+                                                        <tr>
+                                                            <td>{{ getParticipantLabel(groupMatch.participant1Id) }}</td>
+                                                            <td>{{ getParticipantLabel(groupMatch.participant2Id) }}</td>
+                                                            <td>{{ groupMatch.winnerId ? getParticipantLabel(groupMatch.winnerId) : '—' }}</td>
+                                                            <td>
+                                                                <span class="status-pill" [class]="statusClass(groupMatch.status)">{{ groupMatch.status }}</span>
+                                                            </td>
+                                                            <td>{{ formatDate(groupMatch.scheduledAt || '') }}</td>
+                                                            @if (authService.isAdmin()) {
+                                                                <td class="action-cell">
+                                                                    <button class="btn-icon" (click)="openGmEdit(groupMatch)">✎</button>
+                                                                    <button class="btn-icon btn-icon-danger" (click)="openGmDelete(groupMatch)">✕</button>
+                                                                </td>
+                                                            }
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <!-- Bracket -->
+                    @if (activeTab() === 'bracket') {
+                        <div class="groups-layout">
+                            <div class="tab-content groups-left">
+                                <div class="tc-header">
+                                    <span class="tc-title">// FASES BRACKET</span>
+                                    @if (authService.isAdmin()) {
+                                        <button class="btn-neon btn-sm" (click)="openBsCreate()">+ FASE</button>
+                                    }
+                                </div>
+
+                                @if (bracketLoading()) {
+                                    <div class="tab-loading">
+                                        <span class="loading-spinner">◈</span>
+                                    </div>
+                                } @else if (bracketStages().length === 0) {
+                                    <div class="tab-empty">Sin fases de bracket</div>
+                                } @else {
+                                    <div class="stage-list">
+                                        @for (stage of bracketStages(); track stage.id) {
+                                            <div class="stage-row" [class.selected]="selectedStage()?.id === stage.id" (click)="selectStage(stage)">
+                                                <div class="stage-order">{{ stage.stageOrder }}</div>
+                                                <div class="stage-info">
+                                                    <span class="stage-name">{{ stage.stageName }}</span>
+                                                    <span class="status-pill" [class]="statusClass(stage.status)">{{ stage.status }}</span>
+                                                </div>
+
+                                                @if (authService.isAdmin()) {
+                                                    <div class="stage-actions" (click)="$event.stopPropagation()">
+                                                        <button class="btn-icon" (click)="openBsEdit(stage)">✎</button>
+                                                        <button class="btn-icon btn-icon-danger" (click)="openBsDelete(stage)">✕</button>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+
+                            @if (selectedStage()) {
+                                <div class="groups-right">
+                                    <div class="tab-content">
+                                        <div class="tc-header">
+                                            <span class="tc-title">// {{ selectedStage()!.stageName }} — PARTIDOS</span>
+                                            @if (authService.isAdmin()) {
+                                                <button class="btn-neon btn-sm" (click)="openBmCreate()">+ PARTIDO</button>
+                                            }
+                                        </div>
+
+                                        @if (bracketMatches().length === 0) {
+                                            <div class="tab-empty">Sin partidos en esta fase</div>
+                                        } @else {
+                                            <table class="data-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>J1</th>
+                                                        <th>J2</th>
+                                                        <th>GANADOR</th>
+                                                        <th>ESTADO</th>
+                                                        <th>REPLAY</th>
+                                                        @if (authService.isAdmin()) {
+                                                            <th></th>
+                                                        }
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @for (bracketMatch of bracketMatches(); track bracketMatch.id) {
+                                                        <tr>
+                                                            <td class="num-cell">{{ bracketMatch.matchNumber }}</td>
+                                                            <td>{{ bracketMatch.participant1Id ? getParticipantLabel(bracketMatch.participant1Id) : 'TBD' }}</td>
+                                                            <td>{{ bracketMatch.participant2Id ? getParticipantLabel(bracketMatch.participant2Id) : 'TBD' }}</td>
+                                                            <td>{{ bracketMatch.winnerId ? getParticipantLabel(bracketMatch.winnerId) : '—' }}</td>
+                                                            <td>
+                                                                <span class="status-pill" [class]="statusClass(bracketMatch.status)">{{ bracketMatch.status }}</span>
+                                                            </td>
+                                                            <td>
+                                                                @if (bracketMatch.replayUrl) {
+                                                                    <a [href]="bracketMatch.replayUrl" target="_blank" class="replay-link">▶ VER</a>
+                                                                } @else {
+                                                                    <span class="text-dim">—</span>
+                                                                }
+                                                            </td>
+                                                            @if (authService.isAdmin()) {
+                                                                <td class="action-cell">
+                                                                    <button class="btn-icon" (click)="openBmEdit(bracketMatch)">✎</button>
+                                                                    <button class="btn-icon btn-icon-danger" (click)="openBmDelete(bracketMatch)">✕</button>
+                                                                </td>
+                                                            }
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <!-- Standings -->
+                    @if (activeTab() === 'standings') {
+                        <div class="tab-content">
+                            <div class="tc-header">
+                                <span class="tc-title">// CLASIFICACIÓN FINAL</span>
+                                @if (authService.isAdmin()) {
+                                    <button class="btn-neon btn-sm" (click)="openStandCreate()">+ ENTRADA</button>
+                                }
+                            </div>
+
+                            @if (standLoading()) {
+                                <div class="tab-loading">
+                                    <span class="loading-spinner">◈</span>
+                                </div>
+                            } @else if (standings().length === 0) {
+                                <div class="tab-empty">Sin standings registrados</div>
+                            } @else {
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>POS</th>
+                                            <th>PARTICIPANTE</th>
+                                            <th>V</th>
+                                            <th>D</th>
+                                            <th>PTS</th>
+                                            <th>ACTUALIZADO</th>
+                                            @if (authService.isAdmin()) {
+                                                <th></th>
+                                            }
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (standing of standings(); track standing.id) {
+                                            <tr [class.podium-1]="standing.finalPosition === 1" [class.podium-2]="standing.finalPosition === 2" [class.podium-3]="standing.finalPosition === 3">
+                                                <td class="pos-cell">
+                                                    @if (standing.finalPosition === 1) {
+                                                        <span class="medal gold">🥇</span>
+                                                    } @else if (standing.finalPosition === 2) {
+                                                        <span class="medal silver">🥈</span>
+                                                    } @else if (standing.finalPosition === 3) {
+                                                        <span class="medal bronze">🥉</span>
+                                                    } @else {
+                                                        <span class="pos-num">{{ standing.finalPosition ?? '—' }}</span>
+                                                    }
+                                                </td>
+                                                <td>{{ getParticipantLabel(standing.tournamentParticipantId) }}</td>
+                                                <td class="stat-cell green">{{ standing.totalWins }}</td>
+                                                <td class="stat-cell red">{{ standing.totalLosses }}</td>
+                                                <td class="stat-cell yellow">{{ standing.totalPoints }}</td>
+                                                <td>{{ formatDate(standing.updatedAt) }}</td>
+                                                @if (authService.isAdmin()) {
+                                                    <td class="action-cell">
+                                                        <button class="btn-icon" (click)="openStandEdit(standing)">✎</button>
+                                                        <button class="btn-icon btn-icon-danger" (click)="openStandDelete(standing)">✕</button>
+                                                    </td>
+                                                }
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+                        </div>
+                    }
+
+                    <!-- Rewards -->
+                    @if (activeTab() === 'rewards') {
+                        <div class="rewards-layout">
+                            <div class="tab-content">
+                                <div class="tc-header">
+                                    <span class="tc-title">// RECOMPENSAS DEL TORNEO</span>
+                                    @if (authService.isAdmin()) {
+                                        <button class="btn-neon btn-sm" (click)="openRewardCreate()">+ RECOMPENSA</button>
+                                    }
+                                </div>
+
+                                @if (rewards().length === 0) {
+                                    <div class="tab-empty">Sin recompensas definidas</div>
+                                } @else {
+                                    <div class="reward-cards">
+                                        @for (reward of rewards(); track reward.id) {
+                                            <div class="reward-card terminal-card">
+                                                @if (reward.imageUrl) {
+                                                    <img [src]="reward.imageUrl" class="reward-img" />
+                                                } @else {
+                                                    <div class="reward-placeholder">★</div>
+                                                }
+
+                                                <div class="reward-pos">POS. {{ reward.position }}</div>
+                                                <div class="reward-name">{{ reward.rewardName }}</div>
+
+                                                @if (reward.rewardValue) {
+                                                    <div class="reward-val">{{ reward.rewardValue }} pts</div>
+                                                }
+
+                                                @if (authService.isAdmin()) {
+                                                    <div class="reward-actions">
+                                                        <button class="btn-icon" (click)="openRewardEdit(reward)">✎</button>
+                                                        <button class="btn-icon btn-icon-danger" (click)="openRewardDelete(reward)">✕</button>
+                                                    </div>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="tab-content">
+                                <div class="tc-header">
+                                    <span class="tc-title">// RECOMPENSAS ASIGNADAS</span>
+                                    @if (authService.isAdmin()) {
+                                        <button class="btn-neon btn-sm" (click)="openUrCreate()">+ ASIGNAR</button>
+                                    }
+                                </div>
+
+                                @if (userRewards().length === 0) {
+                                    <div class="tab-empty">Sin recompensas asignadas</div>
+                                } @else {
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>USUARIO</th>
+                                                <th>RECOMPENSA</th>
+                                                <th>FECHA</th>
+                                                @if (authService.isAdmin()) {
+                                                    <th></th>
+                                                }
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @for (userReward of userRewards(); track userReward.id) {
+                                                <tr>
+                                                    <td>{{ getUserName(userReward.userId) }}</td>
+                                                    <td>{{ getRewardName(userReward.rewardId) }}</td>
+                                                    <td>{{ formatDate(userReward.claimedAt) }}</td>
+                                                    @if (authService.isAdmin()) {
+                                                        <td class="action-cell">
+                                                            <button class="btn-icon btn-icon-danger" (click)="openUrDelete(userReward)">✕</button>
+                                                        </td>
+                                                    }
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+
+<!-- Tour create -->
+@if (tourModal() === 'create') {
+    <div class="modal-backdrop" (click)="closeTourModal()">
+        <div class="modal terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title">// NUEVO TORNEO</span>
+                <button class="modal-close" (click)="closeTourModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">NOMBRE *</label>
+                    <input class="neon-input" type="text" [(ngModel)]="tourForm.name" placeholder="Nombre del torneo" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">DESCRIPCIÓN</label>
+                    <textarea class="neon-input" rows="3" [(ngModel)]="tourForm.description"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">TIPO</label>
+                        <select class="neon-input" [(ngModel)]="tourForm.tournamentType">
+                            @for (option of tournamentTypeOptions; track option.value) {
+                                <option [value]="option.value">{{ option.label }}</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">ESTADO</label>
+                        <select class="neon-input" [(ngModel)]="tourForm.status">
+                            @for (option of tournamentStatusOptions; track option.value) {
+                                <option [value]="option.value">{{ option.label }}</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">MÁX. PARTICIPANTES</label>
+                    <input class="neon-input" type="number" [(ngModel)]="tourForm.maxParticipants" />
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">FECHA INICIO</label>
+                        <input class="neon-input" type="datetime-local" [(ngModel)]="tourForm.startDate" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">FECHA FIN</label>
+                        <input class="neon-input" type="datetime-local" [(ngModel)]="tourForm.endDate" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closeTourModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-success" [disabled]="!tourForm.name" (click)="submitTourCreate()">CREAR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Tour edit -->
+@if (tourModal() === 'edit') {
+    <div class="modal-backdrop" (click)="closeTourModal()">
+        <div class="modal terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title">// EDITAR TORNEO</span>
+                <button class="modal-close" (click)="closeTourModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">NOMBRE</label>
+                    <input class="neon-input" type="text" [(ngModel)]="tourEditForm.name" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">DESCRIPCIÓN</label>
+                    <textarea class="neon-input" rows="3" [(ngModel)]="tourEditForm.description"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">TIPO</label>
+                        <select class="neon-input" [(ngModel)]="tourEditForm.tournamentType">
+                            @for (option of tournamentTypeOptions; track option.value) {
+                                <option [value]="option.value">{{ option.label }}</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">ESTADO</label>
+                        <select class="neon-input" [(ngModel)]="tourEditForm.status">
+                            @for (option of tournamentStatusOptions; track option.value) {
+                                <option [value]="option.value">{{ option.label }}</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">MÁX. PARTICIPANTES</label>
+                    <input class="neon-input" type="number" [(ngModel)]="tourEditForm.maxParticipants" />
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">FECHA INICIO</label>
+                        <input class="neon-input" type="datetime-local" [(ngModel)]="tourEditForm.startDate" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">FECHA FIN</label>
+                        <input class="neon-input" type="datetime-local" [(ngModel)]="tourEditForm.endDate" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closeTourModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-success" (click)="submitTourEdit()">GUARDAR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Tour delete -->
+@if (tourModal() === 'delete') {
+    <div class="modal-backdrop" (click)="closeTourModal()">
+        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title danger-title">// ELIMINAR TORNEO</span>
+                <button class="modal-close" (click)="closeTourModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <p class="delete-warning">¿Eliminar el torneo <strong class="warn-name">{{ tourEditTarget()?.name }}</strong> y todo su contenido?</p>
+                <p class="delete-note">⚠ Esta acción es irreversible.</p>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closeTourModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-danger" (click)="confirmTourDelete()">ELIMINAR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Participant create -->
+@if (partModal() === 'create') {
+    <div class="modal-backdrop" (click)="closePartModal()">
+        <div class="modal terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title">// AÑADIR PARTICIPANTE</span>
+                <button class="modal-close" (click)="closePartModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">USUARIO *</label>
+                    <select class="neon-input" [(ngModel)]="partForm.userId">
+                        <option value="">Seleccionar usuario...</option>
+                        @for (user of allUsers(); track user.id) {
+                            <option [value]="user.id">{{ user.username }} ({{ user.email }})</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">ESTADO</label>
+                    <select class="neon-input" [(ngModel)]="partForm.status">
+                        @for (option of tournamentParticipantStatusOptions; track option.value) {
+                            <option [value]="option.value">{{ option.label }}</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closePartModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-success" [disabled]="!partForm.userId" (click)="submitPartCreate()">AÑADIR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Participant edit -->
+@if (partModal() === 'edit') {
+    <div class="modal-backdrop" (click)="closePartModal()">
+        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title">// EDITAR PARTICIPANTE</span>
+                <button class="modal-close" (click)="closePartModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">ESTADO</label>
+                    <select class="neon-input" [(ngModel)]="partEditForm.status">
+                        @for (option of tournamentParticipantStatusOptions; track option.value) {
+                            <option [value]="option.value">{{ option.label }}</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closePartModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-success" (click)="submitPartEdit()">GUARDAR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Participant delete -->
+@if (partModal() === 'delete') {
+    <div class="modal-backdrop" (click)="closePartModal()">
+        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title danger-title">// ELIMINAR PARTICIPANTE</span>
+                <button class="modal-close" (click)="closePartModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <p class="delete-warning">¿Eliminar a <strong class="warn-name">{{ getUserName(partEditTarget()?.userId || '') }}</strong> del torneo?</p>
+                <p class="delete-note">⚠ Se eliminarán sus stats en grupos y bracket.</p>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closePartModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-danger" (click)="confirmPartDelete()">ELIMINAR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Group create -->
+@if (groupModal() === 'create') {
+    <div class="modal-backdrop" (click)="closeGroupModal()">
+        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title">// NUEVO GRUPO</span>
+                <button class="modal-close" (click)="closeGroupModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">LETRA DEL GRUPO</label>
+                    <input class="neon-input" type="text" maxlength="1" [(ngModel)]="groupForm.groupLetter" placeholder="A" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">ESTADO</label>
+                    <select class="neon-input" [(ngModel)]="groupForm.status">
+                        @for (option of tournamentGroupStatusOptions; track option.value) {
+                            <option [value]="option.value">{{ option.label }}</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closeGroupModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-success" (click)="submitGroupCreate()">CREAR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Group edit -->
+@if (groupModal() === 'edit') {
+    <div class="modal-backdrop" (click)="closeGroupModal()">
+        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title">// EDITAR GRUPO</span>
+                <button class="modal-close" (click)="closeGroupModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">LETRA</label>
+                    <input class="neon-input" type="text" maxlength="1" [(ngModel)]="groupForm.groupLetter" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">ESTADO</label>
+                    <select class="neon-input" [(ngModel)]="groupForm.status">
+                        @for (option of tournamentGroupStatusOptions; track option.value) {
+                            <option [value]="option.value">{{ option.label }}</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closeGroupModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-success" (click)="submitGroupEdit()">GUARDAR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Group delete -->
+@if (groupModal() === 'delete') {
+    <div class="modal-backdrop" (click)="closeGroupModal()">
+        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title danger-title">// ELIMINAR GRUPO</span>
+                <button class="modal-close" (click)="closeGroupModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <p class="delete-warning">¿Eliminar el Grupo <strong class="warn-name">{{ groupEditTarget()?.groupLetter }}</strong>?</p>
+                <p class="delete-note">⚠ Se eliminan todos sus participantes y partidos.</p>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closeGroupModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-danger" (click)="confirmGroupDelete()">ELIMINAR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Group participant create -->
+@if (gpModal() === 'create') {
+    <div class="modal-backdrop" (click)="closeGpModal()">
+        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title">// AÑADIR AL GRUPO</span>
+                <button class="modal-close" (click)="closeGpModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">PARTICIPANTE</label>
+                    <select class="neon-input" [(ngModel)]="gpForm.tournamentParticipantId">
+                        <option value="">Seleccionar...</option>
+                        @for (participant of participants(); track participant.id) {
+                            <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closeGpModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-success" [disabled]="!gpForm.tournamentParticipantId" (click)="submitGpCreate()">AÑADIR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Group participant edit -->
+@if (gpModal() === 'edit') {
+    <div class="modal-backdrop" (click)="closeGpModal()">
+        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title">// EDITAR STATS GRUPO</span>
+                <button class="modal-close" (click)="closeGpModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">POSICIÓN</label>
+                    <input class="neon-input" type="number" [(ngModel)]="gpEditForm.groupPosition" />
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">VICTORIAS</label>
+                        <input class="neon-input" type="number" [(ngModel)]="gpEditForm.wins" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">DERROTAS</label>
+                        <input class="neon-input" type="number" [(ngModel)]="gpEditForm.losses" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">PUNTOS</label>
+                        <input class="neon-input" type="number" [(ngModel)]="gpEditForm.points" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closeGpModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-success" (click)="submitGpEdit()">GUARDAR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Group participant delete -->
+@if (gpModal() === 'delete') {
+    <div class="modal-backdrop" (click)="closeGpModal()">
+        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title danger-title">// QUITAR DEL GRUPO</span>
+                <button class="modal-close" (click)="closeGpModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <p class="delete-warning">¿Quitar este participante del grupo?</p>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closeGpModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-danger" (click)="confirmGpDelete()">QUITAR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Group match create -->
+@if (gmModal() === 'create') {
+    <div class="modal-backdrop" (click)="closeGmModal()">
+        <div class="modal terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title">// NUEVO PARTIDO DE GRUPO</span>
+                <button class="modal-close" (click)="closeGmModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">JUGADOR 1</label>
+                        <select class="neon-input" [(ngModel)]="gmForm.participant1Id">
+                            <option value="">Seleccionar...</option>
+                            @for (participant of participants(); track participant.id) {
+                                <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">JUGADOR 2</label>
+                        <select class="neon-input" [(ngModel)]="gmForm.participant2Id">
+                            <option value="">Seleccionar...</option>
+                            @for (participant of participants(); track participant.id) {
+                                <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">ESTADO</label>
+                    <select class="neon-input" [(ngModel)]="gmForm.status">
+                        @for (option of groupMatchStatusOptions; track option.value) {
+                            <option [value]="option.value">{{ option.label }}</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">FECHA PROGRAMADA</label>
+                    <input class="neon-input" type="datetime-local" [(ngModel)]="gmForm.scheduledAt" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">URL REPLAY</label>
+                    <input class="neon-input" type="url" [(ngModel)]="gmForm.replayUrl" />
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closeGmModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-success" [disabled]="!gmForm.participant1Id || !gmForm.participant2Id" (click)="submitGmCreate()">CREAR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Group match edit -->
+@if (gmModal() === 'edit') {
+    <div class="modal-backdrop" (click)="closeGmModal()">
+        <div class="modal terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title">// EDITAR PARTIDO</span>
+                <button class="modal-close" (click)="closeGmModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">GANADOR</label>
+                    <select class="neon-input" [(ngModel)]="gmEditForm.winnerId">
+                        <option value="">Sin ganador</option>
+                        @for (participant of participants(); track participant.id) {
+                            <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">ESTADO</label>
+                    <select class="neon-input" [(ngModel)]="gmEditForm.status">
+                        @for (option of groupMatchStatusOptions; track option.value) {
+                            <option [value]="option.value">{{ option.label }}</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">URL REPLAY</label>
+                    <input class="neon-input" type="url" [(ngModel)]="gmEditForm.replayUrl" />
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">FECHA PROG.</label>
+                        <input class="neon-input" type="datetime-local" [(ngModel)]="gmEditForm.scheduledAt" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">COMPLETADO</label>
+                        <input class="neon-input" type="datetime-local" [(ngModel)]="gmEditForm.completedAt" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closeGmModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-success" (click)="submitGmEdit()">GUARDAR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Group match delete -->
+@if (gmModal() === 'delete') {
+    <div class="modal-backdrop" (click)="closeGmModal()">
+        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title danger-title">// ELIMINAR PARTIDO</span>
+                <button class="modal-close" (click)="closeGmModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <p class="delete-warning">¿Eliminar este partido de grupo?</p>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closeGmModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-danger" (click)="confirmGmDelete()">ELIMINAR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Bracket stage create -->
+@if (bsModal() === 'create') {
+    <div class="modal-backdrop" (click)="closeBsModal()">
+        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title">// NUEVA FASE BRACKET</span>
+                <button class="modal-close" (click)="closeBsModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">NOMBRE</label>
+                    <input class="neon-input" type="text" [(ngModel)]="bsForm.stageName" placeholder="ej. Cuartos de final" />
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">ORDEN</label>
+                        <input class="neon-input" type="number" [(ngModel)]="bsForm.stageOrder" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">ESTADO</label>
+                        <select class="neon-input" [(ngModel)]="bsForm.status">
+                            @for (option of bracketStageStatusOptions; track option.value) {
+                                <option [value]="option.value">{{ option.label }}</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closeBsModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-success" [disabled]="!bsForm.stageName" (click)="submitBsCreate()">CREAR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Bracket stage edit -->
+@if (bsModal() === 'edit') {
+    <div class="modal-backdrop" (click)="closeBsModal()">
+        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title">// EDITAR FASE</span>
+                <button class="modal-close" (click)="closeBsModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">NOMBRE</label>
+                    <input class="neon-input" type="text" [(ngModel)]="bsEditForm.stageName" />
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">ORDEN</label>
+                        <input class="neon-input" type="number" [(ngModel)]="bsEditForm.stageOrder" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">ESTADO</label>
+                        <select class="neon-input" [(ngModel)]="bsEditForm.status">
+                            @for (option of bracketStageStatusOptions; track option.value) {
+                                <option [value]="option.value">{{ option.label }}</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closeBsModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-success" (click)="submitBsEdit()">GUARDAR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Bracket stage delete -->
+@if (bsModal() === 'delete') {
+    <div class="modal-backdrop" (click)="closeBsModal()">
+        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title danger-title">// ELIMINAR FASE</span>
+                <button class="modal-close" (click)="closeBsModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <p class="delete-warning">¿Eliminar la fase <strong class="warn-name">{{ bsEditTarget()?.stageName }}</strong> y sus partidos?</p>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closeBsModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-danger" (click)="confirmBsDelete()">ELIMINAR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Bracket match create -->
+@if (bmModal() === 'create') {
+    <div class="modal-backdrop" (click)="closeBmModal()">
+        <div class="modal terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title">// NUEVO PARTIDO BRACKET</span>
+                <button class="modal-close" (click)="closeBmModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Nº PARTIDO</label>
+                    <input class="neon-input" type="number" [(ngModel)]="bmForm.matchNumber" />
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">JUGADOR 1</label>
+                        <select class="neon-input" [(ngModel)]="bmForm.participant1Id">
+                            <option value="">TBD</option>
+                            @for (participant of participants(); track participant.id) {
+                                <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">JUGADOR 2</label>
+                        <select class="neon-input" [(ngModel)]="bmForm.participant2Id">
+                            <option value="">TBD</option>
+                            @for (participant of participants(); track participant.id) {
+                                <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">ESTADO</label>
+                    <select class="neon-input" [(ngModel)]="bmForm.status">
+                        @for (option of bracketMatchStatusOptions; track option.value) {
+                            <option [value]="option.value">{{ option.label }}</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">FECHA PROGRAMADA</label>
+                    <input class="neon-input" type="datetime-local" [(ngModel)]="bmForm.scheduledAt" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">URL REPLAY</label>
+                    <input class="neon-input" type="url" [(ngModel)]="bmForm.replayUrl" />
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closeBmModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-success" (click)="submitBmCreate()">CREAR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Bracket match edit -->
+@if (bmModal() === 'edit') {
+    <div class="modal-backdrop" (click)="closeBmModal()">
+        <div class="modal terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title">// EDITAR PARTIDO BRACKET</span>
+                <button class="modal-close" (click)="closeBmModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">JUGADOR 1</label>
+                        <select class="neon-input" [(ngModel)]="bmEditForm.participant1Id">
+                            <option value="">TBD</option>
+                            @for (participant of participants(); track participant.id) {
+                                <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">JUGADOR 2</label>
+                        <select class="neon-input" [(ngModel)]="bmEditForm.participant2Id">
+                            <option value="">TBD</option>
+                            @for (participant of participants(); track participant.id) {
+                                <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">GANADOR</label>
+                    <select class="neon-input" [(ngModel)]="bmEditForm.winnerId">
+                        <option value="">Sin ganador</option>
+                        @for (participant of participants(); track participant.id) {
+                            <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">ESTADO</label>
+                    <select class="neon-input" [(ngModel)]="bmEditForm.status">
+                        @for (option of bracketMatchStatusOptions; track option.value) {
+                            <option [value]="option.value">{{ option.label }}</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">URL REPLAY</label>
+                    <input class="neon-input" type="url" [(ngModel)]="bmEditForm.replayUrl" />
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">PROG.</label>
+                        <input class="neon-input" type="datetime-local" [(ngModel)]="bmEditForm.scheduledAt" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">COMPLETADO</label>
+                        <input class="neon-input" type="datetime-local" [(ngModel)]="bmEditForm.completedAt" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closeBmModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-success" (click)="submitBmEdit()">GUARDAR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Bracket match delete -->
+@if (bmModal() === 'delete') {
+    <div class="modal-backdrop" (click)="closeBmModal()">
+        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title danger-title">// ELIMINAR PARTIDO</span>
+                <button class="modal-close" (click)="closeBmModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <p class="delete-warning">¿Eliminar el partido #{{ bmEditTarget()?.matchNumber }}?</p>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closeBmModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-danger" (click)="confirmBmDelete()">ELIMINAR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Standing create -->
+@if (standModal() === 'create') {
+    <div class="modal-backdrop" (click)="closeStandModal()">
+        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title">// NUEVO STANDING</span>
+                <button class="modal-close" (click)="closeStandModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">PARTICIPANTE</label>
+                    <select class="neon-input" [(ngModel)]="standForm.tournamentParticipantId">
+                        <option value="">Seleccionar...</option>
+                        @for (participant of participants(); track participant.id) {
+                            <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">POSICIÓN FINAL</label>
+                    <input class="neon-input" type="number" [(ngModel)]="standForm.finalPosition" />
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closeStandModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-success" [disabled]="!standForm.tournamentParticipantId" (click)="submitStandCreate()">CREAR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Standing edit -->
+@if (standModal() === 'edit') {
+    <div class="modal-backdrop" (click)="closeStandModal()">
+        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title">// EDITAR STANDING</span>
+                <button class="modal-close" (click)="closeStandModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">POSICIÓN FINAL</label>
+                    <input class="neon-input" type="number" [(ngModel)]="standEditForm.finalPosition" />
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">VICTORIAS</label>
+                        <input class="neon-input" type="number" [(ngModel)]="standEditForm.totalWins" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">DERROTAS</label>
+                        <input class="neon-input" type="number" [(ngModel)]="standEditForm.totalLosses" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">PUNTOS</label>
+                        <input class="neon-input" type="number" [(ngModel)]="standEditForm.totalPoints" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closeStandModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-success" (click)="submitStandEdit()">GUARDAR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Standing delete -->
+@if (standModal() === 'delete') {
+    <div class="modal-backdrop" (click)="closeStandModal()">
+        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title danger-title">// ELIMINAR STANDING</span>
+                <button class="modal-close" (click)="closeStandModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <p class="delete-warning">¿Eliminar este standing?</p>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closeStandModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-danger" (click)="confirmStandDelete()">ELIMINAR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Reward create -->
+@if (rewardModal() === 'create') {
+    <div class="modal-backdrop" (click)="closeRewardModal()">
+        <div class="modal terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title">// NUEVA RECOMPENSA</span>
+                <button class="modal-close" (click)="closeRewardModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">POSICIÓN *</label>
+                        <input class="neon-input" type="number" [(ngModel)]="rewardForm.position" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">VALOR PTS</label>
+                        <input class="neon-input" type="number" [(ngModel)]="rewardForm.rewardValue" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">NOMBRE RECOMPENSA *</label>
+                    <input class="neon-input" type="text" [(ngModel)]="rewardForm.rewardName" placeholder="ej. Medalla de Oro" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">URL IMAGEN</label>
+                    <input class="neon-input" type="url" [(ngModel)]="rewardForm.imageUrl" />
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closeRewardModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-success" [disabled]="!rewardForm.rewardName" (click)="submitRewardCreate()">CREAR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Reward edit -->
+@if (rewardModal() === 'edit') {
+    <div class="modal-backdrop" (click)="closeRewardModal()">
+        <div class="modal terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title">// EDITAR RECOMPENSA</span>
+                <button class="modal-close" (click)="closeRewardModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">POSICIÓN</label>
+                        <input class="neon-input" type="number" [(ngModel)]="rewardEditForm.position" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">VALOR PTS</label>
+                        <input class="neon-input" type="number" [(ngModel)]="rewardEditForm.rewardValue" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">NOMBRE</label>
+                    <input class="neon-input" type="text" [(ngModel)]="rewardEditForm.rewardName" />
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">URL IMAGEN</label>
+                    <input class="neon-input" type="url" [(ngModel)]="rewardEditForm.imageUrl" />
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closeRewardModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-success" (click)="submitRewardEdit()">GUARDAR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Reward delete -->
+@if (rewardModal() === 'delete') {
+    <div class="modal-backdrop" (click)="closeRewardModal()">
+        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title danger-title">// ELIMINAR RECOMPENSA</span>
+                <button class="modal-close" (click)="closeRewardModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <p class="delete-warning">¿Eliminar la recompensa <strong class="warn-name">{{ rewardEditTarget()?.rewardName }}</strong>?</p>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closeRewardModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-danger" (click)="confirmRewardDelete()">ELIMINAR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- User reward create -->
+@if (urModal() === 'create') {
+    <div class="modal-backdrop" (click)="closeUrModal()">
+        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title">// ASIGNAR RECOMPENSA</span>
+                <button class="modal-close" (click)="closeUrModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">USUARIO</label>
+                    <select class="neon-input" [(ngModel)]="urForm.userId">
+                        <option value="">Seleccionar usuario...</option>
+                        @for (user of allUsers(); track user.id) {
+                            <option [value]="user.id">{{ user.username }}</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">RECOMPENSA</label>
+                    <select class="neon-input" [(ngModel)]="urForm.rewardId">
+                        <option value="">Seleccionar recompensa...</option>
+                        @for (reward of rewards(); track reward.id) {
+                            <option [value]="reward.id">Pos. {{ reward.position }} – {{ reward.rewardName }}</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closeUrModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-success" [disabled]="!urForm.userId || !urForm.rewardId" (click)="submitUrCreate()">ASIGNAR</button>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- User reward delete -->
+@if (urModal() === 'delete') {
+    <div class="modal-backdrop" (click)="closeUrModal()">
+        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title danger-title">// REVOCAR RECOMPENSA</span>
+                <button class="modal-close" (click)="closeUrModal()">✕</button>
+            </div>
+
+            <div class="modal-body">
+                <p class="delete-warning">¿Revocar la recompensa asignada a <strong class="warn-name">{{ getUserName(urEditTarget()?.userId || '') }}</strong>?</p>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-neon" (click)="closeUrModal()">CANCELAR</button>
+                <button class="btn-neon btn-neon-danger" (click)="confirmUrDelete()">REVOCAR</button>
+            </div>
+        </div>
+    </div>
+}

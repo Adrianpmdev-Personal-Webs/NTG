@@ -1,0 +1,115 @@
+.pk-page {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.pk-heading {
+    font-family: var(--pk-font-display);
+    font-size: 2rem;
+    color: var(--pk-yellow);
+    margin-bottom: 20px;
+}
+
+.pk-state {
+    color: var(--pk-muted);
+}
+
+.pk-state-error {
+    color: #ff8a8a;
+}
+
+.game-block {
+    margin-bottom: 32px;
+}
+
+.game-head {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.game-image {
+    width: 96px;
+    height: 64px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 2px solid var(--pk-border);
+}
+
+.game-name {
+    font-family: var(--pk-font-display);
+    font-size: 1.4rem;
+}
+
+.game-description {
+    color: var(--pk-muted);
+    font-size: 0.9rem;
+}
+
+.locke-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+.locke-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 18px;
+    background: var(--pk-surface);
+    border: 2px solid var(--pk-border);
+    border-radius: var(--pk-radius);
+}
+
+.locke-name {
+    font-family: var(--pk-font-display);
+    font-size: 1.15rem;
+}
+
+.locke-description {
+    color: var(--pk-muted);
+    font-size: 0.9rem;
+}
+
+.locke-rules {
+    font-size: 0.85rem;
+
+    summary {
+        cursor: pointer;
+        color: var(--pk-yellow);
+        font-weight: 700;
+    }
+
+    ol {
+        margin: 10px 0 0 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    li strong {
+        display: block;
+    }
+
+    li span {
+        color: var(--pk-muted);
+    }
+}
+
+.locke-link {
+    margin-top: auto;
+    align-self: flex-start;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: var(--pk-red);
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 0.15s;
+
+    &:hover {
+        transform: translateY(-2px);
+    }
+}

@@ -1,0 +1,18 @@
+<div class="notif-container">
+    @for (notification of notificationService.notifications(); track notification.id) {
+    <div class="notif" [class]="'notif-' + notification.type" [class.leaving]="notification.leaving">
+        <span class="notif-prefix">
+            @switch (notification.type) {
+                @case ('success') { [OK] }
+                @case ('error') { [ERR] }
+                @case ('warning') { [WARN] }
+                @default { [INFO] }
+            }
+        </span>
+        <span class="notif-msg">{{ notification.message }}</span>
+        <button class="notif-close" (click)="notificationService.dismiss(notification.id)" title="Cerrar notificación">
+            ×
+        </button>
+    </div>
+    }
+</div>

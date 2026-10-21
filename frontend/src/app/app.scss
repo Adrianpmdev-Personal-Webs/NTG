@@ -1,0 +1,10 @@
+/**
+ * Root component styles.
+ * Makes the root host a block so the routed pages fill it.
+ *
+ * @author @adrianpmdev
+ */
+
+:host {
+    display: block;
+}

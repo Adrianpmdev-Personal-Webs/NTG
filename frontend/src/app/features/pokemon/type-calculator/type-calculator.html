@@ -1,0 +1,154 @@
+<div class="pokemon-page">
+
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-left">
+            <div class="page-label">// MÓDULO POKÉMON</div>
+            <h1 class="page-title">CALCULADORA</h1>
+        </div>
+
+        <div class="header-right">
+            <span class="total-badge">{{ selectedTypes().length }}/2 TIPOS</span>
+            <button class="btn-neon" type="button" (click)="clearSelection()">LIMPIAR</button>
+        </div>
+    </div>
+
+    <!-- Intro -->
+    <div class="terminal-card calculator-intro">
+        <div>
+            <div class="terminal-label">DEFENSA&gt;</div>
+            <div class="intro-title">SELECCIONA UNO O DOS TIPOS</div>
+            <div class="intro-subtitle">
+                La matriz calcula el daño recibido según la combinación defensiva seleccionada.
+            </div>
+        </div>
+
+        <div class="selected-types-panel">
+            @if (selectedTypes().length === 0) {
+                <span class="selected-placeholder">SIN TIPOS SELECCIONADOS</span>
+            } @else {
+                @for (type of selectedTypes(); track type) {
+                    <span class="type-chip selected-chip" [class]="getTypeClass(type)">
+                        {{ type }}
+                    </span>
+                }
+            }
+        </div>
+    </div>
+
+    <!-- Type selector -->
+    <div class="terminal-card type-selector-card">
+        <div class="section-header">
+            <span class="section-title">// TIPOS DEFENSIVOS</span>
+            <span class="section-hint">Pulsa un tipo para activar/desactivar</span>
+        </div>
+
+        <div class="type-grid">
+            @for (type of pokemonTypes; track type) {
+                <button
+                    type="button"
+                    class="type-button"
+                    [class.selected]="isTypeSelected(type)"
+                    [class]="getTypeClass(type)"
+                    (click)="toggleType(type)"
+                >
+                    {{ type }}
+                </button>
+            }
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div class="results-grid">
+
+        <div class="terminal-card result-card weakness-card">
+            <div class="result-header">
+                <span class="result-title">DEBILIDADES</span>
+                <span class="result-count">{{ weaknesses().length }}</span>
+            </div>
+
+            @if (weaknesses().length === 0) {
+                <div class="empty-result">SIN DEBILIDADES</div>
+            } @else {
+                <div class="result-list">
+                    @for (result of weaknesses(); track result.type) {
+                        <div class="result-row">
+                            <span class="type-chip" [class]="getTypeClass(result.type)">
+                                {{ result.type }}
+                            </span>
+                            <span class="multiplier danger">{{ formatMultiplier(result.multiplier) }}</span>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="terminal-card result-card resistance-card">
+            <div class="result-header">
+                <span class="result-title">RESISTENCIAS</span>
+                <span class="result-count">{{ resistances().length }}</span>
+            </div>
+
+            @if (resistances().length === 0) {
+                <div class="empty-result">SIN RESISTENCIAS</div>
+            } @else {
+                <div class="result-list">
+                    @for (result of resistances(); track result.type) {
+                        <div class="result-row">
+                            <span class="type-chip" [class]="getTypeClass(result.type)">
+                                {{ result.type }}
+                            </span>
+                            <span class="multiplier success">{{ formatMultiplier(result.multiplier) }}</span>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="terminal-card result-card immunity-card">
+            <div class="result-header">
+                <span class="result-title">INMUNIDADES</span>
+                <span class="result-count">{{ immunities().length }}</span>
+            </div>
+
+            @if (immunities().length === 0) {
+                <div class="empty-result">SIN INMUNIDADES</div>
+            } @else {
+                <div class="result-list">
+                    @for (result of immunities(); track result.type) {
+                        <div class="result-row">
+                            <span class="type-chip" [class]="getTypeClass(result.type)">
+                                {{ result.type }}
+                            </span>
+                            <span class="multiplier immune">{{ formatMultiplier(result.multiplier) }}</span>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="terminal-card result-card neutral-card">
+            <div class="result-header">
+                <span class="result-title">NEUTRALES</span>
+                <span class="result-count">{{ neutralTypes().length }}</span>
+            </div>
+
+            @if (neutralTypes().length === 0) {
+                <div class="empty-result">SIN TIPOS NEUTRALES</div>
+            } @else {
+                <div class="result-list">
+                    @for (result of neutralTypes(); track result.type) {
+                        <div class="result-row">
+                            <span class="type-chip" [class]="getTypeClass(result.type)">
+                                {{ result.type }}
+                            </span>
+                            <span class="multiplier">{{ formatMultiplier(result.multiplier) }}</span>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,31 @@
+<section class="menu-panel">
+    <div class="menu-copy">
+        <h2>Start New Run</h2>
+        <p>Selecciona modo, generación y comienza una run con mapa visual, recompensas y combate automático.</p>
+    </div>
+
+    <div class="mode-grid">
+        <button type="button" class="mode-card" [class.selected]="store.selectedMode() === 'normal'" (click)="store.selectMode('normal')">
+            <span>Normal Mode</span>
+            <small>Run estándar con recompensas completas.</small>
+        </button>
+        <button type="button" class="mode-card" [class.selected]="store.selectedMode() === 'nuzlocke'" (click)="store.selectMode('nuzlocke')">
+            <span>Nuzlocke</span>
+            <small>Decisiones más duras y menos margen de error.</small>
+        </button>
+        <button type="button" class="mode-card" [class.selected]="store.selectedMode() === 'battleTower'" (click)="store.selectMode('battleTower')">
+            <span>Battle Tower</span>
+            <small>Combates continuos centrados en supervivencia.</small>
+        </button>
+    </div>
+
+    <div class="generation-grid">
+        @for (generation of [1, 2, 3, 4, 5, 6, 7, 8, 9]; track generation) {
+            <button type="button" [class.selected]="store.selectedGeneration() === generation" (click)="store.selectGeneration(generation)">
+                GEN {{ generation }}
+            </button>
+        }
+    </div>
+
+    <button class="primary-action" type="button" (click)="store.startRun()">START RUN</button>
+</section>

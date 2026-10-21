@@ -1,0 +1,186 @@
+@use 'mixins' as *;
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;700&display=swap');
+
+:host {
+    /* Pokemon theme tokens */
+    --pk-bg: #141b3d;
+    --pk-surface: #1d2757;
+    --pk-surface-2: #263170;
+    --pk-red: #ee1515;
+    --pk-red-dark: #b60f0f;
+    --pk-yellow: #ffcb05;
+    --pk-blue: #3b6fe0;
+    --pk-text: #f4f6ff;
+    --pk-muted: rgba(244, 246, 255, 0.65);
+    --pk-border: rgba(255, 203, 5, 0.28);
+    --pk-radius: 16px;
+    --pk-font-display: 'Fredoka', 'Trebuchet MS', sans-serif;
+    --pk-font-body: 'Nunito', 'Segoe UI', sans-serif;
+
+    /*
+     * The type calculator and Pokelike were written against the terminal tokens.
+     * Re-pointing those names here gives them the Pokemon palette without touching their styles.
+     */
+    --bg-black: var(--pk-bg);
+    --bg-dark: var(--pk-bg);
+    --bg-panel: var(--pk-surface);
+    --bg-card: var(--pk-surface);
+    --bg-card-hover: var(--pk-surface-2);
+    --neon-green: var(--pk-yellow);
+    --neon-green-dim: #e0b600;
+    --neon-green-dark: #a88700;
+    --neon-green-glow: rgba(255, 203, 5, 0.35);
+    --neon-cyan: var(--pk-blue);
+    --neon-red: var(--pk-red);
+    --neon-yellow: var(--pk-yellow);
+    --neon-orange: #ff9d00;
+    --border-color: var(--pk-border);
+    --border-bright: rgba(255, 203, 5, 0.6);
+    --text-primary: var(--pk-text);
+    --text-secondary: var(--pk-muted);
+    --text-dim: rgba(244, 246, 255, 0.4);
+    --font-mono: var(--pk-font-body);
+    --font-display: var(--pk-font-display);
+    --font-retro: var(--pk-font-display);
+
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+    background: radial-gradient(circle at 20% 0%, var(--pk-surface-2), var(--pk-bg) 55%);
+    color: var(--pk-text);
+    font-family: var(--pk-font-body);
+}
+
+.pk-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 12px 28px;
+    background: var(--pk-red);
+    border-bottom: 4px solid var(--pk-red-dark);
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25);
+}
+
+.pk-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #fff;
+    text-decoration: none;
+}
+
+.pk-ball {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 3px solid #1b1b1b;
+    background: linear-gradient(180deg, var(--pk-red) 0 46%, #1b1b1b 46% 54%, #fff 54% 100%);
+    position: relative;
+    flex-shrink: 0;
+
+    &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        margin: auto;
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: #fff;
+        border: 3px solid #1b1b1b;
+    }
+}
+
+.pk-brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+}
+
+.pk-title {
+    font-family: var(--pk-font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+.pk-subtitle {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--pk-yellow);
+}
+
+.pk-nav {
+    display: flex;
+    gap: 6px;
+    flex: 1;
+}
+
+.pk-nav-link {
+    padding: 8px 16px;
+    border-radius: 999px;
+    color: #fff;
+    font-family: var(--pk-font-display);
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.18);
+    }
+
+    &.active {
+        background: var(--pk-yellow);
+        color: #1b1b1b;
+    }
+}
+
+.pk-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.pk-pill {
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 2px solid #fff;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: transform 0.15s;
+
+    &:hover {
+        transform: translateY(-2px);
+    }
+}
+
+.pk-pill-light {
+    background: #fff;
+    color: var(--pk-red-dark);
+}
+
+.pk-main {
+    flex: 1;
+    min-width: 0;
+    padding: 28px;
+}
+
+@include mobile {
+    .pk-header {
+        flex-wrap: wrap;
+        padding: 12px 16px;
+    }
+
+    .pk-nav {
+        order: 3;
+        flex-basis: 100%;
+        overflow-x: auto;
+    }
+
+    .pk-main {
+        padding: 16px;
+    }
+}

@@ -1,0 +1,40 @@
+<section class="map-panel">
+    <div class="section-heading">
+        <span>// NEXT MAP</span>
+        <small>Elige una ruta para continuar</small>
+    </div>
+
+    <div class="map-board" [style.background-image]="'url(' + store.currentMapImage() + ')'">
+        <div class="route-line route-line-a"></div>
+        <div class="route-line route-line-b"></div>
+        <div class="route-line route-line-c"></div>
+
+        @for (node of store.mapNodes(); track node.id) {
+            <button
+                type="button"
+                class="map-node"
+                [class.completed]="node.completed"
+                [class.locked]="node.locked"
+                [style.left.%]="node.positionX"
+                [style.top.%]="node.positionY"
+                (click)="store.chooseMapNode(node)"
+            >
+                <img [src]="node.iconUrl" [alt]="node.name">
+                <span>{{ store.getNodeTypeLabel(node.type) }}</span>
+            </button>
+        }
+    </div>
+
+    <div class="node-list">
+        @for (node of store.mapNodes(); track node.id) {
+            <article class="node-card">
+                <img [src]="node.iconUrl" [alt]="node.name">
+                <div>
+                    <strong>{{ node.name }}</strong>
+                    <p>{{ node.description }}</p>
+                </div>
+                <span>{{ node.reward }}</span>
+            </article>
+        }
+    </div>
+</section>

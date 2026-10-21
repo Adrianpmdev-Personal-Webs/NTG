@@ -1,0 +1,188 @@
+<section class="pk-page">
+    <a class="back-link" routerLink="/pokemon/lockes">← Lockes</a>
+
+    @if (loading()) {
+        <p class="pk-state">Cargando…</p>
+    } @else if (failed()) {
+        <p class="pk-state pk-state-error">No se ha podido cargar el locke.</p>
+    } @else {
+        <h1 class="pk-heading">{{ locke()?.name }}</h1>
+
+        @if (tournaments().length === 0) {
+            <p class="pk-state">Este locke todavía no tiene torneos.</p>
+        } @else {
+            <div class="tournament-list">
+                @for (tournament of tournaments(); track tournament.id) {
+                    <button
+                        type="button"
+                        class="tournament-chip"
+                        [class.active]="selected()?.id === tournament.id"
+                        (click)="select(tournament)"
+                    >
+                        {{ tournament.name }}
+                    </button>
+                }
+            </div>
+
+            @if (selected(); as tournament) {
+                <div class="tournament-head">
+                    <span class="badge">{{ statusLabel(tournament.status) }}</span>
+                    <span class="badge badge-blue">{{ statusLabel(tournament.tournamentType) }}</span>
+                    <span class="meta">{{ formatDate(tournament.startDate) }} → {{ formatDate(tournament.endDate) }}</span>
+                </div>
+                @if (tournament.description) {
+                    <p class="description">{{ tournament.description }}</p>
+                }
+
+                <nav class="tab-bar">
+                    @for (tab of tabs; track tab.id) {
+                        <button
+                            type="button"
+                            class="tab"
+                            [class.active]="activeTab() === tab.id"
+                            (click)="setTab(tab.id)"
+                        >
+                            {{ tab.label }}
+                        </button>
+                    }
+                </nav>
+
+                @if (detailLoading()) {
+                    <p class="pk-state">Cargando torneo…</p>
+                } @else {
+                    @switch (activeTab()) {
+                        @case ('participants') {
+                            @if (participants().length === 0) {
+                                <p class="pk-state">Sin participantes.</p>
+                            } @else {
+                                <ul class="chip-list">
+                                    @for (participant of participants(); track participant.id) {
+                                        <li class="chip">
+                                            {{ userName(participant.userId) }}
+                                            <small>{{ statusLabel(participant.status) }}</small>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        }
+
+                        @case ('groups') {
+                            @if (groups().length === 0) {
+                                <p class="pk-state">Sin grupos.</p>
+                            }
+                            @for (view of groups(); track view.group.id) {
+                                <div class="panel">
+                                    <h3 class="panel-title">Grupo {{ view.group.groupLetter }}</h3>
+                                    <div class="table-wrap">
+                                        <table>
+                                            <thead>
+                                                <tr><th>#</th><th>Jugador</th><th>V</th><th>D</th><th>Pts</th></tr>
+                                            </thead>
+                                            <tbody>
+                                                @for (entry of sortedGroupParticipants(view); track entry.id; let index = $index) {
+                                                    <tr>
+                                                        <td>{{ entry.groupPosition ?? index + 1 }}</td>
+                                                        <td>{{ participantLabel(entry.tournamentParticipantId) }}</td>
+                                                        <td>{{ entry.wins }}</td>
+                                                        <td>{{ entry.losses }}</td>
+                                                        <td>{{ entry.points }}</td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    @if (view.matches.length > 0) {
+                                        <ul class="match-list">
+                                            @for (match of view.matches; track match.id) {
+                                                <li class="match">
+                                                    <span [class.winner]="match.winnerId === match.participant1Id">
+                                                        {{ participantLabel(match.participant1Id) }}
+                                                    </span>
+                                                    <span class="versus">vs</span>
+                                                    <span [class.winner]="match.winnerId === match.participant2Id">
+                                                        {{ participantLabel(match.participant2Id) }}
+                                                    </span>
+                                                    @if (match.replayUrl) {
+                                                        <a class="replay" [href]="match.replayUrl" target="_blank" rel="noopener">Replay</a>
+                                                    }
+                                                </li>
+                                            }
+                                        </ul>
+                                    }
+                                </div>
+                            }
+                        }
+
+                        @case ('bracket') {
+                            @if (stages().length === 0) {
+                                <p class="pk-state">Sin bracket.</p>
+                            }
+                            @for (view of sortedStages(); track view.stage.id) {
+                                <div class="panel">
+                                    <h3 class="panel-title">{{ view.stage.stageName }}</h3>
+                                    <ul class="match-list">
+                                        @for (match of view.matches; track match.id) {
+                                            <li class="match">
+                                                <span [class.winner]="!!match.winnerId && match.winnerId === match.participant1Id">
+                                                    {{ participantLabel(match.participant1Id) }}
+                                                </span>
+                                                <span class="versus">vs</span>
+                                                <span [class.winner]="!!match.winnerId && match.winnerId === match.participant2Id">
+                                                    {{ participantLabel(match.participant2Id) }}
+                                                </span>
+                                                @if (match.replayUrl) {
+                                                    <a class="replay" [href]="match.replayUrl" target="_blank" rel="noopener">Replay</a>
+                                                }
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                        }
+
+                        @case ('standings') {
+                            @if (standings().length === 0) {
+                                <p class="pk-state">Sin clasificación.</p>
+                            } @else {
+                                <div class="panel table-wrap">
+                                    <table>
+                                        <thead>
+                                            <tr><th>#</th><th>Jugador</th><th>V</th><th>D</th><th>Pts</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            @for (standing of sortedStandings(); track standing.id) {
+                                                <tr>
+                                                    <td>{{ standing.finalPosition ?? '—' }}</td>
+                                                    <td>{{ participantLabel(standing.tournamentParticipantId) }}</td>
+                                                    <td>{{ standing.totalWins }}</td>
+                                                    <td>{{ standing.totalLosses }}</td>
+                                                    <td>{{ standing.totalPoints }}</td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
+                        }
+
+                        @case ('rewards') {
+                            @if (rewards().length === 0) {
+                                <p class="pk-state">Sin premios.</p>
+                            } @else {
+                                <ul class="reward-list">
+                                    @for (reward of rewards(); track reward.id) {
+                                        <li class="reward">
+                                            <span class="reward-position">{{ reward.position }}º</span>
+                                            <span>{{ reward.rewardName }}</span>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+</section>

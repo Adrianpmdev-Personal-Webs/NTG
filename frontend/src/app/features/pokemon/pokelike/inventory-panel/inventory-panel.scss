@@ -1,0 +1,198 @@
+/* ─── SHARED GAME PANEL ─── */
+
+:host {
+    display: block;
+}
+
+.menu-panel,
+.selection-panel,
+.map-panel,
+.battle-panel,
+.trade-panel,
+.end-panel,
+.team-panel,
+.inventory-panel {
+    padding: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.14);
+    background: linear-gradient(180deg, rgba(5, 9, 22, 0.88), rgba(0, 0, 0, 0.76));
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(8px);
+}
+
+.section-heading,
+.panel-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.section-heading span,
+.panel-title span {
+    font-family: var(--font-display);
+    color: #ffffff;
+    font-size: 0.86rem;
+    letter-spacing: 3px;
+}
+
+.section-heading small,
+.panel-title small {
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.68rem;
+    letter-spacing: 1.5px;
+}
+
+.primary-action,
+.secondary-action,
+.mode-card,
+.pokemon-card,
+.item-card {
+    border: 2px solid rgba(255, 255, 255, 0.16);
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.48);
+    color: #ffffff;
+    font-family: var(--font-mono);
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.primary-action:hover,
+.secondary-action:hover,
+.mode-card:hover,
+.pokemon-card:hover,
+.item-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 230, 109, 0.9);
+    background: rgba(255, 230, 109, 0.1);
+}
+
+.primary-action:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.primary-action,
+.secondary-action {
+    min-height: 42px;
+    padding: 0 18px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.primary-action {
+    background: linear-gradient(180deg, #ffe66d, #ffb703);
+    color: #17110a;
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.action-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+
+.centered {
+    justify-content: center;
+}
+
+.health-bar {
+    width: 100%;
+    height: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 99px;
+    background: rgba(255, 0, 64, 0.22);
+    overflow: hidden;
+}
+
+.health-bar span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, #6dff88, #7cffcb);
+}
+
+.type-chip,
+.rarity-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid currentColor;
+    border-radius: 99px;
+    padding: 4px 8px;
+    font-size: 0.58rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: rgba(0, 0, 0, 0.34);
+}
+
+.chip-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.type-normal { color: #a8a878; }
+.type-fuego { color: #f08030; }
+.type-agua { color: #6890f0; }
+.type-eléctrico { color: #f8d030; }
+.type-planta { color: #78c850; }
+.type-hielo { color: #98d8d8; }
+.type-lucha { color: #c03028; }
+.type-veneno { color: #a040a0; }
+.type-tierra { color: #e0c068; }
+.type-volador { color: #a890f0; }
+.type-psíquico { color: #f85888; }
+.type-bicho { color: #a8b820; }
+.type-roca { color: #b8a038; }
+.type-fantasma { color: #705898; }
+.type-dragón { color: #7038f8; }
+.type-siniestro { color: #705848; }
+.type-acero { color: #b8b8d0; }
+.type-hada { color: #ee99ac; }
+.rarity-común { color: rgba(255, 255, 255, 0.72); }
+.rarity-raro { color: #7cffcb; }
+.rarity-épico { color: #ffe66d; }
+.rarity-legendario { color: #ff7a90; }
+
+
+/* ─── INVENTORY PANEL ─── */
+
+.empty-state {
+    padding: 22px 0;
+    color: rgba(255, 255, 255, 0.55);
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+.inventory-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.inventory-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.38);
+}
+
+.inventory-row img {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+    image-rendering: pixelated;
+}
+
+.inventory-row strong {
+    color: #ffffff;
+    font-size: 0.76rem;
+    letter-spacing: 1px;
+}

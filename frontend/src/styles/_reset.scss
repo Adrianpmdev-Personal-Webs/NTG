@@ -1,0 +1,18 @@
+/**
+ * Reset partial.
+ * Reset and neutral page base. Colors and fonts belong to each layout, never to the body.
+ *
+ * @author @adrianpmdev
+ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+    overflow-x: hidden;
+}

@@ -1,0 +1,1040 @@
+/**
+ * Pokémon game detail page styles.
+ * Responsive game locke list layout with banner, breadcrumb, modals and rules.
+ *
+ * Author: Adrián Pérez Morales
+ */
+
+/* ─── POKEMON PAGE ─── */
+
+.pokemon-page {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ─── BREADCRUMB ─── */
+
+.breadcrumb-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.72rem;
+    letter-spacing: 2px;
+    line-height: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.bc-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 24px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    line-height: 1;
+    letter-spacing: 2px;
+    padding: 0;
+    transition: color 0.2s;
+    flex-shrink: 0;
+
+    &:hover {
+        color: var(--neon-green);
+        text-decoration: underline;
+    }
+}
+
+.bc-sep,
+.bc-current {
+    display: inline-flex;
+    align-items: center;
+    height: 24px;
+    line-height: 1;
+}
+
+.bc-sep {
+    color: var(--text-dim);
+    font-size: 0.68rem;
+    transform: translateY(-1px);
+    flex-shrink: 0;
+}
+
+.bc-current {
+    color: var(--neon-green);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ─── BANNER ─── */
+
+.game-banner {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 16px 18px;
+}
+
+.banner-img-wrap {
+    width: 120px;
+    height: 120px;
+    flex-shrink: 0;
+    overflow: hidden;
+    background: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.banner-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.banner-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.banner-label {
+    font-size: 0.62rem;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    margin-bottom: 4px;
+}
+
+.banner-name {
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--neon-green);
+    margin-bottom: 4px;
+    overflow-wrap: anywhere;
+}
+
+.banner-desc {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+/* ─── PAGE HEADER ─── */
+
+.page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color);
+    flex-wrap: wrap;
+}
+
+.page-label {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    margin-bottom: 6px;
+}
+
+.page-title {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 900;
+    letter-spacing: 4px;
+    color: var(--neon-green);
+    text-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.total-badge {
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    border: 1px solid var(--border-color);
+    padding: 4px 10px;
+    white-space: nowrap;
+}
+
+/* ─── LOCKE ROWS ─── */
+
+.lockes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.locke-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 0;
+
+    &:hover {
+        border-color: rgba(0, 255, 65, 0.45);
+        background: rgba(0, 255, 65, 0.04);
+
+        .enter-arrow {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+}
+
+.locke-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+    min-width: 0;
+}
+
+.locke-icon {
+    font-size: 1.4rem;
+    color: var(--neon-green);
+    text-shadow: 0 0 8px var(--neon-green);
+    flex-shrink: 0;
+}
+
+.locke-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.locke-name {
+    font-family: var(--font-display);
+    font-size: 0.88rem;
+    letter-spacing: 2px;
+    color: var(--neon-green);
+    margin-bottom: 4px;
+    overflow-wrap: anywhere;
+}
+
+.locke-desc {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.locke-rules-btn {
+    display: inline-block;
+    width: fit-content;
+    margin-top: 6px;
+    background: transparent;
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    color: var(--neon-cyan);
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    padding: 3px 8px;
+    transition: all 0.2s;
+
+    &:hover {
+        background: rgba(0, 255, 255, 0.08);
+        border-color: var(--neon-cyan);
+        text-shadow: 0 0 8px var(--neon-cyan);
+    }
+}
+
+.locke-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+}
+
+.locke-date {
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+.locke-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.locke-actions:not(:has(> *)) {
+    display: none;
+}
+
+.enter-arrow {
+    font-size: 0.8rem;
+    color: var(--neon-green);
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: all 0.2s;
+}
+
+.btn-sm {
+    font-size: 0.68rem !important;
+    padding: 5px 12px !important;
+    letter-spacing: 1.5px !important;
+}
+
+/* ─── LOADING AND EMPTY STATES ─── */
+
+.loading-state,
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 60px 24px;
+    text-align: center;
+}
+
+.loading-spinner {
+    font-size: 2rem;
+    color: var(--neon-green);
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.empty-icon {
+    font-size: 3rem;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+}
+
+.empty-title {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    letter-spacing: 3px;
+    color: var(--text-secondary);
+}
+
+.empty-sub {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+}
+
+/* ─── MODAL ─── */
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    overflow: hidden;
+}
+
+.modal {
+    width: 100%;
+    max-width: 480px;
+    max-height: min(90vh, 820px);
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: fade-up 0.2s ease forwards;
+}
+
+.modal-sm {
+    max-width: 380px;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.modal-title {
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    letter-spacing: 3px;
+    color: var(--neon-green);
+}
+
+.danger-title {
+    color: var(--neon-red);
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 4px 8px;
+    transition: color 0.2s;
+    flex-shrink: 0;
+
+    &:hover {
+        color: var(--neon-red);
+    }
+}
+
+.modal-body {
+    flex: 1;
+    min-height: 0;
+    padding: 22px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-label {
+    font-size: 0.68rem;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+}
+
+textarea.neon-input {
+    resize: vertical;
+    min-height: 72px;
+}
+
+.font-mono {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding: 16px 22px;
+    border-top: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.btn-neon-success {
+    border-color: var(--neon-green);
+    color: var(--neon-green);
+
+    &:hover {
+        background: rgba(0, 255, 65, 0.1);
+    }
+
+    &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+}
+
+.delete-warning {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.warn-name {
+    color: var(--neon-yellow);
+    font-style: normal;
+}
+
+.delete-note {
+    font-size: 0.72rem;
+    color: var(--neon-red);
+    letter-spacing: 1px;
+}
+
+/* ─── RULES MODAL ─── */
+
+.rules-modal {
+    max-width: 780px;
+    max-height: min(90vh, 820px);
+}
+
+.rules-modal-body {
+    flex: 1;
+    min-height: 0;
+    gap: 18px;
+    overflow-y: auto;
+}
+
+.rules-title {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    letter-spacing: 3px;
+    color: var(--neon-green);
+    text-shadow: 0 0 14px rgba(0, 255, 65, 0.45);
+}
+
+.rules-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.rule-card {
+    padding: 16px;
+}
+
+.rule-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.rule-number {
+    color: var(--neon-yellow);
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+}
+
+.rule-title {
+    color: var(--neon-green);
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    letter-spacing: 2px;
+}
+
+.rule-description {
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    line-height: 1.6;
+}
+
+.rule-block {
+    margin-top: 12px;
+    border-left: 1px solid var(--border-color);
+    padding-left: 12px;
+}
+
+.rule-block-title {
+    color: var(--text-dim);
+    font-size: 0.62rem;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+}
+
+.rule-sublist {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-left: 18px;
+    color: var(--text-secondary);
+    font-size: 0.74rem;
+    line-height: 1.5;
+}
+
+.level-caps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 8px;
+}
+
+.level-cap {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    border: 1px solid var(--border-color);
+    padding: 6px 8px;
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+
+    strong {
+        color: var(--neon-yellow);
+        font-weight: 400;
+    }
+}
+
+.tournament-rules-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: 10px;
+}
+
+.tournament-rule {
+    border: 1px solid var(--border-color);
+    padding: 10px;
+    background: rgba(0, 255, 65, 0.03);
+}
+
+.tournament-rule-name {
+    color: var(--neon-green);
+    font-size: 0.72rem;
+    letter-spacing: 1.5px;
+    margin-bottom: 4px;
+}
+
+.tournament-rule-meta {
+    color: var(--neon-yellow);
+    font-size: 0.68rem;
+    margin-bottom: 6px;
+}
+
+.tournament-rewards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+
+    span {
+        border: 1px solid rgba(0, 255, 255, 0.25);
+        color: var(--neon-cyan);
+        font-size: 0.62rem;
+        padding: 2px 6px;
+    }
+}
+
+.rule-extra {
+    margin-top: 12px;
+    color: var(--neon-cyan);
+    font-size: 0.72rem;
+    letter-spacing: 1px;
+}
+
+/* ─── RESPONSIVE ─── */
+
+@media (max-width: 900px) {
+    .game-banner {
+        align-items: flex-start;
+    }
+
+    .locke-row {
+        align-items: flex-start;
+    }
+
+    .locke-right {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+    }
+
+    .rules-modal {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 760px) {
+    .pokemon-page {
+        gap: 16px;
+    }
+
+    .breadcrumb-nav {
+        gap: 8px;
+        font-size: 0.66rem;
+        letter-spacing: 1.5px;
+    }
+
+    .bc-btn {
+        font-size: 0.66rem;
+        letter-spacing: 1.5px;
+    }
+
+    .game-banner {
+        flex-direction: column;
+        padding: 16px;
+    }
+
+    .banner-img-wrap {
+        width: 100%;
+        height: auto;
+        max-height: 220px;
+        aspect-ratio: 16 / 9;
+    }
+
+    .banner-label {
+        font-size: 0.58rem;
+        letter-spacing: 2px;
+    }
+
+    .banner-name {
+        font-size: 0.86rem;
+        letter-spacing: 1.5px;
+    }
+
+    .banner-desc {
+        font-size: 0.7rem;
+    }
+
+    .page-header {
+        align-items: flex-start;
+        flex-direction: column;
+        padding-bottom: 16px;
+    }
+
+    .page-label {
+        font-size: 0.64rem;
+        letter-spacing: 2px;
+    }
+
+    .page-title {
+        font-size: 1.45rem;
+        letter-spacing: 3px;
+    }
+
+    .header-right {
+        width: 100%;
+        align-items: stretch;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .header-right .btn-neon {
+        width: 100%;
+    }
+
+    .total-badge {
+        text-align: center;
+        font-size: 0.62rem;
+        letter-spacing: 1.5px;
+    }
+
+    .lockes-list {
+        gap: 12px;
+    }
+
+    .locke-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas: "info meta";
+        align-items: center;
+        padding: 14px;
+        gap: 12px;
+    }
+
+    .locke-row:has(.locke-actions > *) {
+        grid-template-areas:
+            "info meta"
+            "actions actions";
+    }
+
+    .locke-left {
+        grid-area: info;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .locke-icon {
+        font-size: 1.2rem;
+    }
+
+    .locke-name {
+        font-size: 0.8rem;
+        letter-spacing: 1.5px;
+    }
+
+    .locke-desc {
+        white-space: normal;
+        display: -webkit-box;
+        line-clamp: 2;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+
+    .locke-rules-btn {
+        font-size: 0.58rem;
+        letter-spacing: 1.5px;
+        padding: 4px 8px;
+    }
+
+    .locke-right {
+        grid-area: meta;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 8px;
+        align-self: center;
+        justify-self: end;
+    }
+
+    .locke-date {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4px 8px;
+        border: 1px solid rgba(0, 255, 65, 0.14);
+        background: rgba(0, 255, 65, 0.025);
+        font-size: 0.62rem;
+        line-height: 1.2;
+        letter-spacing: 1px;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .locke-actions {
+        grid-area: actions;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .locke-actions:not(:has(> *)) {
+        display: none;
+    }
+
+    .enter-arrow {
+        display: none;
+    }
+
+    .btn-sm {
+        width: 100%;
+        font-size: 0.62rem !important;
+        padding: 7px 10px !important;
+        letter-spacing: 1px !important;
+    }
+
+    .loading-state,
+    .empty-state {
+        padding: 42px 18px;
+    }
+
+    .empty-icon {
+        font-size: 2.4rem;
+    }
+
+    .empty-title {
+        font-size: 0.86rem;
+        letter-spacing: 2px;
+    }
+
+    .empty-sub {
+        font-size: 0.7rem;
+        letter-spacing: 1.5px;
+        line-height: 1.5;
+    }
+
+    .modal-backdrop {
+        align-items: flex-end;
+        padding: 12px;
+        overflow: hidden;
+    }
+
+    .modal,
+    .modal-sm,
+    .rules-modal {
+        width: 100%;
+        max-width: none;
+        max-height: calc(100dvh - 24px);
+        min-height: 0;
+    }
+
+    .modal-header {
+        padding: 14px 16px;
+    }
+
+    .modal-title {
+        font-size: 0.72rem;
+        letter-spacing: 1.5px;
+    }
+
+    .modal-body {
+        flex: 1;
+        min-height: 0;
+        padding: 18px 16px;
+        overflow-y: auto;
+    }
+
+    .rules-modal-body {
+        gap: 16px;
+    }
+
+    .form-label {
+        font-size: 0.62rem;
+        letter-spacing: 1.5px;
+    }
+
+    .modal-footer {
+        padding: 14px 16px;
+        flex-direction: column-reverse;
+
+        button {
+            width: 100%;
+        }
+    }
+
+    .delete-warning {
+        font-size: 0.76rem;
+    }
+
+    .delete-note {
+        font-size: 0.66rem;
+    }
+
+    .rules-title {
+        font-size: 0.86rem;
+        letter-spacing: 2px;
+    }
+
+    .rule-card {
+        padding: 14px;
+    }
+
+    .rule-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .rule-title {
+        font-size: 0.72rem;
+        letter-spacing: 1.5px;
+    }
+
+    .rule-description {
+        font-size: 0.74rem;
+    }
+
+    .level-caps-grid,
+    .tournament-rules-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 420px) {
+    .page-title {
+        font-size: 1.25rem;
+        letter-spacing: 2px;
+    }
+
+    .breadcrumb-nav {
+        flex-wrap: wrap;
+        overflow: visible;
+        line-height: 1.4;
+    }
+
+    .bc-current {
+        white-space: normal;
+    }
+
+    .game-banner {
+        padding: 14px;
+    }
+
+    .banner-img-wrap {
+        max-height: 180px;
+    }
+
+    .locke-row {
+        grid-template-columns: minmax(0, 1fr) auto;
+        padding: 12px;
+        gap: 10px;
+    }
+
+    .locke-left {
+        gap: 10px;
+    }
+
+    .locke-date {
+        font-size: 0.58rem;
+        padding: 4px 7px;
+    }
+
+    .locke-name {
+        font-size: 0.74rem;
+        letter-spacing: 1px;
+    }
+
+    .locke-desc {
+        font-size: 0.68rem;
+    }
+
+    .modal-backdrop {
+        padding: 8px;
+    }
+
+    .modal,
+    .modal-sm,
+    .rules-modal {
+        max-height: calc(100dvh - 16px);
+    }
+
+    .modal-header {
+        padding: 12px 14px;
+    }
+
+    .modal-body {
+        padding: 16px 14px;
+    }
+
+    .modal-footer {
+        padding: 12px 14px;
+    }
+
+    .rules-modal-body {
+        gap: 14px;
+    }
+}
+
+@media (max-height: 680px) and (max-width: 760px) {
+    .modal-backdrop {
+        align-items: center;
+    }
+
+    .modal,
+    .modal-sm,
+    .rules-modal {
+        max-height: calc(100dvh - 16px);
+    }
+
+    .rules-modal-body {
+        max-height: none;
+    }
+}
+
+@media (hover: none) {
+    .locke-row:hover {
+        background: transparent;
+        transform: none;
+    }
+
+    .enter-arrow {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .locke-row,
+    .enter-arrow,
+    .modal {
+        animation: none;
+        transition: none;
+    }
+
+    .loading-spinner {
+        animation: none;
+    }
+}

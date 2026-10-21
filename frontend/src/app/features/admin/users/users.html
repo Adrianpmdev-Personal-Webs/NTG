@@ -1,0 +1,277 @@
+<div class="usuarios-page">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-left">
+            <div class="page-label">// GESTIÓN DE ACCESOS</div>
+            <h1 class="page-title">USUARIOS</h1>
+        </div>
+        <button class="btn-neon" (click)="openCreate()">
+            + NUEVO USUARIO
+        </button>
+    </div>
+
+    <!-- Search & filters -->
+    <div class="toolbar terminal-card">
+        <div class="search-wrapper">
+            <span class="search-prefix">&gt; BUSCAR:</span>
+            <input class="neon-input search-input" type="text" placeholder="username, email, rol..."
+                [(ngModel)]="searchTerm" (ngModelChange)="onSearch()" />
+        </div>
+        <div class="filter-group">
+            <span class="filter-label">ROL:</span>
+            <button class="filter-btn" [class.active]="roleFilter() === ''" (click)="setRoleFilter('')">TODOS</button>
+            <button class="filter-btn" [class.active]="roleFilter() === 'admin'"
+                (click)="setRoleFilter('admin')">ADMIN</button>
+            <button class="filter-btn" [class.active]="roleFilter() === 'usuario'"
+                (click)="setRoleFilter('usuario')">USUARIO</button>
+        </div>
+        <div class="count-badge">
+            {{ filteredUsers().length }} / {{ users().length }} REGISTROS
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="terminal-card table-wrapper">
+        <div class="table-header">
+            <span class="card-title">// BASE DE DATOS :: USUARIOS</span>
+        </div>
+
+        @if (loading()) {
+            <div class="table-loading">
+                <span>CARGANDO REGISTROS</span><span class="cursor"> </span>
+            </div>
+        } @else if (filteredUsers().length === 0) {
+            <div class="table-empty">
+                [404] NO SE ENCONTRARON REGISTROS
+            </div>
+        } @else {
+            <div class="table-scroll">
+                <table class="neon-table">
+                    <thead>
+                        <tr>
+                            <th>UUID</th>
+                            <th>USERNAME</th>
+                            <th>EMAIL</th>
+                            <th>ROL</th>
+                            <th>ETIQUETAS</th>
+                            <th>ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (user of filteredUsers(); track user.id) {
+                            <tr class="animate-fade-up" [class.selected]="selectedUser()?.id === user.id">
+                                <td class="uuid-col" (click)="selectUser(user)" title="{{ user.id }}">
+                                    {{ user.id.substring(0, 8) }}...
+                                </td>
+                                <td class="username-col">{{ user.username }}</td>
+                                <td class="email-col">{{ user.email }}</td>
+                                <td>
+                                    <span class="role-badge" [class.role-admin]="isAdminRole(user.role)">
+                                        {{ user.role.toUpperCase() }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="tag-list">
+                                        @for (tag of user.tags; track tag) {
+                                            <span class="tag-chip">{{ tag.toUpperCase() }}</span>
+                                        } @empty {
+                                            <span class="tag-none">—</span>
+                                        }
+                                    </div>
+                                </td>
+                                <td class="actions-col">
+                                    <button class="action-btn btn-neon" (click)="openEdit(user)" title="Editar">
+                                        ✎ EDITAR
+                                    </button>
+                                    <button class="action-btn btn-neon btn-neon-accent"
+                                        (click)="sendInvite(user)"
+                                        [disabled]="inviting() === user.id"
+                                        title="Reenviar el correo para elegir contraseña">
+                                        @if (inviting() === user.id) {
+                                            ⟳ ENVIANDO...
+                                        } @else {
+                                            ✉ INVITAR
+                                        }
+                                    </button>
+                                    <button class="action-btn btn-neon btn-neon-danger" (click)="openDelete(user)"
+                                        title="Eliminar">
+                                        ✕ ELIMINAR
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
+    <!-- User detail panel -->
+    @if (selectedUser()) {
+        <div class="detail-panel terminal-card animate-slide-in">
+            <div class="detail-header">
+                <span class="card-title">// DETALLES DEL NODO</span>
+                <button class="close-btn" (click)="selectedUser.set(null)">✕</button>
+            </div>
+            <div class="detail-grid">
+                <div class="detail-field">
+                    <span class="detail-key">UUID</span>
+                    <span class="detail-value uuid-full">{{ selectedUser()!.id }}</span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-key">USERNAME</span>
+                    <span class="detail-value neon-text">{{ selectedUser()!.username }}</span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-key">EMAIL</span>
+                    <span class="detail-value">{{ selectedUser()!.email }}</span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-key">ROL</span>
+                    <span class="detail-value">
+                        <span class="role-badge" [class.role-admin]="isAdminRole(selectedUser()!.role)">
+                            {{ selectedUser()!.role.toUpperCase() }}
+                        </span>
+                    </span>
+                </div>
+                <div class="detail-field">
+                    <span class="detail-key">ETIQUETAS</span>
+                    <span class="detail-value">
+                        <div class="tag-list">
+                            @for (tag of selectedUser()!.tags; track tag) {
+                                <span class="tag-chip">{{ tag.toUpperCase() }}</span>
+                            } @empty {
+                                <span class="tag-none">SIN ETIQUETAS</span>
+                            }
+                        </div>
+                    </span>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Modal overlay -->
+@if (modalMode()) {
+    <div class="modal-overlay" (click)="closeModal()">
+        <div class="modal terminal-card animate-fade-up" (click)="$event.stopPropagation()">
+
+            <!-- CREATE modal -->
+            @if (modalMode() === 'create') {
+                <div class="modal-header">
+                    <span class="modal-title">// CREAR NUEVO USUARIO</span>
+                    <button class="close-btn" (click)="closeModal()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="terminal-line">
+                        <span>root&#64;sys:~$ adduser --invite</span><span class="cursor"> </span>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label class="field-label">// EMAIL</label>
+                            <input class="neon-input" type="email" [(ngModel)]="form.email" placeholder="user&#64;domain.com" />
+                        </div>
+                        <div class="form-field">
+                            <label class="field-label">// USERNAME</label>
+                            <input class="neon-input" type="text" [(ngModel)]="form.username" placeholder="username" />
+                        </div>
+                        <div class="form-field">
+                            <label class="field-label">// ETIQUETAS (ACCESO A JUEGOS)</label>
+                            <div class="tag-picker">
+                                @for (tag of availableTags(); track tag.key) {
+                                    <label class="tag-option">
+                                        <input type="checkbox" [checked]="form.tags.includes(tag.key)"
+                                            (change)="toggleCreateTag(tag.key)" />
+                                        <span>{{ tag.name }}</span>
+                                    </label>
+                                } @empty {
+                                    <span class="field-hint">No hay etiquetas creadas</span>
+                                }
+                            </div>
+                            <span class="field-hint">
+                                El usuario recibirá un correo con un enlace para elegir su propia contraseña.
+                            </span>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn-neon" (click)="submitCreate()" [disabled]="submitting()">
+                            @if (submitting()) { PROCESANDO... } @else { ⟶ EJECUTAR }
+                        </button>
+                        <button class="btn-neon btn-neon-danger" (click)="closeModal()">CANCELAR</button>
+                    </div>
+                </div>
+            }
+
+            <!-- EDIT modal -->
+            @if (modalMode() === 'edit') {
+                <div class="modal-header">
+                    <span class="modal-title">// MODIFICAR USUARIO :: {{ editTarget()?.username }}</span>
+                    <button class="close-btn" (click)="closeModal()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label class="field-label">// USERNAME</label>
+                            <input class="neon-input" type="text" [(ngModel)]="editForm.username"
+                                [placeholder]="editTarget()?.username || ''" />
+                        </div>
+                        <div class="form-field">
+                            <label class="field-label">// AVATAR URL</label>
+                            <input class="neon-input" type="text" [(ngModel)]="editForm.avatarUrl"
+                                [placeholder]="editTarget()?.avatarUrl || ''" />
+                        </div>
+                        <div class="form-field">
+                            <label class="field-label">// ETIQUETAS (ACCESO A JUEGOS)</label>
+                            <div class="tag-picker">
+                                @for (tag of availableTags(); track tag.key) {
+                                    <label class="tag-option">
+                                        <input type="checkbox" [checked]="editTags.includes(tag.key)"
+                                            (change)="toggleEditTag(tag.key)" />
+                                        <span>{{ tag.name }}</span>
+                                    </label>
+                                } @empty {
+                                    <span class="field-hint">No hay etiquetas creadas</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn-neon" (click)="submitEdit()" [disabled]="submitting()">
+                            @if (submitting()) { PROCESANDO... } @else { ⟶ ACTUALIZAR }
+                        </button>
+                        <button class="btn-neon btn-neon-danger" (click)="closeModal()">CANCELAR</button>
+                    </div>
+                </div>
+            }
+
+            <!-- DELETE modal -->
+            @if (modalMode() === 'delete') {
+                <div class="modal-header">
+                    <span class="modal-title" style="color: var(--neon-red)">// ELIMINAR USUARIO</span>
+                    <button class="close-btn" (click)="closeModal()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="delete-warning">
+                        <div class="warning-icon">⚠</div>
+                        <div class="warning-text">
+                            <div class="warning-title">[ALERTA] OPERACIÓN DESTRUCTIVA</div>
+                            <div class="warning-desc">
+                                Esta acción eliminará permanentemente al usuario
+                                <span class="highlight">{{ editTarget()?.username }}</span>
+                                de Supabase y de la base de datos local. Esta acción no se puede deshacer.
+                            </div>
+                            <div class="warning-id">EMAIL: {{ editTarget()?.email }}</div>
+                            <div class="warning-id">UUID: {{ editTarget()?.id }}</div>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn-neon btn-neon-danger" (click)="submitDelete()" [disabled]="submitting()">
+                            @if (submitting()) { ELIMINANDO... } @else { ⟶ CONFIRMAR ELIMINACIÓN }
+                        </button>
+                        <button class="btn-neon" (click)="closeModal()">CANCELAR</button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}

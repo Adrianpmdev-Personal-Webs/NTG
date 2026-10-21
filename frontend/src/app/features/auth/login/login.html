@@ -1,0 +1,72 @@
+<div class="login-container">
+    <!-- Matrix background -->
+    <div class="matrix-bg" aria-hidden="true">
+        @for (col of matrixCols; track col.id) {
+            <div class="matrix-col" [style.left.%]="col.x" [style.animation-duration]="col.speed + 's'"
+                [style.animation-delay]="col.delay + 's'">
+                {{ col.chars }}
+            </div>
+        }
+    </div>
+
+    @if (checkingSession()) {
+        <!-- Silent session restore in progress — show a minimal indicator -->
+        <div class="session-check animate-fade-up">
+            <div class="sys-label">[SYS] // VERIFICANDO SESIÓN</div>
+            <div class="session-check-dots">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    } @else {
+        <div class="login-box animate-fade-up">
+            <div class="login-header">
+                <div class="sys-label">[SYS] // AUTENTICACIÓN REQUERIDA</div>
+                <h1 class="login-title neon-text-bright">NTG_SYS</h1>
+                <div class="login-subtitle">PANEL DE CONTROL v1.0.0</div>
+            </div>
+
+            <div class="terminal-prompt">
+                <span class="prompt-text">root&#64;ntg:~$ ssh admin&#64;sys.internal</span><span class="cursor"> </span>
+            </div>
+
+            <form (ngSubmit)="onLogin()" class="login-form">
+                <div class="field-group">
+                    <label class="field-label">// EMAIL</label>
+                    <div class="input-wrapper">
+                        <span class="input-prefix">&gt;</span>
+                        <input class="neon-input" type="email" [(ngModel)]="email" name="email"
+                            placeholder="user&#64;domain.com" autocomplete="email" required />
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">// PASSWORD</label>
+                    <div class="input-wrapper">
+                        <span class="input-prefix">&gt;</span>
+                        <input class="neon-input" type="password" [(ngModel)]="password" name="password"
+                            placeholder="••••••••••••" autocomplete="current-password" required />
+                    </div>
+                </div>
+
+                @if (error()) {
+                    <div class="error-msg">
+                        [ERR] {{ error() }}
+                    </div>
+                }
+
+                <button type="submit" class="btn-neon login-btn" [disabled]="loading()">
+                    @if (loading()) {
+                        <span>AUTENTICANDO...</span>
+                        <span class="cursor"> </span>
+                    } @else {
+                        <span>INICIAR SESIÓN</span>
+                    }
+                </button>
+            </form>
+
+            <div class="login-footer">
+                <span class="footer-line">SISTEMA RESTRINGIDO</span>
+            </div>
+        </div>
+    }
+</div>

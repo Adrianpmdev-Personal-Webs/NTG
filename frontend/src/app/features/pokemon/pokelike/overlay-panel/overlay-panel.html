@@ -1,0 +1,45 @@
+@if (store.activePanel() !== 'none') {
+    <div class="overlay">
+        <section class="overlay-card">
+            <header>
+                <h2>// {{ store.activePanel() }}</h2>
+                <button type="button" (click)="store.closePanel()">CERRAR</button>
+            </header>
+
+            @if (store.activePanel() === 'pokedex') {
+                <div class="panel-grid">
+                    @for (pokemon of store.team(); track pokemon.id) {
+                        <article class="panel-card"><img [src]="pokemon.imageUrl" [alt]="pokemon.name"><strong>{{ pokemon.name }}</strong><span>#{{ pokemon.id }} · LVL {{ pokemon.level }}</span></article>
+                    }
+                </div>
+            }
+
+            @if (store.activePanel() === 'achievements') {
+                <div class="panel-list">
+                    @for (achievement of store.achievements(); track achievement.id) {
+                        <article class="panel-card" [class.unlocked]="achievement.unlocked"><strong>{{ achievement.name }}</strong><span>{{ achievement.description }}</span></article>
+                    }
+                </div>
+            }
+
+            @if (store.activePanel() === 'hallOfFame') {
+                @if (store.hallOfFameEntries().length === 0) {
+                    <div class="empty-state">AÚN NO HAY RUNS COMPLETADAS</div>
+                } @else {
+                    <div class="panel-list">
+                        @for (entry of store.hallOfFameEntries(); track entry.id) {
+                            <article class="panel-card"><strong>{{ store.modeLabels[entry.mode] }} · Seed {{ entry.seed }}</strong><span>{{ entry.badges }} medallas · {{ entry.teamNames.join(', ') }}</span></article>
+                        }
+                    </div>
+                }
+            }
+
+            @if (store.activePanel() === 'settings') {
+                <div class="panel-list">
+                    <article class="panel-card"><strong>Generación activa</strong><span>GEN {{ store.selectedGeneration() }}</span></article>
+                    <article class="panel-card"><strong>Modo activo</strong><span>{{ store.modeLabel() }}</span></article>
+                </div>
+            }
+        </section>
+    </div>
+}

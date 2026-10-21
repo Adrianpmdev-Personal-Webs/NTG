@@ -1,0 +1,771 @@
+/**
+ * Pokémon games page styles.
+ * Responsive games catalog layout with search toolbar, game cards and modals.
+ *
+ * Author: Adrián Pérez Morales
+ */
+
+/* ─── POKEMON PAGE ─── */
+
+.pokemon-page {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ─── PAGE HEADER ─── */
+
+.page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+    flex-wrap: wrap;
+}
+
+.page-label {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    margin-bottom: 6px;
+}
+
+.page-title {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 900;
+    letter-spacing: 4px;
+    color: var(--neon-green);
+    text-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.total-badge {
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    border: 1px solid var(--border-color);
+    padding: 4px 10px;
+    white-space: nowrap;
+}
+
+/* ─── TOOLBAR ─── */
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.search-prefix {
+    font-size: 0.78rem;
+    color: var(--neon-green);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.search-input {
+    flex: 1;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+}
+
+/* ─── GAMES GRID ─── */
+
+.games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.game-card {
+    cursor: pointer;
+    transition: all 0.25s;
+    overflow: hidden;
+    min-width: 0;
+
+    &:hover {
+        border-color: rgba(0, 255, 65, 0.5);
+        box-shadow: 0 0 24px rgba(0, 255, 65, 0.12);
+        transform: translateY(-2px);
+
+        .game-img {
+            filter: brightness(1.1);
+        }
+
+        .game-img-overlay {
+            opacity: 1;
+        }
+    }
+}
+
+.game-img-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: var(--bg-dark);
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.game-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    transition: filter 0.3s;
+}
+
+.game-img-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+
+.enter-hint {
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    color: var(--neon-green);
+    letter-spacing: 3px;
+    text-shadow: 0 0 12px var(--neon-green);
+}
+
+.game-body {
+    padding: 16px 18px 12px;
+}
+
+.game-name {
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--neon-green);
+    margin-bottom: 6px;
+    overflow-wrap: anywhere;
+}
+
+.game-desc {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 10px;
+    display: -webkit-box;
+    line-clamp: 2;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.game-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.meta-item {
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+}
+
+.game-actions {
+    display: flex;
+    gap: 8px;
+    padding: 0 18px 14px;
+}
+
+.game-actions:not(:has(> *)) {
+    display: none;
+    padding: 0;
+}
+
+.btn-sm {
+    font-size: 0.68rem !important;
+    padding: 5px 12px !important;
+    letter-spacing: 1.5px !important;
+}
+
+/* ─── LOADING AND EMPTY STATES ─── */
+
+.loading-state,
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 60px 24px;
+    text-align: center;
+}
+
+.loading-spinner {
+    font-size: 2rem;
+    color: var(--neon-green);
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.empty-icon {
+    font-size: 3rem;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+}
+
+.empty-title {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    letter-spacing: 3px;
+    color: var(--text-secondary);
+}
+
+.empty-sub {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+}
+
+/* ─── MODAL ─── */
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    overflow: hidden;
+}
+
+.modal {
+    width: 100%;
+    max-width: 480px;
+    max-height: min(90vh, 760px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: fade-up 0.2s ease forwards;
+}
+
+.modal-sm {
+    max-width: 380px;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.modal-title {
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    letter-spacing: 3px;
+    color: var(--neon-green);
+}
+
+.danger-title {
+    color: var(--neon-red);
+}
+
+.modal-close {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 4px 8px;
+    transition: color 0.2s;
+    flex-shrink: 0;
+
+    &:hover {
+        color: var(--neon-red);
+    }
+}
+
+.modal-body {
+    padding: 22px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-height: 0;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-label {
+    font-size: 0.68rem;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+}
+
+textarea.neon-input {
+    resize: vertical;
+    min-height: 72px;
+}
+
+.img-preview-wrap {
+    width: 100%;
+    max-height: 280px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+    background: var(--bg-dark);
+    padding: 10px;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+.img-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    padding: 16px 22px;
+    border-top: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.btn-neon-success {
+    border-color: var(--neon-green);
+    color: var(--neon-green);
+
+    &:hover {
+        background: rgba(0, 255, 65, 0.1);
+        box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+    }
+
+    &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+}
+
+.delete-warning {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.warn-name {
+    color: var(--neon-yellow);
+    font-style: normal;
+}
+
+.delete-note {
+    font-size: 0.72rem;
+    color: var(--neon-red);
+    letter-spacing: 1px;
+}
+
+/* ─── RESPONSIVE ─── */
+
+@media (max-width: 1100px) {
+    .games-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 18px;
+    }
+}
+
+@media (max-width: 760px) {
+    .pokemon-page {
+        gap: 16px;
+    }
+
+    .page-header {
+        align-items: flex-start;
+        flex-direction: column;
+        padding-bottom: 16px;
+    }
+
+    .page-label {
+        font-size: 0.64rem;
+        letter-spacing: 2px;
+    }
+
+    .page-title {
+        font-size: 1.45rem;
+        letter-spacing: 3px;
+    }
+
+    .header-right {
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .total-badge {
+        font-size: 0.62rem;
+        letter-spacing: 1.5px;
+    }
+
+    .toolbar {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 8px;
+        padding: 14px;
+    }
+
+    .search-prefix {
+        font-size: 0.72rem;
+    }
+
+    .games-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    .game-img-wrap {
+        padding: 8px;
+    }
+
+    .game-body {
+        padding: 14px 14px 10px;
+    }
+
+    .game-name {
+        font-size: 0.82rem;
+        letter-spacing: 1.5px;
+    }
+
+    .game-desc {
+        font-size: 0.7rem;
+        line-clamp: 3;
+        -webkit-line-clamp: 3;
+    }
+
+    .game-meta {
+        gap: 8px;
+    }
+
+    .meta-item {
+        font-size: 0.62rem;
+    }
+
+    .game-actions {
+        padding: 0 14px 14px;
+        flex-direction: column;
+    }
+
+    .game-actions:not(:has(> *)) {
+        display: none;
+        padding: 0;
+    }
+
+    .btn-sm {
+        width: 100%;
+        font-size: 0.62rem !important;
+        padding: 7px 10px !important;
+        letter-spacing: 1px !important;
+    }
+
+    .loading-state,
+    .empty-state {
+        padding: 42px 18px;
+    }
+
+    .empty-icon {
+        font-size: 2.4rem;
+    }
+
+    .empty-title {
+        font-size: 0.86rem;
+        letter-spacing: 2px;
+    }
+
+    .empty-sub {
+        font-size: 0.7rem;
+        letter-spacing: 1.5px;
+        line-height: 1.5;
+    }
+
+    .modal-backdrop {
+        align-items: flex-end;
+        padding: 12px;
+        overflow: hidden;
+    }
+
+    .modal,
+    .modal-sm {
+        width: 100%;
+        max-width: none;
+        max-height: calc(100dvh - 24px);
+        border-bottom: 0;
+    }
+
+    .modal-header {
+        padding: 14px 16px;
+    }
+
+    .modal-title {
+        font-size: 0.72rem;
+        letter-spacing: 1.5px;
+    }
+
+    .modal-body {
+        padding: 18px 16px;
+        min-height: 0;
+        overflow-y: auto;
+    }
+
+    .img-preview-wrap {
+        max-height: 220px;
+    }
+
+    .form-label {
+        font-size: 0.62rem;
+        letter-spacing: 1.5px;
+    }
+
+    .modal-footer {
+        padding: 14px 16px;
+        flex-direction: column-reverse;
+
+        button {
+            width: 100%;
+        }
+    }
+
+    .delete-warning {
+        font-size: 0.76rem;
+    }
+
+    .delete-note {
+        font-size: 0.66rem;
+    }
+}
+
+@media (max-width: 520px) {
+    .page-title {
+        font-size: 1.25rem;
+        letter-spacing: 2px;
+    }
+
+    .header-right {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .header-right .btn-neon {
+        width: 100%;
+    }
+
+    .total-badge {
+        text-align: center;
+    }
+
+    .toolbar {
+        padding: 12px;
+    }
+
+    .games-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .game-card {
+        display: grid;
+        grid-template-columns: 112px minmax(0, 1fr);
+        grid-template-areas: "image body";
+    }
+
+    .game-card:has(.game-actions > *) {
+        grid-template-areas:
+            "image body"
+            "actions actions";
+    }
+
+    .game-img-wrap {
+        grid-area: image;
+        aspect-ratio: auto;
+        min-height: 112px;
+        height: 100%;
+        border-right: 1px solid var(--border-color);
+    }
+
+    .game-body {
+        grid-area: body;
+        padding: 12px;
+        min-width: 0;
+        height: 100%;
+        box-sizing: border-box;
+    }
+
+    .game-name {
+        font-size: 0.78rem;
+        letter-spacing: 1px;
+    }
+
+    .game-desc {
+        margin-bottom: 8px;
+        line-clamp: 2;
+        -webkit-line-clamp: 2;
+    }
+
+    .game-actions {
+        grid-area: actions;
+        padding: 10px 12px 12px;
+        border-top: 1px solid rgba(0, 255, 65, 0.06);
+    }
+
+    .game-actions:not(:has(> *)) {
+        display: none;
+        padding: 0;
+        border-top: 0;
+    }
+
+    .game-img-overlay {
+        display: none;
+    }
+
+    .modal-backdrop {
+        padding: 8px;
+    }
+
+    .modal,
+    .modal-sm {
+        max-height: calc(100dvh - 16px);
+    }
+
+    .modal-header {
+        padding: 12px 14px;
+    }
+
+    .modal-body {
+        padding: 16px 14px;
+    }
+
+    .img-preview-wrap {
+        max-height: 180px;
+        padding: 8px;
+    }
+
+    .modal-footer {
+        padding: 12px 14px;
+    }
+}
+
+@media (max-width: 380px) {
+    .pokemon-page {
+        gap: 14px;
+    }
+
+    .page-title {
+        font-size: 1.1rem;
+        letter-spacing: 1.5px;
+    }
+
+    .page-label,
+    .total-badge,
+    .modal-title {
+        letter-spacing: 1px;
+    }
+
+    .game-card {
+        grid-template-columns: 96px minmax(0, 1fr);
+    }
+
+    .game-img-wrap {
+        min-height: 96px;
+        padding: 6px;
+    }
+
+    .game-body {
+        padding: 10px;
+    }
+
+    .game-name {
+        font-size: 0.72rem;
+    }
+
+    .game-desc {
+        font-size: 0.66rem;
+    }
+
+    .meta-item {
+        font-size: 0.58rem;
+    }
+}
+
+@media (max-height: 680px) and (max-width: 760px) {
+    .modal-backdrop {
+        align-items: center;
+    }
+
+    .modal,
+    .modal-sm {
+        max-height: calc(100dvh - 16px);
+    }
+
+    .img-preview-wrap {
+        max-height: 140px;
+    }
+}
+
+@media (hover: none) {
+    .game-card:hover {
+        transform: none;
+        box-shadow: none;
+
+        .game-img {
+            filter: none;
+        }
+    }
+
+    .game-img-overlay {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .game-card,
+    .game-img,
+    .game-img-overlay,
+    .modal {
+        animation: none;
+        transition: none;
+    }
+
+    .loading-spinner {
+        animation: none;
+    }
+}

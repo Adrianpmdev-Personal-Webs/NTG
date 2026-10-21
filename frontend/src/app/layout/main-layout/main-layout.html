@@ -1,0 +1,170 @@
+<div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" [class.collapsed]="sidebarCollapsed()">
+        <div class="sidebar-header">
+            @if (sidebarCollapsed()) {
+                <button
+                    class="logo-area logo-toggle-btn"
+                    type="button"
+                    title="Abrir menú"
+                    aria-label="Abrir menú lateral"
+                    (click)="toggleSidebar()"
+                >
+                    <span class="logo-icon">⬡</span>
+                </button>
+            } @else {
+                <div class="logo-area">
+                    <span class="logo-icon">⬡</span>
+
+                    <div class="logo-text">
+                        <span class="logo-name neon-text">NTG</span>
+                        <span class="logo-version">v1.0.0</span>
+                    </div>
+                </div>
+
+                <button class="collapse-btn" type="button" (click)="toggleSidebar()" title="Cerrar menú">
+                    ◀
+                </button>
+            }
+        </div>
+
+        <div class="sidebar-status">
+            @if (!sidebarCollapsed()) {
+                <span class="status-dot"></span>
+                <span class="status-text">SISTEMA ONLINE</span>
+            } @else {
+                <span class="status-dot"></span>
+            }
+        </div>
+
+        <nav class="sidebar-nav">
+            @if (authService.isAdmin()) {
+                <a
+                    routerLink="/admin/dashboard"
+                    routerLinkActive="active"
+                    class="nav-item"
+                    [title]="sidebarCollapsed() ? 'Dashboard' : ''"
+                    (click)="handleMenuItemNavigation()"
+                >
+                    <span class="nav-icon">◈</span>
+                    @if (!sidebarCollapsed()) {
+                        <span class="nav-label">DASHBOARD</span>
+                    }
+                </a>
+
+                <a
+                    routerLink="/admin/users"
+                    routerLinkActive="active"
+                    class="nav-item"
+                    [title]="sidebarCollapsed() ? 'Usuarios' : ''"
+                    (click)="handleMenuItemNavigation()"
+                >
+                    <span class="nav-icon">◎</span>
+                    @if (!sidebarCollapsed()) {
+                        <span class="nav-label">USUARIOS</span>
+                    }
+                </a>
+            } @else {
+                <a
+                    routerLink="/welcome"
+                    routerLinkActive="active"
+                    class="nav-item"
+                    [title]="sidebarCollapsed() ? 'Inicio' : ''"
+                    (click)="handleMenuItemNavigation()"
+                >
+                    <span class="nav-icon">◈</span>
+                    @if (!sidebarCollapsed()) {
+                        <span class="nav-label">INICIO</span>
+                    }
+                </a>
+            }
+
+            @for (game of games(); track game.id) {
+                <div class="nav-group">
+                    <button
+                        type="button"
+                        class="nav-item nav-parent"
+                        [class.active]="isGameActive(game)"
+                        [class.open]="isSubmenuOpen(game.id)"
+                        [title]="sidebarCollapsed() ? game.name : ''"
+                        (click)="toggleSubmenu(game.id)"
+                    >
+                        <span class="nav-icon">◎</span>
+
+                        @if (!sidebarCollapsed()) {
+                            <span class="nav-label">{{ game.name.toUpperCase() }}</span>
+                            <span class="nav-caret">{{ isSubmenuOpen(game.id) ? '▾' : '▸' }}</span>
+                        }
+                    </button>
+
+                    @if (isSubmenuOpen(game.id) && !sidebarCollapsed()) {
+                        <div class="nav-submenu">
+                            <a
+                                [routerLink]="game.route"
+                                class="nav-subitem"
+                                (click)="handleSubmenuItemNavigation()"
+                            >
+                                <span class="nav-subicon">▶</span>
+                                <span class="nav-sublabel">JUGAR</span>
+                            </a>
+
+                            @if (authService.isAdmin()) {
+                                @for (item of game.adminItems; track item.route) {
+                                    <a
+                                        [routerLink]="item.route"
+                                        routerLinkActive="active"
+                                        class="nav-subitem"
+                                        (click)="handleSubmenuItemNavigation()"
+                                    >
+                                        <span class="nav-subicon">{{ item.icon }}</span>
+                                        <span class="nav-sublabel">{{ item.label }}</span>
+                                    </a>
+                                }
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </nav>
+
+        <div class="sidebar-footer">
+            @if (!sidebarCollapsed()) {
+                <div class="user-info">
+                    <img src="{{ currentUser()?.avatarUrl || '/images/default-avatar.png' }}" alt="Avatar" class="user-avatar" />
+                    <div class="user-details">
+                        <span class="user-name">{{ currentUser()?.username }}</span>
+                        <span class="user-role">{{ currentUser()?.role?.toUpperCase() }}</span>
+                    </div>
+                </div>
+            }
+
+            <button
+                class="logout-btn btn-neon btn-neon-danger"
+                type="button"
+                (click)="logout()"
+                [title]="sidebarCollapsed() ? 'Cerrar sesión' : ''"
+            >
+                @if (sidebarCollapsed()) {
+                    ⏻
+                } @else {
+                    ⏻ SALIR
+                }
+            </button>
+        </div>
+    </aside>
+
+    @if (!sidebarCollapsed()) {
+        <button class="sidebar-backdrop" type="button" aria-label="Cerrar menú" (click)="closeSidebar()"></button>
+    }
+
+    <!-- Main content -->
+    <main class="main-content">
+        <app-header (menuToggle)="toggleSidebar()" />
+
+        <div class="content-area">
+            <router-outlet />
+        </div>
+
+        <app-footer />
+    </main>
+</div>

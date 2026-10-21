@@ -1,0 +1,298 @@
+/**
+ * Terminal theme partial.
+ * Applied by the layouts and pages that carry the "terminal" class.
+ *
+ * @author @adrianpmdev
+ */
+
+.terminal {
+    display: block;
+    min-height: 100vh;
+    background: var(--bg-black);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    animation: flicker 8s infinite;
+
+    /* Scanlines effect */
+    &::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 2px,
+            rgba(0, 0, 0, 0.08) 2px,
+            rgba(0, 0, 0, 0.08) 4px
+        );
+        pointer-events: none;
+        z-index: 9999;
+    }
+
+    ::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: var(--bg-black);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--neon-green-dark);
+        border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--neon-green);
+    }
+
+    ::selection {
+        background: var(--neon-green);
+        color: var(--bg-black);
+    }
+}
+
+/* CRT flicker animation */
+@keyframes flicker {
+    0%,
+    95%,
+    100% {
+        opacity: 1;
+    }
+
+    96% {
+        opacity: 0.92;
+    }
+
+    97% {
+        opacity: 1;
+    }
+
+    98% {
+        opacity: 0.95;
+    }
+
+    99% {
+        opacity: 1;
+    }
+}
+
+/* Buttons */
+.btn-neon {
+    background: transparent;
+    border: 1px solid var(--neon-green);
+    color: var(--neon-green);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    padding: 8px 20px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.1), transparent);
+        transition: left 0.3s;
+    }
+
+    &:hover {
+        background: rgba(0, 255, 65, 0.08);
+        box-shadow: 0 0 15px var(--neon-green-glow), inset 0 0 15px rgba(0, 255, 65, 0.05);
+        text-shadow: 0 0 8px var(--neon-green);
+
+        &::before {
+            left: 100%;
+        }
+    }
+
+    &:active {
+        transform: scale(0.97);
+    }
+}
+
+.btn-neon-danger {
+    border-color: var(--neon-red);
+    color: var(--neon-red);
+
+    &:hover {
+        background: rgba(255, 0, 64, 0.08);
+        box-shadow: 0 0 15px rgba(255, 0, 64, 0.4);
+        text-shadow: 0 0 8px var(--neon-red);
+    }
+}
+
+.btn-neon-accent {
+    border-color: var(--neon-cyan, #00e5ff);
+    color: var(--neon-cyan, #00e5ff);
+
+    &:hover:not(:disabled) {
+        background: rgba(0, 229, 255, 0.08);
+        box-shadow: 0 0 14px rgba(0, 229, 255, 0.35);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+.btn-neon-warning {
+    border-color: var(--neon-yellow);
+    color: var(--neon-yellow);
+
+    &:hover {
+        background: rgba(255, 255, 0, 0.08);
+        box-shadow: 0 0 15px rgba(255, 255, 0, 0.4);
+        text-shadow: 0 0 8px var(--neon-yellow);
+    }
+}
+
+/* Forms */
+.neon-input {
+    background: rgba(0, 255, 65, 0.03);
+    border: 1px solid var(--border-color);
+    color: var(--neon-green);
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    padding: 10px 14px;
+    width: 100%;
+    outline: none;
+    transition: all 0.2s;
+
+    &::placeholder {
+        color: var(--text-dim);
+    }
+
+    &:focus {
+        border-color: var(--neon-green);
+        box-shadow: 0 0 10px rgba(0, 255, 65, 0.2), inset 0 0 10px rgba(0, 255, 65, 0.03);
+        background: rgba(0, 255, 65, 0.05);
+    }
+}
+
+/* Card */
+.terminal-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    position: relative;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--neon-green), transparent);
+        opacity: 0.6;
+    }
+}
+
+/* Blinking cursor */
+@keyframes blink {
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+.cursor::after {
+    content: '_';
+    animation: blink 1s step-end infinite;
+    color: var(--neon-green);
+}
+
+/* Pulse animation */
+@keyframes pulse-neon {
+    0%,
+    100% {
+        box-shadow: 0 0 5px var(--neon-green-glow);
+    }
+
+    50% {
+        box-shadow: 0 0 20px var(--neon-green-glow), 0 0 40px rgba(0, 255, 65, 0.1);
+    }
+}
+
+/* Matrix rain animation chars */
+@keyframes matrix-fall {
+    0% {
+        transform: translateY(-100%);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(100vh);
+        opacity: 0;
+    }
+}
+
+/* Slide in */
+@keyframes slide-in-left {
+    from {
+        transform: translateX(-20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fade-up {
+    from {
+        transform: translateY(15px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.animate-slide-in {
+    animation: slide-in-left 0.3s ease forwards;
+}
+
+.animate-fade-up {
+    animation: fade-up 0.4s ease forwards;
+}
+
+/* Notification */
+@keyframes notif-in {
+    from {
+        transform: translateX(120%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes notif-out {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateX(120%);
+        opacity: 0;
+    }
+}

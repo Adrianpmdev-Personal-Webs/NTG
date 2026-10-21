@@ -1,0 +1,251 @@
+<div class="dashboard">
+    <!-- Header -->
+    <div class="page-header">
+        <div class="header-left">
+            <div class="page-label">
+                @if (this.isAdmin) {
+                    // SISTEMA DE MONITOREO
+                }
+            </div>
+            <h1 class="page-title">
+                @if (this.isAdmin) {
+                    DASHBOARD
+                } @else {
+                    Bienvenido, NTG {{ authService.getCurrentUser()?.username }}
+                }
+            </h1>
+        </div>
+
+        <div class="header-right">
+            <div class="live-indicator">
+                <span class="live-dot"></span>
+                <span>LIVE</span>
+            </div>
+            <div class="uptime">UPTIME: {{ uptime() }}</div>
+        </div>
+    </div>
+
+    @if (this.isAdmin) {
+        <!-- Stats grid -->
+        <div class="stats-grid">
+            @for (stat of stats(); track stat.label) {
+                <div class="stat-card terminal-card animate-fade-up">
+                    <div class="stat-top">
+                        <span class="stat-icon" [style.color]="stat.color" [style.text-shadow]="'0 0 10px ' + stat.color">
+                            {{ stat.icon }}
+                        </span>
+                        <div class="stat-label">{{ stat.label }}</div>
+                    </div>
+
+                    <div class="stat-value" [style.color]="stat.color" [style.text-shadow]="'0 0 15px ' + stat.color">
+                        <span class="value-number">{{ stat.value }}</span>
+                        @if (stat.suffix) {
+                            <span class="value-suffix">{{ stat.suffix }}</span>
+                        }
+                    </div>
+
+                    <div class="stat-bar">
+                        <div class="stat-bar-fill" [style.background]="stat.color" [style.width]="getBarWidth(stat.value)"></div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Charts row -->
+        <div class="charts-row">
+            <!-- User roles donut chart -->
+            <div class="chart-card terminal-card">
+                <div class="card-header">
+                    <span class="card-title">// DISTRIBUCIÓN DE ROLES</span>
+                    <span class="card-badge">SVG</span>
+                </div>
+
+                <div class="donut-container">
+                    <svg viewBox="0 0 200 200" class="donut-svg">
+                        <!-- Background circle -->
+                        <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(0,255,65,0.08)" stroke-width="24" />
+
+                        <!-- Users segment -->
+                        <circle
+                            cx="100"
+                            cy="100"
+                            r="70"
+                            fill="none"
+                            stroke="var(--neon-green)"
+                            stroke-width="24"
+                            [attr.stroke-dasharray]="usersArc() + ' ' + circumference"
+                            [attr.stroke-dashoffset]="circumference / 4"
+                            class="donut-seg"
+                            style="transition: stroke-dasharray 1s ease"
+                        />
+
+                        <!-- Admin segment -->
+                        <circle
+                            cx="100"
+                            cy="100"
+                            r="70"
+                            fill="none"
+                            stroke="var(--neon-cyan)"
+                            stroke-width="24"
+                            [attr.stroke-dasharray]="adminsArc() + ' ' + circumference"
+                            [attr.stroke-dashoffset]="-usersArc() + circumference / 4"
+                            class="donut-seg"
+                        />
+
+                        <!-- Center text -->
+                        <text
+                            x="100"
+                            y="96"
+                            text-anchor="middle"
+                            fill="var(--neon-green)"
+                            font-family="Orbitron,monospace"
+                            font-size="26"
+                            font-weight="900"
+                        >
+                            {{ totalUsers() }}
+                        </text>
+                        <text
+                            x="100"
+                            y="116"
+                            text-anchor="middle"
+                            fill="rgba(0,255,65,0.5)"
+                            font-family="Share Tech Mono,monospace"
+                            font-size="10"
+                            letter-spacing="2"
+                        >
+                            TOTAL
+                        </text>
+                    </svg>
+
+                    <div class="donut-legend">
+                        <div class="legend-item">
+                            <span class="legend-dot" style="background: var(--neon-green)"></span>
+                            <span>USUARIOS</span>
+                            <span class="legend-val">{{ regularUsersCount() }}</span>
+                        </div>
+
+                        <div class="legend-item">
+                            <span class="legend-dot" style="background: var(--neon-cyan)"></span>
+                            <span>ADMINS</span>
+                            <span class="legend-val">{{ adminsCount() }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity log -->
+            <div class="chart-card terminal-card activity-log">
+                <div class="card-header">
+                    <span class="card-title">// LOG DE ACTIVIDAD</span>
+                    <span class="card-badge blink">LIVE</span>
+                </div>
+
+                <div class="log-container">
+                    @for (log of activityLogs(); track log.id) {
+                        <div class="log-entry" [class]="'log-' + log.level">
+                            <span class="log-time">{{ log.time }}</span>
+                            <span class="log-level">[{{ log.level.toUpperCase() }}]</span>
+                            <span class="log-msg">{{ log.msg }}</span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- System metrics -->
+            <div class="chart-card terminal-card">
+                <div class="card-header">
+                    <span class="card-title">// MÉTRICAS DEL SISTEMA</span>
+                </div>
+
+                <div class="metrics-list">
+                    @for (metric of systemMetrics(); track metric.label) {
+                        <div class="metric-row">
+                            <span class="metric-label">{{ metric.label }}</span>
+
+                            <div class="metric-bar-track">
+                                <div
+                                    class="metric-bar-fill"
+                                    [style.width.%]="metric.value"
+                                    [style.background]="metric.color"
+                                    [style.box-shadow]="'0 0 6px ' + metric.color"
+                                >
+                                </div>
+                            </div>
+
+                            <span class="metric-value" [style.color]="metric.color">{{ metric.value }}%</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent users table -->
+        <div class="terminal-card recent-users">
+            <div class="card-header">
+                <span class="card-title">// ÚLTIMOS USUARIOS REGISTRADOS</span>
+                <span class="card-badge">{{ recentUsers().length }} ENTRIES</span>
+            </div>
+
+            @if (loading()) {
+                <div class="loading-state">
+                    <span>CARGANDO DATOS</span><span class="cursor"> </span>
+                </div>
+            } @else {
+                <table class="neon-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>USERNAME</th>
+                            <th>EMAIL</th>
+                            <th>ROL</th>
+                            <th>ESTADO</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @for (user of recentUsers(); track user.id) {
+                            <tr class="animate-fade-up">
+                                <td class="id-col">{{ user.id.substring(0, 8) }}...</td>
+                                <td class="username-col">{{ user.username }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>
+                                    <span class="role-badge" [class.role-admin]="isAdminRole(user.role)">
+                                        {{ user.role.toUpperCase() }}
+                                    </span>
+                                </td>
+                                <td><span class="status-online">● ACTIVO</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    } @else {
+        <!-- Games -->
+        <section class="games-section">
+            <div class="games-grid">
+                @for (game of availableGames(); track game.id) {
+                    <a
+                        class="game-card terminal-card animate-fade-up"
+                        [class.game-card-upcoming]="game.upcoming"
+                        [routerLink]="game.route"
+                        [attr.aria-disabled]="game.upcoming"
+                        (click)="handleGameClick($event, game.upcoming)"
+                    >
+                        <div class="game-image-wrapper">
+                            <img class="game-image" [src]="game.imageUrl" [alt]="game.name" loading="lazy" />
+
+                            @if (game.upcoming) {
+                                <div class="game-upcoming-overlay">
+                                    <span>PRÓXIMAMENTE</span>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="game-name">{{ game.name }}</div>
+                    </a>
+                }
+            </div>
+        </section>
+    }
+</div>

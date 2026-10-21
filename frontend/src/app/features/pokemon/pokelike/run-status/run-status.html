@@ -1,0 +1,15 @@
+<section class="run-status">
+    <div class="phase-block">
+        <div class="phase-label">RUN&gt;</div>
+        <div class="phase-title">{{ getPhaseTitle() }}</div>
+        <p>Construye equipo, supera rutas, gana medallas y completa la run antes de caer.</p>
+    </div>
+
+    <div class="run-stats">
+        <span>MAPA {{ store.currentMap() }}</span>
+        <span>TEAM {{ store.teamSlotsLabel() }}</span>
+        <span>POWER {{ store.teamPower() }}</span>
+        <span><img [src]="store.assets.icons.coin" alt="">{{ store.coins() }}</span>
+        <span>SEED {{ store.runSeed() }}</span>
+    </div>
+</section>

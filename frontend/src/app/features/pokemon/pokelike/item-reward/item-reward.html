@@ -1,0 +1,22 @@
+<section class="selection-panel">
+    <div class="section-heading">
+        <span>// CHOOSE ONE ITEM</span>
+        <small>Choose one item to keep</small>
+    </div>
+
+    <div class="item-grid">
+        @for (item of store.itemOptions(); track item.id) {
+            <button type="button" class="item-card" [class.selected]="store.isItemSelected(item)" (click)="store.selectItem(item)">
+                <img [src]="item.imageUrl" [alt]="item.name">
+                <strong>{{ item.name }}</strong>
+                <p>{{ item.description }}</p>
+                <span class="rarity-chip {{ store.getRarityClass(item.rarity) }}">{{ item.rarity }}</span>
+            </button>
+        }
+    </div>
+
+    <div class="action-row">
+        <button class="primary-action" type="button" [disabled]="!store.selectedItem()" (click)="store.keepSelectedItem()">GUARDAR</button>
+        <button class="secondary-action" type="button" (click)="store.skipItemReward()">OMITIR</button>
+    </div>
+</section>

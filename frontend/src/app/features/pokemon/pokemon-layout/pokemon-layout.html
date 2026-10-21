@@ -1,0 +1,26 @@
+<header class="pk-header">
+    <a class="pk-brand" routerLink="/pokemon">
+        <span class="pk-ball" aria-hidden="true"></span>
+        <span class="pk-brand-text">
+            <span class="pk-title">Pokémon</span>
+            <span class="pk-subtitle">Liga NTG</span>
+        </span>
+    </a>
+
+    <nav class="pk-nav" aria-label="Navegación de Pokémon">
+        @for (item of menuItems; track item.route) {
+            <a class="pk-nav-link" [routerLink]="item.route" routerLinkActive="active">{{ item.label }}</a>
+        }
+    </nav>
+
+    <div class="pk-actions">
+        @if (authService.isAdmin()) {
+            <a class="pk-pill" routerLink="/admin/pokemon/games">Gestión</a>
+        }
+        <a class="pk-pill pk-pill-light" routerLink="/">← Sistema</a>
+    </div>
+</header>
+
+<main class="pk-main">
+    <router-outlet />
+</main>

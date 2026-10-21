@@ -1,0 +1,14 @@
+/**
+ * Mixins partial.
+ * Mobile breakpoint and the media query mixin shared by the component styles.
+ *
+ * @author @adrianpmdev
+ */
+
+$mobile-breakpoint: 900px;
+
+@mixin mobile {
+    @media (max-width: $mobile-breakpoint) {
+        @content;
+    }
+}

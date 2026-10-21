@@ -1,0 +1,11 @@
+/**
+ * Global styles.
+ * Entry point: loads the design tokens, reset, typography and terminal theme.
+ *
+ * @author @adrianpmdev
+ */
+
+@use 'styles/variables';
+@use 'styles/reset';
+@use 'styles/typography';
+@use 'styles/terminal';

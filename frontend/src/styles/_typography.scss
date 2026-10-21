@@ -1,0 +1,27 @@
+/**
+ * Typography partial.
+ * Fonts of the terminal theme and its glow text helpers.
+ *
+ * @author @adrianpmdev
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=VT323&display=swap');
+
+.neon-text {
+    color: var(--neon-green);
+    text-shadow:
+        0 0 5px var(--neon-green),
+        0 0 10px var(--neon-green),
+        0 0 20px var(--neon-green-dark);
+}
+
+.neon-text-bright {
+    color: var(--neon-green);
+    text-shadow:
+        0 0 7px #fff,
+        0 0 10px #fff,
+        0 0 21px #fff,
+        0 0 42px var(--neon-green),
+        0 0 82px var(--neon-green),
+        0 0 92px var(--neon-green);
+}

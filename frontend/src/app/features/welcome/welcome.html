@@ -1,0 +1,35 @@
+<section class="welcome">
+    <div class="welcome-card terminal-card animate-fade-up">
+        <p class="welcome-prompt">root&#64;ntg:~$ <span class="cursor"></span></p>
+        <h1 class="welcome-title neon-text">BIENVENIDO, {{ currentUser()?.username?.toUpperCase() }}</h1>
+        <p class="welcome-text">
+            Aquí encontrarás la información de los juegos a los que jugamos: torneos, jugadores y herramientas.
+        </p>
+    </div>
+
+    @if (!hasPlayableGames()) {
+        <div class="welcome-card terminal-card">
+            <p class="welcome-text">
+                [AVISO] Todavía no tienes acceso a ningún juego. Pide a un administrador que te asigne la etiqueta correspondiente.
+            </p>
+        </div>
+    }
+
+    <div class="game-grid">
+        @for (game of games(); track game.id) {
+            @if (game.upcoming) {
+                <div class="game-card terminal-card upcoming">
+                    <img class="game-image" [src]="game.imageUrl" [alt]="game.name" />
+                    <span class="game-name">{{ game.name.toUpperCase() }}</span>
+                    <span class="game-tag">PRÓXIMAMENTE</span>
+                </div>
+            } @else {
+                <a class="game-card terminal-card" [routerLink]="game.route">
+                    <img class="game-image" [src]="game.imageUrl" [alt]="game.name" />
+                    <span class="game-name">{{ game.name.toUpperCase() }}</span>
+                    <span class="game-tag">ENTRAR ▶</span>
+                </a>
+            }
+        }
+    </div>
+</section>

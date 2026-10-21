@@ -1,0 +1,146 @@
+/**
+ * Header styles.
+ * Top bar of the terminal layout with breadcrumb, system clock and mobile menu button.
+ *
+ * @author @adrianpmdev
+ */
+
+/* ─── HOST ─── */
+
+:host {
+    display: block;
+}
+
+/* ─── TOP BAR ─── */
+
+.top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    height: 52px;
+    padding: 0 28px;
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(4, 15, 5, 0.5);
+    backdrop-filter: blur(4px);
+    position: relative;
+    z-index: 10;
+    flex-shrink: 0;
+}
+
+.top-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+/* ─── MOBILE MENU BUTTON ─── */
+
+.mobile-menu-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    background: transparent;
+    border: 1px solid rgba(0, 255, 65, 0.25);
+    color: var(--neon-green);
+    cursor: pointer;
+    font-size: 1rem;
+    flex-shrink: 0;
+    text-shadow: 0 0 8px rgba(0, 255, 65, 0.5);
+    transition: all 0.2s;
+
+    &:hover {
+        background: rgba(0, 255, 65, 0.08);
+        border-color: rgba(0, 255, 65, 0.45);
+    }
+}
+
+/* ─── BREADCRUMB ─── */
+
+.breadcrumb {
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.prompt {
+    color: var(--text-dim);
+    flex-shrink: 0;
+}
+
+.path {
+    color: var(--neon-green);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ─── SYSTEM CLOCK ─── */
+
+.sys-time {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    font-family: var(--font-mono);
+    white-space: nowrap;
+}
+
+/* ─── RESPONSIVE ─── */
+
+@media (max-width: 900px) {
+    .top-bar {
+        height: 52px;
+        padding: 0 22px;
+        z-index: 10;
+    }
+
+    .mobile-menu-btn {
+        display: inline-flex;
+    }
+}
+
+@media (max-width: 640px) {
+    .top-bar {
+        height: 48px;
+        padding: 0 16px;
+    }
+
+    .top-bar-left {
+        gap: 10px;
+    }
+
+    .breadcrumb {
+        font-size: 0.72rem;
+        gap: 6px;
+    }
+
+    .sys-time {
+        display: none;
+    }
+}
+
+@media (max-width: 420px) {
+    .top-bar {
+        padding: 0 14px;
+    }
+
+    .mobile-menu-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 0.95rem;
+    }
+
+    .breadcrumb {
+        font-size: 0.68rem;
+    }
+
+    .prompt {
+        display: none;
+    }
+}

@@ -1,0 +1,15 @@
+<aside class="inventory-panel">
+    <div class="panel-title"><span>// ITEMS</span><small>{{ store.inventory().length }}</small></div>
+    @if (store.inventory().length === 0) {
+        <div class="empty-state">SIN OBJETOS</div>
+    } @else {
+        <div class="inventory-list">
+            @for (item of store.inventory(); track item.id) {
+                <article class="inventory-row">
+                    <img [src]="item.imageUrl" [alt]="item.name">
+                    <strong>{{ item.name }}</strong>
+                </article>
+            }
+        </div>
+    }
+</aside>

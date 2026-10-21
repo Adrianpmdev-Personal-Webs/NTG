@@ -1,0 +1,20 @@
+<header class="top-bar">
+    <div class="brand-area">
+        <img class="brand-logo" [src]="store.assets.icons.logo" alt="Pokelike logo">
+        <div>
+            <div class="eyebrow">// POKELIKE ROGUELIKE</div>
+            <h1>POKELIKE</h1>
+        </div>
+    </div>
+
+    <nav class="top-actions">
+        <span class="status-pill">{{ store.modeLabel() }}</span>
+        <span class="status-pill">GEN {{ store.selectedGeneration() }}</span>
+        <span class="status-pill">BADGES {{ store.badgesLabel() }}</span>
+        <button type="button" (click)="store.openPanel('pokedex')"><img [src]="store.assets.icons.pokedex" alt="">Pokédex</button>
+        <button type="button" (click)="store.openPanel('achievements')"><img [src]="store.assets.icons.achievements" alt="">Logros</button>
+        <button type="button" (click)="store.openPanel('hallOfFame')"><img [src]="store.assets.icons.hallOfFame" alt="">Hall</button>
+        <button type="button" (click)="store.openPanel('settings')"><img [src]="store.assets.icons.settings" alt="">Ajustes</button>
+        <button type="button" class="danger-action" (click)="store.restartRun()">Reiniciar</button>
+    </nav>
+</header>

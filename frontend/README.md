@@ -46,11 +46,8 @@ only the games they have access to, and gives admins the tools to manage users, 
 | 🏠 Platform | **Welcome** | Player home: cards for the games they can open |
 | 👑 Admin | **Dashboard** | Platform statistics |
 | 👑 Admin | **Users** | Create users by email, assign tags, edit, resend the password email, delete |
-| 🎮 Pokémon | **Lockes** | Rule sets grouped by game, with a link to each locke's tournaments |
-| 🎮 Pokémon | **Tournaments** | Participants, groups, bracket, standings and rewards of each tournament |
-| 🎮 Pokémon | **Type calculator** | Pick up to two defending types and see the damage multipliers |
-| 🎮 Pokémon | **Pokelike** | A roguelike-style mini-game: starter, map, battles, rewards, trades and badges |
-| 🎮 Pokémon (admin) | **Management** | Games, lockes and full tournament administration (participants, groups, bracket, standings, rewards) |
+| 🎮 Games | **Game areas** | Each game has its own layout, theme, views and tools, and opens only with its tag |
+| 🎮 Games (admin) | **Management** | Each game can add its own administration screens to the admin area |
 
 <br>
 
@@ -85,19 +82,7 @@ Guards: `authGuard`, `adminGuard`, `roleHomeGuard` and `gameGuard(gameId)`.
 ---
 # 🔁 Session handling
 
-```mermaid
-sequenceDiagram
-    participant U as Browser
-    participant App as Angular app
-    participant API as Backend
-    U->>App: Open the site (or reload)
-    App->>API: POST /auth/refresh (HttpOnly cookie)
-    API-->>App: Access token + user (role and tags)
-    Note over App: Token lives only in memory
-    App->>API: Requests with the token
-    API-->>App: 401 (token expired)
-    App->>API: Renew once, then repeat the request
-```
+The session combines a short-lived access token kept in memory with a long-lived HttpOnly cookie.
 
 - **No token on disk.** The access token lives in memory; the long session is kept by an **HttpOnly cookie** that
   scripts cannot read.
@@ -138,11 +123,10 @@ frontend/
             ├── auth/           Login and set password
             ├── welcome/        Player home
             ├── admin/          Dashboard and user management (with tags)
-            └── pokemon/        🎮 The Pokémon module
-                ├── pokemon-layout/       Own shell and theme
-                ├── lockes/ · tournaments/    Player views
-                ├── type-calculator/ · pokelike/    Game tools
-                └── admin/                Games, lockes and tournament management
+            └── <game>/         🎮 One folder per game
+                ├── <game>-layout/        Own shell and theme
+                ├── <views>/              Player views and tools
+                └── admin/                Game management (if needed)
 ```
 
 ### Adding a game
@@ -205,7 +189,7 @@ npm run build      # production build
 
 - Automated tests for guards, interceptor and key screens.
 - A tag management screen for admins.
-- Player names and avatars in tournament views.
+- Player names and avatars in the game views.
 - More game modules following the same structure.
 
 <br>

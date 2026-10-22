@@ -28,20 +28,20 @@ The backend is a **Spring Boot** application split into two Maven modules:
 | Module | Role |
 |---|---|
 | 🚀 **`core`** | The runnable application. Owns identity (users, tags), the Supabase integration, security, logging and error handling. |
-| 🎮 **`pokemon`** | A game module with its own domain and REST endpoints (games, lockes, tournaments, rewards, rankings). It contains **no security code**: `core` decides who can reach it. |
+| 🎮 **Game modules** | One module per game, each with its own domain and REST endpoints. A game module contains **no security code**: `core` decides who can reach it. |
 
 ```mermaid
 flowchart LR
     C([Client]) --> S["core<br/>security · logging · errors"]
     S --> I["core features<br/>auth · users · tags"]
-    S --> P["pokemon module<br/>games · lockes · tournaments · rewards · rankings"]
+    S --> P["game modules<br/>one per game"]
     I --> SB[("Supabase Auth")]
-    I --> DB[("PostgreSQL<br/>schemas core + pokemon")]
+    I --> DB[("PostgreSQL<br/>schema core + one per game")]
     P --> DB
 ```
 
-Adding a new game means adding a new module next to `pokemon` and registering its path and tag in the security
-rules. Nothing else in the platform changes.
+Adding a new game means adding a new module next to the existing game modules and registering its path and tag in
+the security rules. Nothing else in the platform changes.
 
 <br>
 
@@ -76,13 +76,9 @@ backend/
 │           ├── users/              User management and tag assignment
 │           └── tags/               Tag management
 │
-└── pokemon/                        🎮 Game module: domain and REST, no security code
-    └── src/main/java/com/adrianpmdev/pokemon/features/
-        ├── games/                  Pokémon games
-        ├── lockes/                 Lockes and their rule sets
-        ├── tournaments/            Participants, groups, brackets, matches, standings
-        ├── rewards/                Rewards and the ones users have claimed
-        └── rankings/               Global ranking
+└── <game>/                         🎮 One module per game: domain and REST, no security code
+    └── src/main/java/com/adrianpmdev/<game>/features/
+        └── <feature>/              One folder per feature of the game
 ```
 
 ### Inside every feature
@@ -116,20 +112,9 @@ backend/
 # 🛡️ Security
 
 Security is the most carefully designed part of the backend. Every request goes through the same pipeline:
-
-```mermaid
-flowchart TD
-    A[Incoming request] --> B["Request id + access log"]
-    B --> C["CORS allow-list"]
-    C --> D{"Bearer token?"}
-    D -->|yes| E["Verify signature, expiry and issuer<br/>locally with Supabase keys"]
-    E --> F["Load role and tags from the database"]
-    D -->|no| G
-    F --> G["Authorization rules<br/>deny by default"]
-    G -->|allowed| H["Controller → Service → Repository"]
-    G -->|not signed in| I["401 Unauthorized"]
-    G -->|no permission| J["403 Forbidden"]
-```
+request id and access log → CORS allow-list → optional bearer token (verified locally, role and tags loaded from the
+database) → deny-by-default authorization rules → controller. Requests that are not signed in receive `401` and
+requests without permission receive `403`.
 
 | 🔐 Concern | How it is handled |
 |---|---|
@@ -156,8 +141,8 @@ flowchart TD
 | Profile | `PUT /users/me` | Any signed-in user (own profile only) |
 | Users | `/users/**` | **Admin** |
 | Tags | `/tags/**` | **Admin** |
-| Pokémon | `GET /pokemon/**` | Users with the **`pokemon` tag**, and admins |
-| Pokémon | `POST` · `PUT` · `DELETE /pokemon/**` | **Admin** |
+| Games | `GET /<game>/**` | Users with the game's **tag**, and admins |
+| Games | `POST` · `PUT` · `DELETE /<game>/**` | **Admin** |
 | Health | `GET /keep-alive` | Public |
 | Anything else | | ⛔ Denied |
 
@@ -168,53 +153,25 @@ flowchart TD
 
 ### 1. Creating a user (admin → email → password)
 
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Admin
-    actor User
-    participant API as NTG API
-    participant SB as Supabase Auth
-    Admin->>API: POST /users (email, username, tags)
-    API->>SB: Create confirmed account without password
-    API->>API: Save local profile and tags
-    API->>SB: Request the "set your password" email
-    SB-->>User: Email with a one-time link
-    User->>API: PUT /auth/set-password (token from the link)
-    API->>SB: Set the password
-    API-->>User: Session started (access token + refresh cookie)
-```
-
+- An admin creates the user with an email, a username and tags. The account is created in Supabase without a
+  password, the local profile and tags are saved, and Supabase sends an email with a one-time link.
+- The user opens the link, chooses a password and is signed in right away.
 - If saving the profile fails, the Supabase account is removed again, so no half-created users are left behind.
 - If only the email fails (provider limits, for example), the user is still created and the admin is told, so the
   email can be **resent** later.
 
 ### 2. Staying signed in
 
-```mermaid
-sequenceDiagram
-    participant FE as Web app
-    participant API as NTG API
-    participant SB as Supabase Auth
-    FE->>API: POST /auth/login
-    API->>SB: Password sign-in
-    API-->>FE: Access token (kept in memory) + refresh cookie (HttpOnly)
-    Note over FE,API: Page reload, or the access token expires
-    FE->>API: POST /auth/refresh (cookie only)
-    API->>SB: Rotate the refresh token
-    API-->>FE: New access token + new cookie
-```
+- Login returns a short-lived access token (kept in memory by the client) and sets a long-lived refresh token in an
+  HttpOnly cookie.
+- When the page is reloaded or the access token expires, the client asks for a new one using only the cookie. The
+  refresh token rotates on every use.
 
 ### 3. Tags and game access
 
-```mermaid
-flowchart LR
-    A["Admin assigns the 'pokemon' tag"] --> B["Stored in the database"]
-    B --> C["Next request: authority TAG_POKEMON"]
-    C --> D{"Route under /pokemon/** ?"}
-    D -->|GET| E["✅ Allowed"]
-    D -->|write| F["⛔ Admin only"]
-```
+- An admin assigns a tag to a user. It is stored in the database and, from the next request, the user holds the
+  matching `TAG_<KEY>` authority.
+- Routes under a game's path can be **read** by users with that tag and by admins; **writing** is admin only.
 
 <br>
 
@@ -228,7 +185,7 @@ All routes live under `/api/v1`.
 | **Auth** | `auth` (login, refresh, logout, set-password, me) |
 | **Users** | `users` (create, list, update, delete, resend email), `users/{id}/tags` |
 | **Tags** | `tags` |
-| **Pokémon** | `games` · `lockes` · `tournaments` · `tournament-participants` · `tournament-groups` · `group-participants` · `group-matches` · `bracket-stages` · `bracket-matches` · `tournament-standings` · `global-standings` · `rewards` · `user-rewards` |
+| **Game modules** | One group of resources per game, under `/api/v1/<game>/...` |
 
 Interactive documentation is available through Swagger UI (admin only).
 
@@ -237,29 +194,12 @@ Interactive documentation is available through Swagger UI (admin only).
 ---
 # 🗄️ Data model
 
-Two PostgreSQL schemas on Supabase: **`core`** (users, tags) and **`pokemon`** (the game domain).
+PostgreSQL on Supabase, organised in schemas: **`core`** (users and tags) for the platform, plus **one schema per
+game module** for its domain.
 
-```mermaid
-erDiagram
-    USER ||--o{ USER_TAG : has
-    TAG ||--o{ USER_TAG : grants
-    GAME ||--o{ LOCKE : contains
-    LOCKE ||--o{ TOURNAMENT : hosts
-    TOURNAMENT ||--o{ TOURNAMENT_PARTICIPANT : registers
-    TOURNAMENT ||--o{ TOURNAMENT_GROUP : "splits into"
-    TOURNAMENT ||--o{ BRACKET_STAGE : "has stages"
-    BRACKET_STAGE ||--o{ BRACKET_MATCH : contains
-    TOURNAMENT_GROUP ||--o{ GROUP_PARTICIPANT : seats
-    TOURNAMENT_GROUP ||--o{ GROUP_MATCH : plays
-    TOURNAMENT ||--o{ TOURNAMENT_STANDING : ranks
-    TOURNAMENT ||--o{ REWARD : offers
-    REWARD ||--o{ USER_REWARD : "claimed as"
-```
-
-- A **locke** is a rule set (stored as flexible JSON) for a game; tournaments are played inside a locke.
-- Tournaments support three formats (**groups**, **bracket** and **round robin**) and move through statuses from
-  draft to finished.
-- Database constraints protect the rules (for example one registration per user per tournament).
+- Each user shares its id with its Supabase Auth account and is linked to its tags through a join table.
+- Every game module owns the tables of its own schema and never exposes its entities: the API only returns DTOs.
+- Database constraints (keys, uniqueness, relations) protect the rules of each domain.
 
 <br>
 
@@ -283,7 +223,7 @@ and a `requestId` that matches the logs:
 
 ```text
 12:30:01.123 INFO  [a1b2c3d4e5f6] ACCESS  POST /api/v1/auth/login -> 200 (143 ms)
-12:31:10.456 INFO  [9f8e7d6c5b4a] AUDIT   actor=<admin> action=USER_CREATED target=<user> tags=[pokemon]
+12:31:10.456 INFO  [9f8e7d6c5b4a] AUDIT   actor=<admin> action=USER_CREATED target=<user> tags=[<game>]
 ```
 
 - `ACCESS`: one line per request.
@@ -329,7 +269,7 @@ java -jar core/target/core-0.1.jar
 - Automated tests for the security rules and the account flows.
 - Request rate limiting on the public endpoints.
 - A lightweight "player directory" endpoint (name and avatar only) for the game views.
-- More game modules next to `pokemon`.
+- More game modules following the same structure.
 
 <br>
 

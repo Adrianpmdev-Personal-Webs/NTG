@@ -24,8 +24,8 @@
 # ✨ Overview
 
 NTG System is a full-stack web application built for a closed group of friends. It centralizes the data and
-tools of the games we play together, starting with **Pokémon randomlockes and their tournaments**, and it is
-designed so that new games can be plugged in as independent modules.
+tools of the games we play together, and it is designed so that new games can be plugged in as independent
+modules as they are developed.
 
 - 🔒 **Invitation-only.** There is no public sign-up: an admin creates each account and the user receives an
   email to choose their own password.
@@ -47,17 +47,16 @@ designed so that new games can be plugged in as independent modules.
 |---|---|
 | Create users with just an email and a username | Sign in once and stay signed in across visits |
 | Assign or remove **tags** to grant or revoke access to games | See only the games they have access to |
-| Resend the "choose your password" email | Browse **lockes** (rule sets) and their **tournaments** |
-| Platform dashboard with user statistics | Follow groups, brackets, standings and rewards |
-| Manage Pokémon games, lockes and tournaments end to end | Use the **type calculator** |
-| Run tournaments: participants, groups, brackets, results, rewards | Play **Pokelike**, a roguelike-style mini-game |
+| Resend the "choose your password" email | Open the content and tools of every game they can access |
+| Platform dashboard with user statistics | Edit their own profile |
+| Manage the content of each game from the admin area | Follow the activity of the games they take part in |
 
 ### 🧪 Game modules
 
 | Game | Status | Highlights |
 |---|---|---|
-| **Pokémon** | ✅ Live | Lockes with rules, tournaments (groups, bracket, round robin), standings, rewards, global ranking, type calculator, Pokelike |
-| More games | 🛠️ Planned | The tag and module system is ready for them |
+| **Available games** | ✅ Live | Each game ships its own content, rules and tools behind its access tag |
+| **Upcoming games** | 🛠️ Planned | New games are added over time as they are developed; the tag and module system is ready for them |
 
 <br>
 
@@ -76,8 +75,8 @@ flowchart LR
   session cookie is **first-party** and the backend address never appears in the web app.
 - **Supabase Auth** is the identity provider (credentials, email delivery, password setup). The backend adds
   the application rules on top: roles, tags and game access.
-- **PostgreSQL** (Supabase) stores the application data in two schemas: `core` (users, tags) and `pokemon`
-  (games, lockes, tournaments and everything around them).
+- **PostgreSQL** (Supabase) stores the application data in one schema for the platform, `core` (users, tags),
+  plus one schema per game module.
 
 ### How a new user joins
 
@@ -115,7 +114,7 @@ sequenceDiagram
 
 ```text
 NTG/
-├── backend/     Spring Boot API · Maven multi-module (core + pokemon)
+├── backend/     Spring Boot API · Maven multi-module (core + one module per game)
 └── frontend/    Angular single-page application
 ```
 

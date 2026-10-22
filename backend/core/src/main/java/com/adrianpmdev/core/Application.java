@@ -15,7 +15,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @ConfigurationPropertiesScan
 @SpringBootApplication(scanBasePackages = {
         "com.adrianpmdev.core",
-        "com.adrianpmdev.pokemon"
+        "com.adrianpmdev.pokemon",
+        "com.adrianpmdev.wowforever"
 })
 @EnableJpaRepositories(basePackages = {
     "com.adrianpmdev.core.features.users.infrastructure.persistence.repository",
@@ -24,7 +25,10 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
     "com.adrianpmdev.pokemon.features.lockes.infrastructure.persistence.repository",
     "com.adrianpmdev.pokemon.features.rankings.infrastructure.persistence.repository",
     "com.adrianpmdev.pokemon.features.rewards.infrastructure.persistence.repository",
-    "com.adrianpmdev.pokemon.features.tournaments.infrastructure.persistence.repository"
+    "com.adrianpmdev.pokemon.features.tournaments.infrastructure.persistence.repository",
+    "com.adrianpmdev.wowforever.features.classes.infrastructure.persistence.repository",
+    "com.adrianpmdev.wowforever.features.races.infrastructure.persistence.repository",
+    "com.adrianpmdev.wowforever.features.settings.infrastructure.persistence.repository"
 })
 @EntityScan(basePackages = {
     "com.adrianpmdev.core.features.users.infrastructure.persistence.entity",
@@ -33,7 +37,10 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
     "com.adrianpmdev.pokemon.features.lockes.infrastructure.persistence.entity",
     "com.adrianpmdev.pokemon.features.rankings.infrastructure.persistence.entity",
     "com.adrianpmdev.pokemon.features.rewards.infrastructure.persistence.entity",
-    "com.adrianpmdev.pokemon.features.tournaments.infrastructure.persistence.entity"
+    "com.adrianpmdev.pokemon.features.tournaments.infrastructure.persistence.entity",
+    "com.adrianpmdev.wowforever.features.classes.infrastructure.persistence.entity",
+    "com.adrianpmdev.wowforever.features.races.infrastructure.persistence.entity",
+    "com.adrianpmdev.wowforever.features.settings.infrastructure.persistence.entity"
 })
 public class Application {
 

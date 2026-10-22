@@ -88,7 +88,7 @@
 
 /* ─── RESPONSIVE ─── */
 
-@include mobile {
+@include tablet {
     .welcome-title {
         font-size: 1.2rem;
     }

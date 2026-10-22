@@ -1,0 +1,211 @@
+<div class="page">
+    <header class="page-header">
+        <h1 class="page-title">WOW FOREVER · DATOS BASE</h1>
+        <p class="page-subtitle">Clases, razas y ajustes que usan el resto de herramientas.</p>
+    </header>
+
+    <div class="tabs" role="tablist">
+        @for (item of tabs; track item.id) {
+            <button
+                type="button"
+                class="tab"
+                role="tab"
+                [class.active]="tab() === item.id"
+                [attr.aria-selected]="tab() === item.id"
+                (click)="tab.set(item.id)">
+                {{ item.label }}
+            </button>
+        }
+    </div>
+
+    @if (loading()) {
+        <p class="state">&gt; cargando datos...</p>
+    } @else {
+        @switch (tab()) {
+            @case ('classes') {
+                <div class="toolbar">
+                    <button type="button" class="btn-neon" (click)="openCreateClass()">+ NUEVA CLASE</button>
+                </div>
+
+                <div class="table-wrapper terminal-card">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>NOMBRE</th>
+                                <th>SLUG</th>
+                                <th>ICONO</th>
+                                <th>ORDEN</th>
+                                <th>ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (wowClass of classes(); track wowClass.id) {
+                                <tr>
+                                    <td><img class="icon" [src]="iconUrl(wowClass.icon)" alt="" loading="lazy" (error)="onIconError($event)" /></td>
+                                    <td>{{ wowClass.name }}</td>
+                                    <td class="dim">{{ wowClass.slug }}</td>
+                                    <td class="dim">{{ wowClass.icon }}</td>
+                                    <td>{{ wowClass.sortOrder }}</td>
+                                    <td class="actions">
+                                        <button type="button" class="btn-neon btn-small" (click)="openEditClass(wowClass)">EDITAR</button>
+                                        <button type="button" class="btn-neon-danger btn-small" (click)="askDelete('class', wowClass.id, wowClass.name)">ELIMINAR</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+            @case ('races') {
+                <div class="toolbar">
+                    <button type="button" class="btn-neon" (click)="openCreateRace()">+ NUEVA RAZA</button>
+                </div>
+
+                <div class="table-wrapper terminal-card">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>NOMBRE</th>
+                                <th>FACCIÓN</th>
+                                <th>CLASES</th>
+                                <th>ORDEN</th>
+                                <th>ACCIONES</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (race of races(); track race.id) {
+                                <tr>
+                                    <td><img class="icon" [src]="iconUrl(race.icon)" alt="" loading="lazy" (error)="onIconError($event)" /></td>
+                                    <td>{{ race.name }}</td>
+                                    <td>
+                                        <span class="badge" [class.horde]="race.faction === 'HORDE'">{{ factionLabels[race.faction] }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="chips">
+                                            @for (classId of race.classIds; track classId) {
+                                                <span class="chip">{{ className(classId) }}</span>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td>{{ race.sortOrder }}</td>
+                                    <td class="actions">
+                                        <button type="button" class="btn-neon btn-small" (click)="openEditRace(race)">EDITAR</button>
+                                        <button type="button" class="btn-neon-danger btn-small" (click)="askDelete('race', race.id, race.name)">ELIMINAR</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+
+            @case ('settings') {
+                <div class="settings terminal-card">
+                    @for (setting of settings(); track setting.key) {
+                        <div class="setting-row">
+                            <div class="setting-info">
+                                <span class="setting-key">{{ setting.key }}</span>
+                                <span class="dim">{{ setting.description }}</span>
+                            </div>
+                            <input class="neon-input" [(ngModel)]="settingDrafts[setting.key]" [name]="setting.key" />
+                            <button type="button" class="btn-neon btn-small" (click)="saveSetting(setting)">GUARDAR</button>
+                        </div>
+                    }
+                </div>
+            }
+        }
+    }
+</div>
+
+@if (modal(); as current) {
+    <div class="overlay" (click)="closeModal()">
+        <div class="modal terminal-card" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+            <h2 class="modal-title">
+                {{ isEditing() ? 'EDITAR' : 'NUEVA' }} {{ current.kind === 'class' ? 'CLASE' : 'RAZA' }}
+            </h2>
+
+            @if (current.kind === 'class') {
+                <div class="form-field">
+                    <label class="field-label">// SLUG</label>
+                    <input class="neon-input" [(ngModel)]="classForm.slug" name="class-slug" [disabled]="isEditing()" placeholder="warrior" />
+                </div>
+                <div class="form-field">
+                    <label class="field-label">// NOMBRE</label>
+                    <input class="neon-input" [(ngModel)]="classForm.name" name="class-name" />
+                </div>
+                <div class="form-field">
+                    <label class="field-label">// ICONO (nombre del icono)</label>
+                    <input class="neon-input" [(ngModel)]="classForm.icon" name="class-icon" placeholder="classicon_warrior" />
+                </div>
+                <div class="form-field">
+                    <label class="field-label">// ORDEN</label>
+                    <input class="neon-input" type="number" min="0" [(ngModel)]="classForm.sortOrder" name="class-order" />
+                </div>
+            } @else {
+                <div class="form-field">
+                    <label class="field-label">// SLUG</label>
+                    <input class="neon-input" [(ngModel)]="raceForm.slug" name="race-slug" [disabled]="isEditing()" placeholder="night-elf" />
+                </div>
+                <div class="form-field">
+                    <label class="field-label">// NOMBRE</label>
+                    <input class="neon-input" [(ngModel)]="raceForm.name" name="race-name" />
+                </div>
+                <div class="form-field">
+                    <label class="field-label">// FACCIÓN</label>
+                    <div class="radio-group">
+                        @for (item of factions; track item) {
+                            <label class="check">
+                                <input type="radio" name="race-faction" [value]="item" [(ngModel)]="raceForm.faction" />
+                                <span>{{ factionLabels[item] }}</span>
+                            </label>
+                        }
+                    </div>
+                </div>
+                <div class="form-field">
+                    <label class="field-label">// ICONO (nombre del icono)</label>
+                    <input class="neon-input" [(ngModel)]="raceForm.icon" name="race-icon" />
+                </div>
+                <div class="form-field">
+                    <label class="field-label">// ORDEN</label>
+                    <input class="neon-input" type="number" min="0" [(ngModel)]="raceForm.sortOrder" name="race-order" />
+                </div>
+                <div class="form-field">
+                    <label class="field-label">// CLASES QUE PUEDE JUGAR</label>
+                    <div class="check-grid">
+                        @for (wowClass of classes(); track wowClass.id) {
+                            <label class="check">
+                                <input type="checkbox" [checked]="raceForm.classIds.includes(wowClass.id)" (change)="toggleRaceClass(wowClass.id)" />
+                                <span>{{ wowClass.name }}</span>
+                            </label>
+                        }
+                    </div>
+                </div>
+            }
+
+            <div class="modal-actions">
+                <button type="button" class="btn-neon-warning" (click)="closeModal()">CANCELAR</button>
+                <button type="button" class="btn-neon" [disabled]="submitting()" (click)="current.kind === 'class' ? submitClass() : submitRace()">
+                    {{ submitting() ? 'GUARDANDO...' : 'GUARDAR' }}
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@if (deleteTarget(); as target) {
+    <div class="overlay" (click)="cancelDelete()">
+        <div class="modal terminal-card" role="alertdialog" aria-modal="true" (click)="$event.stopPropagation()">
+            <h2 class="modal-title">ELIMINAR</h2>
+            <p class="confirm-text">
+                ¿Eliminar <strong>{{ target.name }}</strong>? Esta acción no se puede deshacer y se quitará de todo lo que lo use.
+            </p>
+            <div class="modal-actions">
+                <button type="button" class="btn-neon-warning" (click)="cancelDelete()">CANCELAR</button>
+                <button type="button" class="btn-neon-danger" [disabled]="submitting()" (click)="confirmDelete()">ELIMINAR</button>
+            </div>
+        </div>
+    </div>
+}

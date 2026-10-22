@@ -1,14 +1,29 @@
 /**
  * Mixins partial.
- * Mobile breakpoint and the media query mixin shared by the component styles.
+ * Responsive breakpoints shared by every style: tablet (900px), mobile (640px) and small phones (420px).
+ * Write styles desktop-first and narrow them down with these mixins.
  *
  * @author @adrianpmdev
  */
 
-$mobile-breakpoint: 900px;
+$breakpoint-tablet: 900px;
+$breakpoint-mobile: 640px;
+$breakpoint-small: 420px;
+
+@mixin tablet {
+    @media (max-width: $breakpoint-tablet) {
+        @content;
+    }
+}
 
 @mixin mobile {
-    @media (max-width: $mobile-breakpoint) {
+    @media (max-width: $breakpoint-mobile) {
+        @content;
+    }
+}
+
+@mixin small {
+    @media (max-width: $breakpoint-small) {
         @content;
     }
 }

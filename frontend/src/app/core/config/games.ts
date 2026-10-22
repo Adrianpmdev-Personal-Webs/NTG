@@ -44,6 +44,17 @@ export const GAMES: readonly GameEntry[] = [
         upcoming: true
     },
     {
+        id: 'wow-forever',
+        name: 'WoW Forever',
+        imageUrl: '/images/games/wow-forever.png',
+        route: '/wow-forever',
+        adminRoute: '/admin/wow-forever',
+        adminItems: [
+            { label: 'DATOS BASE', route: '/admin/wow-forever/base-data', icon: '▣' }
+        ],
+        upcoming: true
+    },
+    {
         id: 'lol',
         name: 'League of Legends',
         imageUrl: '/images/games/lol.png',

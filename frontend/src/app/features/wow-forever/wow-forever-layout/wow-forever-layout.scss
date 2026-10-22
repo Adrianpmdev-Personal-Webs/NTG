@@ -1,0 +1,183 @@
+/**
+ * WoW Forever layout styles.
+ *
+ * Gold-on-dark look of the area with a faction background. Defines the --wf-* tokens used by its pages.
+ *
+ * @author @adrianpmdev
+ */
+
+@use 'mixins' as *;
+
+/* ─── HOST ─── */
+
+:host {
+    display: block;
+}
+
+/* ─── SHELL ─── */
+
+.wf {
+    --wf-gold: #d8b866;
+    --wf-gold-dim: #8a7440;
+    --wf-text: #e8dfcb;
+    --wf-muted: #a79d86;
+    --wf-panel: rgba(10, 10, 14, 0.82);
+    --wf-border: rgba(216, 184, 102, 0.35);
+    --wf-alliance: #4f8fe6;
+    --wf-horde: #d4493d;
+    --wf-accent: var(--wf-alliance);
+    --wf-font: Georgia, 'Times New Roman', serif;
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+    isolation: isolate;
+    background: #050506;
+    color: var(--wf-text);
+    font-family: var(--wf-font);
+
+    &.wf-horde {
+        --wf-accent: var(--wf-horde);
+    }
+}
+
+.wf-bg {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+        linear-gradient(180deg, rgba(5, 5, 6, 0.55) 0%, rgba(5, 5, 6, 0.85) 100%),
+        url('/images/wow-forever/background-alliance.webp') center / cover no-repeat;
+
+    .wf-horde & {
+        background:
+            linear-gradient(180deg, rgba(5, 5, 6, 0.55) 0%, rgba(5, 5, 6, 0.85) 100%),
+            url('/images/wow-forever/background-horde.webp') center / cover no-repeat;
+    }
+}
+
+/* ─── HEADER ─── */
+
+.wf-header {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 12px 32px;
+    border-bottom: 1px solid var(--wf-border);
+    background: rgba(5, 5, 6, 0.7);
+    backdrop-filter: blur(4px);
+}
+
+.wf-brand img {
+    display: block;
+    height: 56px;
+    width: auto;
+}
+
+.wf-nav {
+    display: flex;
+    flex: 1;
+    gap: 4px;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.wf-nav-link {
+    padding: 10px 14px;
+    border-bottom: 2px solid transparent;
+    color: var(--wf-muted);
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    text-decoration: none;
+    text-transform: uppercase;
+    white-space: nowrap;
+    transition: color 0.2s ease, border-color 0.2s ease;
+
+    &:hover:not(.disabled),
+    &.active {
+        color: var(--wf-gold);
+        border-bottom-color: var(--wf-gold);
+    }
+
+    &.disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+}
+
+.wf-exit {
+    flex-shrink: 0;
+    color: var(--wf-muted);
+    font-size: 0.85rem;
+    text-decoration: none;
+
+    &:hover {
+        color: var(--wf-gold);
+    }
+}
+
+/* ─── MAIN AND FOOTER ─── */
+
+.wf-main {
+    flex: 1;
+    padding: 32px;
+}
+
+.wf-footer {
+    padding: 16px 32px;
+    border-top: 1px solid var(--wf-border);
+    background: rgba(5, 5, 6, 0.7);
+    color: var(--wf-muted);
+    font-size: 0.75rem;
+    line-height: 1.5;
+    text-align: center;
+}
+
+/* ─── RESPONSIVE ─── */
+
+@include tablet {
+    .wf-header {
+        flex-wrap: wrap;
+        gap: 8px 16px;
+        padding: 10px 20px;
+    }
+
+    .wf-brand {
+        flex: 1;
+    }
+
+    .wf-nav {
+        order: 3;
+        flex: 0 0 100%;
+    }
+
+    .wf-main {
+        padding: 24px 20px;
+    }
+}
+
+@include mobile {
+    .wf-brand img {
+        height: 44px;
+    }
+
+    .wf-nav-link {
+        padding: 8px 10px;
+        font-size: 0.8rem;
+    }
+
+    .wf-main {
+        padding: 20px 12px;
+    }
+
+    .wf-footer {
+        padding: 12px;
+        font-size: 0.7rem;
+    }
+}

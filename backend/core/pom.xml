@@ -21,6 +21,12 @@
             <version>0.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.adrianpmdev</groupId>
+            <artifactId>wow-forever</artifactId>
+            <version>0.1</version>
+        </dependency>
+
         <!-- Spring Boot Web for REST controllers -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -56,14 +62,14 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>3.1.1</version>
+            <version>3.0.1</version>
         </dependency>
 
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.48</version>
+            <version>1.18.42</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -89,7 +95,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring.boot.version}</version>
+                <version>4.0.4</version>
                 <executions>
                     <execution>
                         <goals>

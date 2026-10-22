@@ -11,11 +11,12 @@
     <modules>
         <module>core</module>
         <module>pokemon</module>
+        <module>wow-forever</module>
     </modules>
 
     <properties>
         <java.version>25</java.version>
-        <spring.boot.version>4.0.8</spring.boot.version>
+        <spring.boot.version>4.0.4</spring.boot.version>
     </properties>
 
     <build>

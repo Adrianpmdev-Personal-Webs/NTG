@@ -52,7 +52,8 @@ public class SecurityConfig {
      * To add a game, add its base path and tag key here, create the tag, and assign it to users.
      */
     private static final Map<String, String> GAME_TAGS = Map.of(
-            "/api/v1/pokemon/**", "pokemon"
+            "/api/v1/pokemon/**", "pokemon",
+            "/api/v1/wow-forever/**", "wow-forever"
     );
 
     private static final long CORS_MAX_AGE_SECONDS = 3_600;

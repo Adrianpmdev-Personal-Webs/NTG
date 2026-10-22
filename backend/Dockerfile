@@ -1,16 +1,17 @@
 # Stage 1: Build (Maven + JDK 25)
 FROM maven:3.9.12-eclipse-temurin-25 AS build
-RUN java -version
 WORKDIR /workspace
 
 # Copiar todos los pom.xml
 COPY pom.xml .
 COPY core/pom.xml core/pom.xml
 COPY pokemon/pom.xml pokemon/pom.xml
+COPY wow-forever/pom.xml wow-forever/pom.xml
 
 # Copiar todo el código fuente
 COPY core/src core/src
 COPY pokemon/src pokemon/src
+COPY wow-forever/src wow-forever/src
 
 # Build: compila core (y el resto de modulos como dependencias)
 RUN mvn -pl core -am clean package -DskipTests

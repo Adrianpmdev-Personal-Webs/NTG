@@ -1,0 +1,251 @@
+/**
+ * WoW Forever home styles.
+ *
+ * Hero, feature cards, class tiles and race lists. Uses the --wf-* tokens of the layout.
+ *
+ * @author @adrianpmdev
+ */
+
+@use 'mixins' as *;
+
+/* ─── HOST ─── */
+
+:host {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ─── HERO ─── */
+
+.hero {
+    padding: 24px 0 8px;
+    text-align: center;
+}
+
+.hero-title {
+    margin: 0;
+    color: var(--wf-gold);
+    font-size: 2.6rem;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+}
+
+.hero-subtitle {
+    margin: 8px 0 20px;
+    color: var(--wf-muted);
+}
+
+.faction-switch {
+    display: inline-flex;
+    border: 1px solid var(--wf-border);
+}
+
+.faction-btn {
+    padding: 10px 28px;
+    border: 0;
+    background: rgba(5, 5, 6, 0.7);
+    color: var(--wf-muted);
+    font: inherit;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+
+    &:hover {
+        color: var(--wf-text);
+    }
+
+    &.active {
+        background: var(--wf-alliance);
+        color: #fff;
+    }
+
+    &.active.horde {
+        background: var(--wf-horde);
+    }
+}
+
+/* ─── PANELS ─── */
+
+.panel {
+    padding: 20px 24px;
+    border: 1px solid var(--wf-border);
+    background: var(--wf-panel);
+}
+
+.panel-title {
+    margin: 0 0 16px;
+    color: var(--wf-gold);
+    font-size: 1.1rem;
+    font-weight: normal;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+}
+
+.state {
+    margin: 0;
+    color: var(--wf-muted);
+}
+
+/* ─── FEATURES ─── */
+
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+.feature-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px;
+    border: 1px solid var(--wf-border);
+    background: rgba(255, 255, 255, 0.03);
+    color: inherit;
+    text-decoration: none;
+    transition: border-color 0.2s ease, background 0.2s ease;
+
+    &:hover:not(.locked) {
+        border-color: var(--wf-gold);
+        background: rgba(216, 184, 102, 0.08);
+    }
+
+    &.locked {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+}
+
+.feature-name {
+    color: var(--wf-gold);
+    font-size: 1rem;
+}
+
+.feature-text {
+    color: var(--wf-muted);
+    font-size: 0.85rem;
+}
+
+.feature-soon {
+    margin-top: auto;
+    color: var(--wf-accent);
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+/* ─── CLASSES AND RACES ─── */
+
+.tile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 8px;
+    border: 1px solid var(--wf-border);
+    background: rgba(255, 255, 255, 0.03);
+    text-align: center;
+}
+
+.tile-icon {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--wf-gold-dim);
+    object-fit: cover;
+}
+
+.tile-name {
+    font-size: 0.9rem;
+}
+
+.race-columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+}
+
+.race-faction {
+    margin: 0 0 8px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--wf-alliance);
+    font-size: 1rem;
+    font-weight: normal;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.race-column.horde .race-faction {
+    border-bottom-color: var(--wf-horde);
+}
+
+.race-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.race-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 8px;
+    background: rgba(255, 255, 255, 0.03);
+
+    .tile-name {
+        flex: 1;
+        min-width: 0;
+    }
+}
+
+.race-count {
+    color: var(--wf-muted);
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
+/* ─── RESPONSIVE ─── */
+
+@include tablet {
+    .race-columns {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@include mobile {
+    .hero-title {
+        font-size: 1.8rem;
+        letter-spacing: 3px;
+    }
+
+    .panel {
+        padding: 16px 12px;
+    }
+
+    .tile-grid {
+        grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+        gap: 8px;
+    }
+}
+
+@include small {
+    .faction-btn {
+        padding: 8px 18px;
+    }
+}

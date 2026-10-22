@@ -39,6 +39,11 @@ export const routes: Routes = [
                             .then(m => m.POKEMON_ADMIN_ROUTES)
                     },
                     {
+                        path: 'wow-forever',
+                        loadChildren: () => import('@features/wow-forever/wow-forever-admin.routes')
+                            .then(m => m.WOW_FOREVER_ADMIN_ROUTES)
+                    },
+                    {
                         path: '',
                         loadChildren: () => import('@features/admin/admin.routes').then(m => m.ADMIN_ROUTES)
                     }
@@ -50,6 +55,11 @@ export const routes: Routes = [
         path: 'pokemon',
         canActivate: [authGuard, gameGuard('pokemon')],
         loadChildren: () => import('@features/pokemon/pokemon.routes').then(m => m.POKEMON_ROUTES)
+    },
+    {
+        path: 'wow-forever',
+        canActivate: [authGuard, gameGuard('wow-forever')],
+        loadChildren: () => import('@features/wow-forever/wow-forever.routes').then(m => m.WOW_FOREVER_ROUTES)
     },
     {
         // Public routes. /set-password is the target of the link in the email sent by Supabase:

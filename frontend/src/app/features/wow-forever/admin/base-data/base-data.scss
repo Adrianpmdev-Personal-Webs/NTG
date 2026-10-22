@@ -1,0 +1,298 @@
+/**
+ * WoW Forever base data styles.
+ *
+ * Tabs, data tables, settings rows and modals of the admin screen. Buttons and inputs come from the global terminal theme.
+ *
+ * @author @adrianpmdev
+ */
+
+@use 'mixins' as *;
+
+/* ─── PAGE ─── */
+
+.page {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px;
+}
+
+.page-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    letter-spacing: 3px;
+    color: var(--neon-green);
+}
+
+.page-subtitle,
+.state,
+.dim {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.page-subtitle {
+    margin: 4px 0 0;
+}
+
+/* ─── TABS AND TOOLBAR ─── */
+
+.tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--border-color);
+    overflow-x: auto;
+}
+
+.tab {
+    padding: 10px 18px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    letter-spacing: 2px;
+    cursor: pointer;
+    white-space: nowrap;
+
+    &:hover {
+        color: var(--neon-green);
+    }
+
+    &.active {
+        color: var(--neon-green);
+        border-bottom-color: var(--neon-green);
+    }
+}
+
+.toolbar {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* ─── TABLE ─── */
+
+.table-wrapper {
+    padding: 0;
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    min-width: 640px;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+
+    th,
+    td {
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--border-color);
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    th {
+        color: var(--text-secondary);
+        font-size: 0.7rem;
+        letter-spacing: 2px;
+        white-space: nowrap;
+    }
+}
+
+.icon {
+    display: block;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border-color);
+    object-fit: cover;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-small {
+    padding: 4px 10px;
+    font-size: 0.7rem;
+}
+
+.badge {
+    padding: 2px 8px;
+    border: 1px solid #4f8fe6;
+    color: #4f8fe6;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+
+    &.horde {
+        border-color: var(--neon-red);
+        color: var(--neon-red);
+    }
+}
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.chip {
+    padding: 1px 6px;
+    border: 1px solid rgba(0, 255, 255, 0.35);
+    color: var(--neon-cyan);
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+}
+
+/* ─── SETTINGS ─── */
+
+.settings {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+}
+
+.setting-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 140px auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.setting-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.setting-key {
+    color: var(--neon-green);
+    letter-spacing: 1px;
+}
+
+/* ─── MODAL ─── */
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.75);
+}
+
+.modal {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    max-width: 520px;
+    max-height: calc(100dvh - 32px);
+    padding: 20px;
+    overflow-y: auto;
+    background: var(--bg-panel);
+}
+
+.modal-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    letter-spacing: 3px;
+    color: var(--neon-green);
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.field-label {
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+}
+
+.radio-group,
+.check-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+}
+
+.check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    cursor: pointer;
+
+    input {
+        accent-color: var(--neon-green);
+        cursor: pointer;
+    }
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.confirm-text {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+/* ─── RESPONSIVE ─── */
+
+@include tablet {
+    .page {
+        padding: 16px;
+    }
+}
+
+@include mobile {
+    .setting-row {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .overlay {
+        align-items: flex-end;
+        padding: 0;
+    }
+
+    .modal {
+        max-width: none;
+        max-height: calc(100dvh - 24px);
+    }
+
+    .modal-actions {
+        flex-direction: column-reverse;
+
+        > button {
+            width: 100%;
+        }
+    }
+}
+
+@include small {
+    .page {
+        padding: 12px 8px;
+    }
+
+    .tab {
+        padding: 8px 12px;
+        letter-spacing: 1px;
+    }
+}

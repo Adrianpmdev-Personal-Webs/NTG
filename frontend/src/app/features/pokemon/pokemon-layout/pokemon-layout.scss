@@ -168,7 +168,7 @@
     padding: 28px;
 }
 
-@include mobile {
+@include tablet {
     .pk-header {
         flex-wrap: wrap;
         padding: 12px 16px;

@@ -1,5 +1,6 @@
 # Stage 1: Build (Maven + JDK 25)
 FROM maven:3.9.12-eclipse-temurin-25 AS build
+RUN java -version
 WORKDIR /workspace
 
 # Copiar todos los pom.xml

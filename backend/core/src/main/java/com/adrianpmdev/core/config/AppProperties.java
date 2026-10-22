@@ -1,6 +1,5 @@
 package com.adrianpmdev.core.config;
 
-import com.adrianpmdev.core.Application;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 

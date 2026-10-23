@@ -1,0 +1,194 @@
+/**
+ * Launcher header styles.
+ *
+ * Riveted metal header with the logo, copied from the original WoW Forever web. The language selector and store button are replaced by a link back to NTG.
+ *
+ * @author @adrianpmdev
+ */
+
+@use 'mixins' as *;
+
+/* ─── HOST ─── */
+
+:host {
+  display: block;
+}
+
+/* ─── HEADER ─── */
+
+.launcher-header {
+  position: relative;
+  z-index: 5;
+  min-height: 108px;
+  overflow: visible;
+  background:
+    radial-gradient(circle at 7% 55%, rgba(255,255,255,.10) 0 1px, transparent 2px),
+    radial-gradient(circle at 21% 32%, rgba(0,0,0,.55) 0 2px, transparent 4px),
+    radial-gradient(circle at 43% 64%, rgba(255,255,255,.08) 0 1px, transparent 3px),
+    radial-gradient(circle at 63% 26%, rgba(0,0,0,.62) 0 2px, transparent 4px),
+    radial-gradient(circle at 86% 68%, rgba(0,0,0,.48) 0 2px, transparent 4px),
+    linear-gradient(#3a3b3c 0%, #1e2022 32%, #0b0d0e 100%);
+  box-shadow: inset 0 -8px 18px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.12);
+}
+
+.launcher-header::before,
+.launcher-header::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+
+.launcher-header::before {
+  top: 0;
+  height: 100%;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,.05), transparent 8%, transparent 92%, rgba(255,255,255,.05)),
+    radial-gradient(circle at 16% 50%, transparent 0 22%, rgba(0,0,0,.26) 44%, rgba(0,0,0,.58) 100%);
+  opacity: .78;
+}
+
+/* Metal divider with repeated rivets. */
+.launcher-header::after {
+  bottom: -9px;
+  height: 18px;
+  z-index: 20;
+  background:
+    radial-gradient(circle at 8px 50%, #b6b6b6 0 2px, #45484a 2.4px 4.2px, #090a0b 4.6px 5.4px, transparent 5.8px) 0 0 / 46px 18px repeat-x,
+    linear-gradient(180deg, #6a6d6e 0%, #222527 25%, #090a0b 50%, #343739 75%, #77797a 100%);
+  border-top: 1px solid #0a0b0c;
+  border-bottom: 1px solid #090a0a;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.24),
+    inset 0 -1px 0 rgba(255,255,255,.08),
+    0 3px 7px rgba(0,0,0,.65);
+}
+
+/* ─── TOP MENU AND LOGO ─── */
+
+.top-menu {
+  position: absolute;
+  left: 14px;
+  top: 8px;
+  display: flex;
+  gap: 14px;
+  z-index: 25;
+  color: #d8d0bc;
+  font: 10px/1 Arial, Helvetica, sans-serif;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.header-artwork {
+  position: absolute;
+  inset: 0;
+}
+
+.logo-placeholder {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(48vw, 620px);
+  height: calc(100% - 8px);
+  transform: translate(-50%, -50%);
+  background:
+    radial-gradient(ellipse at center, rgba(211,166,47,.18), transparent 57%),
+    url('/images/wow-forever/logo.webp') center / contain no-repeat;
+  filter: drop-shadow(0 3px 2px rgba(0,0,0,.95));
+}
+
+/* ─── BACK LINK ─── */
+
+.back-link {
+  position: relative;
+  right: auto;
+  top: auto;
+  min-width: 123px;
+  min-height: 34px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #080d12;
+  border-radius: 1px;
+  overflow: hidden;
+  color: #e7ca75;
+  font: 700 11px/1 Arial, Helvetica, sans-serif;
+  letter-spacing: .02em;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  text-shadow: 1px 1px 0 #000, 0 0 3px rgba(0,0,0,.9);
+  background:
+    radial-gradient(circle at 34% 18%, rgba(179,208,232,.20), transparent 24%),
+    linear-gradient(180deg, rgba(145,176,205,.16), transparent 45%),
+    linear-gradient(#40566c 0%, #253746 46%, #101a22 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(223,233,240,.34),
+    inset 0 -2px 0 rgba(0,0,0,.83),
+    inset 0 0 0 1px rgba(198,165,88,.22),
+    0 0 0 1px rgba(0,0,0,.75),
+    0 3px 7px rgba(0,0,0,.75);
+}
+
+.back-link::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border: 1px solid rgba(211,187,120,.23);
+  box-shadow: inset 0 0 10px rgba(0,0,0,.54);
+  pointer-events: none;
+}
+
+.back-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 13% 53%, rgba(255,255,255,.12) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 82% 34%, rgba(0,0,0,.25) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 52% 72%, rgba(255,255,255,.08) 0 1px, transparent 1.5px);
+  background-size: 11px 11px, 13px 13px, 17px 17px;
+  mix-blend-mode: overlay;
+  opacity: .72;
+  pointer-events: none;
+}
+
+.header-actions {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.back-link:hover {
+    filter: brightness(1.18);
+}
+
+.back-link:focus-visible {
+    outline: 1px solid #d8b866;
+    outline-offset: 2px;
+}
+
+/* ─── RESPONSIVE ─── */
+
+@include mobile {
+    .logo-placeholder {
+        width: min(44vw, 620px);
+    }
+
+    .back-link {
+        min-width: 84px;
+        padding: 0 8px;
+    }
+}
+
+@include small {
+    .top-menu {
+        display: none;
+    }
+}

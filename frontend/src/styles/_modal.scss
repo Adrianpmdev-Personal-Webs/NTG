@@ -1,0 +1,315 @@
+/**
+ * Modal partial.
+ * Shared look of every modal, form field and delete confirmation of the management screens
+ * (users, WoW Forever, games, lockes and tournaments). Do not restyle these classes inside a component.
+ *
+ * Structure:
+ *   .modal-overlay > .modal.terminal-card (+ .modal-sm | .modal-lg)
+ *     .modal-header > .modal-title (+ .danger-title) and .close-btn
+ *     .modal-body > .form-grid > .form-field (.field-label + .neon-input) ... and .modal-actions
+ *
+ * Buttons of .modal-actions: the main action is a plain .btn-neon (green), CANCELAR is .btn-neon.btn-neon-danger (red).
+ * In delete confirmations it is the other way round: CONFIRMAR ELIMINACIÓN is red and CANCELAR is green.
+ *
+ * @author @adrianpmdev
+ */
+
+@use 'mixins' as *;
+
+/* ─── OVERLAY AND WINDOW ─── */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(4px);
+}
+
+.modal {
+    display: flex;
+    flex-direction: column;
+    width: 520px;
+    max-width: 100%;
+    max-height: calc(100dvh - 40px);
+    overflow: hidden;
+    box-shadow: 0 0 40px rgba(0, 255, 65, 0.2);
+}
+
+.modal-sm {
+    width: 420px;
+}
+
+.modal-lg {
+    width: 720px;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(0, 255, 65, 0.03);
+    flex-shrink: 0;
+}
+
+.modal-title {
+    font-size: 0.78rem;
+    color: var(--neon-green);
+    letter-spacing: 2px;
+
+    &.danger-title {
+        color: var(--neon-red);
+    }
+}
+
+.close-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 2px 6px;
+    transition: color 0.2s;
+    flex-shrink: 0;
+
+    &:hover {
+        color: var(--neon-red);
+    }
+}
+
+.modal-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 20px;
+    min-height: 0;
+    padding: 24px 20px;
+    overflow-y: auto;
+}
+
+.modal-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+/* ─── FORMS ─── */
+
+.terminal-line {
+    padding: 8px 12px;
+    border-left: 2px solid var(--neon-green-dark);
+    background: rgba(0, 255, 65, 0.02);
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    overflow-wrap: anywhere;
+}
+
+.form-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.field-label {
+    color: var(--text-dim);
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+}
+
+.field-hint {
+    color: var(--text-dim);
+    font-size: 0.62rem;
+    letter-spacing: 1px;
+}
+
+select.neon-input option {
+    background: var(--bg-dark);
+    color: var(--neon-green);
+}
+
+textarea.neon-input {
+    min-height: 72px;
+    resize: vertical;
+}
+
+/* Checkbox and radio groups (tags, factions, classes...) */
+.check-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+}
+
+.check-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    cursor: pointer;
+
+    input {
+        accent-color: var(--neon-green);
+        cursor: pointer;
+    }
+}
+
+/* ─── DELETE CONFIRMATION ─── */
+
+.delete-warning {
+    display: flex;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid rgba(255, 0, 64, 0.25);
+    background: rgba(255, 0, 64, 0.04);
+}
+
+.warning-icon {
+    color: var(--neon-red);
+    font-size: 2rem;
+    text-shadow: 0 0 12px var(--neon-red);
+    flex-shrink: 0;
+}
+
+.warning-title {
+    margin-bottom: 8px;
+    color: var(--neon-red);
+    font-size: 0.78rem;
+    letter-spacing: 2px;
+}
+
+.warning-desc {
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.highlight {
+    color: var(--neon-yellow);
+    font-weight: bold;
+}
+
+.warning-id {
+    color: var(--text-dim);
+    font-size: 0.68rem;
+    word-break: break-all;
+}
+
+/* ─── RESPONSIVE ─── */
+
+@include mobile {
+    .modal-overlay {
+        align-items: flex-end;
+        padding: 12px;
+    }
+
+    .modal {
+        width: 100%;
+        max-height: calc(100dvh - 24px);
+    }
+
+    .modal-header {
+        padding: 14px 16px;
+    }
+
+    .modal-title {
+        font-size: 0.72rem;
+        letter-spacing: 1.5px;
+    }
+
+    .modal-body {
+        gap: 18px;
+        padding: 18px 16px;
+    }
+
+    .terminal-line {
+        font-size: 0.7rem;
+    }
+
+    .form-row {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .field-label {
+        font-size: 0.62rem;
+        letter-spacing: 2px;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+
+        button {
+            width: 100%;
+        }
+    }
+
+    .delete-warning {
+        gap: 12px;
+        padding: 14px;
+    }
+
+    .warning-icon {
+        font-size: 1.6rem;
+    }
+
+    .warning-title {
+        font-size: 0.72rem;
+        letter-spacing: 1.5px;
+    }
+
+    .warning-desc {
+        font-size: 0.76rem;
+    }
+
+    .warning-id {
+        font-size: 0.64rem;
+    }
+}
+
+@include small {
+    .modal-overlay {
+        padding: 8px;
+    }
+
+    .modal {
+        max-height: calc(100dvh - 16px);
+    }
+
+    .modal-header {
+        padding: 12px 14px;
+    }
+
+    .modal-body {
+        padding: 16px 14px;
+    }
+
+    .delete-warning {
+        flex-direction: column;
+    }
+}
+
+@media (max-height: 640px) and (max-width: 640px) {
+    .modal-overlay {
+        align-items: center;
+    }
+}

@@ -1,0 +1,19 @@
+<aside class="news-panel">
+    <div class="news-titlebar">
+        <span class="news-gem"></span>
+        <span>Noticias</span>
+    </div>
+    <div class="news-paper">
+        @for (item of news; track item.id) {
+            <div class="news-item">
+                <div class="news-thumb" [style.background-image]="item.image ? 'url(' + item.image + ')' : null" aria-hidden="true"></div>
+                <div class="news-copy">
+                    @if (item.date) {
+                        <span class="news-date">{{ item.date }}</span>
+                    }
+                    <span class="news-item-title">{{ item.title }}</span>
+                </div>
+            </div>
+        }
+    </div>
+</aside>

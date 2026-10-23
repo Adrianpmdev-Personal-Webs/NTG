@@ -1,7 +1,7 @@
 /**
  * WOW_FOREVER_ROUTES
  *
- * Routes of the WoW Forever area for players, rendered inside its own layout.
+ * Routes of the WoW Forever area for players. The launcher home is a full-screen page with its own look.
  *
  * @author @adrianpmdev
  */
@@ -11,13 +11,6 @@ import { Routes } from '@angular/router';
 export const WOW_FOREVER_ROUTES: Routes = [
     {
         path: '',
-        loadComponent: () => import('./wow-forever-layout/wow-forever-layout').then(m => m.WowForeverLayout),
-        children: [
-            {
-                path: '',
-                pathMatch: 'full',
-                loadComponent: () => import('./home/home').then(m => m.Home)
-            }
-        ]
+        loadComponent: () => import('./home/home').then(m => m.Home)
     }
 ];

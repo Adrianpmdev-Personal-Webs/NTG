@@ -80,8 +80,8 @@
                             <span class="locke-date">{{ formatDate(locke.createdAt) }}</span>
                             <div class="locke-actions" (click)="$event.stopPropagation()">
                                 @if (authService.isAdmin()) {
-                                    <button class="btn-neon btn-sm" (click)="openEdit(locke)">EDITAR</button>
-                                    <button class="btn-neon btn-neon-danger btn-sm" (click)="openDelete(locke)">BORRAR</button>
+                                    <button class="action-btn btn-neon" title="Editar" (click)="openEdit(locke)">✎ EDITAR</button>
+                                    <button class="action-btn btn-neon btn-neon-danger" title="Eliminar" (click)="openDelete(locke)">✕ ELIMINAR</button>
                                 }
                             </div>
                             <span class="enter-arrow">▶</span>
@@ -94,31 +94,32 @@
 
     <!-- CREATE MODAL -->
     @if (modalMode() === 'create') {
-        <div class="modal-backdrop" (click)="closeModal()">
-            <div class="modal terminal-card" (click)="$event.stopPropagation()">
+        <div class="modal-overlay" (click)="closeModal()">
+            <div class="modal terminal-card animate-fade-up" (click)="$event.stopPropagation()">
                 <div class="modal-header">
                     <span class="modal-title">// NUEVO LOCKE</span>
-                    <button class="modal-close" (click)="closeModal()">✕</button>
+                    <button type="button" class="close-btn" (click)="closeModal()">✕</button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label class="form-label">NOMBRE *</label>
-                        <input class="neon-input" type="text" [(ngModel)]="form.name" placeholder="ej. NuzLocke Clásico" />
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label class="field-label">// NOMBRE *</label>
+                            <input class="neon-input" type="text" [(ngModel)]="form.name" placeholder="ej. NuzLocke Clásico" />
+                        </div>
+                        <div class="form-field">
+                            <label class="field-label">// DESCRIPCIÓN</label>
+                            <textarea class="neon-input" rows="3" [(ngModel)]="form.description" placeholder="Descripción del locke..."></textarea>
+                        </div>
+                        <div class="form-field">
+                            <label class="field-label">// REGLAS (JSON opcional)</label>
+                            <textarea class="neon-input font-mono" rows="5" [(ngModel)]="rulesText" placeholder='{ "name": "Generationlocke", "rules": [] }'></textarea>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">DESCRIPCIÓN</label>
-                        <textarea class="neon-input" rows="3" [(ngModel)]="form.description" placeholder="Descripción del locke..."></textarea>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-neon" [disabled]="submitting() || !form.name" (click)="submitCreate()">{{ submitting() ? 'GUARDANDO...' : '⟶ CREAR LOCKE' }}</button>
+                        <button type="button" class="btn-neon btn-neon-danger" (click)="closeModal()">CANCELAR</button>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">REGLAS (JSON opcional)</label>
-                        <textarea class="neon-input font-mono" rows="5" [(ngModel)]="rulesText" placeholder='{ "name": "Generationlocke", "rules": [] }'></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn-neon" (click)="closeModal()">CANCELAR</button>
-                    <button class="btn-neon btn-neon-success" [disabled]="submitting() || !form.name" (click)="submitCreate()">
-                        {{ submitting() ? 'GUARDANDO...' : 'CREAR LOCKE' }}
-                    </button>
                 </div>
             </div>
         </div>
@@ -126,31 +127,32 @@
 
     <!-- EDIT MODAL -->
     @if (modalMode() === 'edit') {
-        <div class="modal-backdrop" (click)="closeModal()">
-            <div class="modal terminal-card" (click)="$event.stopPropagation()">
+        <div class="modal-overlay" (click)="closeModal()">
+            <div class="modal terminal-card animate-fade-up" (click)="$event.stopPropagation()">
                 <div class="modal-header">
                     <span class="modal-title">// EDITAR LOCKE</span>
-                    <button class="modal-close" (click)="closeModal()">✕</button>
+                    <button type="button" class="close-btn" (click)="closeModal()">✕</button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label class="form-label">NOMBRE</label>
-                        <input class="neon-input" type="text" [(ngModel)]="editForm.name" />
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label class="field-label">// NOMBRE</label>
+                            <input class="neon-input" type="text" [(ngModel)]="editForm.name" />
+                        </div>
+                        <div class="form-field">
+                            <label class="field-label">// DESCRIPCIÓN</label>
+                            <textarea class="neon-input" rows="3" [(ngModel)]="editForm.description"></textarea>
+                        </div>
+                        <div class="form-field">
+                            <label class="field-label">// REGLAS (JSON opcional)</label>
+                            <textarea class="neon-input font-mono" rows="5" [(ngModel)]="editRulesText"></textarea>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">DESCRIPCIÓN</label>
-                        <textarea class="neon-input" rows="3" [(ngModel)]="editForm.description"></textarea>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-neon" [disabled]="submitting()" (click)="submitEdit()">{{ submitting() ? 'GUARDANDO...' : '⟶ GUARDAR' }}</button>
+                        <button type="button" class="btn-neon btn-neon-danger" (click)="closeModal()">CANCELAR</button>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">REGLAS (JSON opcional)</label>
-                        <textarea class="neon-input font-mono" rows="5" [(ngModel)]="editRulesText"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn-neon" (click)="closeModal()">CANCELAR</button>
-                    <button class="btn-neon btn-neon-success" [disabled]="submitting()" (click)="submitEdit()">
-                        {{ submitting() ? 'GUARDANDO...' : 'GUARDAR' }}
-                    </button>
                 </div>
             </div>
         </div>
@@ -158,21 +160,25 @@
 
     <!-- DELETE MODAL -->
     @if (modalMode() === 'delete') {
-        <div class="modal-backdrop" (click)="closeModal()">
-            <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+        <div class="modal-overlay" (click)="closeModal()">
+            <div class="modal terminal-card animate-fade-up" (click)="$event.stopPropagation()">
                 <div class="modal-header">
-                    <span class="modal-title danger-title">// CONFIRMAR BORRADO</span>
-                    <button class="modal-close" (click)="closeModal()">✕</button>
+                    <span class="modal-title danger-title">// ELIMINAR LOCKE</span>
+                    <button type="button" class="close-btn" (click)="closeModal()">✕</button>
                 </div>
                 <div class="modal-body">
-                    <p class="delete-warning">¿Eliminar el locke <strong class="warn-name">{{ selectedLocke()?.name }}</strong> y todos sus torneos?</p>
-                    <p class="delete-note">⚠ Esta acción es irreversible.</p>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn-neon" (click)="closeModal()">CANCELAR</button>
-                    <button class="btn-neon btn-neon-danger" [disabled]="submitting()" (click)="confirmDelete()">
-                        {{ submitting() ? 'ELIMINANDO...' : 'ELIMINAR' }}
-                    </button>
+                    <div class="delete-warning">
+                        <div class="warning-icon">⚠</div>
+                        <div class="warning-text">
+                            <div class="warning-title">[ALERTA] OPERACIÓN DESTRUCTIVA</div>
+                            <div class="warning-desc">¿Eliminar el locke <span class="highlight">{{ selectedLocke()?.name }}</span> y todos sus torneos?</div>
+                            <div class="warning-id">Esta acción es irreversible.</div>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-neon btn-neon-danger" [disabled]="submitting()" (click)="confirmDelete()">{{ submitting() ? 'ELIMINANDO...' : '⟶ CONFIRMAR ELIMINACIÓN' }}</button>
+                        <button type="button" class="btn-neon" (click)="closeModal()">CANCELAR</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -180,11 +186,11 @@
 
     <!-- RULES MODAL -->
     @if (modalMode() === 'rules') {
-        <div class="modal-backdrop" (click)="closeModal()">
-            <div class="modal rules-modal terminal-card" (click)="$event.stopPropagation()">
+        <div class="modal-overlay" (click)="closeModal()">
+            <div class="modal modal-lg terminal-card animate-fade-up" (click)="$event.stopPropagation()">
                 <div class="modal-header">
                     <span class="modal-title">// REGLAS DEL LOCKE</span>
-                    <button class="modal-close" (click)="closeModal()">✕</button>
+                    <button type="button" class="close-btn" (click)="closeModal()">✕</button>
                 </div>
 
                 <div class="modal-body rules-modal-body">
@@ -271,10 +277,10 @@
                             <div class="empty-title">SIN REGLAS CONFIGURADAS</div>
                         </div>
                     }
-                </div>
 
-                <div class="modal-footer">
-                    <button class="btn-neon" (click)="closeModal()">CERRAR</button>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-neon" (click)="closeModal()">CERRAR</button>
+                    </div>
                 </div>
             </div>
         </div>

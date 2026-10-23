@@ -1,7 +1,7 @@
 /**
- * WoW Forever base data styles.
+ * WoW Forever management styles.
  *
- * Tabs, data tables, settings rows and modals of the admin screen. Buttons and inputs come from the global terminal theme.
+ * Tabs, data tables, and settings rows of the admin screen. Buttons, inputs and modals come from the global styles.
  *
  * @author @adrianpmdev
  */
@@ -108,17 +108,6 @@
     object-fit: cover;
 }
 
-.actions {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.btn-small {
-    padding: 4px 10px;
-    font-size: 0.7rem;
-}
-
 .badge {
     padding: 2px 8px;
     border: 1px solid #4f8fe6;
@@ -175,85 +164,6 @@
     letter-spacing: 1px;
 }
 
-/* ─── MODAL ─── */
-
-.overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-    background: rgba(0, 0, 0, 0.75);
-}
-
-.modal {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    width: 100%;
-    max-width: 520px;
-    max-height: calc(100dvh - 32px);
-    padding: 20px;
-    overflow-y: auto;
-    background: var(--bg-panel);
-}
-
-.modal-title {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: 1rem;
-    letter-spacing: 3px;
-    color: var(--neon-green);
-}
-
-.form-field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.field-label {
-    color: var(--text-secondary);
-    font-size: 0.7rem;
-    letter-spacing: 2px;
-}
-
-.radio-group,
-.check-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 18px;
-}
-
-.check {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: var(--text-secondary);
-    font-size: 0.8rem;
-    cursor: pointer;
-
-    input {
-        accent-color: var(--neon-green);
-        cursor: pointer;
-    }
-}
-
-.modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-}
-
-.confirm-text {
-    margin: 0;
-    color: var(--text-secondary);
-    font-size: 0.85rem;
-    line-height: 1.5;
-}
-
 /* ─── RESPONSIVE ─── */
 
 @include tablet {
@@ -265,24 +175,6 @@
 @include mobile {
     .setting-row {
         grid-template-columns: minmax(0, 1fr);
-    }
-
-    .overlay {
-        align-items: flex-end;
-        padding: 0;
-    }
-
-    .modal {
-        max-width: none;
-        max-height: calc(100dvh - 24px);
-    }
-
-    .modal-actions {
-        flex-direction: column-reverse;
-
-        > button {
-            width: 100%;
-        }
     }
 }
 

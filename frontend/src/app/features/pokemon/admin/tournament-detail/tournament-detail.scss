@@ -1,6 +1,6 @@
 /**
  * Pokémon tournament page styles.
- * Responsive tournament management layout with lists, tabs, tables, cards and modals.
+ * Responsive tournament management layout with lists, tabs, tables, and cards (modals live in the global modal styles).
  *
  * Author: Adrián Pérez Morales
  */
@@ -174,8 +174,6 @@
 
 .panel-header,
 .tc-header,
-.modal-header,
-.modal-footer,
 .tour-info-bar,
 .tour-item-top,
 .tib-left,
@@ -186,8 +184,6 @@
 
 .panel-header,
 .tc-header,
-.modal-header,
-.modal-footer,
 .tour-info-bar {
     justify-content: space-between;
     gap: 12px;
@@ -201,8 +197,7 @@
 }
 
 .panel-title,
-.tc-title,
-.modal-title {
+.tc-title {
     color: var(--neon-green);
     font-family: var(--font-display);
     font-size: 0.72rem;
@@ -649,18 +644,6 @@
 
 /* ─── BUTTONS ─── */
 
-.btn-xs {
-    width: 30px;
-    height: 30px;
-    padding: 0 !important;
-}
-
-.btn-sm {
-    font-size: 0.68rem !important;
-    padding: 5px 12px !important;
-    letter-spacing: 1.5px !important;
-}
-
 .btn-icon {
     display: inline-grid;
     place-items: center;
@@ -701,112 +684,6 @@
 
 .text-dim {
     color: var(--text-dim);
-}
-
-/* ─── MODAL ─── */
-
-.modal-backdrop {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    padding: 20px;
-    background: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(4px);
-    overflow: hidden;
-}
-
-.modal {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    max-width: 720px;
-    max-height: min(90dvh, 820px);
-    min-height: 0;
-    overflow: hidden;
-    animation: fade-up 0.2s ease forwards;
-}
-
-.modal-sm {
-    max-width: 420px;
-}
-
-.modal-header {
-    padding: 18px 22px;
-    border-bottom: 1px solid var(--border-color);
-    flex-shrink: 0;
-}
-
-.modal-body {
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    gap: 16px;
-    min-height: 0;
-    padding: 22px;
-    overflow-y: auto;
-}
-
-.modal-footer {
-    padding: 16px 22px;
-    border-top: 1px solid var(--border-color);
-    flex-shrink: 0;
-}
-
-.modal-close {
-    background: transparent;
-    border: none;
-    color: var(--text-dim);
-    cursor: pointer;
-    font-size: 1rem;
-    padding: 4px 8px;
-    transition: color 0.2s;
-    flex-shrink: 0;
-
-    &:hover {
-        color: var(--neon-red);
-    }
-}
-
-.form-row {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    min-width: 0;
-}
-
-.form-label {
-    color: var(--text-dim);
-    font-size: 0.68rem;
-    letter-spacing: 2px;
-}
-
-textarea.neon-input {
-    min-height: 72px;
-    resize: vertical;
-}
-
-.delete-warning {
-    color: var(--text-secondary);
-    font-size: 0.82rem;
-    line-height: 1.6;
-}
-
-.warn-name {
-    color: var(--neon-yellow);
-}
-
-.delete-note,
-.danger-title {
-    color: var(--neon-red);
 }
 
 /* ─── RESPONSIVE ─── */
@@ -886,12 +763,11 @@ textarea.neon-input {
     }
 
     .shell-header,
-    .shell-title-block,
-    .shell-meta,
-    .tour-info-bar,
-    .panel-header,
-    .tc-header,
-    .modal-footer {
+.shell-title-block,
+.shell-meta,
+.tour-info-bar,
+.panel-header,
+.tc-header {
         align-items: stretch;
         flex-direction: column;
     }
@@ -903,9 +779,8 @@ textarea.neon-input {
     }
 
     .shell-title,
-    .panel-title,
-    .tc-title,
-    .modal-title {
+.panel-title,
+.tc-title {
         font-size: 0.66rem;
         letter-spacing: 1.6px;
         line-height: 1.4;
@@ -1149,46 +1024,6 @@ textarea.neon-input {
         height: 30px;
     }
 
-    .modal-backdrop {
-        align-items: flex-end;
-        padding: 12px;
-    }
-
-    .modal,
-    .modal-sm {
-        max-width: none;
-        max-height: calc(100dvh - 24px);
-    }
-
-    .modal-header {
-        align-items: center;
-        flex-direction: row;
-        padding: 14px 16px;
-    }
-
-    .modal-body {
-        padding: 18px 16px;
-    }
-
-    .modal-footer {
-        padding: 14px 16px;
-        flex-direction: column-reverse;
-
-        button {
-            width: 100%;
-        }
-    }
-
-    .form-row {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-
-    .form-label {
-        font-size: 0.62rem;
-        letter-spacing: 1.5px;
-    }
-
     .status-pill {
         font-size: 0.54rem;
         letter-spacing: 1px;
@@ -1256,26 +1091,6 @@ textarea.neon-input {
         margin-top: 0;
     }
 
-    .modal-backdrop {
-        padding: 8px;
-    }
-
-    .modal,
-    .modal-sm {
-        max-height: calc(100dvh - 16px);
-    }
-
-    .modal-header {
-        padding: 12px 14px;
-    }
-
-    .modal-body {
-        padding: 16px 14px;
-    }
-
-    .modal-footer {
-        padding: 12px 14px;
-    }
 }
 
 @media (max-width: 380px) {
@@ -1312,17 +1127,6 @@ textarea.neon-input {
     }
 }
 
-@media (max-height: 680px) and (max-width: 760px) {
-    .modal-backdrop {
-        align-items: center;
-    }
-
-    .modal,
-    .modal-sm {
-        max-height: calc(100dvh - 16px);
-    }
-}
-
 @media (hover: none) {
     .tour-item:hover,
     .group-chip:hover,
@@ -1336,12 +1140,11 @@ textarea.neon-input {
 
 @media (prefers-reduced-motion: reduce) {
     .tour-item,
-    .group-chip,
-    .stage-row,
-    .tab-btn,
-    .btn-icon,
-    .modal,
-    .loading-spinner {
+.group-chip,
+.stage-row,
+.tab-btn,
+.btn-icon,
+.loading-spinner {
         animation: none;
         transition: none;
     }

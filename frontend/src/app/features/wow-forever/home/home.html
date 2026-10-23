@@ -1,82 +1,46 @@
-<section class="hero">
-    <h1 class="hero-title">WoW Forever</h1>
-    <p class="hero-subtitle">Información y herramientas de World of Warcraft Forever</p>
+<main class="launcher-page">
+    <app-wow-frame>
+        <div class="launcher-shell">
+            <app-launcher-header />
 
-    <div class="faction-switch" role="group" aria-label="Facción">
-        @for (item of factions; track item) {
-            <button
-                type="button"
-                class="faction-btn"
-                [class.active]="faction() === item"
-                [class.horde]="item === 'HORDE'"
-                [attr.aria-pressed]="faction() === item"
-                (click)="setFaction(item)">
-                {{ factionLabels[item] }}
-            </button>
-        }
-    </div>
-</section>
+            <section class="launcher-main">
+                <div class="artwork-layer" [style.background-image]="'url(' + backgroundUrl() + ')'" aria-hidden="true"></div>
+                <div class="artwork-vignette" aria-hidden="true"></div>
+                <div class="content-spacer"></div>
+                <app-news-panel />
+            </section>
 
-<section class="panel">
-    <h2 class="panel-title">Herramientas</h2>
-
-    <div class="feature-grid">
-        @for (feature of features; track feature.id) {
-            @if (feature.available) {
-                <a class="feature-card" [routerLink]="feature.route">
-                    <span class="feature-name">{{ feature.label }}</span>
-                    <span class="feature-text">{{ feature.description }}</span>
-                </a>
-            } @else {
-                <div class="feature-card locked" aria-disabled="true">
-                    <span class="feature-name">{{ feature.label }}</span>
-                    <span class="feature-text">{{ feature.description }}</span>
-                    <span class="feature-soon">Próximamente</span>
+            <section class="launcher-navigation">
+                <div class="launcher-version">
+                    <label for="game-version">Versión del juego</label>
+                    <select
+                        id="game-version"
+                        aria-label="Facción"
+                        [value]="faction()"
+                        (change)="onFactionChange($any($event.target).value)">
+                        <option value="ALLIANCE">Alianza</option>
+                        <option value="HORDE">Horda</option>
+                    </select>
                 </div>
-            }
-        }
-    </div>
-</section>
 
-<section class="panel">
-    <h2 class="panel-title">Clases</h2>
-
-    @if (loading()) {
-        <p class="state">Cargando…</p>
-    } @else if (failed()) {
-        <p class="state">No se han podido cargar los datos. Inténtalo de nuevo más tarde.</p>
-    } @else {
-        <ul class="tile-grid">
-            @for (wowClass of classes(); track wowClass.id) {
-                <li class="tile">
-                    <img class="tile-icon" [src]="iconUrl(wowClass.icon)" alt="" loading="lazy" (error)="onIconError($event)" />
-                    <span class="tile-name">{{ wowClass.name }}</span>
-                </li>
-            }
-        </ul>
-    }
-</section>
-
-@if (!loading() && !failed()) {
-    <section class="panel">
-        <h2 class="panel-title">Razas</h2>
-
-        <div class="race-columns">
-            @for (item of factions; track item) {
-                <div class="race-column" [class.horde]="item === 'HORDE'">
-                    <h3 class="race-faction">{{ factionLabels[item] }}</h3>
-
-                    <ul class="race-list">
-                        @for (race of racesOf(item); track race.id) {
-                            <li class="race-row">
-                                <img class="tile-icon" [src]="iconUrl(race.icon)" alt="" loading="lazy" (error)="onIconError($event)" />
-                                <span class="tile-name">{{ race.name }}</span>
-                                <span class="race-count">{{ race.classIds.length }} clases</span>
-                            </li>
+                <nav class="utility-links" aria-label="Herramientas de WoW Forever">
+                    <div class="resource-link-row">
+                        @for (feature of features; track feature.id) {
+                            @if (feature.available) {
+                                <a class="tiny-link" [routerLink]="feature.route">{{ feature.label }}</a>
+                            } @else {
+                                <span class="tiny-link disabled" title="Próximamente" aria-disabled="true">{{ feature.label }}</span>
+                            }
                         }
-                    </ul>
+                    </div>
+                </nav>
+
+                <div class="play-area">
+                    <app-wow-button [large]="true">JUGAR</app-wow-button>
                 </div>
-            }
+            </section>
+
+            <app-legal-notice />
         </div>
-    </section>
-}
+    </app-wow-frame>
+</main>

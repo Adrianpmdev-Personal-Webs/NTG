@@ -516,65 +516,67 @@
 
 <!-- Tour create -->
 @if (tourModal() === 'create') {
-    <div class="modal-backdrop" (click)="closeTourModal()">
-        <div class="modal terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closeTourModal()">
+        <div class="modal modal-lg terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title">// NUEVO TORNEO</span>
-                <button class="modal-close" (click)="closeTourModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closeTourModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">NOMBRE *</label>
-                    <input class="neon-input" type="text" [(ngModel)]="tourForm.name" placeholder="Nombre del torneo" />
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">DESCRIPCIÓN</label>
-                    <textarea class="neon-input" rows="3" [(ngModel)]="tourForm.description"></textarea>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">TIPO</label>
-                        <select class="neon-input" [(ngModel)]="tourForm.tournamentType">
-                            @for (option of tournamentTypeOptions; track option.value) {
-                                <option [value]="option.value">{{ option.label }}</option>
-                            }
-                        </select>
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label class="field-label">// NOMBRE *</label>
+                        <input class="neon-input" type="text" [(ngModel)]="tourForm.name" placeholder="Nombre del torneo" />
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">ESTADO</label>
-                        <select class="neon-input" [(ngModel)]="tourForm.status">
-                            @for (option of tournamentStatusOptions; track option.value) {
-                                <option [value]="option.value">{{ option.label }}</option>
-                            }
-                        </select>
+                    <div class="form-field">
+                        <label class="field-label">// DESCRIPCIÓN</label>
+                        <textarea class="neon-input" rows="3" [(ngModel)]="tourForm.description"></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label class="field-label">// TIPO</label>
+                            <select class="neon-input" [(ngModel)]="tourForm.tournamentType">
+                                @for (option of tournamentTypeOptions; track option.value) {
+                                    <option [value]="option.value">{{ option.label }}</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label class="field-label">// ESTADO</label>
+                            <select class="neon-input" [(ngModel)]="tourForm.status">
+                                @for (option of tournamentStatusOptions; track option.value) {
+                                    <option [value]="option.value">{{ option.label }}</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="field-label">// MÁX. PARTICIPANTES</label>
+                        <input class="neon-input" type="number" [(ngModel)]="tourForm.maxParticipants" />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label class="field-label">// FECHA INICIO</label>
+                            <input class="neon-input" type="datetime-local" [(ngModel)]="tourForm.startDate" />
+                        </div>
+
+                        <div class="form-field">
+                            <label class="field-label">// FECHA FIN</label>
+                            <input class="neon-input" type="datetime-local" [(ngModel)]="tourForm.endDate" />
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">MÁX. PARTICIPANTES</label>
-                    <input class="neon-input" type="number" [(ngModel)]="tourForm.maxParticipants" />
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon" [disabled]="!tourForm.name" (click)="submitTourCreate()">⟶ CREAR</button>
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="closeTourModal()">CANCELAR</button>
                 </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">FECHA INICIO</label>
-                        <input class="neon-input" type="datetime-local" [(ngModel)]="tourForm.startDate" />
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">FECHA FIN</label>
-                        <input class="neon-input" type="datetime-local" [(ngModel)]="tourForm.endDate" />
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closeTourModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-success" [disabled]="!tourForm.name" (click)="submitTourCreate()">CREAR</button>
             </div>
         </div>
     </div>
@@ -582,65 +584,67 @@
 
 <!-- Tour edit -->
 @if (tourModal() === 'edit') {
-    <div class="modal-backdrop" (click)="closeTourModal()">
-        <div class="modal terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closeTourModal()">
+        <div class="modal modal-lg terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title">// EDITAR TORNEO</span>
-                <button class="modal-close" (click)="closeTourModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closeTourModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">NOMBRE</label>
-                    <input class="neon-input" type="text" [(ngModel)]="tourEditForm.name" />
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">DESCRIPCIÓN</label>
-                    <textarea class="neon-input" rows="3" [(ngModel)]="tourEditForm.description"></textarea>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">TIPO</label>
-                        <select class="neon-input" [(ngModel)]="tourEditForm.tournamentType">
-                            @for (option of tournamentTypeOptions; track option.value) {
-                                <option [value]="option.value">{{ option.label }}</option>
-                            }
-                        </select>
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label class="field-label">// NOMBRE</label>
+                        <input class="neon-input" type="text" [(ngModel)]="tourEditForm.name" />
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">ESTADO</label>
-                        <select class="neon-input" [(ngModel)]="tourEditForm.status">
-                            @for (option of tournamentStatusOptions; track option.value) {
-                                <option [value]="option.value">{{ option.label }}</option>
-                            }
-                        </select>
+                    <div class="form-field">
+                        <label class="field-label">// DESCRIPCIÓN</label>
+                        <textarea class="neon-input" rows="3" [(ngModel)]="tourEditForm.description"></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label class="field-label">// TIPO</label>
+                            <select class="neon-input" [(ngModel)]="tourEditForm.tournamentType">
+                                @for (option of tournamentTypeOptions; track option.value) {
+                                    <option [value]="option.value">{{ option.label }}</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label class="field-label">// ESTADO</label>
+                            <select class="neon-input" [(ngModel)]="tourEditForm.status">
+                                @for (option of tournamentStatusOptions; track option.value) {
+                                    <option [value]="option.value">{{ option.label }}</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="field-label">// MÁX. PARTICIPANTES</label>
+                        <input class="neon-input" type="number" [(ngModel)]="tourEditForm.maxParticipants" />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label class="field-label">// FECHA INICIO</label>
+                            <input class="neon-input" type="datetime-local" [(ngModel)]="tourEditForm.startDate" />
+                        </div>
+
+                        <div class="form-field">
+                            <label class="field-label">// FECHA FIN</label>
+                            <input class="neon-input" type="datetime-local" [(ngModel)]="tourEditForm.endDate" />
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">MÁX. PARTICIPANTES</label>
-                    <input class="neon-input" type="number" [(ngModel)]="tourEditForm.maxParticipants" />
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon" (click)="submitTourEdit()">⟶ GUARDAR</button>
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="closeTourModal()">CANCELAR</button>
                 </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">FECHA INICIO</label>
-                        <input class="neon-input" type="datetime-local" [(ngModel)]="tourEditForm.startDate" />
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">FECHA FIN</label>
-                        <input class="neon-input" type="datetime-local" [(ngModel)]="tourEditForm.endDate" />
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closeTourModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-success" (click)="submitTourEdit()">GUARDAR</button>
             </div>
         </div>
     </div>
@@ -648,21 +652,26 @@
 
 <!-- Tour delete -->
 @if (tourModal() === 'delete') {
-    <div class="modal-backdrop" (click)="closeTourModal()">
-        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closeTourModal()">
+        <div class="modal terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title danger-title">// ELIMINAR TORNEO</span>
-                <button class="modal-close" (click)="closeTourModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closeTourModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <p class="delete-warning">¿Eliminar el torneo <strong class="warn-name">{{ tourEditTarget()?.name }}</strong> y todo su contenido?</p>
-                <p class="delete-note">⚠ Esta acción es irreversible.</p>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closeTourModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-danger" (click)="confirmTourDelete()">ELIMINAR</button>
+                <div class="delete-warning">
+                    <div class="warning-icon">⚠</div>
+                    <div class="warning-text">
+                        <div class="warning-title">[ALERTA] OPERACIÓN DESTRUCTIVA</div>
+                        <div class="warning-desc">¿Eliminar el torneo <span class="highlight">{{ tourEditTarget()?.name }}</span> y todo su contenido?</div>
+                        <div class="warning-id">Esta acción es irreversible.</div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="confirmTourDelete()">⟶ CONFIRMAR ELIMINACIÓN</button>
+                    <button type="button" class="btn-neon" (click)="closeTourModal()">CANCELAR</button>
+                </div>
             </div>
         </div>
     </div>
@@ -670,37 +679,39 @@
 
 <!-- Participant create -->
 @if (partModal() === 'create') {
-    <div class="modal-backdrop" (click)="closePartModal()">
-        <div class="modal terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closePartModal()">
+        <div class="modal terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title">// AÑADIR PARTICIPANTE</span>
-                <button class="modal-close" (click)="closePartModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closePartModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">USUARIO *</label>
-                    <select class="neon-input" [(ngModel)]="partForm.userId">
-                        <option value="">Seleccionar usuario...</option>
-                        @for (user of allUsers(); track user.id) {
-                            <option [value]="user.id">{{ user.username }} ({{ user.email }})</option>
-                        }
-                    </select>
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label class="field-label">// USUARIO *</label>
+                        <select class="neon-input" [(ngModel)]="partForm.userId">
+                            <option value="">Seleccionar usuario...</option>
+                            @for (user of allUsers(); track user.id) {
+                                <option [value]="user.id">{{ user.username }} ({{ user.email }})</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="field-label">// ESTADO</label>
+                        <select class="neon-input" [(ngModel)]="partForm.status">
+                            @for (option of tournamentParticipantStatusOptions; track option.value) {
+                                <option [value]="option.value">{{ option.label }}</option>
+                            }
+                        </select>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">ESTADO</label>
-                    <select class="neon-input" [(ngModel)]="partForm.status">
-                        @for (option of tournamentParticipantStatusOptions; track option.value) {
-                            <option [value]="option.value">{{ option.label }}</option>
-                        }
-                    </select>
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon" [disabled]="!partForm.userId" (click)="submitPartCreate()">⟶ AÑADIR</button>
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="closePartModal()">CANCELAR</button>
                 </div>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closePartModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-success" [disabled]="!partForm.userId" (click)="submitPartCreate()">AÑADIR</button>
             </div>
         </div>
     </div>
@@ -708,27 +719,29 @@
 
 <!-- Participant edit -->
 @if (partModal() === 'edit') {
-    <div class="modal-backdrop" (click)="closePartModal()">
-        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closePartModal()">
+        <div class="modal modal-sm terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title">// EDITAR PARTICIPANTE</span>
-                <button class="modal-close" (click)="closePartModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closePartModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">ESTADO</label>
-                    <select class="neon-input" [(ngModel)]="partEditForm.status">
-                        @for (option of tournamentParticipantStatusOptions; track option.value) {
-                            <option [value]="option.value">{{ option.label }}</option>
-                        }
-                    </select>
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label class="field-label">// ESTADO</label>
+                        <select class="neon-input" [(ngModel)]="partEditForm.status">
+                            @for (option of tournamentParticipantStatusOptions; track option.value) {
+                                <option [value]="option.value">{{ option.label }}</option>
+                            }
+                        </select>
+                    </div>
                 </div>
-            </div>
 
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closePartModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-success" (click)="submitPartEdit()">GUARDAR</button>
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon" (click)="submitPartEdit()">⟶ GUARDAR</button>
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="closePartModal()">CANCELAR</button>
+                </div>
             </div>
         </div>
     </div>
@@ -736,21 +749,26 @@
 
 <!-- Participant delete -->
 @if (partModal() === 'delete') {
-    <div class="modal-backdrop" (click)="closePartModal()">
-        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closePartModal()">
+        <div class="modal terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title danger-title">// ELIMINAR PARTICIPANTE</span>
-                <button class="modal-close" (click)="closePartModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closePartModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <p class="delete-warning">¿Eliminar a <strong class="warn-name">{{ getUserName(partEditTarget()?.userId || '') }}</strong> del torneo?</p>
-                <p class="delete-note">⚠ Se eliminarán sus stats en grupos y bracket.</p>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closePartModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-danger" (click)="confirmPartDelete()">ELIMINAR</button>
+                <div class="delete-warning">
+                    <div class="warning-icon">⚠</div>
+                    <div class="warning-text">
+                        <div class="warning-title">[ALERTA] OPERACIÓN DESTRUCTIVA</div>
+                        <div class="warning-desc">¿Eliminar a <span class="highlight">{{ getUserName(partEditTarget()?.userId || '') }}</span> del torneo?</div>
+                        <div class="warning-id">Se eliminarán sus stats en grupos y bracket.</div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="confirmPartDelete()">⟶ CONFIRMAR ELIMINACIÓN</button>
+                    <button type="button" class="btn-neon" (click)="closePartModal()">CANCELAR</button>
+                </div>
             </div>
         </div>
     </div>
@@ -758,32 +776,34 @@
 
 <!-- Group create -->
 @if (groupModal() === 'create') {
-    <div class="modal-backdrop" (click)="closeGroupModal()">
-        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closeGroupModal()">
+        <div class="modal modal-sm terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title">// NUEVO GRUPO</span>
-                <button class="modal-close" (click)="closeGroupModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closeGroupModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">LETRA DEL GRUPO</label>
-                    <input class="neon-input" type="text" maxlength="1" [(ngModel)]="groupForm.groupLetter" placeholder="A" />
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label class="field-label">// LETRA DEL GRUPO</label>
+                        <input class="neon-input" type="text" maxlength="1" [(ngModel)]="groupForm.groupLetter" placeholder="A" />
+                    </div>
+
+                    <div class="form-field">
+                        <label class="field-label">// ESTADO</label>
+                        <select class="neon-input" [(ngModel)]="groupForm.status">
+                            @for (option of tournamentGroupStatusOptions; track option.value) {
+                                <option [value]="option.value">{{ option.label }}</option>
+                            }
+                        </select>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">ESTADO</label>
-                    <select class="neon-input" [(ngModel)]="groupForm.status">
-                        @for (option of tournamentGroupStatusOptions; track option.value) {
-                            <option [value]="option.value">{{ option.label }}</option>
-                        }
-                    </select>
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon" (click)="submitGroupCreate()">⟶ CREAR</button>
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="closeGroupModal()">CANCELAR</button>
                 </div>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closeGroupModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-success" (click)="submitGroupCreate()">CREAR</button>
             </div>
         </div>
     </div>
@@ -791,32 +811,34 @@
 
 <!-- Group edit -->
 @if (groupModal() === 'edit') {
-    <div class="modal-backdrop" (click)="closeGroupModal()">
-        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closeGroupModal()">
+        <div class="modal modal-sm terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title">// EDITAR GRUPO</span>
-                <button class="modal-close" (click)="closeGroupModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closeGroupModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">LETRA</label>
-                    <input class="neon-input" type="text" maxlength="1" [(ngModel)]="groupForm.groupLetter" />
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label class="field-label">// LETRA</label>
+                        <input class="neon-input" type="text" maxlength="1" [(ngModel)]="groupForm.groupLetter" />
+                    </div>
+
+                    <div class="form-field">
+                        <label class="field-label">// ESTADO</label>
+                        <select class="neon-input" [(ngModel)]="groupForm.status">
+                            @for (option of tournamentGroupStatusOptions; track option.value) {
+                                <option [value]="option.value">{{ option.label }}</option>
+                            }
+                        </select>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">ESTADO</label>
-                    <select class="neon-input" [(ngModel)]="groupForm.status">
-                        @for (option of tournamentGroupStatusOptions; track option.value) {
-                            <option [value]="option.value">{{ option.label }}</option>
-                        }
-                    </select>
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon" (click)="submitGroupEdit()">⟶ GUARDAR</button>
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="closeGroupModal()">CANCELAR</button>
                 </div>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closeGroupModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-success" (click)="submitGroupEdit()">GUARDAR</button>
             </div>
         </div>
     </div>
@@ -824,21 +846,26 @@
 
 <!-- Group delete -->
 @if (groupModal() === 'delete') {
-    <div class="modal-backdrop" (click)="closeGroupModal()">
-        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closeGroupModal()">
+        <div class="modal terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title danger-title">// ELIMINAR GRUPO</span>
-                <button class="modal-close" (click)="closeGroupModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closeGroupModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <p class="delete-warning">¿Eliminar el Grupo <strong class="warn-name">{{ groupEditTarget()?.groupLetter }}</strong>?</p>
-                <p class="delete-note">⚠ Se eliminan todos sus participantes y partidos.</p>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closeGroupModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-danger" (click)="confirmGroupDelete()">ELIMINAR</button>
+                <div class="delete-warning">
+                    <div class="warning-icon">⚠</div>
+                    <div class="warning-text">
+                        <div class="warning-title">[ALERTA] OPERACIÓN DESTRUCTIVA</div>
+                        <div class="warning-desc">¿Eliminar el Grupo <span class="highlight">{{ groupEditTarget()?.groupLetter }}</span>?</div>
+                        <div class="warning-id">Se eliminan todos sus participantes y partidos.</div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="confirmGroupDelete()">⟶ CONFIRMAR ELIMINACIÓN</button>
+                    <button type="button" class="btn-neon" (click)="closeGroupModal()">CANCELAR</button>
+                </div>
             </div>
         </div>
     </div>
@@ -846,28 +873,30 @@
 
 <!-- Group participant create -->
 @if (gpModal() === 'create') {
-    <div class="modal-backdrop" (click)="closeGpModal()">
-        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closeGpModal()">
+        <div class="modal modal-sm terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title">// AÑADIR AL GRUPO</span>
-                <button class="modal-close" (click)="closeGpModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closeGpModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">PARTICIPANTE</label>
-                    <select class="neon-input" [(ngModel)]="gpForm.tournamentParticipantId">
-                        <option value="">Seleccionar...</option>
-                        @for (participant of participants(); track participant.id) {
-                            <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
-                        }
-                    </select>
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label class="field-label">// PARTICIPANTE</label>
+                        <select class="neon-input" [(ngModel)]="gpForm.tournamentParticipantId">
+                            <option value="">Seleccionar...</option>
+                            @for (participant of participants(); track participant.id) {
+                                <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
+                            }
+                        </select>
+                    </div>
                 </div>
-            </div>
 
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closeGpModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-success" [disabled]="!gpForm.tournamentParticipantId" (click)="submitGpCreate()">AÑADIR</button>
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon" [disabled]="!gpForm.tournamentParticipantId" (click)="submitGpCreate()">⟶ AÑADIR</button>
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="closeGpModal()">CANCELAR</button>
+                </div>
             </div>
         </div>
     </div>
@@ -875,40 +904,42 @@
 
 <!-- Group participant edit -->
 @if (gpModal() === 'edit') {
-    <div class="modal-backdrop" (click)="closeGpModal()">
-        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closeGpModal()">
+        <div class="modal modal-sm terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title">// EDITAR STATS GRUPO</span>
-                <button class="modal-close" (click)="closeGpModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closeGpModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">POSICIÓN</label>
-                    <input class="neon-input" type="number" [(ngModel)]="gpEditForm.groupPosition" />
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label class="field-label">// POSICIÓN</label>
+                        <input class="neon-input" type="number" [(ngModel)]="gpEditForm.groupPosition" />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label class="field-label">// VICTORIAS</label>
+                            <input class="neon-input" type="number" [(ngModel)]="gpEditForm.wins" />
+                        </div>
+
+                        <div class="form-field">
+                            <label class="field-label">// DERROTAS</label>
+                            <input class="neon-input" type="number" [(ngModel)]="gpEditForm.losses" />
+                        </div>
+
+                        <div class="form-field">
+                            <label class="field-label">// PUNTOS</label>
+                            <input class="neon-input" type="number" [(ngModel)]="gpEditForm.points" />
+                        </div>
+                    </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">VICTORIAS</label>
-                        <input class="neon-input" type="number" [(ngModel)]="gpEditForm.wins" />
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">DERROTAS</label>
-                        <input class="neon-input" type="number" [(ngModel)]="gpEditForm.losses" />
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">PUNTOS</label>
-                        <input class="neon-input" type="number" [(ngModel)]="gpEditForm.points" />
-                    </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon" (click)="submitGpEdit()">⟶ GUARDAR</button>
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="closeGpModal()">CANCELAR</button>
                 </div>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closeGpModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-success" (click)="submitGpEdit()">GUARDAR</button>
             </div>
         </div>
     </div>
@@ -916,20 +947,25 @@
 
 <!-- Group participant delete -->
 @if (gpModal() === 'delete') {
-    <div class="modal-backdrop" (click)="closeGpModal()">
-        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closeGpModal()">
+        <div class="modal terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title danger-title">// QUITAR DEL GRUPO</span>
-                <button class="modal-close" (click)="closeGpModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closeGpModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <p class="delete-warning">¿Quitar este participante del grupo?</p>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closeGpModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-danger" (click)="confirmGpDelete()">QUITAR</button>
+                <div class="delete-warning">
+                    <div class="warning-icon">⚠</div>
+                    <div class="warning-text">
+                        <div class="warning-title">[ALERTA] OPERACIÓN DESTRUCTIVA</div>
+                        <div class="warning-desc">¿Quitar este participante del grupo?</div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="confirmGpDelete()">⟶ CONFIRMAR</button>
+                    <button type="button" class="btn-neon" (click)="closeGpModal()">CANCELAR</button>
+                </div>
             </div>
         </div>
     </div>
@@ -937,59 +973,61 @@
 
 <!-- Group match create -->
 @if (gmModal() === 'create') {
-    <div class="modal-backdrop" (click)="closeGmModal()">
-        <div class="modal terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closeGmModal()">
+        <div class="modal modal-lg terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title">// NUEVO PARTIDO DE GRUPO</span>
-                <button class="modal-close" (click)="closeGmModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closeGmModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">JUGADOR 1</label>
-                        <select class="neon-input" [(ngModel)]="gmForm.participant1Id">
-                            <option value="">Seleccionar...</option>
-                            @for (participant of participants(); track participant.id) {
-                                <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
+                <div class="form-grid">
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label class="field-label">// JUGADOR 1</label>
+                            <select class="neon-input" [(ngModel)]="gmForm.participant1Id">
+                                <option value="">Seleccionar...</option>
+                                @for (participant of participants(); track participant.id) {
+                                    <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label class="field-label">// JUGADOR 2</label>
+                            <select class="neon-input" [(ngModel)]="gmForm.participant2Id">
+                                <option value="">Seleccionar...</option>
+                                @for (participant of participants(); track participant.id) {
+                                    <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="field-label">// ESTADO</label>
+                        <select class="neon-input" [(ngModel)]="gmForm.status">
+                            @for (option of groupMatchStatusOptions; track option.value) {
+                                <option [value]="option.value">{{ option.label }}</option>
                             }
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">JUGADOR 2</label>
-                        <select class="neon-input" [(ngModel)]="gmForm.participant2Id">
-                            <option value="">Seleccionar...</option>
-                            @for (participant of participants(); track participant.id) {
-                                <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
-                            }
-                        </select>
+                    <div class="form-field">
+                        <label class="field-label">// FECHA PROGRAMADA</label>
+                        <input class="neon-input" type="datetime-local" [(ngModel)]="gmForm.scheduledAt" />
+                    </div>
+
+                    <div class="form-field">
+                        <label class="field-label">// URL REPLAY</label>
+                        <input class="neon-input" type="url" [(ngModel)]="gmForm.replayUrl" />
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">ESTADO</label>
-                    <select class="neon-input" [(ngModel)]="gmForm.status">
-                        @for (option of groupMatchStatusOptions; track option.value) {
-                            <option [value]="option.value">{{ option.label }}</option>
-                        }
-                    </select>
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon" [disabled]="!gmForm.participant1Id || !gmForm.participant2Id" (click)="submitGmCreate()">⟶ CREAR</button>
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="closeGmModal()">CANCELAR</button>
                 </div>
-
-                <div class="form-group">
-                    <label class="form-label">FECHA PROGRAMADA</label>
-                    <input class="neon-input" type="datetime-local" [(ngModel)]="gmForm.scheduledAt" />
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">URL REPLAY</label>
-                    <input class="neon-input" type="url" [(ngModel)]="gmForm.replayUrl" />
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closeGmModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-success" [disabled]="!gmForm.participant1Id || !gmForm.participant2Id" (click)="submitGmCreate()">CREAR</button>
             </div>
         </div>
     </div>
@@ -997,54 +1035,56 @@
 
 <!-- Group match edit -->
 @if (gmModal() === 'edit') {
-    <div class="modal-backdrop" (click)="closeGmModal()">
-        <div class="modal terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closeGmModal()">
+        <div class="modal modal-lg terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title">// EDITAR PARTIDO</span>
-                <button class="modal-close" (click)="closeGmModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closeGmModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">GANADOR</label>
-                    <select class="neon-input" [(ngModel)]="gmEditForm.winnerId">
-                        <option value="">Sin ganador</option>
-                        @for (participant of participants(); track participant.id) {
-                            <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">ESTADO</label>
-                    <select class="neon-input" [(ngModel)]="gmEditForm.status">
-                        @for (option of groupMatchStatusOptions; track option.value) {
-                            <option [value]="option.value">{{ option.label }}</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">URL REPLAY</label>
-                    <input class="neon-input" type="url" [(ngModel)]="gmEditForm.replayUrl" />
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">FECHA PROG.</label>
-                        <input class="neon-input" type="datetime-local" [(ngModel)]="gmEditForm.scheduledAt" />
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label class="field-label">// GANADOR</label>
+                        <select class="neon-input" [(ngModel)]="gmEditForm.winnerId">
+                            <option value="">Sin ganador</option>
+                            @for (participant of participants(); track participant.id) {
+                                <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
+                            }
+                        </select>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">COMPLETADO</label>
-                        <input class="neon-input" type="datetime-local" [(ngModel)]="gmEditForm.completedAt" />
+                    <div class="form-field">
+                        <label class="field-label">// ESTADO</label>
+                        <select class="neon-input" [(ngModel)]="gmEditForm.status">
+                            @for (option of groupMatchStatusOptions; track option.value) {
+                                <option [value]="option.value">{{ option.label }}</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="field-label">// URL REPLAY</label>
+                        <input class="neon-input" type="url" [(ngModel)]="gmEditForm.replayUrl" />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label class="field-label">// FECHA PROG.</label>
+                            <input class="neon-input" type="datetime-local" [(ngModel)]="gmEditForm.scheduledAt" />
+                        </div>
+
+                        <div class="form-field">
+                            <label class="field-label">// COMPLETADO</label>
+                            <input class="neon-input" type="datetime-local" [(ngModel)]="gmEditForm.completedAt" />
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closeGmModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-success" (click)="submitGmEdit()">GUARDAR</button>
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon" (click)="submitGmEdit()">⟶ GUARDAR</button>
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="closeGmModal()">CANCELAR</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1052,20 +1092,25 @@
 
 <!-- Group match delete -->
 @if (gmModal() === 'delete') {
-    <div class="modal-backdrop" (click)="closeGmModal()">
-        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closeGmModal()">
+        <div class="modal terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title danger-title">// ELIMINAR PARTIDO</span>
-                <button class="modal-close" (click)="closeGmModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closeGmModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <p class="delete-warning">¿Eliminar este partido de grupo?</p>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closeGmModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-danger" (click)="confirmGmDelete()">ELIMINAR</button>
+                <div class="delete-warning">
+                    <div class="warning-icon">⚠</div>
+                    <div class="warning-text">
+                        <div class="warning-title">[ALERTA] OPERACIÓN DESTRUCTIVA</div>
+                        <div class="warning-desc">¿Eliminar este partido de grupo?</div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="confirmGmDelete()">⟶ CONFIRMAR ELIMINACIÓN</button>
+                    <button type="button" class="btn-neon" (click)="closeGmModal()">CANCELAR</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1073,39 +1118,41 @@
 
 <!-- Bracket stage create -->
 @if (bsModal() === 'create') {
-    <div class="modal-backdrop" (click)="closeBsModal()">
-        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closeBsModal()">
+        <div class="modal modal-sm terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title">// NUEVA FASE BRACKET</span>
-                <button class="modal-close" (click)="closeBsModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closeBsModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">NOMBRE</label>
-                    <input class="neon-input" type="text" [(ngModel)]="bsForm.stageName" placeholder="ej. Cuartos de final" />
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">ORDEN</label>
-                        <input class="neon-input" type="number" [(ngModel)]="bsForm.stageOrder" />
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label class="field-label">// NOMBRE</label>
+                        <input class="neon-input" type="text" [(ngModel)]="bsForm.stageName" placeholder="ej. Cuartos de final" />
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">ESTADO</label>
-                        <select class="neon-input" [(ngModel)]="bsForm.status">
-                            @for (option of bracketStageStatusOptions; track option.value) {
-                                <option [value]="option.value">{{ option.label }}</option>
-                            }
-                        </select>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label class="field-label">// ORDEN</label>
+                            <input class="neon-input" type="number" [(ngModel)]="bsForm.stageOrder" />
+                        </div>
+
+                        <div class="form-field">
+                            <label class="field-label">// ESTADO</label>
+                            <select class="neon-input" [(ngModel)]="bsForm.status">
+                                @for (option of bracketStageStatusOptions; track option.value) {
+                                    <option [value]="option.value">{{ option.label }}</option>
+                                }
+                            </select>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closeBsModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-success" [disabled]="!bsForm.stageName" (click)="submitBsCreate()">CREAR</button>
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon" [disabled]="!bsForm.stageName" (click)="submitBsCreate()">⟶ CREAR</button>
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="closeBsModal()">CANCELAR</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1113,39 +1160,41 @@
 
 <!-- Bracket stage edit -->
 @if (bsModal() === 'edit') {
-    <div class="modal-backdrop" (click)="closeBsModal()">
-        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closeBsModal()">
+        <div class="modal modal-sm terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title">// EDITAR FASE</span>
-                <button class="modal-close" (click)="closeBsModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closeBsModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">NOMBRE</label>
-                    <input class="neon-input" type="text" [(ngModel)]="bsEditForm.stageName" />
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">ORDEN</label>
-                        <input class="neon-input" type="number" [(ngModel)]="bsEditForm.stageOrder" />
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label class="field-label">// NOMBRE</label>
+                        <input class="neon-input" type="text" [(ngModel)]="bsEditForm.stageName" />
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">ESTADO</label>
-                        <select class="neon-input" [(ngModel)]="bsEditForm.status">
-                            @for (option of bracketStageStatusOptions; track option.value) {
-                                <option [value]="option.value">{{ option.label }}</option>
-                            }
-                        </select>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label class="field-label">// ORDEN</label>
+                            <input class="neon-input" type="number" [(ngModel)]="bsEditForm.stageOrder" />
+                        </div>
+
+                        <div class="form-field">
+                            <label class="field-label">// ESTADO</label>
+                            <select class="neon-input" [(ngModel)]="bsEditForm.status">
+                                @for (option of bracketStageStatusOptions; track option.value) {
+                                    <option [value]="option.value">{{ option.label }}</option>
+                                }
+                            </select>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closeBsModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-success" (click)="submitBsEdit()">GUARDAR</button>
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon" (click)="submitBsEdit()">⟶ GUARDAR</button>
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="closeBsModal()">CANCELAR</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1153,20 +1202,25 @@
 
 <!-- Bracket stage delete -->
 @if (bsModal() === 'delete') {
-    <div class="modal-backdrop" (click)="closeBsModal()">
-        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closeBsModal()">
+        <div class="modal terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title danger-title">// ELIMINAR FASE</span>
-                <button class="modal-close" (click)="closeBsModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closeBsModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <p class="delete-warning">¿Eliminar la fase <strong class="warn-name">{{ bsEditTarget()?.stageName }}</strong> y sus partidos?</p>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closeBsModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-danger" (click)="confirmBsDelete()">ELIMINAR</button>
+                <div class="delete-warning">
+                    <div class="warning-icon">⚠</div>
+                    <div class="warning-text">
+                        <div class="warning-title">[ALERTA] OPERACIÓN DESTRUCTIVA</div>
+                        <div class="warning-desc">¿Eliminar la fase <span class="highlight">{{ bsEditTarget()?.stageName }}</span> y sus partidos?</div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="confirmBsDelete()">⟶ CONFIRMAR ELIMINACIÓN</button>
+                    <button type="button" class="btn-neon" (click)="closeBsModal()">CANCELAR</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1174,64 +1228,66 @@
 
 <!-- Bracket match create -->
 @if (bmModal() === 'create') {
-    <div class="modal-backdrop" (click)="closeBmModal()">
-        <div class="modal terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closeBmModal()">
+        <div class="modal modal-lg terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title">// NUEVO PARTIDO BRACKET</span>
-                <button class="modal-close" (click)="closeBmModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closeBmModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">Nº PARTIDO</label>
-                    <input class="neon-input" type="number" [(ngModel)]="bmForm.matchNumber" />
-                </div>
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label class="field-label">// Nº PARTIDO</label>
+                        <input class="neon-input" type="number" [(ngModel)]="bmForm.matchNumber" />
+                    </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">JUGADOR 1</label>
-                        <select class="neon-input" [(ngModel)]="bmForm.participant1Id">
-                            <option value="">TBD</option>
-                            @for (participant of participants(); track participant.id) {
-                                <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label class="field-label">// JUGADOR 1</label>
+                            <select class="neon-input" [(ngModel)]="bmForm.participant1Id">
+                                <option value="">TBD</option>
+                                @for (participant of participants(); track participant.id) {
+                                    <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label class="field-label">// JUGADOR 2</label>
+                            <select class="neon-input" [(ngModel)]="bmForm.participant2Id">
+                                <option value="">TBD</option>
+                                @for (participant of participants(); track participant.id) {
+                                    <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="field-label">// ESTADO</label>
+                        <select class="neon-input" [(ngModel)]="bmForm.status">
+                            @for (option of bracketMatchStatusOptions; track option.value) {
+                                <option [value]="option.value">{{ option.label }}</option>
                             }
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">JUGADOR 2</label>
-                        <select class="neon-input" [(ngModel)]="bmForm.participant2Id">
-                            <option value="">TBD</option>
-                            @for (participant of participants(); track participant.id) {
-                                <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
-                            }
-                        </select>
+                    <div class="form-field">
+                        <label class="field-label">// FECHA PROGRAMADA</label>
+                        <input class="neon-input" type="datetime-local" [(ngModel)]="bmForm.scheduledAt" />
+                    </div>
+
+                    <div class="form-field">
+                        <label class="field-label">// URL REPLAY</label>
+                        <input class="neon-input" type="url" [(ngModel)]="bmForm.replayUrl" />
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">ESTADO</label>
-                    <select class="neon-input" [(ngModel)]="bmForm.status">
-                        @for (option of bracketMatchStatusOptions; track option.value) {
-                            <option [value]="option.value">{{ option.label }}</option>
-                        }
-                    </select>
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon" (click)="submitBmCreate()">⟶ CREAR</button>
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="closeBmModal()">CANCELAR</button>
                 </div>
-
-                <div class="form-group">
-                    <label class="form-label">FECHA PROGRAMADA</label>
-                    <input class="neon-input" type="datetime-local" [(ngModel)]="bmForm.scheduledAt" />
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">URL REPLAY</label>
-                    <input class="neon-input" type="url" [(ngModel)]="bmForm.replayUrl" />
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closeBmModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-success" (click)="submitBmCreate()">CREAR</button>
             </div>
         </div>
     </div>
@@ -1239,76 +1295,78 @@
 
 <!-- Bracket match edit -->
 @if (bmModal() === 'edit') {
-    <div class="modal-backdrop" (click)="closeBmModal()">
-        <div class="modal terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closeBmModal()">
+        <div class="modal modal-lg terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title">// EDITAR PARTIDO BRACKET</span>
-                <button class="modal-close" (click)="closeBmModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closeBmModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">JUGADOR 1</label>
-                        <select class="neon-input" [(ngModel)]="bmEditForm.participant1Id">
-                            <option value="">TBD</option>
+                <div class="form-grid">
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label class="field-label">// JUGADOR 1</label>
+                            <select class="neon-input" [(ngModel)]="bmEditForm.participant1Id">
+                                <option value="">TBD</option>
+                                @for (participant of participants(); track participant.id) {
+                                    <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label class="field-label">// JUGADOR 2</label>
+                            <select class="neon-input" [(ngModel)]="bmEditForm.participant2Id">
+                                <option value="">TBD</option>
+                                @for (participant of participants(); track participant.id) {
+                                    <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="field-label">// GANADOR</label>
+                        <select class="neon-input" [(ngModel)]="bmEditForm.winnerId">
+                            <option value="">Sin ganador</option>
                             @for (participant of participants(); track participant.id) {
                                 <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
                             }
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">JUGADOR 2</label>
-                        <select class="neon-input" [(ngModel)]="bmEditForm.participant2Id">
-                            <option value="">TBD</option>
-                            @for (participant of participants(); track participant.id) {
-                                <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
+                    <div class="form-field">
+                        <label class="field-label">// ESTADO</label>
+                        <select class="neon-input" [(ngModel)]="bmEditForm.status">
+                            @for (option of bracketMatchStatusOptions; track option.value) {
+                                <option [value]="option.value">{{ option.label }}</option>
                             }
                         </select>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label class="form-label">GANADOR</label>
-                    <select class="neon-input" [(ngModel)]="bmEditForm.winnerId">
-                        <option value="">Sin ganador</option>
-                        @for (participant of participants(); track participant.id) {
-                            <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">ESTADO</label>
-                    <select class="neon-input" [(ngModel)]="bmEditForm.status">
-                        @for (option of bracketMatchStatusOptions; track option.value) {
-                            <option [value]="option.value">{{ option.label }}</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">URL REPLAY</label>
-                    <input class="neon-input" type="url" [(ngModel)]="bmEditForm.replayUrl" />
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">PROG.</label>
-                        <input class="neon-input" type="datetime-local" [(ngModel)]="bmEditForm.scheduledAt" />
+                    <div class="form-field">
+                        <label class="field-label">// URL REPLAY</label>
+                        <input class="neon-input" type="url" [(ngModel)]="bmEditForm.replayUrl" />
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">COMPLETADO</label>
-                        <input class="neon-input" type="datetime-local" [(ngModel)]="bmEditForm.completedAt" />
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label class="field-label">// PROG.</label>
+                            <input class="neon-input" type="datetime-local" [(ngModel)]="bmEditForm.scheduledAt" />
+                        </div>
+
+                        <div class="form-field">
+                            <label class="field-label">// COMPLETADO</label>
+                            <input class="neon-input" type="datetime-local" [(ngModel)]="bmEditForm.completedAt" />
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closeBmModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-success" (click)="submitBmEdit()">GUARDAR</button>
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon" (click)="submitBmEdit()">⟶ GUARDAR</button>
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="closeBmModal()">CANCELAR</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1316,20 +1374,25 @@
 
 <!-- Bracket match delete -->
 @if (bmModal() === 'delete') {
-    <div class="modal-backdrop" (click)="closeBmModal()">
-        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closeBmModal()">
+        <div class="modal terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title danger-title">// ELIMINAR PARTIDO</span>
-                <button class="modal-close" (click)="closeBmModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closeBmModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <p class="delete-warning">¿Eliminar el partido #{{ bmEditTarget()?.matchNumber }}?</p>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closeBmModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-danger" (click)="confirmBmDelete()">ELIMINAR</button>
+                <div class="delete-warning">
+                    <div class="warning-icon">⚠</div>
+                    <div class="warning-text">
+                        <div class="warning-title">[ALERTA] OPERACIÓN DESTRUCTIVA</div>
+                        <div class="warning-desc">¿Eliminar el partido #{{ bmEditTarget()?.matchNumber }}?</div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="confirmBmDelete()">⟶ CONFIRMAR ELIMINACIÓN</button>
+                    <button type="button" class="btn-neon" (click)="closeBmModal()">CANCELAR</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1337,33 +1400,35 @@
 
 <!-- Standing create -->
 @if (standModal() === 'create') {
-    <div class="modal-backdrop" (click)="closeStandModal()">
-        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closeStandModal()">
+        <div class="modal modal-sm terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title">// NUEVO STANDING</span>
-                <button class="modal-close" (click)="closeStandModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closeStandModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">PARTICIPANTE</label>
-                    <select class="neon-input" [(ngModel)]="standForm.tournamentParticipantId">
-                        <option value="">Seleccionar...</option>
-                        @for (participant of participants(); track participant.id) {
-                            <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
-                        }
-                    </select>
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label class="field-label">// PARTICIPANTE</label>
+                        <select class="neon-input" [(ngModel)]="standForm.tournamentParticipantId">
+                            <option value="">Seleccionar...</option>
+                            @for (participant of participants(); track participant.id) {
+                                <option [value]="participant.id">{{ getUserName(participant.userId) }}</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="field-label">// POSICIÓN FINAL</label>
+                        <input class="neon-input" type="number" [(ngModel)]="standForm.finalPosition" />
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">POSICIÓN FINAL</label>
-                    <input class="neon-input" type="number" [(ngModel)]="standForm.finalPosition" />
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon" [disabled]="!standForm.tournamentParticipantId" (click)="submitStandCreate()">⟶ CREAR</button>
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="closeStandModal()">CANCELAR</button>
                 </div>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closeStandModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-success" [disabled]="!standForm.tournamentParticipantId" (click)="submitStandCreate()">CREAR</button>
             </div>
         </div>
     </div>
@@ -1371,40 +1436,42 @@
 
 <!-- Standing edit -->
 @if (standModal() === 'edit') {
-    <div class="modal-backdrop" (click)="closeStandModal()">
-        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closeStandModal()">
+        <div class="modal modal-sm terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title">// EDITAR STANDING</span>
-                <button class="modal-close" (click)="closeStandModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closeStandModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">POSICIÓN FINAL</label>
-                    <input class="neon-input" type="number" [(ngModel)]="standEditForm.finalPosition" />
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label class="field-label">// POSICIÓN FINAL</label>
+                        <input class="neon-input" type="number" [(ngModel)]="standEditForm.finalPosition" />
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label class="field-label">// VICTORIAS</label>
+                            <input class="neon-input" type="number" [(ngModel)]="standEditForm.totalWins" />
+                        </div>
+
+                        <div class="form-field">
+                            <label class="field-label">// DERROTAS</label>
+                            <input class="neon-input" type="number" [(ngModel)]="standEditForm.totalLosses" />
+                        </div>
+
+                        <div class="form-field">
+                            <label class="field-label">// PUNTOS</label>
+                            <input class="neon-input" type="number" [(ngModel)]="standEditForm.totalPoints" />
+                        </div>
+                    </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">VICTORIAS</label>
-                        <input class="neon-input" type="number" [(ngModel)]="standEditForm.totalWins" />
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">DERROTAS</label>
-                        <input class="neon-input" type="number" [(ngModel)]="standEditForm.totalLosses" />
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">PUNTOS</label>
-                        <input class="neon-input" type="number" [(ngModel)]="standEditForm.totalPoints" />
-                    </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon" (click)="submitStandEdit()">⟶ GUARDAR</button>
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="closeStandModal()">CANCELAR</button>
                 </div>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closeStandModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-success" (click)="submitStandEdit()">GUARDAR</button>
             </div>
         </div>
     </div>
@@ -1412,20 +1479,25 @@
 
 <!-- Standing delete -->
 @if (standModal() === 'delete') {
-    <div class="modal-backdrop" (click)="closeStandModal()">
-        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closeStandModal()">
+        <div class="modal terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title danger-title">// ELIMINAR STANDING</span>
-                <button class="modal-close" (click)="closeStandModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closeStandModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <p class="delete-warning">¿Eliminar este standing?</p>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closeStandModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-danger" (click)="confirmStandDelete()">ELIMINAR</button>
+                <div class="delete-warning">
+                    <div class="warning-icon">⚠</div>
+                    <div class="warning-text">
+                        <div class="warning-title">[ALERTA] OPERACIÓN DESTRUCTIVA</div>
+                        <div class="warning-desc">¿Eliminar este standing?</div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="confirmStandDelete()">⟶ CONFIRMAR ELIMINACIÓN</button>
+                    <button type="button" class="btn-neon" (click)="closeStandModal()">CANCELAR</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1433,40 +1505,42 @@
 
 <!-- Reward create -->
 @if (rewardModal() === 'create') {
-    <div class="modal-backdrop" (click)="closeRewardModal()">
-        <div class="modal terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closeRewardModal()">
+        <div class="modal modal-lg terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title">// NUEVA RECOMPENSA</span>
-                <button class="modal-close" (click)="closeRewardModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closeRewardModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">POSICIÓN *</label>
-                        <input class="neon-input" type="number" [(ngModel)]="rewardForm.position" />
+                <div class="form-grid">
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label class="field-label">// POSICIÓN *</label>
+                            <input class="neon-input" type="number" [(ngModel)]="rewardForm.position" />
+                        </div>
+
+                        <div class="form-field">
+                            <label class="field-label">// VALOR PTS</label>
+                            <input class="neon-input" type="number" [(ngModel)]="rewardForm.rewardValue" />
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">VALOR PTS</label>
-                        <input class="neon-input" type="number" [(ngModel)]="rewardForm.rewardValue" />
+                    <div class="form-field">
+                        <label class="field-label">// NOMBRE RECOMPENSA *</label>
+                        <input class="neon-input" type="text" [(ngModel)]="rewardForm.rewardName" placeholder="ej. Medalla de Oro" />
+                    </div>
+
+                    <div class="form-field">
+                        <label class="field-label">// URL IMAGEN</label>
+                        <input class="neon-input" type="url" [(ngModel)]="rewardForm.imageUrl" />
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">NOMBRE RECOMPENSA *</label>
-                    <input class="neon-input" type="text" [(ngModel)]="rewardForm.rewardName" placeholder="ej. Medalla de Oro" />
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon" [disabled]="!rewardForm.rewardName" (click)="submitRewardCreate()">⟶ CREAR</button>
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="closeRewardModal()">CANCELAR</button>
                 </div>
-
-                <div class="form-group">
-                    <label class="form-label">URL IMAGEN</label>
-                    <input class="neon-input" type="url" [(ngModel)]="rewardForm.imageUrl" />
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closeRewardModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-success" [disabled]="!rewardForm.rewardName" (click)="submitRewardCreate()">CREAR</button>
             </div>
         </div>
     </div>
@@ -1474,40 +1548,42 @@
 
 <!-- Reward edit -->
 @if (rewardModal() === 'edit') {
-    <div class="modal-backdrop" (click)="closeRewardModal()">
-        <div class="modal terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closeRewardModal()">
+        <div class="modal modal-lg terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title">// EDITAR RECOMPENSA</span>
-                <button class="modal-close" (click)="closeRewardModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closeRewardModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">POSICIÓN</label>
-                        <input class="neon-input" type="number" [(ngModel)]="rewardEditForm.position" />
+                <div class="form-grid">
+                    <div class="form-row">
+                        <div class="form-field">
+                            <label class="field-label">// POSICIÓN</label>
+                            <input class="neon-input" type="number" [(ngModel)]="rewardEditForm.position" />
+                        </div>
+
+                        <div class="form-field">
+                            <label class="field-label">// VALOR PTS</label>
+                            <input class="neon-input" type="number" [(ngModel)]="rewardEditForm.rewardValue" />
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label">VALOR PTS</label>
-                        <input class="neon-input" type="number" [(ngModel)]="rewardEditForm.rewardValue" />
+                    <div class="form-field">
+                        <label class="field-label">// NOMBRE</label>
+                        <input class="neon-input" type="text" [(ngModel)]="rewardEditForm.rewardName" />
+                    </div>
+
+                    <div class="form-field">
+                        <label class="field-label">// URL IMAGEN</label>
+                        <input class="neon-input" type="url" [(ngModel)]="rewardEditForm.imageUrl" />
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">NOMBRE</label>
-                    <input class="neon-input" type="text" [(ngModel)]="rewardEditForm.rewardName" />
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon" (click)="submitRewardEdit()">⟶ GUARDAR</button>
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="closeRewardModal()">CANCELAR</button>
                 </div>
-
-                <div class="form-group">
-                    <label class="form-label">URL IMAGEN</label>
-                    <input class="neon-input" type="url" [(ngModel)]="rewardEditForm.imageUrl" />
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closeRewardModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-success" (click)="submitRewardEdit()">GUARDAR</button>
             </div>
         </div>
     </div>
@@ -1515,20 +1591,25 @@
 
 <!-- Reward delete -->
 @if (rewardModal() === 'delete') {
-    <div class="modal-backdrop" (click)="closeRewardModal()">
-        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closeRewardModal()">
+        <div class="modal terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title danger-title">// ELIMINAR RECOMPENSA</span>
-                <button class="modal-close" (click)="closeRewardModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closeRewardModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <p class="delete-warning">¿Eliminar la recompensa <strong class="warn-name">{{ rewardEditTarget()?.rewardName }}</strong>?</p>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closeRewardModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-danger" (click)="confirmRewardDelete()">ELIMINAR</button>
+                <div class="delete-warning">
+                    <div class="warning-icon">⚠</div>
+                    <div class="warning-text">
+                        <div class="warning-title">[ALERTA] OPERACIÓN DESTRUCTIVA</div>
+                        <div class="warning-desc">¿Eliminar la recompensa <span class="highlight">{{ rewardEditTarget()?.rewardName }}</span>?</div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="confirmRewardDelete()">⟶ CONFIRMAR ELIMINACIÓN</button>
+                    <button type="button" class="btn-neon" (click)="closeRewardModal()">CANCELAR</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1536,38 +1617,40 @@
 
 <!-- User reward create -->
 @if (urModal() === 'create') {
-    <div class="modal-backdrop" (click)="closeUrModal()">
-        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closeUrModal()">
+        <div class="modal modal-sm terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title">// ASIGNAR RECOMPENSA</span>
-                <button class="modal-close" (click)="closeUrModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closeUrModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">USUARIO</label>
-                    <select class="neon-input" [(ngModel)]="urForm.userId">
-                        <option value="">Seleccionar usuario...</option>
-                        @for (user of allUsers(); track user.id) {
-                            <option [value]="user.id">{{ user.username }}</option>
-                        }
-                    </select>
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label class="field-label">// USUARIO</label>
+                        <select class="neon-input" [(ngModel)]="urForm.userId">
+                            <option value="">Seleccionar usuario...</option>
+                            @for (user of allUsers(); track user.id) {
+                                <option [value]="user.id">{{ user.username }}</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-field">
+                        <label class="field-label">// RECOMPENSA</label>
+                        <select class="neon-input" [(ngModel)]="urForm.rewardId">
+                            <option value="">Seleccionar recompensa...</option>
+                            @for (reward of rewards(); track reward.id) {
+                                <option [value]="reward.id">Pos. {{ reward.position }} – {{ reward.rewardName }}</option>
+                            }
+                        </select>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">RECOMPENSA</label>
-                    <select class="neon-input" [(ngModel)]="urForm.rewardId">
-                        <option value="">Seleccionar recompensa...</option>
-                        @for (reward of rewards(); track reward.id) {
-                            <option [value]="reward.id">Pos. {{ reward.position }} – {{ reward.rewardName }}</option>
-                        }
-                    </select>
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon" [disabled]="!urForm.userId || !urForm.rewardId" (click)="submitUrCreate()">⟶ ASIGNAR</button>
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="closeUrModal()">CANCELAR</button>
                 </div>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closeUrModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-success" [disabled]="!urForm.userId || !urForm.rewardId" (click)="submitUrCreate()">ASIGNAR</button>
             </div>
         </div>
     </div>
@@ -1575,20 +1658,25 @@
 
 <!-- User reward delete -->
 @if (urModal() === 'delete') {
-    <div class="modal-backdrop" (click)="closeUrModal()">
-        <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="closeUrModal()">
+        <div class="modal terminal-card animate-fade-up" (click)="$event.stopPropagation()">
             <div class="modal-header">
                 <span class="modal-title danger-title">// REVOCAR RECOMPENSA</span>
-                <button class="modal-close" (click)="closeUrModal()">✕</button>
+                <button type="button" class="close-btn" (click)="closeUrModal()">✕</button>
             </div>
 
             <div class="modal-body">
-                <p class="delete-warning">¿Revocar la recompensa asignada a <strong class="warn-name">{{ getUserName(urEditTarget()?.userId || '') }}</strong>?</p>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-neon" (click)="closeUrModal()">CANCELAR</button>
-                <button class="btn-neon btn-neon-danger" (click)="confirmUrDelete()">REVOCAR</button>
+                <div class="delete-warning">
+                    <div class="warning-icon">⚠</div>
+                    <div class="warning-text">
+                        <div class="warning-title">[ALERTA] OPERACIÓN DESTRUCTIVA</div>
+                        <div class="warning-desc">¿Revocar la recompensa asignada a <span class="highlight">{{ getUserName(urEditTarget()?.userId || '') }}</span>?</div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-neon btn-neon-danger" (click)="confirmUrDelete()">⟶ CONFIRMAR</button>
+                    <button type="button" class="btn-neon" (click)="closeUrModal()">CANCELAR</button>
+                </div>
             </div>
         </div>
     </div>

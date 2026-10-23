@@ -6,7 +6,7 @@
  * @author @adrianpmdev
  */
 
-import { Faction } from './wow-forever-models';
+import { Faction, LauncherNewsItem } from './wow-forever-models';
 
 /** Where the game icons come from. Icons are stored by name, so changing the host is a one-line change. */
 export const WOW_ICON_BASE_URL = 'https://render.worldofwarcraft.com/us/icons/56';
@@ -70,3 +70,26 @@ export const wowIconUrl = (icon: string): string => `${WOW_ICON_BASE_URL}/${icon
 export const hideBrokenIcon = (event: Event): void => {
     (event.target as HTMLImageElement).style.visibility = 'hidden';
 };
+
+/** Faction artwork shown behind the launcher screen. */
+export const FACTION_BACKGROUNDS: Readonly<Record<Faction, string>> = {
+    ALLIANCE: '/images/wow-forever/background-alliance.webp',
+    HORDE: '/images/wow-forever/background-horde.webp'
+};
+
+/** News shown in the launcher panel. Items without an image show the dark placeholder. */
+export const LAUNCHER_NEWS: readonly LauncherNewsItem[] = [
+    {
+        id: 1,
+        date: '4 de mayo de 2023',
+        title: 'Embers of Neltharion: ¡Monturas, mascotas y mucho más!'
+    },
+    {
+        id: 2,
+        title: 'Adéntrate en las Sendas Temporales Turbulentas con Wrath of the Lich King'
+    },
+    {
+        id: 3,
+        title: 'Notas del parche, eventos y novedades de la comunidad'
+    }
+];

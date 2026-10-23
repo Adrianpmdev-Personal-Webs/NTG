@@ -5,6 +5,8 @@
  * @author @adrianpmdev
  */
 
+@use 'mixins' as *;
+
 .terminal {
     display: block;
     min-height: 100dvh;
@@ -74,8 +76,22 @@
     &:active {
         transform: scale(0.97);
     }
+
+    &:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        background: transparent;
+        box-shadow: none;
+        text-shadow: none;
+        transform: none;
+
+        &::before {
+            display: none;
+        }
+    }
 }
 
+/* Variants: always combined with .btn-neon (green main action, red cancel/delete, cyan secondary) */
 .btn-neon-danger {
     border-color: var(--neon-red);
     color: var(--neon-red);
@@ -110,6 +126,41 @@
         background: rgba(255, 255, 0, 0.08);
         box-shadow: 0 0 15px rgba(255, 255, 0, 0.4);
         text-shadow: 0 0 8px var(--neon-yellow);
+    }
+}
+
+/* Size modifiers for .btn-neon: small text button and square icon button */
+.btn-sm {
+    font-size: 0.68rem;
+    padding: 5px 12px;
+    letter-spacing: 1.5px;
+}
+
+.btn-xs {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+}
+
+/* Row actions: compact buttons for table rows, used together with .btn-neon and its variants (EDITAR, ELIMINAR...) */
+.actions-col {
+    display: flex;
+    gap: 8px;
+    white-space: nowrap;
+
+    @include mobile {
+        gap: 6px;
+    }
+}
+
+.action-btn {
+    font-size: 0.65rem;
+    padding: 4px 10px;
+    letter-spacing: 1px;
+
+    @include mobile {
+        padding: 5px 8px;
+        font-size: 0.6rem;
     }
 }
 

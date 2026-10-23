@@ -1,6 +1,6 @@
 /**
  * Pokémon game detail page styles.
- * Responsive game locke list layout with banner, breadcrumb, modals and rules.
+ * Responsive game locke list layout with banner, breadcrumb and rules (modals live in the global modal styles).
  *
  * Author: Adrián Pérez Morales
  */
@@ -288,12 +288,6 @@
     transition: all 0.2s;
 }
 
-.btn-sm {
-    font-size: 0.68rem !important;
-    padding: 5px 12px !important;
-    letter-spacing: 1.5px !important;
-}
-
 /* ─── LOADING AND EMPTY STATES ─── */
 
 .loading-state,
@@ -337,149 +331,9 @@
     letter-spacing: 2px;
 }
 
-/* ─── MODAL ─── */
-
-.modal-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(4px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    padding: 20px;
-    overflow: hidden;
-}
-
-.modal {
-    width: 100%;
-    max-width: 480px;
-    max-height: min(90vh, 820px);
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    animation: fade-up 0.2s ease forwards;
-}
-
-.modal-sm {
-    max-width: 380px;
-}
-
-.modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
-    padding: 18px 22px;
-    border-bottom: 1px solid var(--border-color);
-    flex-shrink: 0;
-}
-
-.modal-title {
-    font-family: var(--font-display);
-    font-size: 0.8rem;
-    letter-spacing: 3px;
-    color: var(--neon-green);
-}
-
-.danger-title {
-    color: var(--neon-red);
-}
-
-.modal-close {
-    background: transparent;
-    border: none;
-    color: var(--text-dim);
-    cursor: pointer;
-    font-size: 1rem;
-    padding: 4px 8px;
-    transition: color 0.2s;
-    flex-shrink: 0;
-
-    &:hover {
-        color: var(--neon-red);
-    }
-}
-
-.modal-body {
-    flex: 1;
-    min-height: 0;
-    padding: 22px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.form-label {
-    font-size: 0.68rem;
-    letter-spacing: 2px;
-    color: var(--text-dim);
-}
-
-textarea.neon-input {
-    resize: vertical;
-    min-height: 72px;
-}
-
 .font-mono {
     font-family: var(--font-mono);
     font-size: 0.8rem;
-}
-
-.modal-footer {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-    padding: 16px 22px;
-    border-top: 1px solid var(--border-color);
-    flex-shrink: 0;
-}
-
-.btn-neon-success {
-    border-color: var(--neon-green);
-    color: var(--neon-green);
-
-    &:hover {
-        background: rgba(0, 255, 65, 0.1);
-    }
-
-    &:disabled {
-        opacity: 0.4;
-        cursor: not-allowed;
-    }
-}
-
-.delete-warning {
-    font-size: 0.82rem;
-    color: var(--text-secondary);
-    line-height: 1.6;
-}
-
-.warn-name {
-    color: var(--neon-yellow);
-    font-style: normal;
-}
-
-.delete-note {
-    font-size: 0.72rem;
-    color: var(--neon-red);
-    letter-spacing: 1px;
-}
-
-/* ─── RULES MODAL ─── */
-
-.rules-modal {
-    max-width: 780px;
-    max-height: min(90vh, 820px);
 }
 
 .rules-modal-body {
@@ -640,9 +494,6 @@ textarea.neon-input {
         gap: 10px;
     }
 
-    .rules-modal {
-        max-width: 100%;
-    }
 }
 
 @media (max-width: 760px) {
@@ -810,13 +661,6 @@ textarea.neon-input {
         display: none;
     }
 
-    .btn-sm {
-        width: 100%;
-        font-size: 0.62rem !important;
-        padding: 7px 10px !important;
-        letter-spacing: 1px !important;
-    }
-
     .loading-state,
     .empty-state {
         padding: 42px 18px;
@@ -837,61 +681,8 @@ textarea.neon-input {
         line-height: 1.5;
     }
 
-    .modal-backdrop {
-        align-items: flex-end;
-        padding: 12px;
-        overflow: hidden;
-    }
-
-    .modal,
-    .modal-sm,
-    .rules-modal {
-        width: 100%;
-        max-width: none;
-        max-height: calc(100dvh - 24px);
-        min-height: 0;
-    }
-
-    .modal-header {
-        padding: 14px 16px;
-    }
-
-    .modal-title {
-        font-size: 0.72rem;
-        letter-spacing: 1.5px;
-    }
-
-    .modal-body {
-        flex: 1;
-        min-height: 0;
-        padding: 18px 16px;
-        overflow-y: auto;
-    }
-
     .rules-modal-body {
         gap: 16px;
-    }
-
-    .form-label {
-        font-size: 0.62rem;
-        letter-spacing: 1.5px;
-    }
-
-    .modal-footer {
-        padding: 14px 16px;
-        flex-direction: column-reverse;
-
-        button {
-            width: 100%;
-        }
-    }
-
-    .delete-warning {
-        font-size: 0.76rem;
-    }
-
-    .delete-note {
-        font-size: 0.66rem;
     }
 
     .rules-title {
@@ -972,43 +763,12 @@ textarea.neon-input {
         font-size: 0.68rem;
     }
 
-    .modal-backdrop {
-        padding: 8px;
-    }
-
-    .modal,
-    .modal-sm,
-    .rules-modal {
-        max-height: calc(100dvh - 16px);
-    }
-
-    .modal-header {
-        padding: 12px 14px;
-    }
-
-    .modal-body {
-        padding: 16px 14px;
-    }
-
-    .modal-footer {
-        padding: 12px 14px;
-    }
-
     .rules-modal-body {
         gap: 14px;
     }
 }
 
 @media (max-height: 680px) and (max-width: 760px) {
-    .modal-backdrop {
-        align-items: center;
-    }
-
-    .modal,
-    .modal-sm,
-    .rules-modal {
-        max-height: calc(100dvh - 16px);
-    }
 
     .rules-modal-body {
         max-height: none;
@@ -1028,8 +788,7 @@ textarea.neon-input {
 
 @media (prefers-reduced-motion: reduce) {
     .locke-row,
-    .enter-arrow,
-    .modal {
+.enter-arrow {
         animation: none;
         transition: none;
     }

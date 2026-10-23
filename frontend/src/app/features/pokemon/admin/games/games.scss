@@ -1,6 +1,6 @@
 /**
  * Pokémon games page styles.
- * Responsive games catalog layout with search toolbar, game cards and modals.
+ * Responsive games catalog layout with search toolbar, game cards (modals live in the global modal styles).
  *
  * Author: Adrián Pérez Morales
  */
@@ -196,12 +196,6 @@
     padding: 0;
 }
 
-.btn-sm {
-    font-size: 0.68rem !important;
-    padding: 5px 12px !important;
-    letter-spacing: 1.5px !important;
-}
-
 /* ─── LOADING AND EMPTY STATES ─── */
 
 .loading-state,
@@ -245,97 +239,6 @@
     letter-spacing: 2px;
 }
 
-/* ─── MODAL ─── */
-
-.modal-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(4px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-    padding: 20px;
-    overflow: hidden;
-}
-
-.modal {
-    width: 100%;
-    max-width: 480px;
-    max-height: min(90vh, 760px);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    animation: fade-up 0.2s ease forwards;
-}
-
-.modal-sm {
-    max-width: 380px;
-}
-
-.modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
-    padding: 18px 22px;
-    border-bottom: 1px solid var(--border-color);
-    flex-shrink: 0;
-}
-
-.modal-title {
-    font-family: var(--font-display);
-    font-size: 0.8rem;
-    letter-spacing: 3px;
-    color: var(--neon-green);
-}
-
-.danger-title {
-    color: var(--neon-red);
-}
-
-.modal-close {
-    background: transparent;
-    border: none;
-    color: var(--text-dim);
-    cursor: pointer;
-    font-size: 1rem;
-    padding: 4px 8px;
-    transition: color 0.2s;
-    flex-shrink: 0;
-
-    &:hover {
-        color: var(--neon-red);
-    }
-}
-
-.modal-body {
-    padding: 22px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    min-height: 0;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.form-label {
-    font-size: 0.68rem;
-    letter-spacing: 2px;
-    color: var(--text-dim);
-}
-
-textarea.neon-input {
-    resize: vertical;
-    min-height: 72px;
-}
-
 .img-preview-wrap {
     width: 100%;
     max-height: 280px;
@@ -353,47 +256,6 @@ textarea.neon-input {
     height: 100%;
     object-fit: contain;
     display: block;
-}
-
-.modal-footer {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-    padding: 16px 22px;
-    border-top: 1px solid var(--border-color);
-    flex-shrink: 0;
-}
-
-.btn-neon-success {
-    border-color: var(--neon-green);
-    color: var(--neon-green);
-
-    &:hover {
-        background: rgba(0, 255, 65, 0.1);
-        box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
-    }
-
-    &:disabled {
-        opacity: 0.4;
-        cursor: not-allowed;
-    }
-}
-
-.delete-warning {
-    font-size: 0.82rem;
-    color: var(--text-secondary);
-    line-height: 1.6;
-}
-
-.warn-name {
-    color: var(--neon-yellow);
-    font-style: normal;
-}
-
-.delete-note {
-    font-size: 0.72rem;
-    color: var(--neon-red);
-    letter-spacing: 1px;
 }
 
 /* ─── RESPONSIVE ─── */
@@ -491,13 +353,6 @@ textarea.neon-input {
         padding: 0;
     }
 
-    .btn-sm {
-        width: 100%;
-        font-size: 0.62rem !important;
-        padding: 7px 10px !important;
-        letter-spacing: 1px !important;
-    }
-
     .loading-state,
     .empty-state {
         padding: 42px 18px;
@@ -518,60 +373,10 @@ textarea.neon-input {
         line-height: 1.5;
     }
 
-    .modal-backdrop {
-        align-items: flex-end;
-        padding: 12px;
-        overflow: hidden;
-    }
-
-    .modal,
-    .modal-sm {
-        width: 100%;
-        max-width: none;
-        max-height: calc(100dvh - 24px);
-        border-bottom: 0;
-    }
-
-    .modal-header {
-        padding: 14px 16px;
-    }
-
-    .modal-title {
-        font-size: 0.72rem;
-        letter-spacing: 1.5px;
-    }
-
-    .modal-body {
-        padding: 18px 16px;
-        min-height: 0;
-        overflow-y: auto;
-    }
-
     .img-preview-wrap {
         max-height: 220px;
     }
 
-    .form-label {
-        font-size: 0.62rem;
-        letter-spacing: 1.5px;
-    }
-
-    .modal-footer {
-        padding: 14px 16px;
-        flex-direction: column-reverse;
-
-        button {
-            width: 100%;
-        }
-    }
-
-    .delete-warning {
-        font-size: 0.76rem;
-    }
-
-    .delete-note {
-        font-size: 0.66rem;
-    }
 }
 
 @media (max-width: 520px) {
@@ -657,31 +462,11 @@ textarea.neon-input {
         display: none;
     }
 
-    .modal-backdrop {
-        padding: 8px;
-    }
-
-    .modal,
-    .modal-sm {
-        max-height: calc(100dvh - 16px);
-    }
-
-    .modal-header {
-        padding: 12px 14px;
-    }
-
-    .modal-body {
-        padding: 16px 14px;
-    }
-
     .img-preview-wrap {
         max-height: 180px;
         padding: 8px;
     }
 
-    .modal-footer {
-        padding: 12px 14px;
-    }
 }
 
 @media (max-width: 380px) {
@@ -695,8 +480,7 @@ textarea.neon-input {
     }
 
     .page-label,
-    .total-badge,
-    .modal-title {
+.total-badge {
         letter-spacing: 1px;
     }
 
@@ -727,14 +511,6 @@ textarea.neon-input {
 }
 
 @media (max-height: 680px) and (max-width: 760px) {
-    .modal-backdrop {
-        align-items: center;
-    }
-
-    .modal,
-    .modal-sm {
-        max-height: calc(100dvh - 16px);
-    }
 
     .img-preview-wrap {
         max-height: 140px;
@@ -758,9 +534,8 @@ textarea.neon-input {
 
 @media (prefers-reduced-motion: reduce) {
     .game-card,
-    .game-img,
-    .game-img-overlay,
-    .modal {
+.game-img,
+.game-img-overlay {
         animation: none;
         transition: none;
     }

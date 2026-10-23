@@ -1,7 +1,7 @@
 /**
- * BaseData
+ * Management
  *
- * Admin screen for the WoW Forever base data: classes, races (with the classes each one can play) and settings.
+ * Admin management screen of WoW Forever: classes, races (with the classes each one can play) and settings.
  *
  * @author @adrianpmdev
  */
@@ -48,13 +48,13 @@ const emptyRaceForm = (): RaceCreateRequest => ({
 });
 
 @Component({
-    selector: 'app-wow-forever-base-data',
+    selector: 'app-wow-forever-management',
     imports: [FormsModule],
-    templateUrl: './base-data.html',
-    styleUrl: './base-data.scss',
+    templateUrl: './management.html',
+    styleUrl: './management.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BaseData implements OnInit {
+export class Management implements OnInit {
 
     private readonly api = inject(WowForeverApi);
     private readonly notificationService = inject(NotificationService);

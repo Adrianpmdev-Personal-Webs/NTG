@@ -1,7 +1,7 @@
 /**
- * WoW Forever home styles.
+ * Launcher screen styles.
  *
- * Hero, feature cards, class tiles and race lists. Uses the --wf-* tokens of the layout.
+ * Layout, artwork and riveted navigation bar of the WoW Forever launcher, copied from the original web and adapted to the NTG breakpoints.
  *
  * @author @adrianpmdev
  */
@@ -11,241 +11,363 @@
 /* ─── HOST ─── */
 
 :host {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    max-width: 1200px;
-    margin: 0 auto;
+  display: block;
+  width: 100%;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
 }
 
-/* ─── HERO ─── */
+/* ─── PAGE AND SHELL ─── */
 
-.hero {
-    padding: 24px 0 8px;
-    text-align: center;
+.launcher-page {
+  height: 100dvh;
+  min-height: 0;
+  width: 100%;
+  display: block;
+  padding: 0;
+  box-sizing: border-box;
+  background:
+    radial-gradient(circle at 50% 35%, rgba(71,80,87,.16), transparent 42%),
+    linear-gradient(#151719, #070809 72%);
 }
 
-.hero-title {
-    margin: 0;
-    color: var(--wf-gold);
-    font-size: 2.6rem;
-    letter-spacing: 6px;
-    text-transform: uppercase;
-    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8);
+.launcher-shell {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: 108px minmax(0, 1fr) 122px auto;
+  overflow: hidden;
+  background: #080808;
+  border: 1px solid #050505;
+  box-shadow: inset 0 0 0 2px #252525;
 }
 
-.hero-subtitle {
-    margin: 8px 0 20px;
-    color: var(--wf-muted);
+/* ─── ARTWORK AND NEWS ─── */
+
+.launcher-main {
+  position: relative;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(430px, 39%);
+  overflow: hidden;
+  background: #090909;
 }
 
-.faction-switch {
-    display: inline-flex;
-    border: 1px solid var(--wf-border);
+.artwork-layer,
+.artwork-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 }
 
-.faction-btn {
-    padding: 10px 28px;
-    border: 0;
-    background: rgba(5, 5, 6, 0.7);
-    color: var(--wf-muted);
-    font: inherit;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease;
-
-    &:hover {
-        color: var(--wf-text);
-    }
-
-    &.active {
-        background: var(--wf-alliance);
-        color: #fff;
-    }
-
-    &.active.horde {
-        background: var(--wf-horde);
-    }
+.artwork-layer {
+  top: 0;
+  right: 39%;
+  bottom: 0;
+  left: 0;
+  background-color: #101313;
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  filter: saturate(.95) contrast(1.03) brightness(.83);
 }
 
-/* ─── PANELS ─── */
-
-.panel {
-    padding: 20px 24px;
-    border: 1px solid var(--wf-border);
-    background: var(--wf-panel);
+.artwork-vignette {
+  background:
+    radial-gradient(circle at 25% 43%, transparent 0 26%, rgba(0,0,0,.05) 43%, rgba(0,0,0,.75) 100%),
+    linear-gradient(90deg, transparent 0 52%, rgba(0,0,0,.18) 72%, rgba(0,0,0,.58) 100%);
 }
 
-.panel-title {
-    margin: 0 0 16px;
-    color: var(--wf-gold);
-    font-size: 1.1rem;
-    font-weight: normal;
-    letter-spacing: 3px;
-    text-transform: uppercase;
+.content-spacer {
+  grid-column: 1;
+  position: relative;
+  z-index: 1;
 }
 
-.state {
-    margin: 0;
-    color: var(--wf-muted);
+app-news-panel {
+  grid-column: 2;
+  align-self: stretch;
+  position: relative;
+  z-index: 2;
+  min-width: 0;
 }
 
-/* ─── FEATURES ─── */
+/* ─── NAVIGATION BAR ─── */
 
-.feature-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 12px;
+.launcher-navigation {
+  position: relative;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: minmax(185px, 215px) minmax(330px, 1fr) minmax(180px, 220px);
+  align-items: center;
+  gap: 24px;
+  min-height: 122px;
+  padding: 18px 24px 16px;
+  box-sizing: border-box;
+  background:
+    radial-gradient(circle at 8% 40%, rgba(255,255,255,.15) 0 1px, transparent 2px),
+    radial-gradient(circle at 16% 73%, rgba(255,255,255,.10) 0 1px, transparent 2px),
+    radial-gradient(circle at 27% 25%, rgba(255,255,255,.12) 0 1px, transparent 2px),
+    radial-gradient(circle at 39% 76%, rgba(0,0,0,.56) 0 2px, transparent 4px),
+    radial-gradient(circle at 54% 31%, rgba(0,0,0,.48) 0 2px, transparent 4px),
+    radial-gradient(circle at 67% 73%, rgba(0,0,0,.6) 0 2px, transparent 4px),
+    radial-gradient(circle at 81% 30%, rgba(255,255,255,.09) 0 1px, transparent 3px),
+    radial-gradient(circle at 93% 69%, rgba(0,0,0,.56) 0 2px, transparent 4px),
+    linear-gradient(160deg, #767676 0%, #4a4b4c 17%, #222426 48%, #0b0d0e 100%);
+  box-shadow:
+    inset 0 -1px 0 #050606,
+    inset 0 12px 20px rgba(0,0,0,.34),
+    0 0 12px rgba(0,0,0,.7);
 }
 
-.feature-card {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    padding: 16px;
-    border: 1px solid var(--wf-border);
-    background: rgba(255, 255, 255, 0.03);
-    color: inherit;
-    text-decoration: none;
-    transition: border-color 0.2s ease, background 0.2s ease;
-
-    &:hover:not(.locked) {
-        border-color: var(--wf-gold);
-        background: rgba(216, 184, 102, 0.08);
-    }
-
-    &.locked {
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
+/* Matching riveted metal divider between the central artwork and lower controls. */
+.launcher-navigation::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -9px;
+  height: 18px;
+  z-index: 20;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 8px 50%, #b6b6b6 0 2px, #45484a 2.4px 4.2px, #090a0b 4.6px 5.4px, transparent 5.8px) 0 0 / 46px 18px repeat-x,
+    linear-gradient(180deg, #6a6d6e 0%, #222527 25%, #090a0b 50%, #343739 75%, #77797a 100%);
+  border-top: 1px solid #0a0b0c;
+  border-bottom: 1px solid #090a0a;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.24),
+    inset 0 -1px 0 rgba(255,255,255,.08),
+    0 3px 7px rgba(0,0,0,.65);
 }
 
-.feature-name {
-    color: var(--wf-gold);
-    font-size: 1rem;
+/* Irregular stone/metal cracks rather than a repeating diagonal pattern. */
+.launcher-navigation::after {
+  content: '';
+  position: absolute;
+  inset: 10px 12px;
+  pointer-events: none;
+  opacity: .85;
+  background:
+    linear-gradient(117deg, transparent 0 12%, rgba(4,5,6,.65) 12.08% 12.28%, transparent 12.45% 100%),
+    linear-gradient(78deg, transparent 0 28%, rgba(238,238,238,.12) 28.08% 28.28%, transparent 28.5% 100%),
+    linear-gradient(145deg, transparent 0 45%, rgba(2,3,3,.8) 45.08% 45.25%, transparent 45.5% 100%),
+    linear-gradient(24deg, transparent 0 58%, rgba(238,238,238,.10) 58.12% 58.33%, transparent 58.55% 100%),
+    linear-gradient(132deg, transparent 0 74%, rgba(0,0,0,.72) 74.08% 74.3%, transparent 74.6% 100%),
+    linear-gradient(101deg, transparent 0 84%, rgba(255,255,255,.09) 84.1% 84.26%, transparent 84.5% 100%),
+    linear-gradient(33deg, transparent 0 91%, rgba(0,0,0,.72) 91.05% 91.24%, transparent 91.5% 100%);
+  mix-blend-mode: overlay;
 }
 
-.feature-text {
-    color: var(--wf-muted);
-    font-size: 0.85rem;
+.launcher-version,
+.utility-links,
+.play-area {
+  position: relative;
+  z-index: 2;
 }
 
-.feature-soon {
-    margin-top: auto;
-    color: var(--wf-accent);
-    font-size: 0.7rem;
-    letter-spacing: 2px;
-    text-transform: uppercase;
+.launcher-version {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 5px;
+  align-content: center;
 }
 
-/* ─── CLASSES AND RACES ─── */
-
-.tile-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 12px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+.launcher-version label {
+  color: #e0bd62;
+  font: 700 14px/1 Georgia, 'Times New Roman', serif;
+  text-shadow: 1px 1px 0 #000, 0 0 3px rgba(0,0,0,.75);
 }
 
-.tile {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 8px;
-    border: 1px solid var(--wf-border);
-    background: rgba(255, 255, 255, 0.03);
-    text-align: center;
+.launcher-version select {
+  width: 100%;
+  height: 26px;
+  box-sizing: border-box;
+  padding: 2px 27px 2px 7px;
+  color: #191919;
+  border: 1px solid #0a0a0a;
+  border-radius: 0;
+  outline: 1px solid rgba(197,170,100,.38);
+  font: 700 12px/1 Arial, Helvetica, sans-serif;
+  background: linear-gradient(#f4f1e9, #d8d4c9);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.95),
+    inset 0 -1px 0 rgba(0,0,0,.25),
+    0 2px 4px rgba(0,0,0,.56);
 }
 
-.tile-icon {
-    width: 40px;
-    height: 40px;
-    border: 1px solid var(--wf-gold-dim);
-    object-fit: cover;
+/* ─── FEATURE BUTTONS ─── */
+
+.utility-links {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 8px;
 }
 
-.tile-name {
-    font-size: 0.9rem;
+.resource-link-row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
-.race-columns {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 24px;
+.tiny-link {
+  position: relative;
+  min-height: 34px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 2px solid #080d12;
+  border-radius: 1px;
+  overflow: hidden;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #e7ca75;
+  font: 700 11px/1 Arial, Helvetica, sans-serif;
+  letter-spacing: .02em;
+  text-shadow: 1px 1px 0 #000, 0 0 3px rgba(0,0,0,.9);
+  background:
+    radial-gradient(circle at 34% 18%, rgba(179,208,232,.20), transparent 24%),
+    linear-gradient(180deg, rgba(145,176,205,.16), transparent 45%),
+    linear-gradient(#40566c 0%, #253746 46%, #101a22 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(223,233,240,.34),
+    inset 0 -2px 0 rgba(0,0,0,.83),
+    inset 0 0 0 1px rgba(198,165,88,.22),
+    0 0 0 1px rgba(0,0,0,.75),
+    0 3px 7px rgba(0,0,0,.75);
 }
 
-.race-faction {
-    margin: 0 0 8px;
-    padding-bottom: 6px;
-    border-bottom: 2px solid var(--wf-alliance);
-    font-size: 1rem;
-    font-weight: normal;
-    letter-spacing: 2px;
-    text-transform: uppercase;
+.tiny-link::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border: 1px solid rgba(211,187,120,.23);
+  box-shadow: inset 0 0 10px rgba(0,0,0,.54);
+  pointer-events: none;
 }
 
-.race-column.horde .race-faction {
-    border-bottom-color: var(--wf-horde);
+.tiny-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 13% 53%, rgba(255,255,255,.12) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 82% 34%, rgba(0,0,0,.25) 0 1px, transparent 1.7px),
+    radial-gradient(circle at 52% 72%, rgba(255,255,255,.08) 0 1px, transparent 1.5px);
+  background-size: 11px 11px, 13px 13px, 17px 17px;
+  mix-blend-mode: overlay;
+  opacity: .72;
+  pointer-events: none;
 }
 
-.race-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+.tiny-link:hover {
+  filter: brightness(1.18);
 }
 
-.race-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 6px 8px;
-    background: rgba(255, 255, 255, 0.03);
-
-    .tile-name {
-        flex: 1;
-        min-width: 0;
-    }
+.tiny-link:active {
+  transform: translateY(1px);
 }
 
-.race-count {
-    color: var(--wf-muted);
-    font-size: 0.75rem;
-    white-space: nowrap;
+.tiny-link.disabled {
+    opacity: 0.55;
+    cursor: default;
+}
+
+.tiny-link.disabled:hover {
+    filter: none;
+}
+
+.tiny-link:focus-visible,
+.launcher-version select:focus-visible {
+    outline: 1px solid #d8b866;
+    outline-offset: 2px;
+}
+
+/* ─── PLAY BUTTON ─── */
+
+.play-area {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 /* ─── RESPONSIVE ─── */
 
+/* Desktop keeps the fixed full-screen launcher; narrower screens let the page grow and scroll. */
 @include tablet {
-    .race-columns {
-        grid-template-columns: minmax(0, 1fr);
+    :host {
+        height: auto;
+        min-height: 100dvh;
+        overflow: visible;
+    }
+
+    .launcher-page {
+        height: auto;
+        min-height: 100dvh;
+    }
+
+    .launcher-shell {
+        height: auto;
+        min-height: 100dvh;
+        grid-template-rows: 96px minmax(440px, 1fr) auto auto;
+    }
+
+    .launcher-main {
+        grid-template-columns: 1fr;
+    }
+
+    .artwork-layer {
+        right: 0;
+    }
+
+    .content-spacer {
+        display: none;
+    }
+
+    app-news-panel {
+        grid-column: 1;
+        align-self: end;
+        width: min(100%, 680px);
+        margin-left: auto;
+    }
+
+    .launcher-navigation {
+        grid-template-columns: 190px 1fr 190px;
+        gap: 14px;
+        padding-inline: 14px;
     }
 }
 
 @include mobile {
-    .hero-title {
-        font-size: 1.8rem;
-        letter-spacing: 3px;
+    .launcher-navigation {
+        grid-template-columns: 1fr 1fr;
     }
 
-    .panel {
-        padding: 16px 12px;
+    .utility-links {
+        order: 3;
+        grid-column: 1 / -1;
     }
 
-    .tile-grid {
-        grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
-        gap: 8px;
+    .play-area {
+        justify-content: flex-end;
     }
 }
 
 @include small {
-    .faction-btn {
-        padding: 8px 18px;
+    .launcher-navigation {
+        grid-template-columns: 1fr;
+    }
+
+    .utility-links {
+        grid-column: auto;
+    }
+
+    .play-area {
+        justify-content: center;
     }
 }

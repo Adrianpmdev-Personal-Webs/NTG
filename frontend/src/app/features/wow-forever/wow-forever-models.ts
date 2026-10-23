@@ -8,6 +8,13 @@
 
 export type Faction = 'ALLIANCE' | 'HORDE';
 
+export interface LauncherNewsItem {
+    id: number;
+    title: string;
+    date?: string;
+    image?: string;
+}
+
 export interface WowClass {
     id: string;
     slug: string;

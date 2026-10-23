@@ -12,10 +12,10 @@ export const WOW_FOREVER_ADMIN_ROUTES: Routes = [
     {
         path: '',
         pathMatch: 'full',
-        redirectTo: 'base-data'
+        redirectTo: 'management'
     },
     {
-        path: 'base-data',
-        loadComponent: () => import('./admin/base-data/base-data').then(m => m.BaseData)
+        path: 'management',
+        loadComponent: () => import('./admin/management/management').then(m => m.Management)
     }
 ];

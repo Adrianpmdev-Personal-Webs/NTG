@@ -73,8 +73,8 @@
 
                         <div class="game-actions" (click)="$event.stopPropagation()">
                             @if (authService.isAdmin()) {
-                                <button class="btn-neon btn-sm" (click)="openEdit(game)">EDITAR</button>
-                                <button class="btn-neon btn-neon-danger btn-sm" (click)="openDelete(game)">BORRAR</button>
+                                <button class="action-btn btn-neon" title="Editar" (click)="openEdit(game)">✎ EDITAR</button>
+                                <button class="action-btn btn-neon btn-neon-danger" title="Eliminar" (click)="openDelete(game)">✕ ELIMINAR</button>
                             }
                         </div>
                     </div>
@@ -85,64 +85,60 @@
 
     <!-- CREATE MODAL -->
     @if (modalMode() === 'create') {
-        <div class="modal-backdrop" (click)="closeModal()">
-            <div class="modal terminal-card" (click)="$event.stopPropagation()">
+        <div class="modal-overlay" (click)="closeModal()">
+            <div class="modal terminal-card animate-fade-up" (click)="$event.stopPropagation()">
                 <div class="modal-header">
                     <span class="modal-title">// NUEVO JUEGO</span>
-                    <button class="modal-close" (click)="closeModal()">✕</button>
+                    <button type="button" class="close-btn" (click)="closeModal()">✕</button>
                 </div>
 
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label class="form-label">NOMBRE *</label>
-                        <input
-                            class="neon-input"
-                            type="text"
-                            [(ngModel)]="form.name"
-                            placeholder="ej. Pokémon Escarlata"
-                        />
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">DESCRIPCIÓN</label>
-                        <textarea
-                            class="neon-input"
-                            rows="3"
-                            [(ngModel)]="form.description"
-                            placeholder="Descripción del juego..."
-                        ></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">URL IMAGEN *</label>
-                        <input
-                            class="neon-input"
-                            type="url"
-                            [(ngModel)]="form.imageUrl"
-                            placeholder="https://..."
-                        />
-                    </div>
-
-                    @if (form.imageUrl) {
-                        <div class="img-preview-wrap">
-                            <img
-                                [src]="form.imageUrl"
-                                class="img-preview"
-                                (error)="$any($event.target).style.display='none'"
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label class="field-label">// NOMBRE *</label>
+                            <input
+                                class="neon-input"
+                                type="text"
+                                [(ngModel)]="form.name"
+                                placeholder="ej. Pokémon Escarlata"
                             />
                         </div>
-                    }
-                </div>
 
-                <div class="modal-footer">
-                    <button class="btn-neon" (click)="closeModal()">CANCELAR</button>
-                    <button
-                        class="btn-neon btn-neon-success"
-                        [disabled]="submitting() || !form.name || !form.imageUrl"
-                        (click)="submitCreate()"
-                    >
-                        {{ submitting() ? 'GUARDANDO...' : 'CREAR JUEGO' }}
-                    </button>
+                        <div class="form-field">
+                            <label class="field-label">// DESCRIPCIÓN</label>
+                            <textarea
+                                class="neon-input"
+                                rows="3"
+                                [(ngModel)]="form.description"
+                                placeholder="Descripción del juego..."
+                            ></textarea>
+                        </div>
+
+                        <div class="form-field">
+                            <label class="field-label">// URL IMAGEN *</label>
+                            <input
+                                class="neon-input"
+                                type="url"
+                                [(ngModel)]="form.imageUrl"
+                                placeholder="https://..."
+                            />
+                        </div>
+
+                        @if (form.imageUrl) {
+                            <div class="img-preview-wrap">
+                                <img
+                                    [src]="form.imageUrl"
+                                    class="img-preview"
+                                    (error)="$any($event.target).style.display='none'"
+                                />
+                            </div>
+                        }
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-neon" [disabled]="submitting() || !form.name || !form.imageUrl" (click)="submitCreate()">{{ submitting() ? 'GUARDANDO...' : '⟶ CREAR JUEGO' }}</button>
+                        <button type="button" class="btn-neon btn-neon-danger" (click)="closeModal()">CANCELAR</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -150,45 +146,45 @@
 
     <!-- EDIT MODAL -->
     @if (modalMode() === 'edit') {
-        <div class="modal-backdrop" (click)="closeModal()">
-            <div class="modal terminal-card" (click)="$event.stopPropagation()">
+        <div class="modal-overlay" (click)="closeModal()">
+            <div class="modal terminal-card animate-fade-up" (click)="$event.stopPropagation()">
                 <div class="modal-header">
                     <span class="modal-title">// EDITAR JUEGO</span>
-                    <button class="modal-close" (click)="closeModal()">✕</button>
+                    <button type="button" class="close-btn" (click)="closeModal()">✕</button>
                 </div>
 
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label class="form-label">NOMBRE</label>
-                        <input class="neon-input" type="text" [(ngModel)]="editForm.name" />
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">DESCRIPCIÓN</label>
-                        <textarea class="neon-input" rows="3" [(ngModel)]="editForm.description"></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">URL IMAGEN</label>
-                        <input class="neon-input" type="url" [(ngModel)]="editForm.imageUrl" />
-                    </div>
-
-                    @if (editForm.imageUrl) {
-                        <div class="img-preview-wrap">
-                            <img
-                                [src]="editForm.imageUrl"
-                                class="img-preview"
-                                (error)="$any($event.target).style.display='none'"
-                            />
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <label class="field-label">// NOMBRE</label>
+                            <input class="neon-input" type="text" [(ngModel)]="editForm.name" />
                         </div>
-                    }
-                </div>
 
-                <div class="modal-footer">
-                    <button class="btn-neon" (click)="closeModal()">CANCELAR</button>
-                    <button class="btn-neon btn-neon-success" [disabled]="submitting()" (click)="submitEdit()">
-                        {{ submitting() ? 'GUARDANDO...' : 'GUARDAR' }}
-                    </button>
+                        <div class="form-field">
+                            <label class="field-label">// DESCRIPCIÓN</label>
+                            <textarea class="neon-input" rows="3" [(ngModel)]="editForm.description"></textarea>
+                        </div>
+
+                        <div class="form-field">
+                            <label class="field-label">// URL IMAGEN</label>
+                            <input class="neon-input" type="url" [(ngModel)]="editForm.imageUrl" />
+                        </div>
+
+                        @if (editForm.imageUrl) {
+                            <div class="img-preview-wrap">
+                                <img
+                                    [src]="editForm.imageUrl"
+                                    class="img-preview"
+                                    (error)="$any($event.target).style.display='none'"
+                                />
+                            </div>
+                        }
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn-neon" [disabled]="submitting()" (click)="submitEdit()">{{ submitting() ? 'GUARDANDO...' : '⟶ GUARDAR' }}</button>
+                        <button type="button" class="btn-neon btn-neon-danger" (click)="closeModal()">CANCELAR</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -196,27 +192,26 @@
 
     <!-- DELETE MODAL -->
     @if (modalMode() === 'delete') {
-        <div class="modal-backdrop" (click)="closeModal()">
-            <div class="modal modal-sm terminal-card" (click)="$event.stopPropagation()">
+        <div class="modal-overlay" (click)="closeModal()">
+            <div class="modal terminal-card animate-fade-up" (click)="$event.stopPropagation()">
                 <div class="modal-header">
-                    <span class="modal-title danger-title">// CONFIRMAR BORRADO</span>
-                    <button class="modal-close" (click)="closeModal()">✕</button>
+                    <span class="modal-title danger-title">// ELIMINAR JUEGO</span>
+                    <button type="button" class="close-btn" (click)="closeModal()">✕</button>
                 </div>
 
                 <div class="modal-body">
-                    <p class="delete-warning">
-                        ¿Eliminar el juego
-                        <strong class="warn-name">{{ selectedGame()?.name }}</strong>
-                        y todos sus lockes y torneos asociados?
-                    </p>
-                    <p class="delete-note">⚠ Esta acción es irreversible.</p>
-                </div>
-
-                <div class="modal-footer">
-                    <button class="btn-neon" (click)="closeModal()">CANCELAR</button>
-                    <button class="btn-neon btn-neon-danger" [disabled]="submitting()" (click)="confirmDelete()">
-                        {{ submitting() ? 'ELIMINANDO...' : 'ELIMINAR' }}
-                    </button>
+                    <div class="delete-warning">
+                        <div class="warning-icon">⚠</div>
+                        <div class="warning-text">
+                            <div class="warning-title">[ALERTA] OPERACIÓN DESTRUCTIVA</div>
+                            <div class="warning-desc">¿Eliminar el juego <span class="highlight">{{ selectedGame()?.name }}</span> y todos sus lockes y torneos asociados?</div>
+                            <div class="warning-id">Esta acción es irreversible.</div>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button type="button" class="btn-neon btn-neon-danger" [disabled]="submitting()" (click)="confirmDelete()">{{ submitting() ? 'ELIMINANDO...' : '⟶ CONFIRMAR ELIMINACIÓN' }}</button>
+                        <button type="button" class="btn-neon" (click)="closeModal()">CANCELAR</button>
+                    </div>
                 </div>
             </div>
         </div>

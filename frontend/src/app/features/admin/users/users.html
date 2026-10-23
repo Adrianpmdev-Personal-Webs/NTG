@@ -160,7 +160,7 @@
             @if (modalMode() === 'create') {
                 <div class="modal-header">
                     <span class="modal-title">// CREAR NUEVO USUARIO</span>
-                    <button class="close-btn" (click)="closeModal()">✕</button>
+                    <button type="button" class="close-btn" (click)="closeModal()">✕</button>
                 </div>
                 <div class="modal-body">
                     <div class="terminal-line">
@@ -177,9 +177,9 @@
                         </div>
                         <div class="form-field">
                             <label class="field-label">// ETIQUETAS (ACCESO A JUEGOS)</label>
-                            <div class="tag-picker">
+                            <div class="check-group">
                                 @for (tag of availableTags(); track tag.key) {
-                                    <label class="tag-option">
+                                    <label class="check-option">
                                         <input type="checkbox" [checked]="form.tags.includes(tag.key)"
                                             (change)="toggleCreateTag(tag.key)" />
                                         <span>{{ tag.name }}</span>
@@ -206,7 +206,7 @@
             @if (modalMode() === 'edit') {
                 <div class="modal-header">
                     <span class="modal-title">// MODIFICAR USUARIO :: {{ editTarget()?.username }}</span>
-                    <button class="close-btn" (click)="closeModal()">✕</button>
+                    <button type="button" class="close-btn" (click)="closeModal()">✕</button>
                 </div>
                 <div class="modal-body">
                     <div class="form-grid">
@@ -222,9 +222,9 @@
                         </div>
                         <div class="form-field">
                             <label class="field-label">// ETIQUETAS (ACCESO A JUEGOS)</label>
-                            <div class="tag-picker">
+                            <div class="check-group">
                                 @for (tag of availableTags(); track tag.key) {
-                                    <label class="tag-option">
+                                    <label class="check-option">
                                         <input type="checkbox" [checked]="editTags.includes(tag.key)"
                                             (change)="toggleEditTag(tag.key)" />
                                         <span>{{ tag.name }}</span>
@@ -247,8 +247,8 @@
             <!-- DELETE modal -->
             @if (modalMode() === 'delete') {
                 <div class="modal-header">
-                    <span class="modal-title" style="color: var(--neon-red)">// ELIMINAR USUARIO</span>
-                    <button class="close-btn" (click)="closeModal()">✕</button>
+                    <span class="modal-title danger-title">// ELIMINAR USUARIO</span>
+                    <button type="button" class="close-btn" (click)="closeModal()">✕</button>
                 </div>
                 <div class="modal-body">
                     <div class="delete-warning">

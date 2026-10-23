@@ -1,0 +1,8 @@
+<button
+    class="wow-button"
+    [class.wow-button--large]="large()"
+    [disabled]="disabled()"
+    type="button">
+    <span class="wow-button__shine"></span>
+    <span class="wow-button__label"><ng-content /></span>
+</button>

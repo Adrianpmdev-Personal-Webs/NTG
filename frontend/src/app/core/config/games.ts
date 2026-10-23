@@ -50,7 +50,7 @@ export const GAMES: readonly GameEntry[] = [
         route: '/wow-forever',
         adminRoute: '/admin/wow-forever',
         adminItems: [
-            { label: 'DATOS BASE', route: '/admin/wow-forever/base-data', icon: '▣' }
+            { label: 'GESTIÓN', route: '/admin/wow-forever/management', icon: '▣' }
         ],
         upcoming: true
     },

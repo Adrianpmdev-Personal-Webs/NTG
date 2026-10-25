@@ -76,6 +76,13 @@ export interface TalentTree {
     talents: Talent[];
 }
 
+/** A talent under the pointer (or keyboard focus), with the screen position the tooltip card hangs from. */
+export interface TalentHover {
+    talent: Talent;
+    x: number;
+    y: number;
+}
+
 export interface TalentClass {
     slug: string;
     trees: TalentTree[];

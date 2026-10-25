@@ -7,7 +7,6 @@
  */
 
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { FACTION_BACKGROUNDS, WOW_FEATURES } from '../wow-forever-config';
 import { Faction } from '../wow-forever-models';
 import { LegalNotice } from '../ui/legal-notice/legal-notice';
@@ -18,7 +17,7 @@ import { NewsPanel } from './news-panel/news-panel';
 
 @Component({
     selector: 'app-wow-forever-home',
-    imports: [RouterLink, LegalNotice, WowButton, WowFrame, LauncherHeader, NewsPanel],
+    imports: [LegalNotice, WowButton, WowFrame, LauncherHeader, NewsPanel],
     templateUrl: './home.html',
     styleUrl: './home.scss',
     changeDetection: ChangeDetectionStrategy.OnPush

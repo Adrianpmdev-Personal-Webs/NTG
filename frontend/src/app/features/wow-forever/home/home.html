@@ -27,9 +27,9 @@
                     <div class="resource-link-row">
                         @for (feature of features; track feature.id) {
                             @if (feature.available) {
-                                <a class="tiny-link" [routerLink]="feature.route">{{ feature.label }}</a>
+                                <app-wow-button [link]="feature.route">{{ feature.label }}</app-wow-button>
                             } @else {
-                                <span class="tiny-link disabled" title="Próximamente" aria-disabled="true">{{ feature.label }}</span>
+                                <app-wow-button [disabled]="true" title="Próximamente">{{ feature.label }}</app-wow-button>
                             }
                         }
                     </div>

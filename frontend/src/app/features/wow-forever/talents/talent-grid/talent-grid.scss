@@ -12,6 +12,9 @@
 
 :host {
     display: block;
+    /* The grid keeps the proportions of the tree; without a cap it would grow with the width of the column. */
+    max-width: 280px;
+    margin: 0 auto;
 }
 
 /* ─── GRID ─── */
@@ -83,11 +86,6 @@
     &:focus-visible {
         outline: 2px solid #fff;
         outline-offset: 2px;
-    }
-
-    &.selected {
-        outline: 2px solid #fff;
-        outline-offset: 1px;
     }
 
     &.locked {

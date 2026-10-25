@@ -7,11 +7,11 @@
  */
 
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { WowButton } from '../../ui/wow-button/wow-button';
 
 @Component({
     selector: 'app-launcher-header',
-    imports: [RouterLink],
+    imports: [WowButton],
     templateUrl: './launcher-header.html',
     styleUrl: './launcher-header.scss',
     changeDetection: ChangeDetectionStrategy.OnPush

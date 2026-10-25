@@ -23,7 +23,6 @@
             <button
                 type="button"
                 [class]="'talent ' + view.state"
-                [class.selected]="selectedId() === view.talent.id"
                 [attr.aria-label]="view.talent.name + ', rango ' + view.rank + ' de ' + view.talent.maxRanks"
                 (click)="onClick(view.talent)"
                 (contextmenu)="onContextMenu($event, view.talent)"
@@ -32,9 +31,10 @@
                 (pointercancel)="cancelPress()"
                 (pointerleave)="cancelPress()"
                 (keydown)="onKeyDown($event, view.talent)"
-                (mouseenter)="hover.emit(view.talent)"
+                (mouseenter)="onMouseMove($event, view.talent)"
+                (mousemove)="onMouseMove($event, view.talent)"
                 (mouseleave)="hover.emit(null)"
-                (focus)="hover.emit(view.talent)"
+                (focus)="onFocus($event, view.talent)"
                 (blur)="hover.emit(null)">
                 <img class="icon" [src]="iconUrl(view.talent.iconId)" alt="" draggable="false" (error)="onIconError($event)" />
                 <span class="rank">{{ view.rank }}/{{ view.talent.maxRanks }}</span>

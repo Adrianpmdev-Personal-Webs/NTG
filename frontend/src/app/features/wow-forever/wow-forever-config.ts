@@ -66,6 +66,37 @@ export const WOW_FEATURES: readonly WowFeature[] = [
 
 export const wowIconUrl = (icon: string): string => `${WOW_ICON_BASE_URL}/${icon}.jpg`;
 
+/** Icon of each talent tree (the small picture next to its name), by `<class>-<tree>`. Names from the Blizzard icon library. */
+export const TREE_ICONS: Readonly<Record<string, string>> = {
+    'warrior-arms': 'ability_rogue_eviscerate',
+    'warrior-fury': 'ability_warrior_innerrage',
+    'warrior-protection': 'inv_shield_06',
+    'paladin-holy': 'spell_holy_holybolt',
+    'paladin-protection': 'spell_holy_devotionaura',
+    'paladin-retribution': 'spell_holy_auraoflight',
+    'hunter-beast-mastery': 'ability_hunter_beasttaming',
+    'hunter-marksmanship': 'ability_marksmanship',
+    'hunter-survival': 'ability_hunter_swiftstrike',
+    'rogue-assassination': 'ability_rogue_eviscerate',
+    'rogue-combat': 'ability_backstab',
+    'rogue-subtlety': 'ability_stealth',
+    'priest-discipline': 'spell_holy_wordfortitude',
+    'priest-holy': 'spell_holy_guardianspirit',
+    'priest-shadow-magic': 'spell_shadow_shadowwordpain',
+    'shaman-elemental-combat': 'spell_nature_lightning',
+    'shaman-enhancement': 'spell_nature_lightningshield',
+    'shaman-restoration': 'spell_nature_magicimmunity',
+    'mage-arcane': 'spell_holy_magicalsentry',
+    'mage-fire': 'spell_fire_firebolt02',
+    'mage-frost': 'spell_frost_frostbolt02',
+    'warlock-affliction': 'spell_shadow_deathcoil',
+    'warlock-demonology': 'spell_shadow_metamorphosis',
+    'warlock-destruction': 'spell_shadow_rainoffire',
+    'druid-balance': 'spell_nature_starfall',
+    'druid-feral-combat': 'ability_racial_bearform',
+    'druid-restoration': 'spell_nature_healingtouch'
+};
+
 /** Where the talent icons come from. The talent data names them by id, not by name; one line to change if the host changes. */
 export const WOW_TALENT_ICON_BASE_URL = 'https://assets.wow-forever.gg/icons';
 

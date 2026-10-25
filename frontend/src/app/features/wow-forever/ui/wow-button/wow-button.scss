@@ -1,10 +1,13 @@
 /**
  * WoW button styles.
  *
- * Metal launcher button, copied from the original WoW Forever web.
+ * Metal launcher button, copied from the original WoW Forever web. It is the only button style of the WoW Forever area:
+ * action buttons, links back to NTG or the launcher and the tool links of the home all use it (see WowButton).
  *
  * @author @adrianpmdev
  */
+
+@use 'mixins' as *;
 
 :host {
   display: inline-block;
@@ -13,15 +16,21 @@
 .wow-button {
   position: relative;
   isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  text-decoration: none;
+  white-space: nowrap;
   min-width: 112px;
   min-height: 34px;
-  padding: 0 20px;
+  padding: 0 14px;
   border: 2px solid #080d12;
   border-radius: 1px;
   overflow: hidden;
   cursor: pointer;
   color: #e7ca75;
-  font: 700 12px/1 Arial, Helvetica, sans-serif;
+  font: 700 11px/1 Arial, Helvetica, sans-serif;
   letter-spacing: .02em;
   text-shadow: 1px 1px 0 #000, 0 0 3px rgba(0,0,0,.9);
   background:
@@ -117,4 +126,24 @@
 .wow-button:focus-visible {
     outline: 1px solid #d8b866;
     outline-offset: 2px;
+}
+
+/* ─── RESPONSIVE ─── */
+
+/* Narrow screens: tighter buttons so rows of them wrap instead of overflowing. The large variant keeps its own size. */
+@include mobile {
+  .wow-button:not(.wow-button--large) {
+    min-width: 84px;
+    padding: 0 8px;
+  }
+}
+
+@include small {
+  .wow-button--large {
+    width: 150px;
+    min-width: 150px;
+    min-height: 64px;
+    padding: 0 16px;
+    font-size: 20px;
+  }
 }

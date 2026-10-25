@@ -7,11 +7,11 @@
  */
 
 import { ChangeDetectionStrategy, Component, ElementRef, OnInit, computed, inject, signal, viewChild } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { NotificationService } from '@core/services/notification';
 import { WowForeverApi } from '../../wow-forever-api';
-import { hideBrokenIcon, talentIconUrl, wowIconUrl } from '../../wow-forever-config';
+import { TREE_ICONS, hideBrokenIcon, talentIconUrl, wowIconUrl } from '../../wow-forever-config';
 import { WowClass } from '../../wow-forever-models';
 import { WowButton } from '../../ui/wow-button/wow-button';
 import { WowFrame } from '../../ui/wow-frame/wow-frame';
@@ -31,10 +31,10 @@ import {
     totalPoints,
     treeSlug
 } from '../talents-logic';
-import { Talent, TalentTree, TalentsData } from '../talents-models';
+import { Talent, TalentHover, TalentTree, TalentsData } from '../talents-models';
 import { TalentsApi } from '../talents-api';
 
-interface TalentDetail {
+interface TalentTooltip {
     talent: Talent;
     tree: TalentTree;
     rank: number;
@@ -43,11 +43,14 @@ interface TalentDetail {
     requirements: string[];
 }
 
-const BACKGROUNDS_PATH = '/images/wow-forever/talents/backgrounds';
+/** One background picture per tree, named <class>-<tree>.jpg (e.g. warrior-arms.jpg). */
+const TREE_ART_PATH = '/images/wow-forever/talents/trees';
+/** Distance between the pointer and the tooltip card. */
+const TOOLTIP_OFFSET = 16;
 
 @Component({
     selector: 'app-talent-calculator',
-    imports: [RouterLink, TalentGrid, WowButton, WowFrame],
+    imports: [TalentGrid, WowButton, WowFrame],
     templateUrl: './talent-calculator.html',
     styleUrl: './talent-calculator.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -70,7 +73,7 @@ export class TalentCalculator implements OnInit {
     readonly loading = signal(true);
     readonly failed = signal(false);
     readonly hovered = signal<Talent | null>(null);
-    readonly selected = signal<Talent | null>(null);
+    private readonly pointer = signal({ x: 0, y: 0 });
     readonly activeTree = signal(0);
 
     readonly trees = computed<TalentTree[]>(() => {
@@ -91,8 +94,8 @@ export class TalentCalculator implements OnInit {
     /** The level cannot go below what the spent points need. */
     readonly minLevel = computed(() => minLevelFor(this.levels(), this.pointsSpent()));
 
-    readonly detail = computed<TalentDetail | null>(() => {
-        const talent = this.hovered() ?? this.selected();
+    readonly tooltip = computed<TalentTooltip | null>(() => {
+        const talent = this.hovered();
         const tree = talent ? this.treeOf(talent) : undefined;
 
         if (!talent || !tree) {
@@ -126,6 +129,20 @@ export class TalentCalculator implements OnInit {
         };
     });
 
+    /** The card hangs from the pointer, on the side of it that has more room, so it never leaves the screen. */
+    readonly tooltipStyle = computed<Record<string, string>>(() => {
+        const { x, y } = this.pointer();
+
+        return {
+            ...(x > window.innerWidth / 2
+                ? { right: `${window.innerWidth - x + TOOLTIP_OFFSET}px` }
+                : { left: `${x + TOOLTIP_OFFSET}px` }),
+            ...(y > window.innerHeight / 2
+                ? { bottom: `${window.innerHeight - y + TOOLTIP_OFFSET}px` }
+                : { top: `${y + TOOLTIP_OFFSET}px` })
+        };
+    });
+
     readonly iconUrl = wowIconUrl;
     readonly talentIconUrl = talentIconUrl;
     readonly onIconError = hideBrokenIcon;
@@ -150,7 +167,6 @@ export class TalentCalculator implements OnInit {
         this.selectedClass.set(wowClass);
         this.ranks.set({});
         this.hovered.set(null);
-        this.selected.set(null);
         this.activeTree.set(0);
 
         if (level) {
@@ -166,7 +182,6 @@ export class TalentCalculator implements OnInit {
 
     addPoint(talent: Talent): void {
         const tree = this.treeOf(talent);
-        this.selected.set(talent);
 
         if (tree && canAdd(talent, tree, this.ranks(), this.pointsLeft())) {
             this.ranks.update(ranks => ({ ...ranks, [talent.id]: (ranks[talent.id] ?? 0) + 1 }));
@@ -181,18 +196,6 @@ export class TalentCalculator implements OnInit {
             this.ranks.update(ranks => ({ ...ranks, [talent.id]: (ranks[talent.id] ?? 0) - 1 }));
             this.syncUrl();
         }
-    }
-
-    canAddPoint(talent: Talent): boolean {
-        const tree = this.treeOf(talent);
-
-        return !!tree && canAdd(talent, tree, this.ranks(), this.pointsLeft());
-    }
-
-    canRemovePoint(talent: Talent): boolean {
-        const tree = this.treeOf(talent);
-
-        return !!tree && canRemove(talent, tree, this.ranks());
     }
 
     reset(): void {
@@ -220,12 +223,23 @@ export class TalentCalculator implements OnInit {
         );
     }
 
-    hoverTalent(talent: Talent | null): void {
-        this.hovered.set(talent);
+    onHover(hover: TalentHover | null): void {
+        this.hovered.set(hover?.talent ?? null);
+
+        if (hover) {
+            this.pointer.set({ x: hover.x, y: hover.y });
+        }
+    }
+
+    /** Icon of a tree (the small picture next to its name), or an empty string when the tree has none. */
+    treeIcon(tree: TalentTree): string {
+        const icon = TREE_ICONS[this.treeKey(tree)];
+
+        return icon ? wowIconUrl(icon) : '';
     }
 
     treeBackground(tree: TalentTree): string {
-        return `url('${BACKGROUNDS_PATH}/${this.selectedClass()?.slug}-${treeSlug(tree)}.webp')`;
+        return `url('${TREE_ART_PATH}/${this.treeKey(tree)}.jpg')`;
     }
 
     onCarouselScroll(): void {
@@ -241,6 +255,11 @@ export class TalentCalculator implements OnInit {
 
         this.activeTree.set(index);
         element?.scrollTo({ left: index * element.clientWidth, behavior: 'smooth' });
+    }
+
+    /** Name of a tree in file names and in the icon table, e.g. `warrior-arms`. */
+    private treeKey(tree: TalentTree): string {
+        return `${this.selectedClass()?.slug}-${treeSlug(tree)}`;
     }
 
     private treeOf(talent: Talent): TalentTree | undefined {

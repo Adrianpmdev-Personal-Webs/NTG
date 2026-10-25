@@ -9,7 +9,7 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { hideBrokenIcon, talentIconUrl } from '../../wow-forever-config';
 import { Ranks, TalentState, prerequisitesOf, talentState } from '../talents-logic';
-import { Talent, TalentTree } from '../talents-models';
+import { Talent, TalentHover, TalentTree } from '../talents-models';
 
 interface TalentView {
     talent: Talent;
@@ -39,13 +39,13 @@ export class TalentGrid {
     readonly tree = input.required<TalentTree>();
     readonly ranks = input<Ranks>({});
     readonly pointsLeft = input(0);
-    readonly selectedId = input<number | null>(null);
 
     /** The player clicked a talent (+1 point). */
     readonly add = output<Talent>();
     /** Right click or long press (-1 point). */
     readonly remove = output<Talent>();
-    readonly hover = output<Talent | null>();
+    /** The pointer (or keyboard focus) is on a talent, or null when it leaves. */
+    readonly hover = output<TalentHover | null>();
 
     /** Only the talents the source describes are drawn. */
     private readonly visibleTalents = computed(() => this.tree().talents.filter(talent => talent.name !== null));
@@ -80,6 +80,16 @@ export class TalentGrid {
     private pressTimer: ReturnType<typeof setTimeout> | null = null;
     private suppressClick = false;
     private lastLongPress = 0;
+
+    onMouseMove(event: MouseEvent, talent: Talent): void {
+        this.hover.emit({ talent, x: event.clientX, y: event.clientY });
+    }
+
+    onFocus(event: FocusEvent, talent: Talent): void {
+        const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+
+        this.hover.emit({ talent, x: rect.left + rect.width / 2, y: rect.bottom });
+    }
 
     onClick(talent: Talent): void {
         if (this.suppressClick) {

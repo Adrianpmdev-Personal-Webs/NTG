@@ -1,0 +1,44 @@
+<div class="grid" [style.--cols]="tree().columns" [style.--rows]="tree().rows">
+    <svg class="arrows" [attr.viewBox]="'0 0 ' + tree().columns + ' ' + tree().rows" aria-hidden="true">
+        <defs>
+            <marker id="arrow-off" markerUnits="userSpaceOnUse" markerWidth="0.3" markerHeight="0.3" refX="0.28" refY="0.15" orient="auto">
+                <path class="head" d="M 0 0 L 0.3 0.15 L 0 0.3 z" />
+            </marker>
+            <marker id="arrow-on" markerUnits="userSpaceOnUse" markerWidth="0.3" markerHeight="0.3" refX="0.28" refY="0.15" orient="auto">
+                <path class="head active" d="M 0 0 L 0.3 0.15 L 0 0.3 z" />
+            </marker>
+        </defs>
+
+        @for (arrow of arrows(); track arrow.id) {
+            <path
+                class="line"
+                [class.active]="arrow.active"
+                [attr.d]="arrow.path"
+                [attr.marker-end]="arrow.active ? 'url(#arrow-on)' : 'url(#arrow-off)'" />
+        }
+    </svg>
+
+    @for (view of views(); track view.talent.id) {
+        <div class="cell" [style.grid-row]="view.talent.row + 1" [style.grid-column]="view.talent.column + 1">
+            <button
+                type="button"
+                [class]="'talent ' + view.state"
+                [class.selected]="selectedId() === view.talent.id"
+                [attr.aria-label]="view.talent.name + ', rango ' + view.rank + ' de ' + view.talent.maxRanks"
+                (click)="onClick(view.talent)"
+                (contextmenu)="onContextMenu($event, view.talent)"
+                (pointerdown)="onPointerDown($event, view.talent)"
+                (pointerup)="cancelPress()"
+                (pointercancel)="cancelPress()"
+                (pointerleave)="cancelPress()"
+                (keydown)="onKeyDown($event, view.talent)"
+                (mouseenter)="hover.emit(view.talent)"
+                (mouseleave)="hover.emit(null)"
+                (focus)="hover.emit(view.talent)"
+                (blur)="hover.emit(null)">
+                <img class="icon" [src]="iconUrl(view.talent.iconId)" alt="" draggable="false" (error)="onIconError($event)" />
+                <span class="rank">{{ view.rank }}/{{ view.talent.maxRanks }}</span>
+            </button>
+        </div>
+    }
+</div>

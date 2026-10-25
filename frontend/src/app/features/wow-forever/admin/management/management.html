@@ -1,14 +1,14 @@
-<div class="page">
-    <header class="page-header">
-        <h1 class="page-title">WOW FOREVER · GESTIÓN</h1>
-        <p class="page-subtitle">Clases, razas y ajustes que usan el resto de herramientas.</p>
+<div class="admin-page">
+    <header class="admin-page-header">
+        <h1 class="admin-page-title">WOW FOREVER · GESTIÓN</h1>
+        <p class="admin-page-subtitle">Clases, razas y ajustes que usan el resto de herramientas.</p>
     </header>
 
-    <div class="tabs" role="tablist">
+    <div class="admin-tabs" role="tablist">
         @for (item of tabs; track item.id) {
             <button
                 type="button"
-                class="tab"
+                class="admin-tab"
                 role="tab"
                 [class.active]="tab() === item.id"
                 [attr.aria-selected]="tab() === item.id"
@@ -19,11 +19,11 @@
     </div>
 
     @if (loading()) {
-        <p class="state">&gt; cargando datos...</p>
+        <p class="admin-page-state">&gt; cargando datos...</p>
     } @else {
         @switch (tab()) {
             @case ('classes') {
-                <div class="toolbar">
+                <div class="admin-toolbar">
                     <button type="button" class="btn-neon" (click)="openCreateClass()">+ NUEVA CLASE</button>
                 </div>
 
@@ -59,7 +59,7 @@
             }
 
             @case ('races') {
-                <div class="toolbar">
+                <div class="admin-toolbar">
                     <button type="button" class="btn-neon" (click)="openCreateRace()">+ NUEVA RAZA</button>
                 </div>
 

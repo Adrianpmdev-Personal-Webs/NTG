@@ -1,74 +1,18 @@
 /**
  * WoW Forever management styles.
  *
- * Tabs, data tables, and settings rows of the admin screen. Buttons, inputs and modals come from the global styles.
+ * Data tables and settings rows of the admin screen. Page chrome, buttons, inputs and modals come from the global styles.
  *
  * @author @adrianpmdev
  */
 
 @use 'mixins' as *;
 
-/* ─── PAGE ─── */
+/* ─── GENERAL ─── */
 
-.page {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    padding: 24px;
-}
-
-.page-title {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: 1.2rem;
-    letter-spacing: 3px;
-    color: var(--neon-green);
-}
-
-.page-subtitle,
-.state,
 .dim {
     color: var(--text-secondary);
     font-size: 0.8rem;
-}
-
-.page-subtitle {
-    margin: 4px 0 0;
-}
-
-/* ─── TABS AND TOOLBAR ─── */
-
-.tabs {
-    display: flex;
-    gap: 4px;
-    border-bottom: 1px solid var(--border-color);
-    overflow-x: auto;
-}
-
-.tab {
-    padding: 10px 18px;
-    border: 0;
-    border-bottom: 2px solid transparent;
-    background: transparent;
-    color: var(--text-secondary);
-    font-family: var(--font-mono);
-    letter-spacing: 2px;
-    cursor: pointer;
-    white-space: nowrap;
-
-    &:hover {
-        color: var(--neon-green);
-    }
-
-    &.active {
-        color: var(--neon-green);
-        border-bottom-color: var(--neon-green);
-    }
-}
-
-.toolbar {
-    display: flex;
-    justify-content: flex-end;
 }
 
 /* ─── TABLE ─── */
@@ -166,25 +110,8 @@
 
 /* ─── RESPONSIVE ─── */
 
-@include tablet {
-    .page {
-        padding: 16px;
-    }
-}
-
 @include mobile {
     .setting-row {
         grid-template-columns: minmax(0, 1fr);
-    }
-}
-
-@include small {
-    .page {
-        padding: 12px 8px;
-    }
-
-    .tab {
-        padding: 8px 12px;
-        letter-spacing: 1px;
     }
 }

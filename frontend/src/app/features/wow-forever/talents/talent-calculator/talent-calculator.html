@@ -1,0 +1,143 @@
+<main class="page">
+    <app-wow-frame>
+        <div class="calc">
+            <header class="calc-header">
+                <a class="link" routerLink="/wow-forever">← Lanzador</a>
+                <h1 class="title">Calculadora de talentos</h1>
+                <a class="link" routerLink="/">← NTG</a>
+            </header>
+
+            @if (loading()) {
+                <p class="state">Cargando…</p>
+            } @else if (failed()) {
+                <p class="state">No se han podido cargar los datos. Inténtalo de nuevo más tarde.</p>
+            } @else {
+                <nav class="classes" aria-label="Clase">
+                    @for (wowClass of classes(); track wowClass.id) {
+                        <button
+                            type="button"
+                            class="class-btn"
+                            [class.active]="selectedClass()?.id === wowClass.id"
+                            [attr.aria-pressed]="selectedClass()?.id === wowClass.id"
+                            (click)="selectClass(wowClass)">
+                            <img class="class-icon" [src]="iconUrl(wowClass.icon)" alt="" (error)="onIconError($event)" />
+                            <span class="class-name">{{ wowClass.name }}</span>
+                        </button>
+                    }
+                </nav>
+
+                <section class="controls">
+                    <div class="level">
+                        <label for="level">Nivel</label>
+                        <input
+                            id="level"
+                            class="level-range"
+                            type="range"
+                            [min]="firstLevel()"
+                            [max]="maxLevel()"
+                            [value]="level()"
+                            (input)="changeLevel($any($event.target).value)" />
+                        <input
+                            class="level-number"
+                            type="number"
+                            aria-label="Nivel"
+                            [min]="firstLevel()"
+                            [max]="maxLevel()"
+                            [value]="level()"
+                            (change)="changeLevel($any($event.target).value)" />
+                    </div>
+
+                    <div class="points" aria-live="polite">
+                        <span>Puntos: <strong>{{ pointsTotal() }}</strong></span>
+                        <span>Gastados: <strong>{{ pointsSpent() }}</strong></span>
+                        <span [class.over]="pointsLeft() === 0">Restantes: <strong>{{ pointsLeft() }}</strong></span>
+                    </div>
+
+                    <div class="actions">
+                        <app-wow-button (click)="reset()">Reiniciar</app-wow-button>
+                        <app-wow-button (click)="share()">Compartir</app-wow-button>
+                    </div>
+                </section>
+
+                @if (trees().length === 0) {
+                    <p class="state">Todavía no hay talentos cargados para esta clase.</p>
+                } @else {
+                    <div class="tree-tabs" role="tablist">
+                        @for (tree of trees(); track tree.id; let index = $index) {
+                            <button
+                                type="button"
+                                class="tree-tab"
+                                role="tab"
+                                [class.active]="activeTree() === index"
+                                [attr.aria-selected]="activeTree() === index"
+                                (click)="goToTree(index)">
+                                {{ tree.name }} <span class="tab-points">{{ treePoints()[index] }}</span>
+                            </button>
+                        }
+                    </div>
+
+                    <div class="trees" #carousel (scroll)="onCarouselScroll()">
+                        @for (tree of trees(); track tree.id; let index = $index) {
+                            <section class="tree">
+                                <header class="tree-header">
+                                    <span class="tree-name">{{ tree.name }}</span>
+                                    <span class="tree-points">{{ treePoints()[index] }}</span>
+                                </header>
+
+                                <div class="tree-body" [style.--tree-bg]="treeBackground(tree)">
+                                    <app-talent-grid
+                                        [tree]="tree"
+                                        [ranks]="ranks()"
+                                        [pointsLeft]="pointsLeft()"
+                                        [selectedId]="selected()?.id ?? null"
+                                        (add)="addPoint($event)"
+                                        (remove)="removePoint($event)"
+                                        (hover)="hoverTalent($event)" />
+                                </div>
+                            </section>
+                        }
+                    </div>
+
+                    <aside class="detail" aria-live="polite">
+                        @if (detail(); as info) {
+                            <div class="detail-head">
+                                <img class="detail-icon" [src]="talentIconUrl(info.talent.iconId)" alt="" (error)="onIconError($event)" />
+                                <div>
+                                    <div class="detail-name">{{ info.talent.name }}</div>
+                                    <div class="detail-rank">Rango {{ info.rank }}/{{ info.talent.maxRanks }} · {{ info.tree.name }}</div>
+                                </div>
+                                <div class="detail-buttons">
+                                    <button type="button" class="step" aria-label="Quitar un punto" [disabled]="!canRemovePoint(info.talent)" (click)="removePoint(info.talent)">−</button>
+                                    <button type="button" class="step" aria-label="Añadir un punto" [disabled]="!canAddPoint(info.talent)" (click)="addPoint(info.talent)">+</button>
+                                </div>
+                            </div>
+
+                            @if (info.current) {
+                                <p class="detail-text">{{ info.current }}</p>
+                            }
+                            @if (info.next) {
+                                <p class="detail-text next">
+                                    @if (info.current) {
+                                        <span class="next-label">Siguiente rango:</span>
+                                    }
+                                    {{ info.next }}
+                                </p>
+                            }
+                            @for (requirement of info.requirements; track requirement) {
+                                <p class="detail-requirement">{{ requirement }}</p>
+                            }
+                        } @else {
+                            <p class="detail-hint">
+                                Pulsa un talento para ganar un punto. Clic derecho, o mantén pulsado en el móvil, para quitarlo.
+                            </p>
+                        }
+                    </aside>
+                }
+
+                @if (data(); as talents) {
+                    <p class="credit">{{ talents.attribution }} · Build {{ talents.build }}</p>
+                }
+            }
+        </div>
+    </app-wow-frame>
+</main>

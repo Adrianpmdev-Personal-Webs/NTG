@@ -11,6 +11,11 @@ import { Routes } from '@angular/router';
 export const WOW_FOREVER_ROUTES: Routes = [
     {
         path: '',
+        pathMatch: 'full',
         loadComponent: () => import('./home/home').then(m => m.Home)
+    },
+    {
+        path: 'talents',
+        loadComponent: () => import('./talents/talent-calculator/talent-calculator').then(m => m.TalentCalculator)
     }
 ];

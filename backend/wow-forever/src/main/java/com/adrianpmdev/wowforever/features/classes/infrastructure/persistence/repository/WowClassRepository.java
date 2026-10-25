@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -18,4 +19,6 @@ public interface WowClassRepository extends JpaRepository<WowClass, UUID> {
     List<WowClass> findAllByOrderBySortOrderAsc();
 
     boolean existsBySlug(String slug);
+
+    Optional<WowClass> findBySlug(String slug);
 }

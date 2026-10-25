@@ -1,0 +1,456 @@
+/**
+ * Talent calculator styles.
+ *
+ * Metal frame page with class selector, level controls, three talent trees (a swipeable carousel on phones) and a parchment detail panel.
+ *
+ * @author @adrianpmdev
+ */
+
+@use 'mixins' as *;
+
+/* ─── HOST AND PAGE ─── */
+
+:host {
+    display: block;
+}
+
+.page {
+    min-height: 100dvh;
+    background: #050506;
+}
+
+app-wow-frame {
+    height: auto;
+    min-height: 100dvh;
+}
+
+.calc {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-height: calc(100dvh - 14px);
+    padding: 16px 20px 24px;
+    background: radial-gradient(ellipse at top, #1b1812 0%, #0a0a0a 70%);
+    color: #e8dfcb;
+    font-family: Georgia, 'Times New Roman', serif;
+}
+
+.state {
+    margin: 24px 0;
+    color: #a79d86;
+    text-align: center;
+}
+
+/* ─── HEADER ─── */
+
+.calc-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.title {
+    margin: 0;
+    color: #d8b866;
+    font-size: 1.3rem;
+    font-weight: normal;
+    letter-spacing: 3px;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.link {
+    color: #a79d86;
+    font-size: 0.85rem;
+    text-decoration: none;
+    white-space: nowrap;
+
+    &:hover {
+        color: #d8b866;
+    }
+}
+
+/* ─── CLASSES ─── */
+
+.classes {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 4px 2px 8px;
+}
+
+.class-btn {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 72px;
+    padding: 6px 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: #a79d86;
+    font: inherit;
+    cursor: pointer;
+
+    &:hover {
+        color: #e8dfcb;
+    }
+
+    &.active {
+        border-color: #d8b866;
+        background: rgba(216, 184, 102, 0.1);
+        color: #d8b866;
+    }
+
+    &:focus-visible {
+        outline: 1px solid #d8b866;
+        outline-offset: 2px;
+    }
+}
+
+.class-icon {
+    width: 36px;
+    height: 36px;
+    border: 1px solid #8a7440;
+    object-fit: cover;
+}
+
+.class-name {
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* ─── CONTROLS ─── */
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 24px;
+    padding: 10px 14px;
+    border: 1px solid rgba(216, 184, 102, 0.35);
+    background: rgba(10, 10, 14, 0.8);
+}
+
+.level {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #d8b866;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.level-range {
+    width: 180px;
+    accent-color: #d8b866;
+}
+
+.level-number {
+    width: 56px;
+    padding: 4px 6px;
+    border: 1px solid #8a7440;
+    background: #0a0a0a;
+    color: #e8dfcb;
+    font: inherit;
+    text-align: center;
+}
+
+.points {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    color: #a79d86;
+    font-size: 0.9rem;
+
+    strong {
+        color: #e8dfcb;
+    }
+
+    .over strong {
+        color: #f2c94c;
+    }
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* ─── TREES ─── */
+
+.tree-tabs {
+    display: none;
+}
+
+.trees {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.tree {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    border: 1px solid rgba(216, 184, 102, 0.4);
+    background: #0a0a0e;
+}
+
+.tree-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(216, 184, 102, 0.4);
+    background: linear-gradient(#26231b, #14130f);
+}
+
+.tree-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    color: #d8b866;
+    letter-spacing: 2px;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.tree-points {
+    padding: 0 8px;
+    border: 1px solid #8a7440;
+    background: #000;
+    color: #f2c94c;
+    font-weight: bold;
+}
+
+.tree-body {
+    flex: 1;
+    padding: 14px 18px 22px;
+    background:
+        linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.7)),
+        var(--tree-bg) center / cover no-repeat,
+        radial-gradient(ellipse at top, #2a2418 0%, #0d0d10 80%);
+}
+
+/* ─── DETAIL ─── */
+
+.detail {
+    min-height: 120px;
+    padding: 12px 16px;
+    border: 1px solid #5a4a22;
+    background: linear-gradient(#e6d9b7, #cdbb91);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3), 0 4px 10px rgba(0, 0, 0, 0.5);
+    color: #2b2418;
+}
+
+.detail-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.detail-icon {
+    width: 44px;
+    height: 44px;
+    border: 2px solid #5a4a22;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+.detail-head > div:nth-child(2) {
+    flex: 1;
+    min-width: 0;
+}
+
+.detail-name {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.detail-rank {
+    font-size: 0.8rem;
+    color: #5a4a22;
+}
+
+.detail-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.step {
+    width: 36px;
+    height: 36px;
+    border: 1px solid #5a4a22;
+    background: linear-gradient(#f3ead0, #d6c79f);
+    color: #2b2418;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+        background: #fff6dc;
+    }
+
+    &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+}
+
+.detail-text {
+    margin: 10px 0 0;
+    line-height: 1.45;
+    /* Some rank texts carry their own line breaks (one line per weapon, for example). */
+    white-space: pre-line;
+}
+
+.next {
+    color: #3f5e1f;
+}
+
+.next-label {
+    font-weight: bold;
+}
+
+.detail-requirement {
+    margin: 8px 0 0;
+    color: #a3281c;
+    font-size: 0.9rem;
+}
+
+.detail-hint {
+    margin: 0;
+    color: #5a4a22;
+}
+
+.credit {
+    margin: 12px 0 0;
+    color: #8a7a52;
+    font-size: 0.75rem;
+    text-align: center;
+}
+
+/* ─── RESPONSIVE ─── */
+
+@include tablet {
+    .calc {
+        padding: 12px 12px 20px;
+    }
+
+    .tree-body {
+        padding: 10px 12px 18px;
+    }
+
+    .level-range {
+        width: 140px;
+    }
+}
+
+/* On phones the three trees become a swipeable carousel, one tree per screen. */
+@include mobile {
+    .calc-header {
+        flex-wrap: wrap;
+    }
+
+    .title {
+        order: -1;
+        flex: 0 0 100%;
+        font-size: 1.05rem;
+        letter-spacing: 2px;
+    }
+
+    .classes {
+        justify-content: flex-start;
+    }
+
+    .controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .level {
+        flex-wrap: wrap;
+    }
+
+    .level-range {
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .actions {
+        justify-content: center;
+    }
+
+    .tree-tabs {
+        display: flex;
+        border-bottom: 1px solid rgba(216, 184, 102, 0.4);
+    }
+
+    .tree-tab {
+        flex: 1;
+        padding: 8px 4px;
+        border: 0;
+        border-bottom: 2px solid transparent;
+        background: transparent;
+        color: #a79d86;
+        font: inherit;
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        cursor: pointer;
+
+        &.active {
+            border-bottom-color: #d8b866;
+            color: #d8b866;
+        }
+    }
+
+    .tab-points {
+        margin-left: 4px;
+        color: #f2c94c;
+        font-weight: bold;
+    }
+
+    .trees {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+
+        &::-webkit-scrollbar {
+            display: none;
+        }
+    }
+
+    .tree {
+        flex: 0 0 100%;
+        scroll-snap-align: center;
+    }
+
+    .detail-head {
+        flex-wrap: wrap;
+    }
+}
+
+@include small {
+    .calc {
+        padding: 10px 8px 16px;
+        gap: 10px;
+    }
+
+    .tree-body {
+        padding: 8px 10px 16px;
+    }
+
+    .class-btn {
+        min-width: 60px;
+    }
+}

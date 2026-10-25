@@ -32,7 +32,7 @@ export const WOW_FEATURES: readonly WowFeature[] = [
         label: 'Calculadora de talentos',
         description: 'Planifica tu build de nivel 10 a 60.',
         route: '/wow-forever/talents',
-        available: false
+        available: true
     },
     {
         id: 'dungeons',
@@ -65,6 +65,11 @@ export const WOW_FEATURES: readonly WowFeature[] = [
 ];
 
 export const wowIconUrl = (icon: string): string => `${WOW_ICON_BASE_URL}/${icon}.jpg`;
+
+/** Where the talent icons come from. The talent data names them by id, not by name; one line to change if the host changes. */
+export const WOW_TALENT_ICON_BASE_URL = 'https://assets.wow-forever.gg/icons';
+
+export const talentIconUrl = (iconId: number): string => `${WOW_TALENT_ICON_BASE_URL}/${iconId}.png`;
 
 /** Hides an icon image that could not be loaded; the name next to it still identifies the item. */
 export const hideBrokenIcon = (event: Event): void => {

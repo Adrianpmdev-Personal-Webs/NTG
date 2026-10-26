@@ -52,7 +52,7 @@ export const GAMES: readonly GameEntry[] = [
         adminItems: [
             { label: 'GESTIÓN', route: '/admin/wow-forever/management', icon: '▣' }
         ],
-        upcoming: true
+        upcoming: false
     },
     {
         id: 'lol',

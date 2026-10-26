@@ -1,13 +1,14 @@
 /**
  * TalentGrid
  *
- * Grid of one talent tree: icons, rank counters and prerequisite arrows. Click adds a point; right click or a long press removes one.
+ * Grid of one talent tree (or Legacy perk tree): icons, rank counters and prerequisite arrows. Click adds a point; right
+ * click or a long press removes one.
  *
  * @author @adrianpmdev
  */
 
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
-import { hideBrokenIcon, talentIconUrl } from '../../wow-forever-config';
+import { hideBrokenIcon, wowIconUrl } from '../../wow-forever-config';
 import { Ranks, TalentState, prerequisitesOf, talentState } from '../talents-logic';
 import { Talent, TalentHover, TalentTree } from '../talents-models';
 
@@ -47,14 +48,11 @@ export class TalentGrid {
     /** The pointer (or keyboard focus) is on a talent, or null when it leaves. */
     readonly hover = output<TalentHover | null>();
 
-    /** Only the talents the source describes are drawn. */
-    private readonly visibleTalents = computed(() => this.tree().talents.filter(talent => talent.name !== null));
-
     readonly views = computed<TalentView[]>(() => {
         const tree = this.tree();
         const ranks = this.ranks();
 
-        return this.visibleTalents().map(talent => ({
+        return tree.talents.map(talent => ({
             talent,
             rank: ranks[talent.id] ?? 0,
             state: talentState(talent, tree, ranks, this.pointsLeft())
@@ -65,7 +63,7 @@ export class TalentGrid {
         const tree = this.tree();
         const ranks = this.ranks();
 
-        return this.visibleTalents().flatMap(talent =>
+        return tree.talents.flatMap(talent =>
             prerequisitesOf(tree, talent).map(required => ({
                 id: `${required.id}-${talent.id}`,
                 path: this.pathBetween(required, talent),
@@ -74,7 +72,7 @@ export class TalentGrid {
         );
     });
 
-    readonly iconUrl = talentIconUrl;
+    readonly iconUrl = wowIconUrl;
     readonly onIconError = hideBrokenIcon;
 
     private pressTimer: ReturnType<typeof setTimeout> | null = null;

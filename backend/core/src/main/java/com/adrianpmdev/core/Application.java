@@ -26,8 +26,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
     "com.adrianpmdev.pokemon.features.rankings.infrastructure.persistence.repository",
     "com.adrianpmdev.pokemon.features.rewards.infrastructure.persistence.repository",
     "com.adrianpmdev.pokemon.features.tournaments.infrastructure.persistence.repository",
-    "com.adrianpmdev.wowforever.features.classes.infrastructure.persistence.repository",
-    "com.adrianpmdev.wowforever.features.races.infrastructure.persistence.repository",
     "com.adrianpmdev.wowforever.features.settings.infrastructure.persistence.repository"
 })
 @EntityScan(basePackages = {
@@ -38,8 +36,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
     "com.adrianpmdev.pokemon.features.rankings.infrastructure.persistence.entity",
     "com.adrianpmdev.pokemon.features.rewards.infrastructure.persistence.entity",
     "com.adrianpmdev.pokemon.features.tournaments.infrastructure.persistence.entity",
-    "com.adrianpmdev.wowforever.features.classes.infrastructure.persistence.entity",
-    "com.adrianpmdev.wowforever.features.races.infrastructure.persistence.entity",
     "com.adrianpmdev.wowforever.features.settings.infrastructure.persistence.entity"
 })
 public class Application {

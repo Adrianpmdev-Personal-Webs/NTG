@@ -1,0 +1,117 @@
+<app-wow-page title="Legacy System" [credit]="credit()">
+    @if (loading()) {
+        <p class="state">Cargando…</p>
+    } @else if (failed()) {
+        <p class="state">No se han podido cargar los datos. Inténtalo de nuevo más tarde.</p>
+    } @else {
+        <p class="intro">
+            Los desafíos de la cuenta dan puntos de Legacy. Cada personaje puede gastar hasta
+            <strong>{{ pointsTotal() }}</strong> en sus tres árboles de perks, sin que afecte a los demás.
+        </p>
+
+        <section class="controls">
+            <div class="points" aria-live="polite">
+                <span>Puntos: <strong>{{ pointsTotal() }}</strong></span>
+                <span>Gastados: <strong>{{ pointsSpent() }}</strong></span>
+                <span [class.over]="pointsLeft() === 0">Restantes: <strong>{{ pointsLeft() }}</strong></span>
+            </div>
+
+            <div class="actions">
+                <app-wow-button (click)="reset()">Reiniciar</app-wow-button>
+                <app-wow-button (click)="share()">Compartir</app-wow-button>
+            </div>
+        </section>
+
+        @if (trees().length === 0) {
+            <p class="state">Todavía no hay perks cargados.</p>
+        } @else {
+            <div class="tree-tabs" role="tablist">
+                @for (tree of trees(); track tree.id; let index = $index) {
+                    <button
+                        type="button"
+                        class="tree-tab"
+                        role="tab"
+                        [class.active]="activeTree() === index"
+                        [attr.aria-selected]="activeTree() === index"
+                        (click)="goToTree(index)">
+                        {{ tree.name }} <span class="tab-points">{{ treePoints()[index] }}</span>
+                    </button>
+                }
+            </div>
+
+            <div class="trees" #carousel (scroll)="onCarouselScroll()">
+                @for (tree of trees(); track tree.id; let index = $index) {
+                    <section class="tree">
+                        <header class="tree-header">
+                            <img class="tree-icon" [src]="iconUrl(tree.icon)" alt="" (error)="onIconError($event)" />
+                            <span class="tree-name">{{ tree.name }}</span>
+                            <span class="tree-points">{{ treePoints()[index] }}</span>
+                        </header>
+
+                        <div class="tree-body">
+                            <app-talent-grid
+                                [tree]="tree"
+                                [ranks]="ranks()"
+                                [pointsLeft]="pointsLeft()"
+                                (add)="addPoint($event)"
+                                (remove)="removePoint($event)"
+                                (hover)="onHover($event)" />
+                        </div>
+                    </section>
+                }
+            </div>
+
+            @if (hovered(); as info) {
+                <app-talent-tooltip [talent]="info.talent" [tree]="info.tree" [ranks]="ranks()" [x]="info.x" [y]="info.y" />
+            }
+
+            <p class="hint">
+                Pulsa un perk para ganar un punto. Clic derecho, o mantén pulsado en el móvil, para quitarlo. Las casillas
+                con interrogación son perks que llegarán más adelante.
+            </p>
+        }
+
+        <section class="challenges">
+            <header class="challenges-header">
+                <h2 class="section-title">Desafíos de la cuenta</h2>
+                <p class="progress">
+                    Completados: <strong>{{ completedCount() }}/{{ challengeCount() }}</strong>
+                    · Puntos ganados: <strong>{{ earnedPoints() }}</strong>
+                </p>
+            </header>
+
+            <p class="note">Marca los que ya tienes. Se guardan solo en este navegador.</p>
+
+            <div class="groups">
+                @for (group of groups(); track group.name) {
+                    <section class="group">
+                        <header class="group-header">
+                            <h3 class="group-name">{{ groupLabel(group) }}</h3>
+                            <span class="group-count">{{ completedIn(group) }}/{{ group.challenges.length }}</span>
+                        </header>
+
+                        <ul class="challenge-list">
+                            @for (challenge of group.challenges; track challenge.name) {
+                                <li>
+                                    <label class="challenge" [class.done]="isCompleted(challenge.name)">
+                                        <input
+                                            type="checkbox"
+                                            [checked]="isCompleted(challenge.name)"
+                                            (change)="toggleChallenge(challenge.name)" />
+                                        <span class="challenge-text">
+                                            <span class="challenge-name">{{ challenge.name }}</span>
+                                            @if (challenge.description) {
+                                                <span class="challenge-desc">{{ challenge.description }}</span>
+                                            }
+                                        </span>
+                                        <span class="challenge-points">{{ challenge.points }}</span>
+                                    </label>
+                                </li>
+                            }
+                        </ul>
+                    </section>
+                }
+            </div>
+        </section>
+    }
+</app-wow-page>

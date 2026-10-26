@@ -1,7 +1,7 @@
 /**
  * WoW Forever management styles.
  *
- * Data tables and settings rows of the admin screen. Page chrome, buttons, inputs and modals come from the global styles.
+ * Settings rows of the admin screen. Page chrome, buttons and inputs come from the global styles.
  *
  * @author @adrianpmdev
  */
@@ -13,70 +13,6 @@
 .dim {
     color: var(--text-secondary);
     font-size: 0.8rem;
-}
-
-/* ─── TABLE ─── */
-
-.table-wrapper {
-    padding: 0;
-    overflow-x: auto;
-}
-
-.data-table {
-    width: 100%;
-    min-width: 640px;
-    border-collapse: collapse;
-    font-size: 0.85rem;
-
-    th,
-    td {
-        padding: 10px 12px;
-        border-bottom: 1px solid var(--border-color);
-        text-align: left;
-        vertical-align: middle;
-    }
-
-    th {
-        color: var(--text-secondary);
-        font-size: 0.7rem;
-        letter-spacing: 2px;
-        white-space: nowrap;
-    }
-}
-
-.icon {
-    display: block;
-    width: 32px;
-    height: 32px;
-    border: 1px solid var(--border-color);
-    object-fit: cover;
-}
-
-.badge {
-    padding: 2px 8px;
-    border: 1px solid #4f8fe6;
-    color: #4f8fe6;
-    font-size: 0.7rem;
-    letter-spacing: 1px;
-
-    &.horde {
-        border-color: var(--neon-red);
-        color: var(--neon-red);
-    }
-}
-
-.chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-}
-
-.chip {
-    padding: 1px 6px;
-    border: 1px solid rgba(0, 255, 255, 0.35);
-    color: var(--neon-cyan);
-    font-size: 0.65rem;
-    letter-spacing: 1px;
 }
 
 /* ─── SETTINGS ─── */

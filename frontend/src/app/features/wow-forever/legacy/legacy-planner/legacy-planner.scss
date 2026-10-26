@@ -1,0 +1,177 @@
+/**
+ * Legacy planner styles.
+ *
+ * Point counters, the three perk trees (a swipeable carousel on phones) and the challenge checklist in columns of
+ * groups. The page frame and the tooltip card have their own components.
+ *
+ * @author @adrianpmdev
+ */
+
+@use 'mixins' as *;
+@use 'wow-forever' as wow;
+
+:host {
+    display: block;
+}
+
+.state {
+    @include wow.state;
+}
+
+.intro {
+    margin: 0;
+    color: wow.$muted;
+    line-height: 1.5;
+    text-align: center;
+
+    strong {
+        color: wow.$bright;
+    }
+}
+
+.controls {
+    @include wow.controls;
+}
+
+/* ─── TREES ─── */
+
+@include wow.talent-trees;
+
+.hint {
+    @include wow.hint;
+}
+
+/* ─── CHALLENGES ─── */
+
+.challenges {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.challenges-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px 16px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid wow.$line-strong;
+}
+
+.section-title {
+    @include wow.section-title;
+}
+
+.progress {
+    margin: 0;
+    color: wow.$muted;
+    font-size: 0.9rem;
+
+    strong {
+        color: wow.$bright;
+    }
+}
+
+.note {
+    margin: 0;
+    color: wow.$dim;
+    font-size: 0.8rem;
+}
+
+.groups {
+    columns: 2 320px;
+    column-gap: 12px;
+}
+
+.group {
+    @include wow.panel;
+    break-inside: avoid;
+    margin-bottom: 12px;
+}
+
+.group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-bottom: 1px solid wow.$line;
+    background: linear-gradient(#26231b, #14130f);
+}
+
+.group-name {
+    margin: 0;
+    color: wow.$gold;
+    font-size: 0.85rem;
+    font-weight: normal;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.group-count {
+    color: wow.$bright;
+    font-size: 0.85rem;
+}
+
+.challenge-list {
+    margin: 0;
+    padding: 4px 0;
+    list-style: none;
+}
+
+.challenge {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 6px 12px;
+    cursor: pointer;
+
+    &:hover {
+        background: rgba(216, 184, 102, 0.06);
+    }
+
+    input {
+        flex: 0 0 auto;
+        margin-top: 3px;
+        accent-color: wow.$gold;
+    }
+
+    &.done .challenge-name {
+        color: wow.$green;
+    }
+}
+
+.challenge-text {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.challenge-name {
+    color: wow.$text;
+    font-size: 0.9rem;
+}
+
+.challenge-desc {
+    color: wow.$muted;
+    font-size: 0.78rem;
+    line-height: 1.35;
+}
+
+.challenge-points {
+    flex: 0 0 auto;
+    min-width: 22px;
+    border: 1px solid wow.$icon-border;
+    color: wow.$bright;
+    font-size: 0.75rem;
+    text-align: center;
+}
+
+@include mobile {
+    .groups {
+        columns: 1;
+    }
+}

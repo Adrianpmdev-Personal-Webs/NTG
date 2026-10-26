@@ -1,0 +1,13 @@
+<nav class="classes" aria-label="Clase">
+    @for (gameClass of classes(); track gameClass.slug) {
+        <button
+            type="button"
+            class="class-btn"
+            [class.active]="selected() === gameClass.slug"
+            [attr.aria-pressed]="selected() === gameClass.slug"
+            (click)="pick.emit(gameClass)">
+            <img class="class-icon" [src]="iconUrl(gameClass.icon)" alt="" (error)="onIconError($event)" />
+            <span class="class-name">{{ gameClass.name }}</span>
+        </button>
+    }
+</nav>

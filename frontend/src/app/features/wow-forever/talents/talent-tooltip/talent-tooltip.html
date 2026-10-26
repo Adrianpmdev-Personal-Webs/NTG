@@ -1,0 +1,33 @@
+<div class="tooltip" role="tooltip" [style]="position()">
+    <div class="tooltip-head">
+        <img class="tooltip-icon" [src]="iconUrl(talent().icon)" alt="" (error)="onIconError($event)" />
+        <div>
+            <div class="tooltip-name">{{ talent().name }}</div>
+            <div class="tooltip-rank">Rango {{ rank() }}/{{ talent().maxRanks }} · {{ tree().name }}</div>
+        </div>
+    </div>
+
+    @if (talent().cost; as cost) {
+        <p class="tooltip-cost">{{ cost }}</p>
+    }
+    @if (current(); as text) {
+        <p class="tooltip-text">{{ text }}</p>
+    }
+    @if (next(); as text) {
+        <p class="tooltip-text next">
+            @if (current()) {
+                <span class="next-label">Siguiente rango:</span>
+            }
+            {{ text }}
+        </p>
+    }
+    @if (talent().maxRanks === 0 && !current() && !next() && talent().descriptions.length > 0) {
+        <p class="tooltip-text">{{ talent().descriptions[0] }}</p>
+    }
+    @for (requirement of requirements(); track requirement) {
+        <p class="tooltip-requirement">{{ requirement }}</p>
+    }
+    @if (classicLabel(); as label) {
+        <p class="tooltip-classic">{{ label }}</p>
+    }
+</div>

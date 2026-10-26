@@ -1,78 +1,54 @@
 /**
  * TalentsModels
  *
- * Models of the talent calculator. The first block describes talents.json as WoW Forever publishes it; the second one
- * is what the app works with (see TalentsApi, the only place that knows the file format).
+ * Models of a talent tree as the app works with it. The talent calculator and the Legacy planner share them: a Legacy
+ * perk tree is a talent tree whose point gates count every point of the tree instead of the rows above.
  *
  * @author @adrianpmdev
  */
 
-/* ─── talents.json (as published) ─── */
+import { ClassicStatus, DataCredit, GameClass } from '../game-data/game-data-models';
 
-export interface TalentFile {
-    id: number;
-    name: string | null;
-    row: number;
-    column: number;
-    max_ranks: number;
-    points_required: number;
-    requires: number[];
-    spell_id: number;
-    icon_id: number;
-    description?: string[];
-}
-
-export interface TalentTreeFile {
-    id: number;
-    name: string;
-    rows: number;
-    columns: number;
-    talents: TalentFile[];
-}
-
-export interface TalentClassFile {
-    id: number;
-    name: string;
-    slug: string;
-    trees: TalentTreeFile[];
-}
-
-export interface TalentsFile {
-    build: string;
-    attribution: string;
-    levels_that_grant_a_point: number[];
-    classes: TalentClassFile[];
-}
-
-/* ─── App models ─── */
+/**
+ * What a point gate counts: `rows-above` for talents (rows open every few points spent in the rows above),
+ * `tree` for Legacy perks (points spent anywhere else in the tree).
+ */
+export type GateScope = 'rows-above' | 'tree';
 
 export interface Talent {
+    /** Unique in its class (or in the Legacy trees): the tree id and the position in the share code. */
     id: number;
     treeId: number;
-    /** Null for a position the source keeps (so build codes still line up) but does not describe: it is not drawn. */
-    name: string | null;
+    name: string;
     /** Zero based, top row first. */
     row: number;
     /** Zero based, left column first. */
     column: number;
-    /** Points the talent takes. 0 means it cannot be bought in this build. */
+    /** Points the talent takes. 0 means it cannot be bought (a slot kept for something still to come). */
     maxRanks: number;
-    /** Points that must already be spent in the rows above, in the same tree. */
+    /** Points that must already be spent before it opens; see GateScope. */
     pointsRequired: number;
-    /** Talents of the same tree and a row above; with several, any one of them at full rank is enough. */
+    /** Talents of the same tree; with several, any one of them at full rank is enough. */
     requires: number[];
-    spellId: number;
-    iconId: number;
-    /** Text of each rank; one entry when every rank reads alike, none when the talent has no text. */
+    icon: string;
+    /** Text of each rank; fewer texts than ranks repeat the last one, none when the talent has no text. */
     descriptions: string[];
+    /** Cost line of an active talent, null for passives. */
+    cost: string | null;
+    /** How the talent compares with Classic, when the data says it. */
+    classic: ClassicStatus | null;
 }
 
 export interface TalentTree {
     id: number;
+    /** Lowercase name for file names, e.g. "beast-mastery". */
+    slug: string;
     name: string;
+    icon: string;
     rows: number;
     columns: number;
-    /** In build code order: position N is digit N of the tree's part of a share code. */
+    gateScope: GateScope;
+    /** In share code order (top row first, left to right): position N is digit N of the tree's part of a code. */
     talents: Talent[];
 }
 
@@ -83,17 +59,9 @@ export interface TalentHover {
     y: number;
 }
 
-export interface TalentClass {
-    slug: string;
+/** Everything the calculator needs for one class. */
+export interface ClassTalents {
+    gameClass: GameClass;
     trees: TalentTree[];
-}
-
-export interface TalentsData {
-    /** Game build the talents come from. */
-    build: string;
-    /** Credit line the licence asks us to show. */
-    attribution: string;
-    /** Levels that give a talent point, in order. */
-    levels: number[];
-    classes: TalentClass[];
+    credit: DataCredit;
 }

@@ -1,0 +1,19 @@
+<main class="page">
+    <app-wow-frame>
+        <div class="wow-page">
+            <header class="page-header">
+                <app-wow-button link="/wow-forever">← Lanzador</app-wow-button>
+                <h1 class="title">{{ title() }}</h1>
+                <app-wow-button link="/">← NTG</app-wow-button>
+            </header>
+
+            <div class="content">
+                <ng-content />
+            </div>
+
+            @if (credit(); as text) {
+                <p class="credit">{{ text }}</p>
+            }
+        </div>
+    </app-wow-frame>
+</main>

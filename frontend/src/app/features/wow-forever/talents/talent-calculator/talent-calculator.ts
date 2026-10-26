@@ -1,21 +1,25 @@
 /**
  * TalentCalculator
  *
- * Talent calculator of WoW Forever: pick a class, set the level and spend points in its three trees. The build lives in the URL so it can be shared.
+ * Talent calculator of WoW Forever: pick a class, set the level and spend points in its three trees. The talents of a
+ * class are downloaded when it is picked. The build lives in the URL so it can be shared.
  *
  * @author @adrianpmdev
  */
 
-import { ChangeDetectionStrategy, Component, ElementRef, OnInit, computed, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, OnInit, computed, inject, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { NotificationService } from '@core/services/notification';
-import { WowForeverApi } from '../../wow-forever-api';
-import { TREE_ICONS, hideBrokenIcon, talentIconUrl, wowIconUrl } from '../../wow-forever-config';
-import { WowClass } from '../../wow-forever-models';
+import { GameDataApi } from '../../game-data/game-data-api';
+import { DataCredit, GameClass } from '../../game-data/game-data-models';
+import { ClassPicker } from '../../ui/class-picker/class-picker';
 import { WowButton } from '../../ui/wow-button/wow-button';
-import { WowFrame } from '../../ui/wow-frame/wow-frame';
+import { WowPage } from '../../ui/wow-page/wow-page';
+import { creditLine, hideBrokenIcon, wowIconUrl } from '../../wow-forever-config';
 import { TalentGrid } from '../talent-grid/talent-grid';
+import { TalentTooltip } from '../talent-tooltip/talent-tooltip';
+import { TALENT_POINT_LEVELS, TREE_ART_PATH } from '../talents-config';
 import {
     Ranks,
     canAdd,
@@ -23,136 +27,77 @@ import {
     decodeBuild,
     encodeBuild,
     minLevelFor,
-    pointsAboveRow,
     pointsAtLevel,
     pointsInTree,
-    prerequisitesOf,
-    rankText,
-    totalPoints,
-    treeSlug
+    totalPoints
 } from '../talents-logic';
-import { Talent, TalentHover, TalentTree, TalentsData } from '../talents-models';
-import { TalentsApi } from '../talents-api';
-
-interface TalentTooltip {
-    talent: Talent;
-    tree: TalentTree;
-    rank: number;
-    current: string | null;
-    next: string | null;
-    requirements: string[];
-}
-
-/** One background picture per tree, named <class>-<tree>.jpg (e.g. warrior-arms.jpg). */
-const TREE_ART_PATH = '/images/wow-forever/talents/trees';
-/** Distance between the pointer and the tooltip card. */
-const TOOLTIP_OFFSET = 16;
+import { ClassTalents, Talent, TalentHover, TalentTree } from '../talents-models';
 
 @Component({
     selector: 'app-talent-calculator',
-    imports: [TalentGrid, WowButton, WowFrame],
+    imports: [ClassPicker, TalentGrid, TalentTooltip, WowButton, WowPage],
     templateUrl: './talent-calculator.html',
     styleUrl: './talent-calculator.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TalentCalculator implements OnInit {
 
-    private readonly wowApi = inject(WowForeverApi);
-    private readonly talentsApi = inject(TalentsApi);
+    private readonly gameData = inject(GameDataApi);
     private readonly route = inject(ActivatedRoute);
     private readonly router = inject(Router);
     private readonly notificationService = inject(NotificationService);
 
     private readonly carousel = viewChild<ElementRef<HTMLElement>>('carousel');
+    private classLoad: Subscription | null = null;
 
-    readonly classes = signal<WowClass[]>([]);
-    readonly data = signal<TalentsData | null>(null);
-    readonly selectedClass = signal<WowClass | null>(null);
+    readonly classes = signal<GameClass[]>([]);
+    readonly selectedClass = signal<GameClass | null>(null);
+    readonly classTalents = signal<ClassTalents | null>(null);
+    private readonly indexCredit = signal<DataCredit | null>(null);
     readonly ranks = signal<Ranks>({});
-    readonly level = signal(0);
+    readonly level = signal(TALENT_POINT_LEVELS.at(-1) ?? 0);
     readonly loading = signal(true);
+    readonly loadingTrees = signal(false);
     readonly failed = signal(false);
-    readonly hovered = signal<Talent | null>(null);
-    private readonly pointer = signal({ x: 0, y: 0 });
+    readonly hover = signal<TalentHover | null>(null);
     readonly activeTree = signal(0);
 
-    readonly trees = computed<TalentTree[]>(() => {
-        const slug = this.selectedClass()?.slug;
-
-        return this.data()?.classes.find(talentClass => talentClass.slug === slug)?.trees ?? [];
-    });
+    readonly trees = computed<TalentTree[]>(() => this.classTalents()?.trees ?? []);
 
     /** Levels that give a talent point: the first and the last one are the ends of the level control. */
-    private readonly levels = computed(() => this.data()?.levels ?? []);
-    readonly firstLevel = computed(() => this.levels()[0] ?? 0);
-    readonly maxLevel = computed(() => this.levels().at(-1) ?? 0);
+    private readonly levels = TALENT_POINT_LEVELS;
+    readonly firstLevel = this.levels[0] ?? 0;
+    readonly maxLevel = this.levels.at(-1) ?? 0;
 
-    readonly pointsTotal = computed(() => pointsAtLevel(this.levels(), this.level()));
+    readonly pointsTotal = computed(() => pointsAtLevel(this.levels, this.level()));
     readonly pointsSpent = computed(() => totalPoints(this.trees(), this.ranks()));
     readonly pointsLeft = computed(() => this.pointsTotal() - this.pointsSpent());
     readonly treePoints = computed(() => this.trees().map(tree => pointsInTree(tree, this.ranks())));
     /** The level cannot go below what the spent points need. */
-    readonly minLevel = computed(() => minLevelFor(this.levels(), this.pointsSpent()));
+    readonly minLevel = computed(() => minLevelFor(this.levels, this.pointsSpent()));
 
-    readonly tooltip = computed<TalentTooltip | null>(() => {
-        const talent = this.hovered();
-        const tree = talent ? this.treeOf(talent) : undefined;
+    /** The talent under the pointer with its tree, for the tooltip card. */
+    readonly hovered = computed(() => {
+        const hover = this.hover();
+        const tree = hover ? this.treeOf(hover.talent) : undefined;
 
-        if (!talent || !tree) {
-            return null;
-        }
-
-        const ranks = this.ranks();
-        const rank = ranks[talent.id] ?? 0;
-        const requirements: string[] = [];
-
-        if (pointsAboveRow(tree, ranks, talent.row) < talent.pointsRequired) {
-            requirements.push(`Requiere ${talent.pointsRequired} puntos en ${tree.name}`);
-        }
-
-        const prerequisites = prerequisitesOf(tree, talent);
-
-        if (prerequisites.length > 0 && !prerequisites.some(required => (ranks[required.id] ?? 0) >= required.maxRanks)) {
-            const options = prerequisites.map(required =>
-                `${required.maxRanks} ${required.maxRanks === 1 ? 'punto' : 'puntos'} en ${required.name}`);
-
-            requirements.push(`Requiere ${options.join(' o ')}`);
-        }
-
-        return {
-            talent,
-            tree,
-            rank,
-            current: rank > 0 ? rankText(talent, rank) : null,
-            next: rank < talent.maxRanks ? rankText(talent, rank + 1) : null,
-            requirements
-        };
+        return hover && tree ? { ...hover, tree } : null;
     });
 
-    /** The card hangs from the pointer, on the side of it that has more room, so it never leaves the screen. */
-    readonly tooltipStyle = computed<Record<string, string>>(() => {
-        const { x, y } = this.pointer();
-
-        return {
-            ...(x > window.innerWidth / 2
-                ? { right: `${window.innerWidth - x + TOOLTIP_OFFSET}px` }
-                : { left: `${x + TOOLTIP_OFFSET}px` }),
-            ...(y > window.innerHeight / 2
-                ? { bottom: `${window.innerHeight - y + TOOLTIP_OFFSET}px` }
-                : { top: `${y + TOOLTIP_OFFSET}px` })
-        };
-    });
+    readonly credit = computed(() => creditLine(this.classTalents()?.credit ?? this.indexCredit()));
 
     readonly iconUrl = wowIconUrl;
-    readonly talentIconUrl = talentIconUrl;
     readonly onIconError = hideBrokenIcon;
 
+    constructor() {
+        inject(DestroyRef).onDestroy(() => this.classLoad?.unsubscribe());
+    }
+
     ngOnInit(): void {
-        forkJoin({ classes: this.wowApi.getClasses(), data: this.talentsApi.getTalents() }).subscribe({
-            next: ({ classes, data }) => {
-                this.classes.set(classes);
-                this.data.set(data);
-                this.level.set(this.maxLevel());
+        this.gameData.getIndex().subscribe({
+            next: index => {
+                this.classes.set(index.classes);
+                this.indexCredit.set(index.credit);
                 this.loading.set(false);
                 this.openFromUrl();
             },
@@ -163,21 +108,35 @@ export class TalentCalculator implements OnInit {
         });
     }
 
-    selectClass(wowClass: WowClass, build?: string, level?: number): void {
-        this.selectedClass.set(wowClass);
+    selectClass(gameClass: GameClass, build?: string, level?: number): void {
+        this.selectedClass.set(gameClass);
+        this.classTalents.set(null);
         this.ranks.set({});
-        this.hovered.set(null);
+        this.hover.set(null);
         this.activeTree.set(0);
 
         if (level) {
-            this.level.set(Math.min(this.maxLevel(), Math.max(this.firstLevel(), level)));
+            this.level.set(Math.min(this.maxLevel, Math.max(this.firstLevel, level)));
         }
 
-        if (build) {
-            this.applyBuild(build);
-        }
+        this.classLoad?.unsubscribe();
+        this.loadingTrees.set(true);
+        this.classLoad = this.gameData.getTalents(gameClass.slug).subscribe({
+            next: talents => {
+                this.classTalents.set(talents);
+                this.loadingTrees.set(false);
 
-        this.syncUrl();
+                if (build) {
+                    this.applyBuild(build);
+                }
+
+                this.syncUrl();
+            },
+            error: () => {
+                this.loadingTrees.set(false);
+                this.notificationService.error(`No se han podido cargar los talentos de ${gameClass.name}`);
+            }
+        });
     }
 
     addPoint(talent: Talent): void {
@@ -210,7 +169,7 @@ export class TalentCalculator implements OnInit {
             return;
         }
 
-        this.level.set(Math.min(this.maxLevel(), Math.max(this.minLevel(), Math.round(parsed))));
+        this.level.set(Math.min(this.maxLevel, Math.max(this.minLevel(), Math.round(parsed))));
         this.syncUrl();
     }
 
@@ -224,22 +183,15 @@ export class TalentCalculator implements OnInit {
     }
 
     onHover(hover: TalentHover | null): void {
-        this.hovered.set(hover?.talent ?? null);
-
-        if (hover) {
-            this.pointer.set({ x: hover.x, y: hover.y });
-        }
+        this.hover.set(hover);
     }
 
-    /** Icon of a tree (the small picture next to its name), or an empty string when the tree has none. */
     treeIcon(tree: TalentTree): string {
-        const icon = TREE_ICONS[this.treeKey(tree)];
-
-        return icon ? wowIconUrl(icon) : '';
+        return wowIconUrl(tree.icon);
     }
 
     treeBackground(tree: TalentTree): string {
-        return `url('${TREE_ART_PATH}/${this.treeKey(tree)}.jpg')`;
+        return `url('${TREE_ART_PATH}/${this.selectedClass()?.slug}-${tree.slug}.jpg')`;
     }
 
     onCarouselScroll(): void {
@@ -257,11 +209,6 @@ export class TalentCalculator implements OnInit {
         element?.scrollTo({ left: index * element.clientWidth, behavior: 'smooth' });
     }
 
-    /** Name of a tree in file names and in the icon table, e.g. `warrior-arms`. */
-    private treeKey(tree: TalentTree): string {
-        return `${this.selectedClass()?.slug}-${treeSlug(tree)}`;
-    }
-
     private treeOf(talent: Talent): TalentTree | undefined {
         return this.trees().find(tree => tree.id === talent.treeId);
     }
@@ -275,14 +222,14 @@ export class TalentCalculator implements OnInit {
         }
 
         // The shared build may use more points than the level in the link allows.
-        this.level.update(level => Math.max(level, minLevelFor(this.levels(), spent)));
+        this.level.update(level => Math.max(level, minLevelFor(this.levels, spent)));
         this.ranks.set(decoded);
     }
 
     private openFromUrl(): void {
         const params = this.route.snapshot.queryParamMap;
         const classes = this.classes();
-        const fromUrl = classes.find(wowClass => wowClass.slug === params.get('class')) ?? classes[0];
+        const fromUrl = classes.find(gameClass => gameClass.slug === params.get('class')) ?? classes[0];
 
         if (fromUrl) {
             this.selectClass(fromUrl, params.get('build') ?? undefined, Number(params.get('level')) || undefined);
@@ -290,9 +237,9 @@ export class TalentCalculator implements OnInit {
     }
 
     private syncUrl(): void {
-        const wowClass = this.selectedClass();
+        const gameClass = this.selectedClass();
 
-        if (!wowClass) {
+        if (!gameClass) {
             return;
         }
 
@@ -300,7 +247,7 @@ export class TalentCalculator implements OnInit {
 
         this.router.navigate([], {
             relativeTo: this.route,
-            queryParams: { class: wowClass.slug, level: this.level(), build },
+            queryParams: { class: gameClass.slug, level: this.level(), build },
             replaceUrl: true
         });
     }

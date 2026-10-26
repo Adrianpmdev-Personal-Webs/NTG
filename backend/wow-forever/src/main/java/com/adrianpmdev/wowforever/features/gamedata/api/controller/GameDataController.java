@@ -1,0 +1,64 @@
+package com.adrianpmdev.wowforever.features.gamedata.api.controller;
+
+import com.adrianpmdev.wowforever.features.gamedata.application.service.GameDataService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.CacheControl;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.concurrent.TimeUnit;
+
+/**
+ * REST controller for the game data (talents, spellbooks, racials and the Legacy System). Read only: the data changes
+ * with the data.json file, not from the app. One endpoint per screen, so each screen downloads only what it shows.
+ *
+ * @author adrianpmdev
+ */
+@RestController
+@RequestMapping(value = "/api/v1/wow-forever/data", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequiredArgsConstructor
+public class GameDataController {
+
+    /** The data only changes with a new deploy, so the browser can keep it for a while. */
+    private static final CacheControl CACHE = CacheControl.maxAge(1, TimeUnit.HOURS).cachePrivate();
+
+    private final GameDataService gameDataService;
+
+    /** Credit line and the classes with their icons. */
+    @GetMapping
+    public ResponseEntity<String> getIndex() {
+        return json(gameDataService.getIndex());
+    }
+
+    /** Talent trees of a class, by slug (for example {@code warrior}). */
+    @GetMapping("/talents/{classSlug}")
+    public ResponseEntity<String> getTalents(@PathVariable String classSlug) {
+        return json(gameDataService.getTalents(classSlug));
+    }
+
+    /** Spellbook of a class, by slug, with the text of every rank. */
+    @GetMapping("/spellbook/{classSlug}")
+    public ResponseEntity<String> getSpellbook(@PathVariable String classSlug) {
+        return json(gameDataService.getSpellbook(classSlug));
+    }
+
+    /** Races of both factions with their racial abilities. */
+    @GetMapping("/racials")
+    public ResponseEntity<String> getRacials() {
+        return json(gameDataService.getRacials());
+    }
+
+    /** Legacy System perk trees and challenges. */
+    @GetMapping("/legacy")
+    public ResponseEntity<String> getLegacy() {
+        return json(gameDataService.getLegacy());
+    }
+
+    private static ResponseEntity<String> json(String body) {
+        return ResponseEntity.ok().cacheControl(CACHE).body(body);
+    }
+}

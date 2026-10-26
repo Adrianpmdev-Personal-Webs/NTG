@@ -1,364 +1,70 @@
 /**
  * Talent calculator styles.
  *
- * Metal frame page with class selector, level controls, three talent trees (a swipeable carousel on phones) and a tooltip card that follows the pointer.
+ * Level controls and the three talent trees (a swipeable carousel on phones). The page frame, the class picker and the
+ * tooltip card have their own components.
  *
  * @author @adrianpmdev
  */
 
 @use 'mixins' as *;
-
-/* ─── HOST AND PAGE ─── */
+@use 'wow-forever' as wow;
 
 :host {
     display: block;
 }
 
-.page {
-    min-height: 100dvh;
-    background: #050506;
-}
-
-app-wow-frame {
-    height: auto;
-    min-height: 100dvh;
-}
-
-.calc {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 14px;
-    min-height: calc(100dvh - 14px);
-    padding: 16px 20px 24px;
-    background: radial-gradient(ellipse at top, #1b1812 0%, #0a0a0a 70%);
-    color: #e8dfcb;
-    font-family: Georgia, 'Times New Roman', serif;
-}
-
-/* Everything inside keeps a readable width instead of stretching over the whole screen. */
-.calc > *:not(.tooltip) {
-    width: 100%;
-    max-width: 1040px;
-}
-
 .state {
-    margin: 24px 0;
-    color: #a79d86;
-    text-align: center;
-}
-
-/* ─── HEADER ─── */
-
-.calc-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-}
-
-.title {
-    margin: 0;
-    color: #d8b866;
-    font-size: 1.3rem;
-    font-weight: normal;
-    letter-spacing: 3px;
-    text-align: center;
-    text-transform: uppercase;
-}
-
-/* ─── CLASSES ─── */
-
-.classes {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    overflow-x: auto;
-    padding: 4px 2px 8px;
-}
-
-.class-btn {
-    display: flex;
-    flex: 0 0 auto;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    min-width: 72px;
-    padding: 6px 8px;
-    border: 1px solid transparent;
-    background: transparent;
-    color: #a79d86;
-    font: inherit;
-    cursor: pointer;
-
-    &:hover {
-        color: #e8dfcb;
-    }
-
-    &.active {
-        border-color: #d8b866;
-        background: rgba(216, 184, 102, 0.1);
-        color: #d8b866;
-    }
-
-    &:focus-visible {
-        outline: 1px solid #d8b866;
-        outline-offset: 2px;
-    }
-}
-
-.class-icon {
-    width: 36px;
-    height: 36px;
-    border: 1px solid #8a7440;
-    object-fit: cover;
-}
-
-.class-name {
-    font-size: 0.7rem;
-    letter-spacing: 1px;
-    text-transform: uppercase;
+    @include wow.state;
 }
 
 /* ─── CONTROLS ─── */
 
 .controls {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px 24px;
-    padding: 10px 14px;
-    border: 1px solid rgba(216, 184, 102, 0.35);
-    background: rgba(10, 10, 14, 0.8);
+    @include wow.controls;
 }
 
 .level {
     display: flex;
     align-items: center;
     gap: 10px;
-    color: #d8b866;
+    color: wow.$gold;
     letter-spacing: 2px;
     text-transform: uppercase;
 }
 
 .level-range {
     width: 180px;
-    accent-color: #d8b866;
+    accent-color: wow.$gold;
 }
 
 .level-number {
     width: 56px;
     padding: 4px 6px;
-    border: 1px solid #8a7440;
+    border: 1px solid wow.$icon-border;
     background: #0a0a0a;
-    color: #e8dfcb;
+    color: wow.$text;
     font: inherit;
     text-align: center;
 }
 
-.points {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px 18px;
-    color: #a79d86;
-    font-size: 0.9rem;
-
-    strong {
-        color: #e8dfcb;
-    }
-
-    .over strong {
-        color: #f2c94c;
-    }
-}
-
-.actions {
-    display: flex;
-    gap: 8px;
-}
-
 /* ─── TREES ─── */
 
-.tree-tabs {
-    display: none;
-}
-
-.trees {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
-}
-
-.tree {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    border: 1px solid rgba(216, 184, 102, 0.4);
-    background: #0a0a0e;
-}
-
-.tree-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    border-bottom: 1px solid rgba(216, 184, 102, 0.4);
-    background: linear-gradient(#26231b, #14130f);
-}
-
-.tree-icon {
-    width: 24px;
-    height: 24px;
-    border: 1px solid #8a7440;
-    object-fit: cover;
-}
-
-.tree-name {
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    color: #d8b866;
-    letter-spacing: 2px;
-    text-overflow: ellipsis;
-    text-transform: uppercase;
-    white-space: nowrap;
-}
-
-.tree-points {
-    padding: 0 8px;
-    border: 1px solid #8a7440;
-    background: #000;
-    color: #f2c94c;
-    font-weight: bold;
-}
-
-.tree-body {
-    flex: 1;
-    padding: 14px 18px 22px;
-    background:
-        linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.7)),
-        var(--tree-bg) center / cover no-repeat,
-        radial-gradient(ellipse at top, #2a2418 0%, #0d0d10 80%);
-}
-
-/* ─── TOOLTIP ─── */
-
-/* Card that hangs from the mouse pointer. It never takes the pointer itself, so hovering keeps working under it. */
-.tooltip {
-    position: fixed;
-    z-index: 1000;
-    width: max-content;
-    max-width: min(320px, calc(100vw - 32px));
-    padding: 10px 12px;
-    border: 1px solid #8a7440;
-    border-radius: 4px;
-    background: rgba(8, 8, 12, 0.96);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.7);
-    color: #e8dfcb;
-    font-size: 0.85rem;
-    pointer-events: none;
-}
-
-.tooltip-head {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.tooltip-icon {
-    width: 36px;
-    height: 36px;
-    border: 1px solid #8a7440;
-    border-radius: 3px;
-    object-fit: cover;
-}
-
-.tooltip-name {
-    color: #f2c94c;
-    font-size: 1rem;
-    font-weight: bold;
-}
-
-.tooltip-rank {
-    color: #a79d86;
-    font-size: 0.75rem;
-}
-
-.tooltip-text {
-    margin: 8px 0 0;
-    color: #f2e9d0;
-    line-height: 1.4;
-    /* Some rank texts carry their own line breaks (one line per weapon, for example). */
-    white-space: pre-line;
-}
-
-.next {
-    color: #6bd06b;
-}
-
-.next-label {
-    font-weight: bold;
-}
-
-.tooltip-requirement {
-    margin: 6px 0 0;
-    color: #ff5a4a;
-    font-size: 0.8rem;
-}
+@include wow.talent-trees;
 
 .hint {
-    margin: 0;
-    color: #8a7a52;
-    font-size: 0.8rem;
-    text-align: center;
-}
-
-.credit {
-    margin: 12px 0 0;
-    color: #8a7a52;
-    font-size: 0.75rem;
-    text-align: center;
+    @include wow.hint;
 }
 
 /* ─── RESPONSIVE ─── */
 
 @include tablet {
-    .calc {
-        padding: 12px 12px 20px;
-    }
-
-    .tree-body {
-        padding: 10px 12px 18px;
-    }
-
     .level-range {
         width: 140px;
     }
 }
 
-/* On phones the three trees become a swipeable carousel, one tree per screen. */
 @include mobile {
-    .calc-header {
-        flex-wrap: wrap;
-    }
-
-    .title {
-        order: -1;
-        flex: 0 0 100%;
-        font-size: 1.05rem;
-        letter-spacing: 2px;
-    }
-
-    .classes {
-        justify-content: flex-start;
-    }
-
-    .controls {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
     .level {
         flex-wrap: wrap;
     }
@@ -366,71 +72,5 @@ app-wow-frame {
     .level-range {
         flex: 1;
         min-width: 120px;
-    }
-
-    .actions {
-        justify-content: center;
-    }
-
-    .tree-tabs {
-        display: flex;
-        border-bottom: 1px solid rgba(216, 184, 102, 0.4);
-    }
-
-    .tree-tab {
-        flex: 1;
-        padding: 8px 4px;
-        border: 0;
-        border-bottom: 2px solid transparent;
-        background: transparent;
-        color: #a79d86;
-        font: inherit;
-        font-size: 0.75rem;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        cursor: pointer;
-
-        &.active {
-            border-bottom-color: #d8b866;
-            color: #d8b866;
-        }
-    }
-
-    .tab-points {
-        margin-left: 4px;
-        color: #f2c94c;
-        font-weight: bold;
-    }
-
-    .trees {
-        display: flex;
-        gap: 12px;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        scrollbar-width: none;
-
-        &::-webkit-scrollbar {
-            display: none;
-        }
-    }
-
-    .tree {
-        flex: 0 0 100%;
-        scroll-snap-align: center;
-    }
-}
-
-@include small {
-    .calc {
-        padding: 10px 8px 16px;
-        gap: 10px;
-    }
-
-    .tree-body {
-        padding: 8px 10px 16px;
-    }
-
-    .class-btn {
-        min-width: 60px;
     }
 }

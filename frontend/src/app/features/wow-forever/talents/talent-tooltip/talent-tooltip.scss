@@ -1,0 +1,83 @@
+/**
+ * Talent tooltip styles.
+ *
+ * Dark card with a gold border, fixed to the screen next to the pointer. It never takes the pointer itself, so hovering
+ * keeps working under it. Current rank text in light gold, next rank in green, missing requirements in red.
+ *
+ * @author @adrianpmdev
+ */
+
+@use 'wow-forever' as wow;
+
+.tooltip {
+    position: fixed;
+    z-index: 1000;
+    width: max-content;
+    max-width: min(320px, calc(100vw - 32px));
+    padding: 10px 12px;
+    border: 1px solid wow.$icon-border;
+    border-radius: 4px;
+    background: rgba(8, 8, 12, 0.96);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.7);
+    color: wow.$text;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 0.85rem;
+    pointer-events: none;
+}
+
+.tooltip-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tooltip-icon {
+    @include wow.icon(36px);
+    border-radius: 3px;
+}
+
+.tooltip-name {
+    color: wow.$bright;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.tooltip-rank {
+    color: wow.$muted;
+    font-size: 0.75rem;
+}
+
+.tooltip-cost {
+    margin: 8px 0 0;
+    color: wow.$muted;
+    font-size: 0.75rem;
+}
+
+.tooltip-text {
+    margin: 8px 0 0;
+    color: wow.$text-strong;
+    line-height: 1.4;
+    /* Some rank texts carry their own line breaks (one line per weapon, for example). */
+    white-space: pre-line;
+}
+
+.next {
+    color: wow.$green;
+}
+
+.next-label {
+    font-weight: bold;
+}
+
+.tooltip-requirement {
+    margin: 6px 0 0;
+    color: wow.$red;
+    font-size: 0.8rem;
+}
+
+.tooltip-classic {
+    margin: 6px 0 0;
+    color: wow.$dim;
+    font-size: 0.75rem;
+    font-style: italic;
+}

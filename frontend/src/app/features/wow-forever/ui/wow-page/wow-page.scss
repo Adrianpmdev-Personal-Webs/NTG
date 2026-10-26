@@ -1,0 +1,110 @@
+/**
+ * WoW page styles.
+ *
+ * Full-height metal frame page with a centred column of readable width, a header with the title between the two way-back
+ * buttons and the credit line at the bottom.
+ *
+ * @author @adrianpmdev
+ */
+
+@use 'mixins' as *;
+@use 'wow-forever' as wow;
+
+/* ─── HOST AND PAGE ─── */
+
+:host {
+    display: block;
+}
+
+.page {
+    min-height: 100dvh;
+    background: #050506;
+}
+
+app-wow-frame {
+    height: auto;
+    min-height: 100dvh;
+}
+
+.wow-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    min-height: calc(100dvh - 14px);
+    padding: 16px 20px 24px;
+    background: radial-gradient(ellipse at top, #1b1812 0%, #0a0a0a 70%);
+    color: wow.$text;
+    font-family: Georgia, 'Times New Roman', serif;
+}
+
+/* Everything keeps a readable width instead of stretching over the whole screen. */
+.page-header,
+.content,
+.credit {
+    width: 100%;
+    max-width: 1040px;
+}
+
+.content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* ─── HEADER ─── */
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.title {
+    margin: 0;
+    color: wow.$gold;
+    font-size: 1.3rem;
+    font-weight: normal;
+    letter-spacing: 3px;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+/* ─── CREDIT ─── */
+
+.credit {
+    margin: 12px 0 0;
+    color: wow.$dim;
+    font-size: 0.75rem;
+    text-align: center;
+}
+
+/* ─── RESPONSIVE ─── */
+
+@include tablet {
+    .wow-page {
+        padding: 12px 12px 20px;
+    }
+}
+
+@include mobile {
+    .page-header {
+        flex-wrap: wrap;
+    }
+
+    .title {
+        order: -1;
+        flex: 0 0 100%;
+        font-size: 1.05rem;
+        letter-spacing: 2px;
+    }
+}
+
+@include small {
+    .wow-page {
+        gap: 10px;
+        padding: 10px 8px 16px;
+    }
+}

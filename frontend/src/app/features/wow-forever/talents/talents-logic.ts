@@ -1,7 +1,8 @@
 /**
  * TalentsLogic
  *
- * Pure rules of the talent calculator: unlocking, adding and removing points, points per level and the share code.
+ * Pure rules of a talent tree: unlocking, adding and removing points, points per level and the share code. The talent
+ * calculator and the Legacy planner use the same rules; only what a point gate counts changes (see GateScope).
  *
  * @author @adrianpmdev
  */
@@ -27,15 +28,24 @@ export const pointsInTree = (tree: TalentTree, ranks: Ranks): number =>
 export const pointsAboveRow = (tree: TalentTree, ranks: Ranks, row: number): number =>
     tree.talents.reduce((sum, talent) => (talent.row < row ? sum + rankOf(ranks, talent) : sum), 0);
 
+/**
+ * Points that count towards the gate of a talent: the rows above it for talents, every other point of the tree for
+ * Legacy perks.
+ */
+export const pointsTowardsGate = (tree: TalentTree, ranks: Ranks, talent: Talent): number =>
+    tree.gateScope === 'tree'
+        ? pointsInTree(tree, ranks) - rankOf(ranks, talent)
+        : pointsAboveRow(tree, ranks, talent.row);
+
 export const totalPoints = (trees: readonly TalentTree[], ranks: Ranks): number =>
     trees.reduce((sum, tree) => sum + pointsInTree(tree, ranks), 0);
 
 export const prerequisitesOf = (tree: TalentTree, talent: Talent): Talent[] =>
     tree.talents.filter(other => talent.requires.includes(other.id));
 
-/** Whether the rows above hold enough points and, if the talent has prerequisites, one of them is complete. */
+/** Whether the gate of the talent is met and, if it has prerequisites, one of them is complete. */
 export const isUnlocked = (talent: Talent, tree: TalentTree, ranks: Ranks): boolean => {
-    if (pointsAboveRow(tree, ranks, talent.row) < talent.pointsRequired) {
+    if (pointsTowardsGate(tree, ranks, talent) < talent.pointsRequired) {
         return false;
     }
 
@@ -96,12 +106,10 @@ export const minLevelFor = (levels: readonly number[], spent: number): number =>
 
 /* ─── Share code ─── */
 
-/** Lowercase name of a tree for file names, e.g. "Beast Mastery" becomes "beast-mastery". */
-export const treeSlug = (tree: TalentTree): string => tree.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-
 /**
  * Compact code of a build for the share link, in the format of wow-forever.gg: one group per tree with points,
- * `<tree id>.<one digit per talent>`, trailing zeros trimmed, groups joined with `-`.
+ * `<tree id>.<one digit per talent>`, talents in order (top row first, left to right), trailing zeros trimmed, groups
+ * joined with `-`.
  */
 export const encodeBuild = (trees: readonly TalentTree[], ranks: Ranks): string =>
     trees

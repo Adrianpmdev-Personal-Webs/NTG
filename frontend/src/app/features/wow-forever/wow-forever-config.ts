@@ -1,11 +1,13 @@
 /**
  * WowForeverConfig
  *
- * Static configuration of the WoW Forever area: icon source, faction labels and the list of features.
+ * Static configuration of the WoW Forever area: icon source, faction labels, the list of features and the credit line of
+ * the game data.
  *
  * @author @adrianpmdev
  */
 
+import { DataCredit } from './game-data/game-data-models';
 import { Faction, LauncherNewsItem } from './wow-forever-models';
 
 /** Where the game icons come from. Icons are stored by name, so changing the host is a one-line change. */
@@ -46,61 +48,37 @@ export const WOW_FEATURES: readonly WowFeature[] = [
         label: 'Spellbook',
         description: 'Los hechizos de cada clase, rango a rango.',
         route: '/wow-forever/spellbook',
-        available: false
+        available: true
     },
     {
         id: 'legacy',
         label: 'Legacy System',
         description: 'Perks y desafíos de la cuenta.',
         route: '/wow-forever/legacy',
-        available: false
+        available: true
     },
     {
         id: 'races',
         label: 'Razas y racials',
         description: 'Habilidades raciales y combinaciones raza-clase.',
         route: '/wow-forever/races',
-        available: false
+        available: true
     }
 ];
 
 export const wowIconUrl = (icon: string): string => `${WOW_ICON_BASE_URL}/${icon}.jpg`;
 
-/** Icon of each talent tree (the small picture next to its name), by `<class>-<tree>`. Names from the Blizzard icon library. */
-export const TREE_ICONS: Readonly<Record<string, string>> = {
-    'warrior-arms': 'ability_rogue_eviscerate',
-    'warrior-fury': 'ability_warrior_innerrage',
-    'warrior-protection': 'inv_shield_06',
-    'paladin-holy': 'spell_holy_holybolt',
-    'paladin-protection': 'spell_holy_devotionaura',
-    'paladin-retribution': 'spell_holy_auraoflight',
-    'hunter-beast-mastery': 'ability_hunter_beasttaming',
-    'hunter-marksmanship': 'ability_marksmanship',
-    'hunter-survival': 'ability_hunter_swiftstrike',
-    'rogue-assassination': 'ability_rogue_eviscerate',
-    'rogue-combat': 'ability_backstab',
-    'rogue-subtlety': 'ability_stealth',
-    'priest-discipline': 'spell_holy_wordfortitude',
-    'priest-holy': 'spell_holy_guardianspirit',
-    'priest-shadow-magic': 'spell_shadow_shadowwordpain',
-    'shaman-elemental-combat': 'spell_nature_lightning',
-    'shaman-enhancement': 'spell_nature_lightningshield',
-    'shaman-restoration': 'spell_nature_magicimmunity',
-    'mage-arcane': 'spell_holy_magicalsentry',
-    'mage-fire': 'spell_fire_firebolt02',
-    'mage-frost': 'spell_frost_frostbolt02',
-    'warlock-affliction': 'spell_shadow_deathcoil',
-    'warlock-demonology': 'spell_shadow_metamorphosis',
-    'warlock-destruction': 'spell_shadow_rainoffire',
-    'druid-balance': 'spell_nature_starfall',
-    'druid-feral-combat': 'ability_racial_bearform',
-    'druid-restoration': 'spell_nature_healingtouch'
+/**
+ * Credit line the licence of the game data asks for, with the game build when the data gives it, e.g.
+ * "Data from talentsforever.com (https://talentsforever.com) · Build 1.60.1.70425". Null while there is no data.
+ */
+export const creditLine = (credit: DataCredit | null): string | null => {
+    if (!credit?.attribution) {
+        return null;
+    }
+
+    return credit.build ? `${credit.attribution} · Build ${credit.build}` : credit.attribution;
 };
-
-/** Where the talent icons come from. The talent data names them by id, not by name; one line to change if the host changes. */
-export const WOW_TALENT_ICON_BASE_URL = 'https://assets.wow-forever.gg/icons';
-
-export const talentIconUrl = (iconId: number): string => `${WOW_TALENT_ICON_BASE_URL}/${iconId}.png`;
 
 /** Hides an icon image that could not be loaded; the name next to it still identifies the item. */
 export const hideBrokenIcon = (event: Event): void => {

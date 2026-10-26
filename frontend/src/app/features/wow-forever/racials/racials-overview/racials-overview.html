@@ -1,0 +1,118 @@
+<app-wow-page title="Razas y raciales" [credit]="credit()">
+    @if (loading()) {
+        <p class="state">Cargando…</p>
+    } @else if (failed()) {
+        <p class="state">No se han podido cargar los datos. Inténtalo de nuevo más tarde.</p>
+    } @else {
+        <div class="tabs" role="tablist" aria-label="Facción">
+            @for (item of filters; track item.id) {
+                <button
+                    type="button"
+                    class="tab"
+                    role="tab"
+                    [class.active]="filter() === item.id"
+                    [attr.aria-selected]="filter() === item.id"
+                    (click)="setFilter(item.id)">
+                    {{ item.label }}
+                </button>
+            }
+        </div>
+
+        @if (races().length === 0) {
+            <p class="state">Todavía no hay razas cargadas.</p>
+        } @else {
+            <div class="races">
+                @for (race of races(); track race.slug) {
+                    <article class="race" [class.horde]="race.faction === 'HORDE'">
+                        <header class="race-header">
+                            <img class="race-icon" [src]="iconUrl(race.icon)" alt="" loading="lazy" (error)="onIconError($event)" />
+                            <div class="race-title">
+                                <h2 class="race-name">{{ race.name }}</h2>
+                                <span class="faction">{{ factionLabels[race.faction] }}</span>
+                            </div>
+                        </header>
+
+                        <div class="race-classes" [attr.aria-label]="'Clases de ' + race.name">
+                            @for (gameClass of classesOf(race); track gameClass.slug) {
+                                <img
+                                    class="class-icon"
+                                    [src]="iconUrl(gameClass.icon)"
+                                    [alt]="gameClass.name"
+                                    [title]="gameClass.name"
+                                    loading="lazy"
+                                    (error)="onIconError($event)" />
+                            }
+                        </div>
+
+                        <ul class="ability-list">
+                            @for (ability of race.abilities; track ability.name) {
+                                <li class="ability">
+                                    <img class="ability-icon" [src]="iconUrl(ability.icon)" alt="" loading="lazy" (error)="onIconError($event)" />
+                                    <span class="ability-text">
+                                        <span class="ability-name">{{ ability.name }}</span>
+                                        <span class="ability-desc">{{ ability.text }}</span>
+                                    </span>
+                                </li>
+                            }
+                        </ul>
+
+                        @for (group of race.classRacials; track group.className) {
+                            <div class="class-racials">
+                                <h3 class="class-racials-title">Solo {{ group.className }}</h3>
+                                <ul class="ability-list">
+                                    @for (ability of group.abilities; track ability.name) {
+                                        <li class="ability">
+                                            <img class="ability-icon" [src]="iconUrl(ability.icon)" alt="" loading="lazy" (error)="onIconError($event)" />
+                                            <span class="ability-text">
+                                                <span class="ability-name">{{ ability.name }}</span>
+                                                <span class="ability-desc">{{ ability.text }}</span>
+                                            </span>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+                    </article>
+                }
+            </div>
+
+            <section class="matrix-section">
+                <h2 class="section-title">Combinaciones raza-clase</h2>
+
+                <div class="matrix-wrapper">
+                    <table class="matrix">
+                        <thead>
+                            <tr>
+                                <th scope="col"><span class="visually-hidden">Raza</span></th>
+                                @for (gameClass of classes(); track gameClass.slug) {
+                                    <th scope="col">
+                                        <img
+                                            class="class-icon"
+                                            [src]="iconUrl(gameClass.icon)"
+                                            [alt]="gameClass.name"
+                                            [title]="gameClass.name"
+                                            (error)="onIconError($event)" />
+                                    </th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (race of races(); track race.slug) {
+                                <tr [class.horde]="race.faction === 'HORDE'">
+                                    <th scope="row">{{ race.name }}</th>
+                                    @for (gameClass of classes(); track gameClass.slug) {
+                                        <td [class.yes]="canPlay(race, gameClass)">
+                                            @if (canPlay(race, gameClass)) {
+                                                <span aria-label="Sí">✓</span>
+                                            }
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        }
+    }
+</app-wow-page>

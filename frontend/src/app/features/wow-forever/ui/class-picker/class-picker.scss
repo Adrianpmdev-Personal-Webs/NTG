@@ -1,0 +1,74 @@
+/**
+ * Class picker styles.
+ *
+ * Centred row of class buttons that scrolls sideways on narrow screens. The selected class gets the gold border.
+ *
+ * @author @adrianpmdev
+ */
+
+@use 'mixins' as *;
+@use 'wow-forever' as wow;
+
+:host {
+    display: block;
+}
+
+.classes {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 4px 2px 8px;
+}
+
+.class-btn {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 72px;
+    padding: 6px 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: wow.$muted;
+    font: inherit;
+    cursor: pointer;
+
+    &:hover {
+        color: wow.$text;
+    }
+
+    &.active {
+        border-color: wow.$gold;
+        background: rgba(216, 184, 102, 0.1);
+        color: wow.$gold;
+    }
+
+    &:focus-visible {
+        outline: 1px solid wow.$gold;
+        outline-offset: 2px;
+    }
+}
+
+.class-icon {
+    @include wow.icon(36px);
+}
+
+.class-name {
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+@include mobile {
+    .classes {
+        justify-content: flex-start;
+    }
+}
+
+@include small {
+    .class-btn {
+        min-width: 60px;
+    }
+}

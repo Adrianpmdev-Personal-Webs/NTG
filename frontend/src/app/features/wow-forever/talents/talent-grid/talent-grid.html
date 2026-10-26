@@ -36,7 +36,7 @@
                 (mouseleave)="hover.emit(null)"
                 (focus)="onFocus($event, view.talent)"
                 (blur)="hover.emit(null)">
-                <img class="icon" [src]="iconUrl(view.talent.iconId)" alt="" draggable="false" (error)="onIconError($event)" />
+                <img class="icon" [src]="iconUrl(view.talent.icon)" alt="" draggable="false" (error)="onIconError($event)" />
                 <span class="rank">{{ view.rank }}/{{ view.talent.maxRanks }}</span>
             </button>
         </div>

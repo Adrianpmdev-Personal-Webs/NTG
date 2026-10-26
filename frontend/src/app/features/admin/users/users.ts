@@ -13,6 +13,7 @@ import { FormsModule } from '@angular/forms';
 import { switchMap } from 'rxjs';
 import { CreateUserRequest, UpdateUserRequest, User } from '@shared/models/user';
 import { Tag } from '@shared/models/tag';
+import { resolveApiError } from '@shared/utils/api-error';
 import { NotificationService } from '@core/services/notification';
 import { TagService } from '@core/services/tag';
 import { UserService } from '@core/services/user';
@@ -64,7 +65,7 @@ export class Users implements OnInit {
     loadTags(): void {
         this.tagService.getAllTags().subscribe({
             next: tags => this.availableTags.set(tags),
-            error: error => this.notificationService.error(this.resolveError(error, 'Error al cargar etiquetas'))
+            error: error => this.notificationService.error(resolveApiError(error, 'Error al cargar etiquetas'))
         });
     }
 
@@ -86,7 +87,7 @@ export class Users implements OnInit {
                 this.loading.set(false);
             },
             error: error => {
-                this.notificationService.error(this.resolveError(error, 'Error al cargar usuarios'));
+                this.notificationService.error(resolveApiError(error, 'Error al cargar usuarios'));
                 this.loading.set(false);
             }
         });
@@ -150,7 +151,7 @@ export class Users implements OnInit {
                 this.inviting.set(null);
             },
             error: error => {
-                this.notificationService.error(this.resolveError(error, 'Error al enviar el correo'));
+                this.notificationService.error(resolveApiError(error, 'Error al enviar el correo'));
                 this.inviting.set(null);
             }
         });
@@ -184,7 +185,7 @@ export class Users implements OnInit {
                 this.loadUsers();
             },
             error: error => {
-                this.notificationService.error(this.resolveError(error, 'Error al crear usuario'));
+                this.notificationService.error(resolveApiError(error, 'Error al crear usuario'));
                 this.submitting.set(false);
             }
         });
@@ -216,7 +217,7 @@ export class Users implements OnInit {
                 this.loadUsers();
             },
             error: error => {
-                this.notificationService.error(this.resolveError(error, 'Error al actualizar usuario'));
+                this.notificationService.error(resolveApiError(error, 'Error al actualizar usuario'));
                 this.submitting.set(false);
             }
         });
@@ -238,7 +239,7 @@ export class Users implements OnInit {
                 this.loadUsers();
             },
             error: error => {
-                this.notificationService.error(this.resolveError(error, 'Error al eliminar usuario'));
+                this.notificationService.error(resolveApiError(error, 'Error al eliminar usuario'));
                 this.submitting.set(false);
             }
         });
@@ -276,9 +277,5 @@ export class Users implements OnInit {
 
     private normalizeRole(role: string): string {
         return role.toLowerCase().replace('role_', '');
-    }
-
-    private resolveError(error: any, fallback: string): string {
-        return error.error?.detail || error.error?.message || error.message || fallback;
     }
 }

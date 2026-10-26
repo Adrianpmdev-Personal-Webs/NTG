@@ -1,0 +1,192 @@
+/**
+ * Auth screens shared styles.
+ * Layout, Matrix background, box, header, form and footer used by both the login and the set-password pages.
+ * Each page does `@use 'auth-screen';` and keeps only what is its own (messages, responsive tweaks, extras).
+ *
+ * @author @adrianpmdev
+ */
+
+/* ─── LAYOUT ─── */
+
+.login-container {
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-black);
+    position: relative;
+    overflow: hidden;
+    padding: 32px 20px;
+}
+
+/* ─── MATRIX BACKGROUND ─── */
+
+.matrix-bg {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    z-index: 0;
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+.matrix-col {
+    position: absolute;
+    top: -100%;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--neon-green);
+    white-space: nowrap;
+    writing-mode: vertical-rl;
+    letter-spacing: 4px;
+    animation: matrix-fall 8s linear infinite;
+}
+
+/* ─── BOX ─── */
+
+.login-box {
+    position: relative;
+    z-index: 1;
+    width: min(480px, 100%);
+    background: rgba(4, 15, 5, 0.95);
+    border: 1px solid var(--neon-green-dark);
+    box-shadow:
+        0 0 30px rgba(0, 255, 65, 0.15),
+        0 0 60px rgba(0, 255, 65, 0.05),
+        inset 0 0 30px rgba(0, 255, 65, 0.02);
+    padding: 48px 40px;
+    backdrop-filter: blur(4px);
+
+    &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--neon-green), transparent);
+        box-shadow: 0 0 10px var(--neon-green);
+    }
+
+    &::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--neon-green-dark), transparent);
+    }
+}
+
+/* ─── HEADER ─── */
+
+.login-header {
+    text-align: center;
+    margin-bottom: 36px;
+}
+
+.sys-label {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+}
+
+.login-title {
+    font-family: var(--font-display);
+    font-size: 2.2rem;
+    font-weight: 900;
+    letter-spacing: 6px;
+    margin-bottom: 8px;
+}
+
+.login-subtitle {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    letter-spacing: 4px;
+}
+
+/* ─── TERMINAL PROMPT ─── */
+
+.terminal-prompt {
+    background: rgba(0, 255, 65, 0.03);
+    border: 1px solid rgba(0, 255, 65, 0.1);
+    border-left: 2px solid var(--neon-green-dark);
+    padding: 10px 14px;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    margin-bottom: 28px;
+    font-family: var(--font-mono);
+}
+
+.prompt-text {
+    color: var(--text-secondary);
+}
+
+/* ─── FORM ─── */
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.field-label {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+}
+
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.input-prefix {
+    color: var(--neon-green);
+    font-size: 1.1rem;
+    text-shadow: 0 0 8px var(--neon-green);
+    flex-shrink: 0;
+}
+
+/* ─── BUTTON ─── */
+
+.login-btn {
+    margin-top: 8px;
+    padding: 14px;
+    font-size: 0.9rem;
+    letter-spacing: 3px;
+    width: 100%;
+
+    &:hover {
+        box-shadow: 0 0 25px rgba(0, 255, 65, 0.3);
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+}
+
+/* ─── FOOTER ─── */
+
+.login-footer {
+    margin-top: 28px;
+    text-align: center;
+}
+
+.footer-line {
+    font-size: 0.62rem;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+}

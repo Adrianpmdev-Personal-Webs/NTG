@@ -18,6 +18,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '@core/services/auth';
 import { NotificationService } from '@core/services/notification';
+import { resolveApiError } from '@shared/utils/api-error';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -129,26 +130,8 @@ export class SetPassword implements OnInit {
     }
 
     private handleError(error: unknown): void {
-        this.error.set(this.resolveError(error));
+        this.error.set(resolveApiError(error, 'El enlace no es válido o ha expirado'));
         this.loading.set(false);
-    }
-
-    private resolveError(error: unknown): string {
-        if (this.hasApiErrorMessage(error)) {
-            return (error as { error: { detail?: string; message?: string } }).error.detail
-                || (error as { error: { detail?: string; message?: string } }).error.message
-                || 'El enlace no es válido o ha expirado';
-        }
-
-        return 'El enlace no es válido o ha expirado';
-    }
-
-    private hasApiErrorMessage(error: unknown): boolean {
-        return typeof error === 'object'
-            && error !== null
-            && 'error' in error
-            && typeof (error as { error?: unknown }).error === 'object'
-            && (error as { error?: unknown }).error !== null;
     }
 
     goToLogin(): void {

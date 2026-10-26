@@ -10,6 +10,7 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { NotificationService } from '@core/services/notification';
+import { resolveApiError } from '@shared/utils/api-error';
 import { FACTION_LABELS, hideBrokenIcon, wowIconUrl } from '../../wow-forever-config';
 import { WowForeverApi } from '../../wow-forever-api';
 import {
@@ -103,7 +104,7 @@ export class Management implements OnInit {
                 this.loading.set(false);
             },
             error: error => {
-                this.notificationService.error(this.resolveError(error, 'Error al cargar los datos'));
+                this.notificationService.error(resolveApiError(error, 'Error al cargar los datos'));
                 this.loading.set(false);
             }
         });
@@ -213,7 +214,7 @@ export class Management implements OnInit {
                 this.notificationService.success('Ajuste guardado');
                 this.load();
             },
-            error: error => this.notificationService.error(this.resolveError(error, 'Error al guardar el ajuste'))
+            error: error => this.notificationService.error(resolveApiError(error, 'Error al guardar el ajuste'))
         });
     }
 
@@ -249,7 +250,7 @@ export class Management implements OnInit {
                 this.load();
             },
             error: error => {
-                this.notificationService.error(this.resolveError(error, 'No se ha podido eliminar'));
+                this.notificationService.error(resolveApiError(error, 'No se ha podido eliminar'));
                 this.submitting.set(false);
             }
         });
@@ -266,15 +267,9 @@ export class Management implements OnInit {
                 this.load();
             },
             error: error => {
-                this.notificationService.error(this.resolveError(error, 'Error al guardar'));
+                this.notificationService.error(resolveApiError(error, 'Error al guardar'));
                 this.submitting.set(false);
             }
         });
-    }
-
-    private resolveError(error: unknown, fallback: string): string {
-        const detail = (error as { error?: { detail?: string } })?.error?.detail;
-
-        return detail || fallback;
     }
 }

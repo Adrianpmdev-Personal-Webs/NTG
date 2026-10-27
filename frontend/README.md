@@ -147,6 +147,9 @@ key** that unlocks it on the backend.
   command-line flavour.
 - **Each game defines its own identity** inside its feature (custom properties, fonts and layout). The terminal
   styles are scoped, so they never leak into a game.
+- **A game can reuse its components in both worlds.** Components written against the terminal tokens (as the
+  Pokémon tournament views are) look green in the admin area and take the game palette inside the game layout,
+  which re-points those tokens.
 - Design tokens are CSS custom properties, and global feedback (success, error, warning) goes through a single
   notification service.
 

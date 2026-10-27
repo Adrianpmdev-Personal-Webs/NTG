@@ -3,6 +3,7 @@ package com.adrianpmdev.core.integration.supabase.storage;
 import com.adrianpmdev.core.integration.supabase.config.SupabaseProperties;
 import com.adrianpmdev.platform.port.ObjectStorage;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -53,12 +54,21 @@ public class SupabaseStorageClient implements ObjectStorage {
     }
 
     @Override
-    public void upload(String bucket, String objectName, byte[] content, String contentType) {
+    public void upload(String bucket, String objectName, byte[] content, String contentType, Duration cacheMaxAge) {
         HttpHeaders headers = serviceHeaders();
         headers.setContentType(MediaType.parseMediaType(contentType));
         headers.set(UPSERT_HEADER, "true");
 
+        if (cacheMaxAge != null) {
+            headers.setCacheControl(CacheControl.maxAge(cacheMaxAge).cachePublic());
+        }
+
         exchange(objectUrl(bucket, objectName), HttpMethod.POST, new HttpEntity<>(content, headers), Void.class);
+    }
+
+    @Override
+    public String publicUrl(String bucket, String objectName) {
+        return storageUrl() + "/object/public/" + bucket + "/" + objectName;
     }
 
     @Override

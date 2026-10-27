@@ -2,6 +2,7 @@ package com.adrianpmdev.core.security.filter;
 
 import com.adrianpmdev.core.security.authentication.AuthenticatedUser;
 import com.adrianpmdev.core.security.authorization.Authorities;
+import com.adrianpmdev.core.features.catalog.application.service.GameCatalogService;
 import com.adrianpmdev.core.features.tags.infrastructure.persistence.entity.Tag;
 import com.adrianpmdev.core.features.users.infrastructure.persistence.entity.User;
 import com.adrianpmdev.core.features.users.infrastructure.persistence.repository.UserRepository;
@@ -28,12 +29,14 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
  * Authenticates requests that carry a Supabase access token.
  * The token is verified locally; the role and tags are read from the local database on every request,
- * so changing a role or a tag (or deleting a user) takes effect immediately.
+ * so changing a role or a tag (or deleting a user) takes effect immediately. The tag of a game that is still
+ * upcoming in the catalog is ignored for non-admins, which keeps its API closed to players.
  * If the token is missing or invalid the request simply continues unauthenticated and the
  * authorization rules decide (public endpoints keep working, protected ones answer 401).
  * It is created in {@link SecurityConfig} and is deliberately not a {@code @Component}.
@@ -46,19 +49,24 @@ public class SupabaseJwtAuthFilter extends OncePerRequestFilter {
 
     private static final String BEARER_PREFIX = "Bearer ";
     private static final String DEFAULT_ROLE = "USUARIO";
+    private static final String ADMIN_ROLE = "ADMIN";
 
     private final JwtDecoder jwtDecoder;
     private final UserRepository userRepository;
+    private final GameCatalogService gameCatalogService;
 
     /**
      * Builds the filter.
      *
-     * @param jwtDecoder     access token decoder
-     * @param userRepository local user repository
+     * @param jwtDecoder         access token decoder
+     * @param userRepository     local user repository
+     * @param gameCatalogService game catalog (upcoming games)
      */
-    public SupabaseJwtAuthFilter(JwtDecoder jwtDecoder, UserRepository userRepository) {
+    public SupabaseJwtAuthFilter(JwtDecoder jwtDecoder, UserRepository userRepository,
+                                 GameCatalogService gameCatalogService) {
         this.jwtDecoder = jwtDecoder;
         this.userRepository = userRepository;
+        this.gameCatalogService = gameCatalogService;
     }
 
     @Override
@@ -88,7 +96,13 @@ public class SupabaseJwtAuthFilter extends OncePerRequestFilter {
             List<GrantedAuthority> authorities = new ArrayList<>();
             authorities.add(new SimpleGrantedAuthority(Authorities.ROLE_PREFIX + role));
 
+            Set<String> closedGames = ADMIN_ROLE.equals(role) ? Set.of() : gameCatalogService.upcomingKeys();
+
             for (Tag tag : user.getTags()) {
+                if (closedGames.contains(tag.getKey())) {
+                    continue;
+                }
+
                 authorities.add(new SimpleGrantedAuthority(Authorities.tag(tag.getKey())));
             }
 

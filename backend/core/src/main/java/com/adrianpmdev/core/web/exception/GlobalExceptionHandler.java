@@ -17,6 +17,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
@@ -116,6 +117,18 @@ public class GlobalExceptionHandler {
         return build(denied ? HttpStatus.FORBIDDEN : HttpStatus.UNAUTHORIZED,
                 denied ? "Forbidden" : "Unauthorized",
                 denied ? "Access denied" : "Unauthenticated", exception, request);
+    }
+
+    /**
+     * Handles uploads larger than the multipart limits.
+     *
+     * @param exception upload size exception
+     * @param request   current HTTP request
+     * @return problem detail response
+     */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ProblemDetail> handleUploadTooLarge(MaxUploadSizeExceededException exception, HttpServletRequest request) {
+        return build(HttpStatus.CONTENT_TOO_LARGE, "Content too large", "El archivo no puede superar 4 MB", exception, request);
     }
 
     /**

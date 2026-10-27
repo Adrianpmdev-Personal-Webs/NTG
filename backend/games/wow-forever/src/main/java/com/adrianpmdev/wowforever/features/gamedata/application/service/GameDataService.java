@@ -11,6 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -126,6 +127,28 @@ public class GameDataService {
 
             return response;
         });
+    }
+
+    /**
+     * Talent trees of every class, as slugs: the class slug and the slugs of its trees, in file order.
+     *
+     * @return tree slugs by class slug
+     */
+    public Map<String, List<String>> getTalentTreeSlugs() {
+        GameData gameData = data();
+        Map<String, List<String>> trees = new LinkedHashMap<>();
+
+        gameData.classNamesBySlug().forEach((slug, name) -> {
+            List<String> treeSlugs = new ArrayList<>();
+
+            for (JsonNode tree : gameData.root().path("talents").path(name).path("trees")) {
+                treeSlugs.add(slugify(tree.path("name").asText("")));
+            }
+
+            trees.put(slug, List.copyOf(treeSlugs));
+        });
+
+        return trees;
     }
 
     /* ─── Responses ─── */

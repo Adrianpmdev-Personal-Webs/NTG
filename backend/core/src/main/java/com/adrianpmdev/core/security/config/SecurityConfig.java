@@ -4,6 +4,7 @@ import com.adrianpmdev.core.security.authentication.SupabaseBasicAdminAuthentica
 import com.adrianpmdev.core.security.authorization.Authorities;
 import com.adrianpmdev.core.security.filter.SupabaseJwtAuthFilter;
 import com.adrianpmdev.core.config.AppProperties;
+import com.adrianpmdev.core.features.catalog.application.service.GameCatalogService;
 import com.adrianpmdev.core.features.users.infrastructure.persistence.repository.UserRepository;
 import com.adrianpmdev.platform.module.GameModule;
 import org.springframework.context.annotation.Bean;
@@ -81,18 +82,19 @@ public class SecurityConfig {
      * reading needs the game tag (or ADMIN), writing needs ADMIN except the routes the game opens to players.
      * A new game needs no change here: declare its module, create the tag and assign it to users.
      *
-     * @param http           HTTP security configuration
-     * @param jwtDecoder     access token decoder
-     * @param userRepository local user repository
-     * @param gameModules    game modules on the classpath
+     * @param http               HTTP security configuration
+     * @param jwtDecoder         access token decoder
+     * @param userRepository     local user repository
+     * @param gameCatalogService game catalog (upcoming games)
+     * @param gameModules        game modules on the classpath
      * @return configured security filter chain
      * @throws Exception if the security chain cannot be built
      */
     @Bean
     @Order(2)
     SecurityFilterChain apiChain(HttpSecurity http, JwtDecoder jwtDecoder, UserRepository userRepository,
-                                 List<GameModule> gameModules) throws Exception {
-        SupabaseJwtAuthFilter jwtFilter = new SupabaseJwtAuthFilter(jwtDecoder, userRepository);
+                                 GameCatalogService gameCatalogService, List<GameModule> gameModules) throws Exception {
+        SupabaseJwtAuthFilter jwtFilter = new SupabaseJwtAuthFilter(jwtDecoder, userRepository, gameCatalogService);
 
         http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -115,6 +117,11 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.PUT, "/api/v1/users/me").authenticated();
                     auth.requestMatchers("/api/v1/users", "/api/v1/users/**").hasRole(ADMIN_ROLE);
                     auth.requestMatchers("/api/v1/tags", "/api/v1/tags/**").hasRole(ADMIN_ROLE);
+
+                    // Catalog: every signed-in user reads the games they can see; changes and pictures are ADMIN.
+                    auth.requestMatchers(HttpMethod.GET, "/api/v1/games").authenticated();
+                    auth.requestMatchers("/api/v1/games", "/api/v1/games/**").hasRole(ADMIN_ROLE);
+                    auth.requestMatchers("/api/v1/assets", "/api/v1/assets/**").hasRole(ADMIN_ROLE);
 
                     // Games: the writes each game opens to players, then read with the game tag and write as ADMIN.
                     for (GameModule game : gameModules) {

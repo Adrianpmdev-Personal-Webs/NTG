@@ -1,6 +1,7 @@
 package com.adrianpmdev.wowforever.features.gamedata.api.controller;
 
 import com.adrianpmdev.wowforever.features.gamedata.application.service.GameDataService;
+import com.adrianpmdev.wowforever.features.gamedata.application.service.GameImagesService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -27,6 +29,7 @@ public class GameDataController {
     private static final CacheControl CACHE = CacheControl.maxAge(1, TimeUnit.HOURS).cachePrivate();
 
     private final GameDataService gameDataService;
+    private final GameImagesService gameImagesService;
 
     /** Credit line and the classes with their icons. */
     @GetMapping
@@ -56,6 +59,16 @@ public class GameDataController {
     @GetMapping("/legacy")
     public ResponseEntity<String> getLegacy() {
         return json(gameDataService.getLegacy());
+    }
+
+    /**
+     * Public URLs of the pictures of the area (logo, faction backgrounds and talent trees), by short key, for example
+     * {@code backgrounds/horde} or {@code talents/warrior-arms}. Pictures not uploaded yet are left out. Not cached:
+     * an admin may replace a picture at any time.
+     */
+    @GetMapping("/images")
+    public Map<String, String> getImages() {
+        return gameImagesService.getUrls();
     }
 
     private static ResponseEntity<String> json(String body) {

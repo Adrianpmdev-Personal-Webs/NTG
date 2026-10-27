@@ -6,6 +6,9 @@ import com.adrianpmdev.pokemon.features.tournaments.infrastructure.persistence.e
 import com.adrianpmdev.pokemon.features.tournaments.infrastructure.persistence.entity.TournamentPlayer;
 import com.adrianpmdev.pokemon.features.tournaments.infrastructure.persistence.repository.TournamentPlayerRepository;
 import com.adrianpmdev.platform.error.ApiErrors;
+import com.adrianpmdev.platform.image.CompressedImage;
+import com.adrianpmdev.platform.image.ImageCompressor;
+import com.adrianpmdev.platform.image.ImageSpec;
 import com.adrianpmdev.platform.port.CurrentUser;
 import com.adrianpmdev.platform.port.ObjectStorage;
 import lombok.RequiredArgsConstructor;
@@ -37,9 +40,9 @@ import java.util.concurrent.ThreadLocalRandom;
  *     while the tournament is not finished and the teams are not revealed yet.</li>
  *     <li><b>Who may see it:</b> an admin and its owner, always; everybody else once the reveal moment
  *     has passed (or when the tournament has none).</li>
- *     <li><b>Files:</b> WebP, JPEG or PNG (checked by their first bytes, not by the name), up to 1 MB. The
- *     browser compresses pictures before sending them. Object names are generated here, never taken from
- *     the request.</li>
+ *     <li><b>Files:</b> clients send the original picture (JPEG or PNG, up to 4 MB) and the platform
+ *     {@link ImageCompressor} validates it and compresses it (at most {@value #MAX_SIDE} px and 1 MB, the
+ *     limit of the bucket). Object names are generated here, never taken from the request.</li>
  *     <li><b>URLs:</b> the database keeps only the object name; clients get signed URLs that expire,
  *     cached here and reused until shortly before they expire.</li>
  * </ul>
@@ -53,60 +56,22 @@ public class TeamImageService {
 
     static final String BUCKET = "pokemon-teams";
 
-    private static final int MAX_BYTES = 1024 * 1024;
+    static final int MAX_SIDE = 1600;
+
+    private static final ImageSpec SPEC = new ImageSpec(MAX_SIDE, 1024 * 1024);
+    private static final long MAX_SOURCE_BYTES = 4L * 1024 * 1024;
     private static final Duration URL_VALIDITY = Duration.ofHours(1);
     private static final Duration URL_REUSE_MARGIN = Duration.ofMinutes(10);
     private static final int RANDOM_SUFFIX_BYTES = 4;
 
     private final TournamentPlayerRepository tournamentPlayerRepository;
     private final ObjectStorage storage;
+    private final ImageCompressor imageCompressor;
     private final CurrentUser currentUser;
 
     private final Map<String, SignedUrl> urlCache = new ConcurrentHashMap<>();
 
     private record SignedUrl(String url, Instant expiresAt) {
-    }
-
-    /** Supported picture formats, recognised by their first bytes. */
-    private enum ImageType {
-        WEBP("image/webp", "webp"),
-        JPEG("image/jpeg", "jpg"),
-        PNG("image/png", "png");
-
-        private final String contentType;
-        private final String extension;
-
-        ImageType(String contentType, String extension) {
-            this.contentType = contentType;
-            this.extension = extension;
-        }
-
-        static ImageType detect(byte[] bytes) {
-            if (bytes.length >= 12 && ascii(bytes, 0, "RIFF") && ascii(bytes, 8, "WEBP")) {
-                return WEBP;
-            }
-
-            if (bytes.length >= 3 && (bytes[0] & 0xFF) == 0xFF && (bytes[1] & 0xFF) == 0xD8 && (bytes[2] & 0xFF) == 0xFF) {
-                return JPEG;
-            }
-
-            if (bytes.length >= 8 && (bytes[0] & 0xFF) == 0x89 && ascii(bytes, 1, "PNG")
-                    && bytes[4] == 0x0D && bytes[5] == 0x0A && bytes[6] == 0x1A && bytes[7] == 0x0A) {
-                return PNG;
-            }
-
-            return null;
-        }
-
-        private static boolean ascii(byte[] bytes, int offset, String text) {
-            for (int i = 0; i < text.length(); i++) {
-                if (bytes[offset + i] != text.charAt(i)) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
     }
 
     /**
@@ -121,16 +86,10 @@ public class TeamImageService {
         TournamentPlayer entry = findEntry(tournamentPlayerId);
         requireCanEdit(entry);
 
-        byte[] bytes = readLimited(file);
-        ImageType type = ImageType.detect(bytes);
-
-        if (type == null) {
-            throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "La imagen debe ser WebP, JPEG o PNG");
-        }
-
+        CompressedImage image = imageCompressor.compress(readLimited(file), SPEC);
         String objectName = "tournaments/%s/%s-%s.%s".formatted(entry.getTournament().getId(), entry.getId(),
-                randomSuffix(), type.extension);
-        storage.upload(BUCKET, objectName, bytes, type.contentType);
+                randomSuffix(), image.extension());
+        storage.upload(BUCKET, objectName, image.bytes(), image.contentType());
 
         String previous = entry.getTeamImage();
         entry.setTeamImage(objectName);
@@ -279,8 +238,8 @@ public class TeamImageService {
             throw ApiErrors.badRequest("Falta la imagen");
         }
 
-        if (file.getSize() > MAX_BYTES) {
-            throw new ResponseStatusException(HttpStatus.CONTENT_TOO_LARGE, "La imagen no puede superar 1 MB");
+        if (file.getSize() > MAX_SOURCE_BYTES) {
+            throw new ResponseStatusException(HttpStatus.CONTENT_TOO_LARGE, "La imagen no puede superar 4 MB");
         }
 
         try {

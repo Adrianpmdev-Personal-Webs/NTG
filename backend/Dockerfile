@@ -2,6 +2,9 @@
 FROM maven:3.9.12-eclipse-temurin-25 AS build
 WORKDIR /workspace
 
+# Opciones de la JVM de Maven (permite a Lombok compilar en Java 25 sin avisos)
+COPY .mvn .mvn
+
 # Copiar todos los pom.xml
 COPY pom.xml .
 COPY platform-api/pom.xml platform-api/pom.xml

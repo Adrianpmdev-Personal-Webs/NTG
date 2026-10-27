@@ -6,7 +6,8 @@
 -- of games, the public pictures uploaded by admins and their public Storage bucket.
 --
 -- How to use: run it in the Supabase SQL editor of an empty project. Order of the files:
--- core.sql, pokemon.sql, wow_forever.sql (the game schemas do not depend on core).
+-- core.sql, then pokemon.sql (the game schemas do not depend on core). WoW Forever has no tables: its data
+-- lives in files of its backend module.
 -- =====================================================================================================
 
 create schema if not exists core;

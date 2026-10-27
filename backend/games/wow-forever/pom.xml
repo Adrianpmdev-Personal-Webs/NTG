@@ -27,12 +27,6 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- Spring Boot Data JPA for entities and repositories -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-
         <!-- Swagger/OpenAPI for endpoint documentation -->
         <dependency>
             <groupId>org.springdoc</groupId>

@@ -6,6 +6,8 @@ import com.adrianpmdev.core.features.catalog.api.dto.request.UpdateGameRequest;
 import com.adrianpmdev.core.features.catalog.api.dto.response.GameResponse;
 import com.adrianpmdev.core.features.catalog.infrastructure.persistence.entity.CatalogGame;
 import com.adrianpmdev.core.features.catalog.infrastructure.persistence.repository.CatalogGameRepository;
+import com.adrianpmdev.core.features.tags.infrastructure.persistence.entity.Tag;
+import com.adrianpmdev.core.features.tags.infrastructure.persistence.repository.TagRepository;
 import com.adrianpmdev.core.security.authorization.Authorities;
 import com.adrianpmdev.platform.asset.ImageSlot;
 import com.adrianpmdev.platform.asset.ImageSlotProvider;
@@ -13,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collection;
@@ -30,6 +33,8 @@ import java.util.stream.Collectors;
  *     <li><b>Upcoming games:</b> the access token filter asks {@link #upcomingKeys()} and ignores the tag of an
  *     upcoming game for non-admins, so its API stays closed to players even if they have the tag.</li>
  *     <li><b>Covers:</b> each game declares the public picture {@code platform/games/<key>}, uploaded by an admin.</li>
+ *     <li><b>Tags:</b> adding a game also creates the tag with its key (if it does not exist yet), so it can be given
+ *     to users right away. Removing a game keeps its tag.</li>
  * </ul>
  * The catalog is tiny and read on every request by the token filter, so it is kept in memory and reloaded after every
  * change.
@@ -45,6 +50,7 @@ public class GameCatalogService implements ImageSlotProvider {
     private static final String COVER_GROUP = "Plataforma · Portadas de juegos";
 
     private final CatalogGameRepository gameRepository;
+    private final TagRepository tagRepository;
     private final AssetService assetService;
 
     /** Catalog in display order; null until first needed and after every change. */
@@ -58,10 +64,13 @@ public class GameCatalogService implements ImageSlotProvider {
      * Builds the service with its dependencies.
      *
      * @param gameRepository catalog repository
+     * @param tagRepository  tag repository (the tag of each new game)
      * @param assetService   public pictures (covers)
      */
-    public GameCatalogService(CatalogGameRepository gameRepository, AssetService assetService) {
+    public GameCatalogService(CatalogGameRepository gameRepository, TagRepository tagRepository,
+                              AssetService assetService) {
         this.gameRepository = gameRepository;
+        this.tagRepository = tagRepository;
         this.assetService = assetService;
     }
 
@@ -96,19 +105,27 @@ public class GameCatalogService implements ImageSlotProvider {
     }
 
     /**
-     * Adds a game to the catalog.
+     * Adds a game to the catalog and creates its tag when it does not exist yet, both or neither.
      *
      * @param request game data
      * @param actorId admin performing the action
      * @return the game as an admin sees it
      */
+    @Transactional
     public GameResponse create(CreateGameRequest request, UUID actorId) {
         if (gameRepository.existsById(request.key())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Game '" + request.key() + "' already exists");
         }
 
+        String name = request.name().trim();
         CatalogGame game = gameRepository.save(
-                new CatalogGame(request.key(), request.name().trim(), request.upcoming(), (short) request.sortOrder()));
+                new CatalogGame(request.key(), name, request.upcoming(), (short) request.sortOrder()));
+
+        if (!tagRepository.existsById(game.getKey())) {
+            tagRepository.save(new Tag(game.getKey(), name, "Acceso a " + name));
+            AUDIT.info("actor={} action=TAG_CREATED tag={} reason=GAME_CREATED", actorId, game.getKey());
+        }
+
         entries = null;
         AUDIT.info("actor={} action=GAME_CREATED game={}", actorId, game.getKey());
 

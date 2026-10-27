@@ -2,13 +2,15 @@
 
 # 🖥️ NTG System · Frontend 🖥️
 
-**Single-page application for the NTG platform: sign in, pick a game, play and manage it.**
+### Single-page application for the NTG platform: sign in, pick a game, play and manage it
 
-![Angular](https://img.shields.io/badge/Angular-21-DD0031?logo=angular&logoColor=white&style=flat-square)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white&style=flat-square)
-![RxJS](https://img.shields.io/badge/RxJS-7.8-B7178C?logo=reactivex&logoColor=white&style=flat-square)
-![SCSS](https://img.shields.io/badge/SCSS-design_tokens-CC6699?logo=sass&logoColor=white&style=flat-square)
-![Vercel](https://img.shields.io/badge/Vercel-deployed-000000?logo=vercel&logoColor=white&style=flat-square)
+![Angular](https://img.shields.io/badge/Angular-21-DD0031?style=for-the-badge&logo=angular&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![RxJS](https://img.shields.io/badge/RxJS-7.8-B7178C?style=for-the-badge&logo=reactivex&logoColor=white)
+![SCSS](https://img.shields.io/badge/SCSS-design_tokens-CC6699?style=for-the-badge&logo=sass&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-deployed-000000?style=for-the-badge&logo=vercel&logoColor=white)
+
+[![Author](https://img.shields.io/badge/Author-adrianpmdev-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/adrianpmdev)
 
 [Overview](#-overview) · [Screens](#-screens) · [Access & routing](#-access-and-routing) · [Session](#-session-handling) · [Folder structure](#-folder-structure) · [Look & feel](#-look-and-feel) · [Conventions](#-conventions) · [Run & deploy](#-run-and-deploy)
 
@@ -16,10 +18,11 @@
 
 </div>
 
+---
+
 <br>
 
----
-# ✨ Overview
+## ✨ Overview
 
 The frontend is an **Angular 21** SPA that talks to the [NTG backend](../backend/README.md). It shows each user
 only the games they have access to, and gives admins the tools to manage users, access, the game catalog, pictures
@@ -35,13 +38,14 @@ and game content.
 - 📱 **Works on every screen size:** each screen was checked from 320 px phones to desktop.
 - 🎨 **Two visual worlds:** a terminal look for the platform, and a custom identity for each game.
 
-> The interface is written in Spanish (the audience is a Spanish-speaking group). Code and documentation are in
+> 🌍 **The interface is written in Spanish** (the audience is a Spanish-speaking group). Code and documentation are in
 > English.
+
+---
 
 <br>
 
----
-# 🧭 Screens
+## 🧭 Screens
 
 | Area | Screen | What it does |
 |---|---|---|
@@ -55,10 +59,11 @@ and game content.
 | 🎮 Games | **Game areas** | Each game has its own layout, theme, views and tools, and opens only with its tag |
 | 🎮 Games (admin) | **Management** | A game can add its own administration screens to the admin area |
 
+---
+
 <br>
 
----
-# 🚦 Access and routing
+## 🚦 Access and routing
 
 The backend says which games each user can open (`GET /games`); the app uses that answer to build the sidebar and
 to guard the game routes. The backend enforces the same rules, the frontend only hides what a user cannot use.
@@ -84,10 +89,11 @@ flowchart LR
 The routes of the games are generated from the list in `games/games.ts`: every game is served at `/<id>` and its
 management area at `/admin/<id>`, so adding a game does not touch `app.routes.ts`.
 
+---
+
 <br>
 
----
-# 🔁 Session handling
+## 🔁 Session handling
 
 The session combines a short-lived access token kept in memory with a long-lived HttpOnly cookie.
 
@@ -100,10 +106,11 @@ The session combines a short-lived access token kept in memory with a long-lived
 - **First-time access:** the invitation email opens `/set-password`; after choosing a password the user is signed
   in without going through the login screen.
 
+---
+
 <br>
 
----
-# 📁 Folder structure
+## 📁 Folder structure
 
 ```text
 frontend/
@@ -146,10 +153,11 @@ frontend/
 The sidebar, the welcome page and the dashboard read the catalog from the backend, and the game's **id doubles as
 the tag key** that unlocks it.
 
+---
+
 <br>
 
----
-# 🎨 Look and feel
+## 🎨 Look and feel
 
 - **Platform areas** (login, welcome, admin) share a **terminal** aesthetic: monospaced type, neon accents and a
   command-line flavour.
@@ -164,10 +172,11 @@ the tag key** that unlocks it.
 - Design tokens are CSS custom properties, and global feedback (success, error, warning) goes through a single
   notification service.
 
+---
+
 <br>
 
----
-# 📐 Conventions
+## 📐 Conventions
 
 - **Dependency direction:** features and games may use `core`, `shared` and `layout`; `core` and `shared` never
   import from `features` or `games`; a game never imports from another game or from `features`.
@@ -178,10 +187,11 @@ the tag key** that unlocks it.
 - **Path aliases:** `@core`, `@shared`, `@layout`, `@features`, `@games`.
 - Every file starts with a short English header comment.
 
+---
+
 <br>
 
----
-# 🚢 Run and deploy
+## 🚢 Run and deploy
 
 ```bash
 npm install
@@ -198,18 +208,29 @@ npm run build      # production build
 - **Why the rewrite:** the browser only talks to the site's own domain, so the session cookie is **first-party**
   (it also works in browsers that block third-party cookies) and the backend address is never exposed to the app.
 
+---
+
 <br>
 
----
-# 🗺️ Ideas for next steps
+## 🗺️ Ideas for next steps
 
 - Real data for the admin dashboard.
 - A screen for users to edit their own profile.
 - Automated tests for guards, interceptor and key screens.
 - More game modules following the same structure.
 
+---
+
 <br>
+
+↩️ [Back to the project overview](../README.md) · ⚙️ [Backend documentation](../backend/README.md) · 📄 [License](../LICENSE)
 
 ---
 
-↩️ [Back to the project overview](../README.md) · ⚙️ [Backend documentation](../backend/README.md)
+<br>
+
+<div align="center">
+
+✨ Made in **2026** by [@adrianpmdev](https://github.com/adrianpmdev) ✨
+
+</div>

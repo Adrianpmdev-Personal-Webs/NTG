@@ -42,6 +42,7 @@
 }
 
 .header-right {
+    flex-wrap: wrap;
     display: flex;
     align-items: center;
     gap: 14px;
@@ -54,6 +55,34 @@
     border: 1px solid var(--border-color);
     padding: 4px 10px;
     white-space: nowrap;
+}
+
+/* ─── MODE SWITCH ─── */
+
+.mode-switch {
+    display: flex;
+    border: 1px solid var(--border-color);
+}
+
+.mode-button {
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 2px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+        color: var(--neon-green);
+    }
+
+    &.active {
+        color: var(--bg-black);
+        background: var(--neon-green);
+    }
 }
 
 /* ─── INTRO ─── */
@@ -266,6 +295,10 @@
 .multiplier.success {
     color: var(--neon-cyan);
     text-shadow: 0 0 8px rgba(0, 255, 255, 0.35);
+}
+
+.multiplier.neutral {
+    color: var(--neon-green);
 }
 
 .multiplier.immune {

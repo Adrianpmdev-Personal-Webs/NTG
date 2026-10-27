@@ -29,10 +29,6 @@ export const POKEMON_ROUTES: Routes = [
             {
                 path: 'type-calculator',
                 loadComponent: () => import('./type-calculator/type-calculator').then(m => m.TypeCalculator)
-            },
-            {
-                path: 'pokelike',
-                loadComponent: () => import('./pokelike/pokelike-shell/pokelike-shell').then(m => m.PokelikeShell)
             }
         ]
     }

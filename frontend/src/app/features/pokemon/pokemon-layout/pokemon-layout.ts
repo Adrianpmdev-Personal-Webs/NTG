@@ -24,7 +24,6 @@ export class PokemonLayout {
 
     readonly menuItems = [
         { label: 'Lockes', route: '/pokemon/lockes' },
-        { label: 'Calculadora', route: '/pokemon/type-calculator' },
-        { label: 'Pokelike', route: '/pokemon/pokelike' }
+        { label: 'Calculadora', route: '/pokemon/type-calculator' }
     ] as const;
 }

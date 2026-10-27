@@ -15,7 +15,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * REST controller for the game data (talents, spellbooks, racials and the Legacy System). Read only: the data changes
+ * REST controller for the game data (talents, spellbooks, racials and the Legacy System), already turned into the models
+ * every web client shows (see GameDataResponses). Read only: the data changes
  * with the data.json file, not from the app. One endpoint per screen, so each screen downloads only what it shows.
  *
  * @author adrianpmdev
@@ -31,7 +32,7 @@ public class GameDataController {
     private final GameDataService gameDataService;
     private final GameImagesService gameImagesService;
 
-    /** Credit line and the classes with their icons. */
+    /** Credit, classes, tools and news of the home, faction names and the levels that give a talent point. */
     @GetMapping
     public ResponseEntity<String> getIndex() {
         return json(gameDataService.getIndex());

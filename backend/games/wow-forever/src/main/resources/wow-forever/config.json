@@ -1,0 +1,80 @@
+{
+    "iconBaseUrl": "https://render.worldofwarcraft.com/us/icons/56",
+    "fallbackIcon": "inv_misc_questionmark",
+
+    "factions": {
+        "ALLIANCE": "Alianza",
+        "HORDE": "Horda"
+    },
+
+    "features": [
+        { "id": "talents", "label": "Calculadora de talentos", "description": "Planifica tu build de nivel 10 a 60.", "available": true },
+        { "id": "dungeons", "label": "Dungeons y loot", "description": "Mazmorras, jefes y el botín de cada uno.", "available": false },
+        { "id": "spellbook", "label": "Spellbook", "description": "Los hechizos de cada clase, rango a rango.", "available": true },
+        { "id": "legacy", "label": "Legacy System", "description": "Perks y desafíos de la cuenta.", "available": true },
+        { "id": "races", "label": "Razas y racials", "description": "Habilidades raciales y combinaciones raza-clase.", "available": true }
+    ],
+
+    "news": [
+        { "id": 1, "date": "4 de mayo de 2023", "title": "Embers of Neltharion: ¡Monturas, mascotas y mucho más!" },
+        { "id": 2, "title": "Adéntrate en las Sendas Temporales Turbulentas con Wrath of the Lich King" },
+        { "id": 3, "title": "Notas del parche, eventos y novedades de la comunidad" }
+    ],
+
+    "talents": {
+        "firstPointLevel": 10,
+        "lastPointLevel": 60,
+        "pointsPerRow": 5,
+        "treeIds": {
+            "warrior-arms": 26,
+            "warrior-fury": 256,
+            "warrior-protection": 257,
+            "paladin-holy": 594,
+            "paladin-protection": 267,
+            "paladin-retribution": 184,
+            "hunter-beast-mastery": 50,
+            "hunter-marksmanship": 163,
+            "hunter-survival": 51,
+            "rogue-assassination": 253,
+            "rogue-combat": 38,
+            "rogue-subtlety": 39,
+            "priest-discipline": 613,
+            "priest-holy": 56,
+            "priest-shadow": 78,
+            "shaman-elemental": 375,
+            "shaman-enhancement": 373,
+            "shaman-restoration": 374,
+            "mage-arcane": 237,
+            "mage-fire": 8,
+            "mage-frost": 6,
+            "warlock-affliction": 355,
+            "warlock-demonology": 354,
+            "warlock-destruction": 593,
+            "druid-balance": 574,
+            "druid-feral-combat": 134,
+            "druid-restoration": 573
+        }
+    },
+
+    "spellbook": {
+        "generalTabName": "General",
+        "learnedFromQuest": "Lo enseña una misión de clase",
+        "learnedFrom": {
+            "1": "Lo enseña el entrenador de portales",
+            "2": "Se aprende con un tomo, una misión o un botín",
+            "3": "Se aprende con el talento",
+            "4": "No lo vende el entrenador de clase"
+        }
+    },
+
+    "legacy": {
+        "placeholderPerkName": "Próximamente",
+        "challengeGroups": {
+            "Classes": "Clases",
+            "Crafting": "Profesiones",
+            "Dungeons and raids": "Mazmorras y bandas",
+            "PvP": "JcJ",
+            "Other": "Otros"
+        }
+    }
+}

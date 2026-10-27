@@ -34,5 +34,8 @@ COPY --from=build /workspace/app/target/ntg.jar ntg.jar
 # Exponer puerto
 EXPOSE 8080
 
-# Comando de inicio
-ENTRYPOINT ["java", "-jar", "ntg.jar"]
+# Comando de inicio. Ajustes para los 512 MB del plan gratuito de Render:
+#  - MaxRAMPercentage=70: el heap usa como mucho el 70 % de la memoria; el resto queda para la JVM y el sistema
+#  - UseSerialGC: el recolector más ligero, el adecuado con 1 CPU y poca memoria
+#  - ExitOnOutOfMemoryError: si se queda sin memoria se cierra y Render lo arranca de nuevo, en vez de quedarse colgado
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=70", "-XX:+UseSerialGC", "-XX:+ExitOnOutOfMemoryError", "-jar", "ntg.jar"]

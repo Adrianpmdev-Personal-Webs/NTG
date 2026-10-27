@@ -44,6 +44,12 @@
             <artifactId>spring-security-oauth2-jose</artifactId>
         </dependency>
 
+        <!-- In-memory cache of the role and tags of each user (version managed by Spring Boot) -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+
         <!-- Swagger/OpenAPI for endpoint documentation -->
         <dependency>
             <groupId>org.springdoc</groupId>

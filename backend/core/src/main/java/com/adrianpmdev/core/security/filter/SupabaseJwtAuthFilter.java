@@ -1,11 +1,9 @@
 package com.adrianpmdev.core.security.filter;
 
 import com.adrianpmdev.core.security.authentication.AuthenticatedUser;
+import com.adrianpmdev.core.security.authentication.UserAuthorityCache;
 import com.adrianpmdev.core.security.authorization.Authorities;
 import com.adrianpmdev.core.features.catalog.application.service.GameCatalogService;
-import com.adrianpmdev.core.features.tags.infrastructure.persistence.entity.Tag;
-import com.adrianpmdev.core.features.users.infrastructure.persistence.entity.User;
-import com.adrianpmdev.core.features.users.infrastructure.persistence.repository.UserRepository;
 import com.adrianpmdev.core.security.config.SecurityConfig;
 import com.adrianpmdev.core.security.authorization.RoleUtils;
 import jakarta.servlet.FilterChain;
@@ -34,8 +32,9 @@ import java.util.UUID;
 
 /**
  * Authenticates requests that carry a Supabase access token.
- * The token is verified locally; the role and tags are read from the local database on every request,
- * so changing a role or a tag (or deleting a user) takes effect immediately. The tag of a game that is still
+ * The token is verified locally; the role and tags come from the local database through {@link UserAuthorityCache}
+ * (one query per user per minute at most), which is evicted whenever a role or a tag changes, so those changes (or
+ * deleting a user) take effect immediately. The tag of a game that is still
  * upcoming in the catalog is ignored for non-admins, which keeps its API closed to players.
  * If the token is missing or invalid the request simply continues unauthenticated and the
  * authorization rules decide (public endpoints keep working, protected ones answer 401).
@@ -52,20 +51,20 @@ public class SupabaseJwtAuthFilter extends OncePerRequestFilter {
     private static final String ADMIN_ROLE = "ADMIN";
 
     private final JwtDecoder jwtDecoder;
-    private final UserRepository userRepository;
+    private final UserAuthorityCache userAuthorityCache;
     private final GameCatalogService gameCatalogService;
 
     /**
      * Builds the filter.
      *
      * @param jwtDecoder         access token decoder
-     * @param userRepository     local user repository
+     * @param userAuthorityCache role and tags of each user
      * @param gameCatalogService game catalog (upcoming games)
      */
-    public SupabaseJwtAuthFilter(JwtDecoder jwtDecoder, UserRepository userRepository,
+    public SupabaseJwtAuthFilter(JwtDecoder jwtDecoder, UserAuthorityCache userAuthorityCache,
                                  GameCatalogService gameCatalogService) {
         this.jwtDecoder = jwtDecoder;
-        this.userRepository = userRepository;
+        this.userAuthorityCache = userAuthorityCache;
         this.gameCatalogService = gameCatalogService;
     }
 
@@ -85,25 +84,25 @@ public class SupabaseJwtAuthFilter extends OncePerRequestFilter {
         try {
             Jwt jwt = jwtDecoder.decode(token);
             UUID userId = UUID.fromString(jwt.getSubject());
-            User user = userRepository.findWithTagsById(userId).orElse(null);
+            UserAuthorityCache.Authorities user = userAuthorityCache.get(userId).orElse(null);
 
             if (user == null) {
                 LOG.debug("Valid token for user {} without local profile", userId);
                 return;
             }
 
-            String role = RoleUtils.normalizeRole(user.getRole(), DEFAULT_ROLE);
+            String role = RoleUtils.normalizeRole(user.role(), DEFAULT_ROLE);
             List<GrantedAuthority> authorities = new ArrayList<>();
             authorities.add(new SimpleGrantedAuthority(Authorities.ROLE_PREFIX + role));
 
             Set<String> closedGames = ADMIN_ROLE.equals(role) ? Set.of() : gameCatalogService.upcomingKeys();
 
-            for (Tag tag : user.getTags()) {
-                if (closedGames.contains(tag.getKey())) {
+            for (String tagKey : user.tagKeys()) {
+                if (closedGames.contains(tagKey)) {
                     continue;
                 }
 
-                authorities.add(new SimpleGrantedAuthority(Authorities.tag(tag.getKey())));
+                authorities.add(new SimpleGrantedAuthority(Authorities.tag(tagKey)));
             }
 
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(

@@ -5,7 +5,7 @@ import com.adrianpmdev.core.security.authorization.Authorities;
 import com.adrianpmdev.core.security.filter.SupabaseJwtAuthFilter;
 import com.adrianpmdev.core.config.AppProperties;
 import com.adrianpmdev.core.features.catalog.application.service.GameCatalogService;
-import com.adrianpmdev.core.features.users.infrastructure.persistence.repository.UserRepository;
+import com.adrianpmdev.core.security.authentication.UserAuthorityCache;
 import com.adrianpmdev.platform.module.GameModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -84,7 +84,7 @@ public class SecurityConfig {
      *
      * @param http               HTTP security configuration
      * @param jwtDecoder         access token decoder
-     * @param userRepository     local user repository
+     * @param userAuthorityCache role and tags of each user
      * @param gameCatalogService game catalog (upcoming games)
      * @param gameModules        game modules on the classpath
      * @return configured security filter chain
@@ -92,9 +92,9 @@ public class SecurityConfig {
      */
     @Bean
     @Order(2)
-    SecurityFilterChain apiChain(HttpSecurity http, JwtDecoder jwtDecoder, UserRepository userRepository,
+    SecurityFilterChain apiChain(HttpSecurity http, JwtDecoder jwtDecoder, UserAuthorityCache userAuthorityCache,
                                  GameCatalogService gameCatalogService, List<GameModule> gameModules) throws Exception {
-        SupabaseJwtAuthFilter jwtFilter = new SupabaseJwtAuthFilter(jwtDecoder, userRepository, gameCatalogService);
+        SupabaseJwtAuthFilter jwtFilter = new SupabaseJwtAuthFilter(jwtDecoder, userAuthorityCache, gameCatalogService);
 
         http
                 .csrf(AbstractHttpConfigurer::disable)

@@ -1,5 +1,6 @@
 package com.adrianpmdev.wowforever.features.gamedata.api.controller;
 
+import com.adrianpmdev.platform.web.JsonResponses;
 import com.adrianpmdev.wowforever.features.gamedata.application.service.GameDataService;
 import com.adrianpmdev.wowforever.features.gamedata.application.service.GameImagesService;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class GameDataController {
 
-    /** The data only changes with a new deploy, so the browser can keep it for a while. */
+    /** The data only changes with a new deploy: the browser keeps it an hour and then checks its ETag (304 if unchanged). */
     private static final CacheControl CACHE = CacheControl.maxAge(1, TimeUnit.HOURS).cachePrivate();
 
     private final GameDataService gameDataService;
@@ -73,6 +74,6 @@ public class GameDataController {
     }
 
     private static ResponseEntity<String> json(String body) {
-        return ResponseEntity.ok().cacheControl(CACHE).body(body);
+        return JsonResponses.cacheable(body, CACHE);
     }
 }

@@ -14,6 +14,7 @@ import com.adrianpmdev.core.features.users.infrastructure.persistence.repository
 import com.adrianpmdev.core.integration.supabase.auth.client.SupabaseAuthClient;
 import com.adrianpmdev.core.integration.supabase.auth.exception.SupabaseAuthException;
 import lombok.extern.slf4j.Slf4j;
+import com.adrianpmdev.core.security.authentication.UserAuthorityCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -46,6 +47,7 @@ public class UserService {
     private final TagRepository tagRepository;
     private final SupabaseAuthClient supabase;
     private final AppProperties appProperties;
+    private final UserAuthorityCache userAuthorityCache;
 
     /**
      * Builds the service with its dependencies.
@@ -53,14 +55,17 @@ public class UserService {
      * @param userRepository user repository
      * @param tagRepository  tag repository
      * @param supabase       Supabase Auth client
-     * @param appProperties  application settings
+     * @param appProperties      application settings
+     * @param userAuthorityCache role and tags cached for the access token filter
      */
     public UserService(UserRepository userRepository, TagRepository tagRepository,
-                       SupabaseAuthClient supabase, AppProperties appProperties) {
+                       SupabaseAuthClient supabase, AppProperties appProperties,
+                       UserAuthorityCache userAuthorityCache) {
         this.userRepository = userRepository;
         this.tagRepository = tagRepository;
         this.supabase = supabase;
         this.appProperties = appProperties;
+        this.userAuthorityCache = userAuthorityCache;
     }
 
     /**
@@ -88,6 +93,7 @@ public class UserService {
         Set<Tag> tags = resolveTags(request.tags());
         UUID userId = createInSupabase(email);
         User saved = saveLocalProfile(userId, email, username, tags);
+        userAuthorityCache.evict(userId);
 
         boolean inviteSent = sendPasswordEmail(email);
         AUDIT.info("actor={} action=USER_CREATED target={} tags={} inviteSent={}",
@@ -164,6 +170,7 @@ public class UserService {
         }
 
         userRepository.deleteById(id);
+        userAuthorityCache.evict(id);
         AUDIT.info("actor={} action=USER_DELETED target={}", actorId, id);
     }
 
@@ -202,6 +209,7 @@ public class UserService {
         Set<Tag> tags = resolveTags(keys);
         user.getTags().clear();
         user.getTags().addAll(tags);
+        userAuthorityCache.evict(id);
         AUDIT.info("actor={} action=USER_TAGS_SET target={} tags={}", actorId, id, tagKeys(tags));
 
         return UserMapper.toResponse(user);
@@ -221,6 +229,7 @@ public class UserService {
         Tag tag = tagRepository.findById(TagService.normalizeKey(key))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tag not found"));
         user.getTags().add(tag);
+        userAuthorityCache.evict(id);
         AUDIT.info("actor={} action=USER_TAG_ADDED target={} tag={}", actorId, id, tag.getKey());
 
         return UserMapper.toResponse(user);
@@ -239,6 +248,7 @@ public class UserService {
         User user = find(id);
         String normalized = TagService.normalizeKey(key);
         user.getTags().removeIf(tag -> tag.getKey().equals(normalized));
+        userAuthorityCache.evict(id);
         AUDIT.info("actor={} action=USER_TAG_REMOVED target={} tag={}", actorId, id, normalized);
 
         return UserMapper.toResponse(user);

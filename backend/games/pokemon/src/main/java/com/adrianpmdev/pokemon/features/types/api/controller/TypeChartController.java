@@ -1,5 +1,6 @@
 package com.adrianpmdev.pokemon.features.types.api.controller;
 
+import com.adrianpmdev.platform.web.JsonResponses;
 import com.adrianpmdev.pokemon.features.types.application.service.TypeChartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.CacheControl;
@@ -21,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class TypeChartController {
 
-    /** The chart only changes with a new deploy, so the browser can keep it for a day. */
+    /** The chart only changes with a new deploy: the browser keeps it a day and then checks its ETag (304 if unchanged). */
     private static final CacheControl CACHE = CacheControl.maxAge(1, TimeUnit.DAYS).cachePrivate();
 
     private final TypeChartService typeChartService;
@@ -29,6 +30,6 @@ public class TypeChartController {
     /** Types in display order and the multiplier of every attacking type against each defending type (1 when absent). */
     @GetMapping
     public ResponseEntity<String> getChart() {
-        return ResponseEntity.ok().cacheControl(CACHE).body(typeChartService.getChart());
+        return JsonResponses.cacheable(typeChartService.getChart(), CACHE);
     }
 }

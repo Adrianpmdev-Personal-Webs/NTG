@@ -6,6 +6,7 @@ import com.adrianpmdev.core.features.tags.api.dto.response.TagResponse;
 import com.adrianpmdev.core.features.tags.infrastructure.persistence.entity.Tag;
 import com.adrianpmdev.core.features.users.api.mapper.UserMapper;
 import com.adrianpmdev.core.features.tags.infrastructure.persistence.repository.TagRepository;
+import com.adrianpmdev.core.security.authentication.UserAuthorityCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -28,14 +29,17 @@ public class TagService {
     private static final Logger AUDIT = LoggerFactory.getLogger("AUDIT");
 
     private final TagRepository tagRepository;
+    private final UserAuthorityCache userAuthorityCache;
 
     /**
      * Builds the service with its dependencies.
      *
-     * @param tagRepository tag repository
+     * @param tagRepository      tag repository
+     * @param userAuthorityCache role and tags cached for the access token filter
      */
-    public TagService(TagRepository tagRepository) {
+    public TagService(TagRepository tagRepository, UserAuthorityCache userAuthorityCache) {
         this.tagRepository = tagRepository;
+        this.userAuthorityCache = userAuthorityCache;
     }
 
     /**
@@ -97,6 +101,7 @@ public class TagService {
     public void delete(String key, UUID actorId) {
         Tag tag = find(key);
         tagRepository.delete(tag);
+        userAuthorityCache.evictAll();
         AUDIT.info("actor={} action=TAG_DELETED tag={}", actorId, tag.getKey());
     }
 

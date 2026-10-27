@@ -1,0 +1,18 @@
+# Settings without secrets, the same in every environment, versioned with the code.
+# Secrets and values that change per environment live in application.properties (local only, ignored by git) or in
+# the environment variables of Render; both override anything written here.
+
+server:
+  compression:
+    # JSON is compressed before leaving the server (the WoW data drops from about 1.8 MB to about 200 KB).
+    enabled: true
+    mime-types: application/json,application/problem+json,text/plain
+    min-response-size: 2KB
+
+spring:
+  datasource:
+    hikari:
+      # A handful of users never need more; fewer idle connections to the Supabase pooler.
+      maximum-pool-size: 5
+      minimum-idle: 1
+      idle-timeout: 300000

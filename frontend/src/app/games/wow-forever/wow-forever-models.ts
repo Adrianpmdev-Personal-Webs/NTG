@@ -11,8 +11,8 @@ export type Faction = 'ALLIANCE' | 'HORDE';
 export interface LauncherNewsItem {
     id: number;
     title: string;
-    date?: string;
-    image?: string;
+    date?: string | null;
+    image?: string | null;
 }
 
 export interface WowSetting {

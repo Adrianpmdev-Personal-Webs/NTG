@@ -13,16 +13,16 @@
                     id="level"
                     class="level-range"
                     type="range"
-                    [min]="firstLevel"
-                    [max]="maxLevel"
+                    [min]="firstLevel()"
+                    [max]="maxLevel()"
                     [value]="level()"
                     (input)="changeLevel($any($event.target).value)" />
                 <input
                     class="level-number"
                     type="number"
                     aria-label="Nivel"
-                    [min]="firstLevel"
-                    [max]="maxLevel"
+                    [min]="firstLevel()"
+                    [max]="maxLevel()"
                     [value]="level()"
                     (change)="changeLevel($any($event.target).value)" />
             </div>
@@ -62,7 +62,7 @@
                 @for (tree of trees(); track tree.id; let index = $index) {
                     <section class="tree">
                         <header class="tree-header">
-                            <img class="tree-icon" [src]="treeIcon(tree)" alt="" (error)="onIconError($event)" />
+                            <img class="tree-icon" [src]="tree.icon" alt="" (error)="onIconError($event)" />
                             <span class="tree-name">{{ tree.name }}</span>
                             <span class="tree-points">{{ treePoints()[index] }}</span>
                         </header>

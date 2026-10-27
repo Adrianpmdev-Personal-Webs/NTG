@@ -6,8 +6,8 @@
  * @author @adrianpmdev
  */
 
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { LAUNCHER_NEWS } from '../../wow-forever-config';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { LauncherNewsItem } from '../../wow-forever-models';
 
 @Component({
     selector: 'app-news-panel',
@@ -17,5 +17,6 @@ import { LAUNCHER_NEWS } from '../../wow-forever-config';
 })
 export class NewsPanel {
 
-    readonly news = LAUNCHER_NEWS;
+    /** News of the launcher, from the backend index. */
+    readonly news = input<readonly LauncherNewsItem[]>([]);
 }

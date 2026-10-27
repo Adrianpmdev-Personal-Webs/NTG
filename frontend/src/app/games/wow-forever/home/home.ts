@@ -1,14 +1,17 @@
 /**
  * Home
  *
- * Launcher-style home of WoW Forever: faction artwork, news and the tools of the area.
+ * Launcher-style home of WoW Forever: faction artwork, news and the tools of the area (tools, news and faction names
+ * come from the backend index).
  *
  * @author @adrianpmdev
  */
 
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { catchError, of } from 'rxjs';
+import { GameDataApi } from '../game-data/game-data-api';
 import { cssUrl, gameImages } from '../game-data/game-images';
-import { WOW_FEATURES } from '../wow-forever-config';
 import { Faction } from '../wow-forever-models';
 import { LegalNotice } from '../ui/legal-notice/legal-notice';
 import { WowButton } from '../ui/wow-button/wow-button';
@@ -25,7 +28,11 @@ import { NewsPanel } from './news-panel/news-panel';
 })
 export class Home {
 
-    readonly features = WOW_FEATURES;
+    private readonly index = toSignal(inject(GameDataApi).getIndex().pipe(catchError(() => of(null))), { initialValue: null });
+
+    readonly features = computed(() => this.index()?.features ?? []);
+    readonly news = computed(() => this.index()?.news ?? []);
+    readonly factions = computed(() => this.index()?.factions ?? null);
     readonly faction = signal<Faction>('ALLIANCE');
 
     private readonly images = gameImages();

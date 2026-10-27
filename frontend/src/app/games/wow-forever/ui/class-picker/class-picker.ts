@@ -8,7 +8,7 @@
 
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { GameClass } from '../../game-data/game-data-models';
-import { hideBrokenIcon, wowIconUrl } from '../../wow-forever-config';
+import { hideBrokenIcon } from '../../wow-forever-config';
 
 @Component({
     selector: 'app-class-picker',
@@ -24,6 +24,5 @@ export class ClassPicker {
 
     readonly pick = output<GameClass>();
 
-    readonly iconUrl = wowIconUrl;
     readonly onIconError = hideBrokenIcon;
 }

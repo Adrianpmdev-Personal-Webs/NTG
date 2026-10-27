@@ -43,7 +43,7 @@
                 @for (tree of trees(); track tree.id; let index = $index) {
                     <section class="tree">
                         <header class="tree-header">
-                            <img class="tree-icon" [src]="iconUrl(tree.icon)" alt="" (error)="onIconError($event)" />
+                            <img class="tree-icon" [src]="tree.icon" alt="" (error)="onIconError($event)" />
                             <span class="tree-name">{{ tree.name }}</span>
                             <span class="tree-points">{{ treePoints()[index] }}</span>
                         </header>
@@ -86,7 +86,7 @@
                 @for (group of groups(); track group.name) {
                     <section class="group">
                         <header class="group-header">
-                            <h3 class="group-name">{{ groupLabel(group) }}</h3>
+                            <h3 class="group-name">{{ group.name }}</h3>
                             <span class="group-count">{{ completedIn(group) }}/{{ group.challenges.length }}</span>
                         </header>
 

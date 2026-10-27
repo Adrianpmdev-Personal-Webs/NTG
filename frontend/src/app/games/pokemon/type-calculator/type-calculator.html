@@ -52,7 +52,12 @@
         </div>
 
         <div class="type-grid">
-            @for (type of pokemonTypes; track type) {
+            @if (loading()) {
+                <span class="section-hint">CARGANDO TIPOS...</span>
+            } @else if (failed()) {
+                <span class="section-hint">No se han podido cargar los tipos. Recarga la página para intentarlo de nuevo.</span>
+            }
+            @for (type of pokemonTypes(); track type) {
                 <button
                     type="button"
                     class="type-button"

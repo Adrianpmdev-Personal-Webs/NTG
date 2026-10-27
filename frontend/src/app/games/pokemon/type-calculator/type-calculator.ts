@@ -4,19 +4,23 @@
  * Pokémon type calculator page with two modes.
  * Defense: pick up to two types of a Pokémon and see the damage it receives from every attacking type.
  * Attack: pick up to two attacking types (a Pokémon's moves) and see the best damage they deal to every type.
+ * The types and the damage chart come from the backend (once per session); the calculation runs here.
  *
  * @author @adrianpmdev
  */
 
-import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { catchError, of } from 'rxjs';
+import { PokemonApi } from '../data/pokemon-api';
 import {
     CALCULATOR_MODES,
     CalculatorMode,
     MAX_SELECTED_TYPES,
-    POKEMON_TYPES,
     PokemonType,
     RESULT_CATEGORIES,
     ResultCategory,
+    TypeChart,
     TypeDamageResult,
     typeMultiplier
 } from './type-calculator-constants';
@@ -36,7 +40,17 @@ interface ResultGroup {
 })
 export class TypeCalculator {
 
-    readonly pokemonTypes = POKEMON_TYPES;
+    private readonly emptyChart: TypeChart = { types: [], chart: {} };
+
+    /** Types and chart from the backend; empty until they arrive (or if they cannot be loaded). */
+    private readonly typeChart = toSignal(
+        inject(PokemonApi).getTypeChart().pipe(catchError(() => of(this.emptyChart))),
+        { initialValue: null }
+    );
+
+    readonly loading = computed(() => this.typeChart() === null);
+    readonly failed = computed(() => this.typeChart()?.types.length === 0);
+    readonly pokemonTypes = computed<PokemonType[]>(() => this.typeChart()?.types ?? []);
     readonly modes = CALCULATOR_MODES;
     readonly maxSelectedTypes = MAX_SELECTED_TYPES;
 
@@ -48,7 +62,7 @@ export class TypeCalculator {
         const selected = this.selectedTypes();
         const attacking = this.mode().id === 'attack';
 
-        return this.pokemonTypes.map(type => ({
+        return this.pokemonTypes().map(type => ({
             type,
             multiplier: attacking ? this.bestAttackMultiplier(selected, type) : this.defenseMultiplier(type, selected)
         }));
@@ -106,7 +120,9 @@ export class TypeCalculator {
 
     /** Damage a Pokémon with the defending types receives from one attacking type. */
     private defenseMultiplier(attackType: PokemonType, defendingTypes: readonly PokemonType[]): number {
-        return defendingTypes.reduce((total, defendingType) => total * typeMultiplier(attackType, defendingType), 1);
+        const chart = this.typeChart() ?? this.emptyChart;
+
+        return defendingTypes.reduce((total, defendingType) => total * typeMultiplier(chart, attackType, defendingType), 1);
     }
 
     /** Best damage any of the attacking types deals to one defending type (move coverage). */
@@ -115,6 +131,8 @@ export class TypeCalculator {
             return 1;
         }
 
-        return Math.max(...attackTypes.map(attackType => typeMultiplier(attackType, defendingType)));
+        const chart = this.typeChart() ?? this.emptyChart;
+
+        return Math.max(...attackTypes.map(attackType => typeMultiplier(chart, attackType, defendingType)));
     }
 }

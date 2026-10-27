@@ -7,7 +7,7 @@
                 <div class="artwork-layer" [style.background-image]="backgroundImage()" aria-hidden="true"></div>
                 <div class="artwork-vignette" aria-hidden="true"></div>
                 <div class="content-spacer"></div>
-                <app-news-panel />
+                <app-news-panel [news]="news()" />
             </section>
 
             <section class="launcher-navigation">
@@ -18,16 +18,16 @@
                         aria-label="Facción"
                         [value]="faction()"
                         (change)="onFactionChange($any($event.target).value)">
-                        <option value="ALLIANCE">Alianza</option>
-                        <option value="HORDE">Horda</option>
+                        <option value="ALLIANCE">{{ factions()?.ALLIANCE ?? 'Alianza' }}</option>
+                        <option value="HORDE">{{ factions()?.HORDE ?? 'Horda' }}</option>
                     </select>
                 </div>
 
                 <nav class="utility-links" aria-label="Herramientas de WoW Forever">
                     <div class="resource-link-row">
-                        @for (feature of features; track feature.id) {
+                        @for (feature of features(); track feature.id) {
                             @if (feature.available) {
-                                <app-wow-button [link]="feature.route">{{ feature.label }}</app-wow-button>
+                                <app-wow-button [link]="'/wow-forever/' + feature.id">{{ feature.label }}</app-wow-button>
                             } @else {
                                 <app-wow-button [disabled]="true" title="Próximamente">{{ feature.label }}</app-wow-button>
                             }

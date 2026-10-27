@@ -18,8 +18,8 @@ import { Ranks, canAdd, canRemove, decodeBuild, encodeBuild, pointsInTree, total
 import { Talent, TalentHover, TalentTree } from '../../talents/talents-models';
 import { WowButton } from '../../ui/wow-button/wow-button';
 import { WowPage } from '../../ui/wow-page/wow-page';
-import { creditLine, hideBrokenIcon, wowIconUrl } from '../../wow-forever-config';
-import { CHALLENGE_GROUP_LABELS, COMPLETED_CHALLENGES_KEY } from '../legacy-config';
+import { creditLine, hideBrokenIcon } from '../../wow-forever-config';
+import { COMPLETED_CHALLENGES_KEY } from '../legacy-config';
 import { ChallengeGroup, LegacyData } from '../legacy-models';
 
 /** Reads the ticked challenges. Storage can be blocked or hold anything, so whatever fails reads as nothing ticked. */
@@ -86,7 +86,6 @@ export class LegacyPlanner implements OnInit {
 
     readonly credit = computed(() => creditLine(this.data()?.credit ?? null));
 
-    readonly iconUrl = wowIconUrl;
     readonly onIconError = hideBrokenIcon;
 
     ngOnInit(): void {
@@ -157,10 +156,6 @@ export class LegacyPlanner implements OnInit {
     }
 
     /* ─── Challenges ─── */
-
-    groupLabel(group: ChallengeGroup): string {
-        return CHALLENGE_GROUP_LABELS[group.name] ?? group.name;
-    }
 
     isCompleted(name: string): boolean {
         return this.completed().has(name);

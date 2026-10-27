@@ -9,8 +9,9 @@
 
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, catchError, shareReplay, throwError } from 'rxjs';
 import { API_BASE_URL } from '@core/config/api';
+import { TypeChart } from '../type-calculator/type-calculator-constants';
 import {
     Game, GameRequest, LockeDetail, LockeRequest, LockeSummary, MatchCreateRequest, MatchGameInput, Player,
     PlayerRequest, PlayerStanding, RewardRequest, TournamentCreateRequest, TournamentDetail,
@@ -22,6 +23,8 @@ export class PokemonApi {
 
     private readonly http = inject(HttpClient);
     private readonly base = `${API_BASE_URL}/pokemon`;
+
+    private typeChart$: Observable<TypeChart> | null = null;
 
     // ─── Games ───
 
@@ -174,5 +177,22 @@ export class PokemonApi {
 
     getRanking(): Observable<PlayerStanding[]> {
         return this.http.get<PlayerStanding[]>(`${this.base}/ranking`);
+    }
+
+    // ─── Types ───
+
+    /** Types and damage chart of the type calculator. Downloaded once per session; a failed request is retried later. */
+    getTypeChart(): Observable<TypeChart> {
+        if (!this.typeChart$) {
+            this.typeChart$ = this.http.get<TypeChart>(`${this.base}/types`).pipe(
+                catchError(error => {
+                    this.typeChart$ = null;
+                    return throwError(() => error);
+                }),
+                shareReplay({ bufferSize: 1, refCount: false })
+            );
+        }
+
+        return this.typeChart$;
     }
 }

@@ -12,7 +12,7 @@ import { forkJoin } from 'rxjs';
 import { GameDataApi } from '../../game-data/game-data-api';
 import { GameClass } from '../../game-data/game-data-models';
 import { WowPage } from '../../ui/wow-page/wow-page';
-import { FACTION_LABELS, creditLine, hideBrokenIcon, wowIconUrl } from '../../wow-forever-config';
+import { creditLine, hideBrokenIcon } from '../../wow-forever-config';
 import { Faction } from '../../wow-forever-models';
 import { Race, RacialsData } from '../racials-models';
 
@@ -29,12 +29,14 @@ export class RacialsOverview implements OnInit {
 
     private readonly gameData = inject(GameDataApi);
 
-    readonly filters: readonly { id: FactionFilter; label: string }[] = [
+    /** Faction names from the backend index. */
+    readonly factionLabels = signal<Record<Faction, string>>({ ALLIANCE: '', HORDE: '' });
+
+    readonly filters = computed<readonly { id: FactionFilter; label: string }[]>(() => [
         { id: 'ALL', label: 'Todas' },
-        { id: 'ALLIANCE', label: FACTION_LABELS.ALLIANCE },
-        { id: 'HORDE', label: FACTION_LABELS.HORDE }
-    ];
-    readonly factionLabels = FACTION_LABELS;
+        { id: 'ALLIANCE', label: this.factionLabels().ALLIANCE },
+        { id: 'HORDE', label: this.factionLabels().HORDE }
+    ]);
 
     readonly data = signal<RacialsData | null>(null);
     readonly classes = signal<GameClass[]>([]);
@@ -51,13 +53,13 @@ export class RacialsOverview implements OnInit {
 
     readonly credit = computed(() => creditLine(this.data()?.credit ?? null));
 
-    readonly iconUrl = wowIconUrl;
     readonly onIconError = hideBrokenIcon;
 
     ngOnInit(): void {
         forkJoin({ index: this.gameData.getIndex(), racials: this.gameData.getRacials() }).subscribe({
             next: ({ index, racials }) => {
                 this.classes.set(index.classes);
+                this.factionLabels.set(index.factions);
                 this.data.set(racials);
                 this.loading.set(false);
             },

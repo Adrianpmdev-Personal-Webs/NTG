@@ -16,11 +16,10 @@ import { DataCredit, GameClass } from '../../game-data/game-data-models';
 import { ClassPicker } from '../../ui/class-picker/class-picker';
 import { WowButton } from '../../ui/wow-button/wow-button';
 import { WowPage } from '../../ui/wow-page/wow-page';
-import { creditLine, hideBrokenIcon, wowIconUrl } from '../../wow-forever-config';
+import { creditLine, hideBrokenIcon } from '../../wow-forever-config';
 import { TalentGrid } from '../talent-grid/talent-grid';
 import { TalentTooltip } from '../talent-tooltip/talent-tooltip';
 import { cssUrl, gameImages } from '../../game-data/game-images';
-import { TALENT_POINT_LEVELS } from '../talents-config';
 import {
     Ranks,
     canAdd,
@@ -57,7 +56,7 @@ export class TalentCalculator implements OnInit {
     readonly classTalents = signal<ClassTalents | null>(null);
     private readonly indexCredit = signal<DataCredit | null>(null);
     readonly ranks = signal<Ranks>({});
-    readonly level = signal(TALENT_POINT_LEVELS.at(-1) ?? 0);
+    readonly level = signal(0);
     readonly loading = signal(true);
     readonly loadingTrees = signal(false);
     readonly failed = signal(false);
@@ -66,17 +65,17 @@ export class TalentCalculator implements OnInit {
 
     readonly trees = computed<TalentTree[]>(() => this.classTalents()?.trees ?? []);
 
-    /** Levels that give a talent point: the first and the last one are the ends of the level control. */
-    private readonly levels = TALENT_POINT_LEVELS;
-    readonly firstLevel = this.levels[0] ?? 0;
-    readonly maxLevel = this.levels.at(-1) ?? 0;
+    /** Levels that give a talent point (from the backend index): the first and the last one are the ends of the level control. */
+    private readonly levels = signal<readonly number[]>([]);
+    readonly firstLevel = computed(() => this.levels()[0] ?? 0);
+    readonly maxLevel = computed(() => this.levels().at(-1) ?? 0);
 
-    readonly pointsTotal = computed(() => pointsAtLevel(this.levels, this.level()));
+    readonly pointsTotal = computed(() => pointsAtLevel(this.levels(), this.level()));
     readonly pointsSpent = computed(() => totalPoints(this.trees(), this.ranks()));
     readonly pointsLeft = computed(() => this.pointsTotal() - this.pointsSpent());
     readonly treePoints = computed(() => this.trees().map(tree => pointsInTree(tree, this.ranks())));
     /** The level cannot go below what the spent points need. */
-    readonly minLevel = computed(() => minLevelFor(this.levels, this.pointsSpent()));
+    readonly minLevel = computed(() => minLevelFor(this.levels(), this.pointsSpent()));
 
     /** The talent under the pointer with its tree, for the tooltip card. */
     readonly hovered = computed(() => {
@@ -88,7 +87,6 @@ export class TalentCalculator implements OnInit {
 
     readonly credit = computed(() => creditLine(this.classTalents()?.credit ?? this.indexCredit()));
 
-    readonly iconUrl = wowIconUrl;
     readonly onIconError = hideBrokenIcon;
 
     constructor() {
@@ -100,6 +98,8 @@ export class TalentCalculator implements OnInit {
             next: index => {
                 this.classes.set(index.classes);
                 this.indexCredit.set(index.credit);
+                this.levels.set(index.talentPointLevels);
+                this.level.set(index.talentPointLevels.at(-1) ?? 0);
                 this.loading.set(false);
                 this.openFromUrl();
             },
@@ -118,7 +118,7 @@ export class TalentCalculator implements OnInit {
         this.activeTree.set(0);
 
         if (level) {
-            this.level.set(Math.min(this.maxLevel, Math.max(this.firstLevel, level)));
+            this.level.set(Math.min(this.maxLevel(), Math.max(this.firstLevel(), level)));
         }
 
         this.classLoad?.unsubscribe();
@@ -171,7 +171,7 @@ export class TalentCalculator implements OnInit {
             return;
         }
 
-        this.level.set(Math.min(this.maxLevel, Math.max(this.minLevel(), Math.round(parsed))));
+        this.level.set(Math.min(this.maxLevel(), Math.max(this.minLevel(), Math.round(parsed))));
         this.syncUrl();
     }
 
@@ -186,10 +186,6 @@ export class TalentCalculator implements OnInit {
 
     onHover(hover: TalentHover | null): void {
         this.hover.set(hover);
-    }
-
-    treeIcon(tree: TalentTree): string {
-        return wowIconUrl(tree.icon);
     }
 
     treeBackground(tree: TalentTree): string {
@@ -224,7 +220,7 @@ export class TalentCalculator implements OnInit {
         }
 
         // The shared build may use more points than the level in the link allows.
-        this.level.update(level => Math.max(level, minLevelFor(this.levels, spent)));
+        this.level.update(level => Math.max(level, minLevelFor(this.levels(), spent)));
         this.ranks.set(decoded);
     }
 

@@ -8,7 +8,7 @@
  */
 
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { hideBrokenIcon, wowIconUrl } from '../../wow-forever-config';
+import { hideBrokenIcon } from '../../wow-forever-config';
 import { Ranks, pointsTowardsGate, prerequisitesOf, rankText } from '../talents-logic';
 import { Talent, TalentTree } from '../talents-models';
 
@@ -90,6 +90,5 @@ export class TalentTooltip {
         };
     });
 
-    readonly iconUrl = wowIconUrl;
     readonly onIconError = hideBrokenIcon;
 }

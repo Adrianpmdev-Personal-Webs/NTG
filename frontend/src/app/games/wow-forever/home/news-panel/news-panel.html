@@ -4,7 +4,7 @@
         <span>Noticias</span>
     </div>
     <div class="news-paper">
-        @for (item of news; track item.id) {
+        @for (item of news(); track item.id) {
             <div class="news-item">
                 <div class="news-thumb" [style.background-image]="item.image ? 'url(' + item.image + ')' : null" aria-hidden="true"></div>
                 <div class="news-copy">

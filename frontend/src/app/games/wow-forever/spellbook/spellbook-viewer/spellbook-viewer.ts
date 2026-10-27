@@ -16,7 +16,7 @@ import { GameDataApi } from '../../game-data/game-data-api';
 import { ClassicStatus, DataCredit, GameClass } from '../../game-data/game-data-models';
 import { ClassPicker } from '../../ui/class-picker/class-picker';
 import { WowPage } from '../../ui/wow-page/wow-page';
-import { creditLine, hideBrokenIcon, wowIconUrl } from '../../wow-forever-config';
+import { creditLine, hideBrokenIcon } from '../../wow-forever-config';
 import { ClassSpellbook, Spell, SpellRank } from '../spellbook-models';
 
 interface SpellView {
@@ -108,7 +108,6 @@ export class SpellbookViewer implements OnInit {
 
     readonly credit = computed(() => creditLine(this.spellbook()?.credit ?? this.indexCredit()));
 
-    readonly iconUrl = wowIconUrl;
     readonly onIconError = hideBrokenIcon;
 
     constructor() {

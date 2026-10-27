@@ -8,7 +8,7 @@
  */
 
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
-import { hideBrokenIcon, wowIconUrl } from '../../wow-forever-config';
+import { hideBrokenIcon } from '../../wow-forever-config';
 import { Ranks, TalentState, prerequisitesOf, talentState } from '../talents-logic';
 import { Talent, TalentHover, TalentTree } from '../talents-models';
 
@@ -72,7 +72,6 @@ export class TalentGrid {
         );
     });
 
-    readonly iconUrl = wowIconUrl;
     readonly onIconError = hideBrokenIcon;
 
     private pressTimer: ReturnType<typeof setTimeout> | null = null;

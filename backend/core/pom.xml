@@ -50,6 +50,13 @@
             <artifactId>caffeine</artifactId>
         </dependency>
 
+        <!-- Limits on sign-in attempts (token buckets) -->
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j_jdk17-core</artifactId>
+            <version>${bucket4j.version}</version>
+        </dependency>
+
         <!-- Swagger/OpenAPI for endpoint documentation -->
         <dependency>
             <groupId>org.springdoc</groupId>

@@ -20,16 +20,18 @@ COPY app/src app/src
 # Build: compila app (y core, los juegos y platform-api como dependencias)
 RUN mvn -pl app -am clean package -DskipTests
 
-# Stage 2: Runtime (Java 25 JRE)
+# Stage 2: Runtime (Java 25 JRE, ya incluye los certificados para HTTPS)
 FROM eclipse-temurin:25-jre
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends curl ca-certificates \
-  && rm -rf /var/lib/apt/lists/*
+
+# Usuario sin privilegios: si alguien llegara a ejecutar código en el contenedor, no sería root
+RUN groupadd --system app && useradd --system --gid app --no-create-home --shell /usr/sbin/nologin app
 
 WORKDIR /app
 
-# Copiar el JAR generado
+# Copiar el JAR generado (de root y solo de lectura para el usuario de la aplicación)
 COPY --from=build /workspace/app/target/ntg.jar ntg.jar
+
+USER app
 
 # Exponer puerto
 EXPOSE 8080

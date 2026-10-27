@@ -28,12 +28,15 @@ public record SupabaseProperties(
      * @param algorithm JWS algorithm used with the JWKS endpoint (ES256 for the default ECC key)
      * @param secret    legacy shared secret (HS256). When set it is used instead of the JWKS endpoint
      * @param issuer    expected issuer; defaults to {@code <url>/auth/v1}
+     * @param audience  expected audience of the session tokens ({@code authenticated} in Supabase); blank skips the
+     *                  check
      */
     public record Jwt(
             String jwksUri,
             @DefaultValue("ES256") String algorithm,
             String secret,
-            String issuer
+            String issuer,
+            @DefaultValue("authenticated") String audience
     ) {
     }
 

@@ -88,8 +88,11 @@ create table if not exists core.asset (
 -- The backend connects as the table owner, which bypasses RLS. Enabling it without policies closes
 -- the tables to the Supabase Data API (anon and authenticated roles).
 
-alter table core.game  enable row level security;
-alter table core.asset enable row level security;
+alter table core."user"   enable row level security;
+alter table core.tag      enable row level security;
+alter table core.user_tag enable row level security;
+alter table core.game     enable row level security;
+alter table core.asset    enable row level security;
 
 -- ─── Storage: public pictures ────────────────────────────────────────────────────────────────────
 -- Public bucket public-assets: anybody can download a picture through its public URL (they are not

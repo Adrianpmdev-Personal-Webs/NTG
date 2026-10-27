@@ -1,0 +1,33 @@
+/**
+ * Calendar styles (terminal tokens, remapped by the Pokémon layout).
+ *
+ * @author @adrianpmdev
+ */
+
+:host {
+    display: block;
+}
+
+.empty {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.rounds {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 16px;
+}
+
+.round {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.round-label {
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}

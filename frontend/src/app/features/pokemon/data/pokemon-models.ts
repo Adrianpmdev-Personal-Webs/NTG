@@ -1,0 +1,228 @@
+/**
+ * pokemon-models
+ *
+ * Types of the Pokémon API (requests and responses), mirroring the backend DTOs.
+ *
+ * @author @adrianpmdev
+ */
+
+import { LockeRules } from './locke-rules';
+
+// ─── Shared ───
+
+/** Short reference to another resource. */
+export interface Ref {
+    id: string;
+    name: string;
+}
+
+export type TournamentFormat = 'groups_bracket' | 'round_robin';
+export type TournamentStatus = 'draft' | 'in_progress' | 'finished';
+export type MatchStage = 'group' | 'league' | 'upper' | 'lower' | 'grand_final';
+export type MatchStatus = 'pending' | 'ready' | 'finished' | 'bye' | 'void';
+export type GroupName = 'A' | 'B';
+
+// ─── Games ───
+
+export interface Game {
+    id: string;
+    name: string;
+    description: string | null;
+    imageUrl: string;
+    /** Randomlockes with at least one tournament in this game. */
+    lockeCount: number;
+}
+
+export interface GameRequest {
+    name: string;
+    description: string | null;
+    imageUrl: string;
+}
+
+// ─── Players ───
+
+export interface Player {
+    id: string;
+    name: string;
+    /** Linked platform account; only sent to admins. */
+    userId: string | null;
+}
+
+export interface PlayerRequest {
+    name: string;
+    userId: string | null;
+}
+
+// ─── Randomlockes ───
+
+export interface LockeSummary {
+    id: string;
+    name: string;
+    description: string | null;
+    games: Ref[];
+    tournamentCount: number;
+    playerCount: number;
+}
+
+export interface TournamentSummary {
+    id: string;
+    game: Ref;
+    position: number;
+    name: string;
+    format: TournamentFormat;
+    status: TournamentStatus;
+    champion: Ref | null;
+}
+
+/** A player in the standings of a randomlocke or in the global ranking. */
+export interface PlayerStanding {
+    playerId: string;
+    name: string;
+    position: number;
+    points: number;
+    wins: number;
+    losses: number;
+    tournaments: number;
+    titles: number;
+    lockes: number;
+}
+
+export interface LockeDetail {
+    id: string;
+    name: string;
+    description: string | null;
+    rules: LockeRules | null;
+    games: Ref[];
+    roster: Ref[];
+    tournaments: TournamentSummary[];
+    standings: PlayerStanding[];
+}
+
+export interface LockeRequest {
+    name: string;
+    description: string | null;
+    rules: LockeRules | null;
+}
+
+// ─── Tournaments ───
+
+export interface TournamentPlayer {
+    /** Tournament player id (used by series, standings and rewards). */
+    id: string;
+    playerId: string;
+    name: string;
+    group: GroupName | null;
+    pointsAdjustment: number;
+    hasTeamImage: boolean;
+    /** Temporary URL; null when there is no picture or it is still hidden for the caller. */
+    teamImageUrl: string | null;
+    mine: boolean;
+    canEditTeam: boolean;
+}
+
+export interface MatchGame {
+    number: number;
+    winnerSide: 1 | 2;
+    replayUrl: string | null;
+    playedAt: string;
+}
+
+export interface Match {
+    id: string;
+    stage: MatchStage;
+    round: number;
+    slot: number;
+    player1Id: string | null;
+    player2Id: string | null;
+    score1: number;
+    score2: number;
+    winnerId: string | null;
+    status: MatchStatus;
+    games: MatchGame[];
+}
+
+export interface Standing {
+    tournamentPlayerId: string;
+    position: number;
+    played: number;
+    wins: number;
+    losses: number;
+    gamesWon: number;
+    gamesLost: number;
+    points: number;
+}
+
+export interface GroupStandings {
+    group: GroupName;
+    standings: Standing[];
+}
+
+export interface Reward {
+    id: string;
+    sortOrder: number;
+    name: string;
+    chosenBy: string | null;
+}
+
+export interface TournamentDetail {
+    id: string;
+    locke: Ref;
+    game: Ref;
+    position: number;
+    name: string;
+    description: string | null;
+    format: TournamentFormat;
+    status: TournamentStatus;
+    pointsPerWin: number;
+    teamsRevealAt: string | null;
+    teamsRevealed: boolean;
+    bracketSize: number | null;
+    players: TournamentPlayer[];
+    matches: Match[];
+    /** Final standings: the order in which players pick their rewards. */
+    standings: Standing[];
+    groups: GroupStandings[];
+    rewards: Reward[];
+}
+
+export interface TournamentCreateRequest {
+    lockeId: string;
+    gameId: string;
+    name: string;
+    description: string | null;
+    format: TournamentFormat;
+    pointsPerWin: number;
+    teamsRevealAt: string | null;
+}
+
+export interface TournamentUpdateRequest {
+    gameId: string;
+    name: string;
+    description: string | null;
+    status: TournamentStatus;
+    pointsPerWin: number;
+    teamsRevealAt: string | null;
+}
+
+export interface TournamentPlayerUpdateRequest {
+    group: GroupName | null;
+    pointsAdjustment: number;
+}
+
+export interface MatchGameInput {
+    winnerSide: 1 | 2;
+    replayUrl: string | null;
+}
+
+export interface MatchCreateRequest {
+    stage: MatchStage;
+    round: number;
+    slot: number;
+    player1Id: string;
+    player2Id: string;
+}
+
+export interface RewardRequest {
+    name: string;
+    chosenBy: string | null;
+}

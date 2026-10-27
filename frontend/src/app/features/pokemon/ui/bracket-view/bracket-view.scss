@@ -1,0 +1,52 @@
+/**
+ * Bracket styles (terminal tokens, remapped by the Pokémon layout).
+ *
+ * @author @adrianpmdev
+ */
+
+:host {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.empty {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.side-title {
+    margin: 0 0 10px;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    color: var(--neon-green);
+}
+
+.rounds {
+    display: flex;
+    gap: 18px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+}
+
+.round {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 0 0 auto;
+}
+
+.round-label {
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.round-matches {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    gap: 12px;
+    flex: 1;
+}

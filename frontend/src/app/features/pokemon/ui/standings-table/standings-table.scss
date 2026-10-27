@@ -1,0 +1,65 @@
+/**
+ * Standings table styles (terminal tokens, remapped by the Pokémon layout).
+ *
+ * @author @adrianpmdev
+ */
+
+:host {
+    display: block;
+}
+
+.empty {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+.standings {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+
+    th,
+    td {
+        padding: 8px 10px;
+        border-bottom: 1px solid var(--border-color);
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    th {
+        color: var(--text-secondary);
+        font-weight: 600;
+        font-size: 0.72rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    .num {
+        text-align: center;
+        width: 1%;
+    }
+
+    .name {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .points {
+        font-family: var(--font-display);
+        font-weight: 700;
+        color: var(--neon-green);
+    }
+
+    tr.podium .position {
+        color: var(--neon-green);
+        font-weight: 700;
+    }
+
+    tr.mine td {
+        background: rgba(255, 255, 255, 0.05);
+    }
+}

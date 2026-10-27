@@ -1,0 +1,26 @@
+@if (sides().length === 0) {
+    <p class="empty">El bracket todavía no se ha generado.</p>
+}
+
+@for (side of sides(); track side.stage) {
+    <section class="side">
+        <h3 class="side-title">{{ side.title }}</h3>
+        <div class="rounds">
+            @for (round of side.rounds; track round.round) {
+                <div class="round">
+                    <div class="round-label">{{ round.label }}</div>
+                    <div class="round-matches">
+                        @for (match of round.matches; track match.id) {
+                            <app-pokemon-match-card
+                                [match]="match"
+                                [players]="players()"
+                                [editable]="editable()"
+                                (edit)="edit.emit($event)"
+                            />
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+}

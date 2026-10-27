@@ -1,0 +1,133 @@
+/**
+ * Tournament page styles.
+ *
+ * @author @adrianpmdev
+ */
+
+@use 'mixins' as *;
+@use 'pokemon' as pk;
+
+.page {
+    @include pk.page;
+}
+
+.back {
+    @include pk.back-link;
+}
+
+.heading {
+    @include pk.heading;
+}
+
+.section-title {
+    @include pk.section-title;
+}
+
+.state {
+    @include pk.state;
+}
+
+.head {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.chip {
+    @include pk.chip;
+
+    &.live {
+        background: var(--pk-blue);
+    }
+}
+
+.description,
+.hint {
+    margin: 0;
+    color: var(--pk-muted);
+}
+
+.hint {
+    margin-bottom: 12px;
+    font-size: 0.85rem;
+}
+
+.tabs {
+    @include pk.tabs;
+}
+
+.panel {
+    @include pk.card;
+}
+
+.groups {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+
+    @include tablet {
+        grid-template-columns: 1fr;
+    }
+}
+
+.group {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+}
+
+.rewards {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: 24px;
+
+    @include tablet {
+        grid-template-columns: 1fr;
+    }
+}
+
+.pick-order {
+    margin: 0;
+    padding-left: 22px;
+    line-height: 1.9;
+    font-weight: 700;
+}
+
+.reward-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.reward {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    border: 2px solid var(--pk-border);
+    border-radius: 12px;
+
+    &.taken {
+        background: var(--pk-surface-2);
+    }
+}
+
+.reward-name {
+    font-weight: 700;
+}
+
+.reward-owner {
+    color: var(--pk-yellow);
+    font-weight: 700;
+    white-space: nowrap;
+}

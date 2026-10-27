@@ -23,7 +23,8 @@ export class PokemonLayout {
     readonly authService = inject(AuthService);
 
     readonly menuItems = [
-        { label: 'Lockes', route: '/pokemon/lockes' },
+        { label: 'Juegos', route: '/pokemon/games' },
+        { label: 'Ranking', route: '/pokemon/ranking' },
         { label: 'Calculadora', route: '/pokemon/type-calculator' }
     ] as const;
 }

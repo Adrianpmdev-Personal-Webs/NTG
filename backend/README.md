@@ -2,15 +2,17 @@
 
 # ⚙️ NTG System · Backend ⚙️
 
-**REST API that handles identity, access control and the data of every game module.**
+### REST API that handles identity, access control and the data of every game module
 
-![Java](https://img.shields.io/badge/Java-25-ED8B00?logo=openjdk&logoColor=white&style=flat-square)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0-6DB33F?logo=springboot&logoColor=white&style=flat-square)
-![Spring Security](https://img.shields.io/badge/Spring_Security-JWT-6DB33F?logo=springsecurity&logoColor=white&style=flat-square)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-4169E1?logo=postgresql&logoColor=white&style=flat-square)
-![Maven](https://img.shields.io/badge/Maven-multi--module-C71A36?logo=apachemaven&logoColor=white&style=flat-square)
-![Docker](https://img.shields.io/badge/Docker-multi--stage-2496ED?logo=docker&logoColor=white&style=flat-square)
-![OpenAPI](https://img.shields.io/badge/OpenAPI-Swagger-85EA2D?logo=swagger&logoColor=black&style=flat-square)
+![Java](https://img.shields.io/badge/Java-25-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
+![Spring Security](https://img.shields.io/badge/Spring_Security-JWT-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
+![Maven](https://img.shields.io/badge/Maven-multi--module-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-multi--stage-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![OpenAPI](https://img.shields.io/badge/OpenAPI-Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)
+
+[![Author](https://img.shields.io/badge/Author-adrianpmdev-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/adrianpmdev)
 
 [Overview](#-overview) · [Folder structure](#-folder-structure) · [Security](#-security) · [Main flows](#-main-flows) · [API](#-api-overview) · [Data model](#-data-model) · [Free tiers](#-built-for-free-tiers) · [Errors & logs](#-errors-and-logging) · [Run & deploy](#-run-and-deploy)
 
@@ -18,10 +20,11 @@
 
 </div>
 
+---
+
 <br>
 
----
-# ✨ Overview
+## ✨ Overview
 
 The backend is a **Spring Boot** application split into Maven modules with one rule: **the platform never names
 a game, and a game never depends on the platform**. Both only share a small module of contracts.
@@ -47,10 +50,11 @@ flowchart LR
 `Application` lives in the root package `com.adrianpmdev`, so Spring finds the components, entities and
 repositories of every module on the classpath without listing them.
 
+---
+
 <br>
 
----
-# 📁 Folder structure
+## 📁 Folder structure
 
 The code is **feature-first**: each feature owns everything it needs, split into layers.
 
@@ -116,10 +120,11 @@ backend/
 - A game declares itself with a `GameModule` bean (API path, tag key, write routes open to players) and, if it
   needs public pictures, with an `ImageSlotProvider`. `core` reads those beans; it never has a game's name in it.
 
+---
+
 <br>
 
----
-# 🛡️ Security
+## 🛡️ Security
 
 Every request goes through the same pipeline: request id and access log → CORS allow-list → optional bearer token
 (verified locally, role and tags from a short cache) → deny-by-default authorization rules → controller. Requests
@@ -162,10 +167,11 @@ security headers (see the [frontend documentation](../frontend/README.md)).
 | Health | `GET /keep-alive` | Public |
 | Anything else | | ⛔ Denied |
 
+---
+
 <br>
 
----
-# 🔄 Main flows
+## 🔄 Main flows
 
 ### 1. Creating a user (admin → email → password)
 
@@ -196,10 +202,11 @@ security headers (see the [frontend documentation](../frontend/README.md)).
   server checks it, resizes it, re-encodes it as JPEG (PNG when it has transparency) and stores it in the public
   bucket. Its URL changes with every upload, so browsers can cache each version for a year.
 
+---
+
 <br>
 
----
-# 🌐 API overview
+## 🌐 API overview
 
 All routes live under `/api/v1`.
 
@@ -214,10 +221,11 @@ All routes live under `/api/v1`.
 
 Interactive documentation is available through Swagger UI where an environment enables it (admin only).
 
+---
+
 <br>
 
----
-# 🗄️ Data model
+## 🗄️ Data model
 
 PostgreSQL on Supabase, organised in schemas: **`core`** for the platform (users, tags, game catalog, pictures)
 plus **one schema per game** that needs tables. Each module keeps its DDL next to its code
@@ -229,10 +237,11 @@ plus **one schema per game** that needs tables. Each module keeps its DDL next t
   inside the module, not in the database.
 - Pictures are files in Supabase Storage; the database keeps only their object names.
 
+---
+
 <br>
 
----
-# 🪶 Built for free tiers
+## 🪶 Built for free tiers
 
 The site runs on the free plans of Render, Vercel and Supabase, so the backend avoids work it does not need:
 
@@ -246,10 +255,11 @@ The site runs on the free plans of Render, Vercel and Supabase, so the backend a
 | **Small connection pool** | At most 5 connections to the Supabase pooler |
 | **JVM tuned for 512 MB** | Limited heap, light garbage collector, restart on out-of-memory |
 
+---
+
 <br>
 
----
-# 🧾 Errors and logging
+## 🧾 Errors and logging
 
 **One consistent error format** (RFC 7807 problem details), with the field errors listed for validation failures
 and a `requestId` that matches the logs:
@@ -275,10 +285,11 @@ and a `requestId` that matches the logs:
 - `AUDIT`: who did what in the admin area.
 - Client errors are warnings without stack traces; server errors are errors with the full trace.
 
+---
+
 <br>
 
----
-# 🚢 Run and deploy
+## 🚢 Run and deploy
 
 ### Requirements
 
@@ -310,18 +321,29 @@ From an IDE, run `com.adrianpmdev.Application` in the `app` module.
 - `GET /keep-alive` works as a health check and keeps the free instance awake.
 - All environment-specific values come from the platform's environment variables.
 
+---
+
 <br>
 
----
-# 🗺️ Ideas for next steps
+## 🗺️ Ideas for next steps
 
 - Real data for the admin dashboard.
 - A screen for users to edit their own profile (the endpoint already exists).
 - More automated tests for the account flows.
 - More game modules following the same structure.
 
+---
+
 <br>
+
+↩️ [Back to the project overview](../README.md) · 🖥️ [Frontend documentation](../frontend/README.md) · 📄 [License](../LICENSE)
 
 ---
 
-↩️ [Back to the project overview](../README.md) · 🖥️ [Frontend documentation](../frontend/README.md)
+<br>
+
+<div align="center">
+
+✨ Made in **2026** by [@adrianpmdev](https://github.com/adrianpmdev) ✨
+
+</div>

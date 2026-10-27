@@ -3,13 +3,15 @@
  *
  * HTTP service of the Pokémon module: one method per endpoint. Every admin action on a tournament
  * answers with the whole updated tournament, so screens just replace their copy with the response.
+ * Reads are kept for a minute, so moving between screens does not ask the server again; any write empties
+ * that memory, so a change made from this browser always shows up right away.
  *
  * @author @adrianpmdev
  */
 
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, catchError, shareReplay, throwError } from 'rxjs';
+import { Observable, catchError, shareReplay, tap, throwError } from 'rxjs';
 import { API_BASE_URL } from '@core/config/api';
 import { TypeChart } from '../type-calculator/type-calculator-constants';
 import {
@@ -17,6 +19,9 @@ import {
     PlayerRequest, PlayerStanding, RewardRequest, TournamentCreateRequest, TournamentDetail,
     TournamentPlayerUpdateRequest, TournamentUpdateRequest
 } from './pokemon-models';
+
+/** How long a read is answered from memory. */
+const READ_TTL_MS = 60_000;
 
 @Injectable({ providedIn: 'root' })
 export class PokemonApi {
@@ -26,44 +31,47 @@ export class PokemonApi {
 
     private typeChart$: Observable<TypeChart> | null = null;
 
+    /** Recent reads by URL, kept {@link READ_TTL_MS} ms. */
+    private readonly reads = new Map<string, { expiresAt: number; request: Observable<unknown> }>();
+
     // ─── Games ───
 
     getGames(): Observable<Game[]> {
-        return this.http.get<Game[]>(`${this.base}/games`);
+        return this.cachedGet<Game[]>(`${this.base}/games`);
     }
 
     getGame(id: string): Observable<Game> {
-        return this.http.get<Game>(`${this.base}/games/${id}`);
+        return this.cachedGet<Game>(`${this.base}/games/${id}`);
     }
 
     createGame(request: GameRequest): Observable<Game> {
-        return this.http.post<Game>(`${this.base}/games`, request);
+        return this.write(this.http.post<Game>(`${this.base}/games`, request));
     }
 
     updateGame(id: string, request: GameRequest): Observable<Game> {
-        return this.http.put<Game>(`${this.base}/games/${id}`, request);
+        return this.write(this.http.put<Game>(`${this.base}/games/${id}`, request));
     }
 
     deleteGame(id: string): Observable<void> {
-        return this.http.delete<void>(`${this.base}/games/${id}`);
+        return this.write(this.http.delete<void>(`${this.base}/games/${id}`));
     }
 
     // ─── Players ───
 
     getPlayers(): Observable<Player[]> {
-        return this.http.get<Player[]>(`${this.base}/players`);
+        return this.cachedGet<Player[]>(`${this.base}/players`);
     }
 
     createPlayer(request: PlayerRequest): Observable<Player> {
-        return this.http.post<Player>(`${this.base}/players`, request);
+        return this.write(this.http.post<Player>(`${this.base}/players`, request));
     }
 
     updatePlayer(id: string, request: PlayerRequest): Observable<Player> {
-        return this.http.put<Player>(`${this.base}/players/${id}`, request);
+        return this.write(this.http.put<Player>(`${this.base}/players/${id}`, request));
     }
 
     deletePlayer(id: string): Observable<void> {
-        return this.http.delete<void>(`${this.base}/players/${id}`);
+        return this.write(this.http.delete<void>(`${this.base}/players/${id}`));
     }
 
     // ─── Randomlockes ───
@@ -72,91 +80,91 @@ export class PokemonApi {
     getLockes(gameId?: string): Observable<LockeSummary[]> {
         const params: Record<string, string> = gameId ? { gameId } : {};
 
-        return this.http.get<LockeSummary[]>(`${this.base}/lockes`, { params });
+        return this.cachedGet<LockeSummary[]>(`${this.base}/lockes`, params);
     }
 
     getLocke(id: string): Observable<LockeDetail> {
-        return this.http.get<LockeDetail>(`${this.base}/lockes/${id}`);
+        return this.cachedGet<LockeDetail>(`${this.base}/lockes/${id}`);
     }
 
     createLocke(request: LockeRequest): Observable<LockeDetail> {
-        return this.http.post<LockeDetail>(`${this.base}/lockes`, request);
+        return this.write(this.http.post<LockeDetail>(`${this.base}/lockes`, request));
     }
 
     updateLocke(id: string, request: LockeRequest): Observable<LockeDetail> {
-        return this.http.put<LockeDetail>(`${this.base}/lockes/${id}`, request);
+        return this.write(this.http.put<LockeDetail>(`${this.base}/lockes/${id}`, request));
     }
 
     setLockeRoster(id: string, playerIds: string[]): Observable<LockeDetail> {
-        return this.http.put<LockeDetail>(`${this.base}/lockes/${id}/players`, { playerIds });
+        return this.write(this.http.put<LockeDetail>(`${this.base}/lockes/${id}/players`, { playerIds }));
     }
 
     deleteLocke(id: string): Observable<void> {
-        return this.http.delete<void>(`${this.base}/lockes/${id}`);
+        return this.write(this.http.delete<void>(`${this.base}/lockes/${id}`));
     }
 
     // ─── Tournaments ───
 
     getTournament(id: string): Observable<TournamentDetail> {
-        return this.http.get<TournamentDetail>(`${this.base}/tournaments/${id}`);
+        return this.cachedGet<TournamentDetail>(`${this.base}/tournaments/${id}`);
     }
 
     createTournament(request: TournamentCreateRequest): Observable<TournamentDetail> {
-        return this.http.post<TournamentDetail>(`${this.base}/tournaments`, request);
+        return this.write(this.http.post<TournamentDetail>(`${this.base}/tournaments`, request));
     }
 
     updateTournament(id: string, request: TournamentUpdateRequest): Observable<TournamentDetail> {
-        return this.http.put<TournamentDetail>(`${this.base}/tournaments/${id}`, request);
+        return this.write(this.http.put<TournamentDetail>(`${this.base}/tournaments/${id}`, request));
     }
 
     deleteTournament(id: string): Observable<void> {
-        return this.http.delete<void>(`${this.base}/tournaments/${id}`);
+        return this.write(this.http.delete<void>(`${this.base}/tournaments/${id}`));
     }
 
     addTournamentPlayer(tournamentId: string, playerId: string): Observable<TournamentDetail> {
-        return this.http.post<TournamentDetail>(`${this.base}/tournaments/${tournamentId}/players`, { playerId });
+        return this.write(this.http.post<TournamentDetail>(`${this.base}/tournaments/${tournamentId}/players`, { playerId }));
     }
 
     updateTournamentPlayer(id: string, request: TournamentPlayerUpdateRequest): Observable<TournamentDetail> {
-        return this.http.put<TournamentDetail>(`${this.base}/tournament-players/${id}`, request);
+        return this.write(this.http.put<TournamentDetail>(`${this.base}/tournament-players/${id}`, request));
     }
 
     removeTournamentPlayer(id: string): Observable<TournamentDetail> {
-        return this.http.delete<TournamentDetail>(`${this.base}/tournament-players/${id}`);
+        return this.write(this.http.delete<TournamentDetail>(`${this.base}/tournament-players/${id}`));
     }
 
     /** Generates the league or the groups (drawn again when randomGroups is true). */
     generateCalendar(tournamentId: string, randomGroups: boolean): Observable<TournamentDetail> {
-        return this.http.post<TournamentDetail>(`${this.base}/tournaments/${tournamentId}/schedule`, { randomGroups });
+        return this.write(this.http.post<TournamentDetail>(`${this.base}/tournaments/${tournamentId}/schedule`, { randomGroups }));
     }
 
     generateBracket(tournamentId: string): Observable<TournamentDetail> {
-        return this.http.post<TournamentDetail>(`${this.base}/tournaments/${tournamentId}/bracket`, {});
+        return this.write(this.http.post<TournamentDetail>(`${this.base}/tournaments/${tournamentId}/bracket`, {}));
     }
 
     createMatch(tournamentId: string, request: MatchCreateRequest): Observable<TournamentDetail> {
-        return this.http.post<TournamentDetail>(`${this.base}/tournaments/${tournamentId}/matches`, request);
+        return this.write(this.http.post<TournamentDetail>(`${this.base}/tournaments/${tournamentId}/matches`, request));
     }
 
     /** Replaces every game of a series. */
     recordGames(matchId: string, games: MatchGameInput[]): Observable<TournamentDetail> {
-        return this.http.put<TournamentDetail>(`${this.base}/matches/${matchId}/games`, { games });
+        return this.write(this.http.put<TournamentDetail>(`${this.base}/matches/${matchId}/games`, { games }));
     }
 
     deleteMatch(matchId: string): Observable<TournamentDetail> {
-        return this.http.delete<TournamentDetail>(`${this.base}/matches/${matchId}`);
+        return this.write(this.http.delete<TournamentDetail>(`${this.base}/matches/${matchId}`));
     }
 
     createReward(tournamentId: string, request: RewardRequest): Observable<TournamentDetail> {
-        return this.http.post<TournamentDetail>(`${this.base}/tournaments/${tournamentId}/rewards`, request);
+        return this.write(this.http.post<TournamentDetail>(`${this.base}/tournaments/${tournamentId}/rewards`, request));
     }
 
     updateReward(id: string, request: RewardRequest): Observable<TournamentDetail> {
-        return this.http.put<TournamentDetail>(`${this.base}/rewards/${id}`, request);
+        return this.write(this.http.put<TournamentDetail>(`${this.base}/rewards/${id}`, request));
     }
 
     deleteReward(id: string): Observable<TournamentDetail> {
-        return this.http.delete<TournamentDetail>(`${this.base}/rewards/${id}`);
+        return this.write(this.http.delete<TournamentDetail>(`${this.base}/rewards/${id}`));
     }
 
     // ─── Team pictures ───
@@ -166,17 +174,17 @@ export class PokemonApi {
         const body = new FormData();
         body.append('file', file, file.name);
 
-        return this.http.put<{ url: string }>(`${this.base}/tournament-players/${tournamentPlayerId}/team-image`, body);
+        return this.write(this.http.put<{ url: string }>(`${this.base}/tournament-players/${tournamentPlayerId}/team-image`, body));
     }
 
     deleteTeamImage(tournamentPlayerId: string): Observable<void> {
-        return this.http.delete<void>(`${this.base}/tournament-players/${tournamentPlayerId}/team-image`);
+        return this.write(this.http.delete<void>(`${this.base}/tournament-players/${tournamentPlayerId}/team-image`));
     }
 
     // ─── Ranking ───
 
     getRanking(): Observable<PlayerStanding[]> {
-        return this.http.get<PlayerStanding[]>(`${this.base}/ranking`);
+        return this.cachedGet<PlayerStanding[]>(`${this.base}/ranking`);
     }
 
     // ─── Types ───
@@ -194,5 +202,34 @@ export class PokemonApi {
         }
 
         return this.typeChart$;
+    }
+
+    // ─── Read memory ───
+
+    /** A GET answered from memory while it is recent. A failed request is forgotten so the next call asks again. */
+    private cachedGet<T>(url: string, params: Record<string, string> = {}): Observable<T> {
+        const key = `${url}?${new URLSearchParams(params)}`;
+        const known = this.reads.get(key);
+
+        if (known && known.expiresAt > Date.now()) {
+            return known.request as Observable<T>;
+        }
+
+        const request = this.http.get<T>(url, { params }).pipe(
+            catchError(error => {
+                this.reads.delete(key);
+                return throwError(() => error);
+            }),
+            shareReplay({ bufferSize: 1, refCount: false })
+        );
+
+        this.reads.set(key, { expiresAt: Date.now() + READ_TTL_MS, request });
+
+        return request;
+    }
+
+    /** Any change may affect any screen, so it empties the read memory once the server has applied it. */
+    private write<T>(request: Observable<T>): Observable<T> {
+        return request.pipe(tap(() => this.reads.clear()));
     }
 }

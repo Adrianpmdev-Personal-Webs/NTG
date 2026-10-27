@@ -12,7 +12,7 @@
 ![Docker](https://img.shields.io/badge/Docker-multi--stage-2496ED?logo=docker&logoColor=white&style=flat-square)
 ![OpenAPI](https://img.shields.io/badge/OpenAPI-Swagger-85EA2D?logo=swagger&logoColor=black&style=flat-square)
 
-[Overview](#-overview) · [Folder structure](#-folder-structure) · [Security](#-security) · [Main flows](#-main-flows) · [API](#-api-overview) · [Data model](#-data-model) · [Errors & logs](#-errors-and-logging) · [Run & deploy](#-run-and-deploy)
+[Overview](#-overview) · [Folder structure](#-folder-structure) · [Security](#-security) · [Main flows](#-main-flows) · [API](#-api-overview) · [Data model](#-data-model) · [Free tiers](#-built-for-free-tiers) · [Errors & logs](#-errors-and-logging) · [Run & deploy](#-run-and-deploy)
 
 ↩️ [Back to the project overview](../README.md)
 
@@ -23,62 +23,74 @@
 ---
 # ✨ Overview
 
-The backend is a **Spring Boot** application split into two Maven modules:
+The backend is a **Spring Boot** application split into Maven modules with one rule: **the platform never names
+a game, and a game never depends on the platform**. Both only share a small module of contracts.
 
 | Module | Role |
 |---|---|
-| 🚀 **`core`** | The runnable application. Owns identity (users, tags), the Supabase integration, security, logging and error handling. |
-| 🎮 **Game modules** | One module per game, each with its own domain and REST endpoints. A game module contains **no security code**: `core` decides who can reach it. |
+| 📜 **`platform-api`** | Contracts shared by everyone: who is calling, file storage, picture compression, public pictures, how a game declares itself (`GameModule`) and helpers for cacheable JSON. No Spring Security, no Supabase. |
+| 🚀 **`core`** | The platform: identity (users, tags), the game catalog, public pictures, security, the Supabase integration, logging and error handling. It implements the contracts of `platform-api`. |
+| 🎮 **`games/*`** | One module per game, with its own domain and REST endpoints. It depends **only on `platform-api`** and contains **no security code**: it declares its API path and tag, and `core` builds the access rules from that. |
+| 🧷 **`app`** | Boots `core` and every game together and builds the runnable `ntg.jar`. Adding a game to the application is adding one dependency here. |
 
 ```mermaid
 flowchart LR
-    C([Client]) --> S["core<br/>security · logging · errors"]
-    S --> I["core features<br/>auth · users · tags"]
-    S --> P["game modules<br/>one per game"]
-    I --> SB[("Supabase Auth")]
-    I --> DB[("PostgreSQL<br/>schema core + one per game")]
-    P --> DB
+    A["app<br/>boots everything"] --> C["core<br/>identity · security · catalog · pictures"]
+    A --> G["games/*<br/>one module per game"]
+    C --> P["platform-api<br/>shared contracts"]
+    G --> P
+    C --> SB[("Supabase<br/>Auth · Storage")]
+    C --> DB[("PostgreSQL<br/>schema core")]
+    G --> DB2[("PostgreSQL<br/>one schema per game")]
 ```
 
-Adding a new game means adding a new module next to the existing game modules and registering its path and tag in
-the security rules. Nothing else in the platform changes.
+`Application` lives in the root package `com.adrianpmdev`, so Spring finds the components, entities and
+repositories of every module on the classpath without listing them.
 
 <br>
 
 ---
 # 📁 Folder structure
 
-The code is **feature-first**: each feature owns everything it needs, split into three layers.
+The code is **feature-first**: each feature owns everything it needs, split into layers.
 
 ```text
 backend/
-├── pom.xml                         Parent POM: Java 25, Spring Boot dependency management, modules
-├── Dockerfile                      Multi-stage build (Maven + JDK → slim JRE image)
+├── pom.xml                         Parent POM: Java 25, versions, plugins, list of modules
+├── Dockerfile                      Multi-stage build (Maven + JDK → slim JRE, non-root user)
+├── .mvn/jvm.config                 JVM options of Maven
 │
-├── core/                           🚀 Runnable application: platform, identity and security
-│   └── src/main/java/com/adrianpmdev/core/
-│       ├── Application.java        Entry point (also loads the game modules)
-│       ├── config/                 Typed settings, OpenAPI, shared HTTP client
-│       │
+├── platform-api/                   📜 Contracts shared by core and the games
+│   └── com/adrianpmdev/platform/
+│       ├── port/                   CurrentUser, ObjectStorage
+│       ├── module/                 GameModule: API path, tag and player writes of a game
+│       ├── image/                  ImageCompressor, ImageSpec, CompressedImage
+│       ├── asset/                  ImageSlot, ImageSlotProvider, PublicAssets
+│       ├── error/                  ApiErrors (404, 409, 400, 403)
+│       └── web/                    JsonResponses (JSON with ETag and cache rules)
+│
+├── core/                           🚀 The platform
+│   ├── sql/core.sql                Schema core, public bucket and policies
+│   └── com/adrianpmdev/core/
+│       ├── config/                 Typed settings, OpenAPI, HTTP client, upload limits
 │       ├── security/               🛡️ Who you are and what you may do
 │       │   ├── config/             Security chains, CORS, token decoder
-│       │   ├── authentication/     Authenticated-user principal, Swagger admin login
+│       │   ├── authentication/     Principal, cached role and tags, Swagger admin login
 │       │   ├── authorization/      Roles and tag-based authorities
+│       │   ├── ratelimit/          Limits on sign-in attempts
 │       │   ├── cookie/             Session (refresh token) cookie
 │       │   └── filter/             Bearer token filter
-│       │
+│       ├── image/                  Picture compression (JDK only)
+│       ├── integration/supabase/   🔌 Supabase Auth and Storage clients
 │       ├── web/                    Health endpoint and global error handling
 │       ├── logging/                Request id and access log
-│       ├── integration/supabase/   🔌 Supabase Auth client, DTOs and settings
-│       │
-│       └── features/               Business features
-│           ├── auth/               Login, refresh, logout, set password
-│           ├── users/              User management and tag assignment
-│           └── tags/               Tag management
+│       └── features/               auth · users · tags · catalog · assets
 │
-└── <game>/                         🎮 One module per game: domain and REST, no security code
-    └── src/main/java/com/adrianpmdev/<game>/features/
-        └── <feature>/              One folder per feature of the game
+├── games/
+│   ├── pokemon/                    🎮 Pokémon (+ sql/pokemon.sql)
+│   └── wow-forever/                🎮 WoW Forever (no tables: data.json + config.json)
+│
+└── app/                            🧷 Application.java, application.yml, ntg.jar
 ```
 
 ### Inside every feature
@@ -89,66 +101,64 @@ backend/
 │   ├── controller/                 REST endpoints
 │   ├── dto/request/                Validated input
 │   ├── dto/response/               Explicit output (entities are never exposed)
-│   ├── mapper/                     Entity ⇄ DTO conversion
-│   └── validation/                 Custom validators (only where needed)
-├── application/                    🧠 What the feature does
-│   └── service/                    Business rules and orchestration
+│   └── mapper/                     Entity ⇄ DTO conversion (only where needed)
+├── application/service/            🧠 Business rules and orchestration
 ├── domain/                         🧩 Pure rules without Spring (only where needed, e.g. Pokémon tournaments)
-└── infrastructure/                 🗄️ How it is stored
-    └── persistence/
-        ├── entity/                 JPA entities
-        └── repository/             Spring Data repositories
+└── infrastructure/persistence/     🗄️ JPA entities and Spring Data repositories
 ```
 
 **Rules that keep it tidy**
 
-- Controllers never touch repositories: they call services, and services own the business rules and talk to the
-  repositories and to the Supabase client.
+- Controllers never touch repositories: they call services, and services own the business rules.
 - Requests are validated at the edge and responses are DTOs, so the database model never leaks into the API.
-- Game modules never depend on `core`'s security: the access policy lives in one place.
-- When a game needs something from the platform (who is calling, file storage), it declares a small interface
-  (a *port*) in its own `shared/port` package and `core` implements it. The dependency keeps pointing from
-  `core` to the game, never back.
+- A game only knows `platform-api`. When it needs something from the platform (who is calling, storing a file,
+  compressing a picture) it uses one of those contracts and `core` provides the implementation.
+- A game declares itself with a `GameModule` bean (API path, tag key, write routes open to players) and, if it
+  needs public pictures, with an `ImageSlotProvider`. `core` reads those beans; it never has a game's name in it.
 
 <br>
 
 ---
 # 🛡️ Security
 
-Security is the most carefully designed part of the backend. Every request goes through the same pipeline:
-request id and access log → CORS allow-list → optional bearer token (verified locally, role and tags loaded from the
-database) → deny-by-default authorization rules → controller. Requests that are not signed in receive `401` and
-requests without permission receive `403`.
+Every request goes through the same pipeline: request id and access log → CORS allow-list → optional bearer token
+(verified locally, role and tags from a short cache) → deny-by-default authorization rules → controller. Requests
+that are not signed in receive `401` and requests without permission receive `403`.
 
 | 🔐 Concern | How it is handled |
 |---|---|
 | **Identity** | Delegated to **Supabase Auth**. The backend never stores passwords. |
-| **Token verification** | Access tokens (JWT) are verified **locally** (signature, expiry, issuer) against Supabase's keys: no network call per request. |
-| **Fresh permissions** | Role and tags are read from the database on every request, so removing a tag or deleting a user takes effect **immediately**, not when the token expires. |
-| **Authorization** | **Deny by default.** Every route must be listed explicitly; anything not listed is rejected. Routes are grouped by role (`ADMIN`) and by game tag. |
-| **Game access** | Reading a game's endpoints needs its **tag** (or admin). Writing needs **admin**. The rule is defined once per game, by path. |
+| **Token verification** | Access tokens (JWT) are verified **locally**: signature, expiry, issuer and audience (`authenticated`, so only session tokens are accepted). No network call per request. |
+| **Fresh permissions** | Role and tags are kept in memory for at most 60 seconds and evicted the moment an admin changes them, so a removed tag or a deleted user takes effect **immediately**. |
+| **Authorization** | **Deny by default.** Every route must be listed; anything else is rejected. Game rules are built from the `GameModule` each game declares. |
+| **Game access** | Reading a game's endpoints needs its **tag** (or admin); writing needs **admin**, except the routes a game opens to players. The tag of a game that is still *coming soon* is ignored for non-admins, so its API stays closed. |
+| **Sign-in limits** | Login is limited per email, per client address and site-wide; session renewal and the email link per address. Too many attempts get `429` with `Retry-After`. |
 | **Sessions** | Short-lived access token kept in memory by the client, plus a long-lived **refresh token in an HttpOnly cookie** (scoped to the auth path, `Secure` and `SameSite` configurable). The refresh token **rotates** on every use and logout revokes it on Supabase. |
 | **Accounts** | **No public sign-up.** Only admins create users, and users choose their own password from a one-time email link. An admin cannot delete their own account. |
-| **Passwords** | Policy enforced on the way in (length, at least a letter and a number, any characters allowed). Login never reveals the policy, and a failed login gives a generic message that does not say whether the email exists. |
+| **Passwords** | Policy enforced on the way in (length, at least a letter and a number). A failed login gives a generic message that does not say whether the email exists. |
+| **Uploaded pictures** | Validated by their bytes, never by name. The server resizes and re-encodes every picture (which also drops metadata such as GPS), guards against huge images and processes one at a time. Private pictures (Pokémon teams) live in a bucket closed to clients and are shown through short-lived signed URLs. |
+| **Database** | Row level security is enabled on every table, so the Supabase Data API can read nothing; the backend connects as the owner. |
 | **Errors** | Standard problem-detail responses. Server errors return a generic message plus a **request id**, never stack traces, SQL or class names. |
-| **CORS** | Explicit **origin allow-list** from configuration, with credentials. |
-| **Swagger** | Interactive API docs are protected with **Basic Auth** (admin only) and can be turned off per environment. |
-| **Secrets** | Keys, database credentials and the token secret live **outside the repository** (environment variables or secret files). |
-| **Uploaded files** | Pokémon team pictures go through the backend to a **private Storage bucket** closed to clients by a restrictive policy. Only the player of that tournament entry (or an admin) may upload, files are checked by their bytes and size, the database keeps only object names and clients get short-lived signed URLs. |
-| **Auditability** | Admin actions (create/delete user, change tags…) are written to a dedicated `AUDIT` log with who did what to whom. |
+| **Swagger** | Off by default; when an environment turns it on, it is protected with **Basic Auth** (admin only). |
+| **Container** | The Docker image runs as an unprivileged user. |
+| **Secrets** | Keys and credentials live **outside the repository** (environment variables or an ignored local file). |
+| **Auditability** | Admin actions (users, tags, catalog, pictures…) are written to a dedicated `AUDIT` log. |
+
+The web client adds its own browser protections on Vercel: a strict Content Security Policy, HSTS and the usual
+security headers (see the [frontend documentation](../frontend/README.md)).
 
 ### Who can call what
 
 | Area | Route | Access |
 |---|---|---|
-| Session | `POST /auth/login`, `/auth/refresh`, `/auth/logout`, `PUT /auth/set-password` | Public (the last one needs the link token) |
+| Session | `POST /auth/login`, `/auth/refresh`, `/auth/logout`, `PUT /auth/set-password` | Public (the last one needs the link token), with attempt limits |
 | Session | `GET /auth/me` | Any signed-in user |
 | Profile | `PUT /users/me` | Any signed-in user (own profile only) |
-| Users | `/users/**` | **Admin** |
-| Tags | `/tags/**` | **Admin** |
+| Catalog | `GET /games` | Any signed-in user (each sees the games they can) |
+| Catalog | `POST` · `PUT` · `DELETE /games/**` | **Admin** |
+| Users, tags, pictures | `/users/**`, `/tags/**`, `/assets/**` | **Admin** |
 | Games | `GET /<game>/**` | Users with the game's **tag**, and admins |
-| Games | `POST` · `PUT` · `DELETE /<game>/**` | **Admin** |
-| Games | `PUT` · `DELETE /pokemon/tournament-players/*/team-image` | Users with the `pokemon` tag; the module only accepts the owner of the entry (or an admin) |
+| Games | Other methods on `/<game>/**` | **Admin**, except the routes the game opens to players |
 | Health | `GET /keep-alive` | Public |
 | Anything else | | ⛔ Denied |
 
@@ -173,11 +183,18 @@ requests without permission receive `403`.
 - When the page is reloaded or the access token expires, the client asks for a new one using only the cookie. The
   refresh token rotates on every use.
 
-### 3. Tags and game access
+### 3. Games, tags and release
 
-- An admin assigns a tag to a user. It is stored in the database and, from the next request, the user holds the
-  matching `TAG_<KEY>` authority.
-- Routes under a game's path can be **read** by users with that tag and by admins; **writing** is admin only.
+- Adding a game to the **catalog** also creates its tag. A new game starts as *coming soon*: listed for everyone,
+  open only to admins.
+- An admin assigns the tag to users and, when the game is ready, unticks *coming soon*. From the next request,
+  users with the tag can read the game's API. No deploy is needed.
+
+### 4. Pictures
+
+- An admin uploads the original picture for a slot that a module declared (a game cover, a talent tree…). The
+  server checks it, resizes it, re-encodes it as JPEG (PNG when it has transparency) and stores it in the public
+  bucket. Its URL changes with every upload, so browsers can cache each version for a year.
 
 <br>
 
@@ -189,23 +206,45 @@ All routes live under `/api/v1`.
 | Module | Resources |
 |---|---|
 | **Auth** | `auth` (login, refresh, logout, set-password, me) |
-| **Users** | `users` (create, list, update, delete, resend email), `users/{id}/tags` |
+| **Users** | `users` (create, list, update, delete, resend email), `users/{id}/tags`, `users/me` |
 | **Tags** | `tags` |
+| **Catalog** | `games` (the games each user can see, and their management) |
+| **Pictures** | `assets` (expected pictures, upload, delete) |
 | **Game modules** | One group of resources per game, under `/api/v1/<game>/...` |
 
-Interactive documentation is available through Swagger UI (admin only).
+Interactive documentation is available through Swagger UI where an environment enables it (admin only).
 
 <br>
 
 ---
 # 🗄️ Data model
 
-PostgreSQL on Supabase, organised in schemas: **`core`** (users and tags) for the platform, plus **one schema per
-game module** for its domain.
+PostgreSQL on Supabase, organised in schemas: **`core`** for the platform (users, tags, game catalog, pictures)
+plus **one schema per game** that needs tables. Each module keeps its DDL next to its code
+(`core/sql/core.sql`, `games/<game>/sql/`), and every file can be run again safely.
 
 - Each user shares its id with its Supabase Auth account and is linked to its tags through a join table.
-- Every game module owns the tables of its own schema and never exposes its entities: the API only returns DTOs.
-- Database constraints (keys, uniqueness, relations) protect the rules of each domain.
+- A game owns the tables of its own schema and never exposes its entities: the API only returns DTOs.
+- Data that only changes with a release (the WoW Forever game data, the Pokémon type chart) lives in JSON files
+  inside the module, not in the database.
+- Pictures are files in Supabase Storage; the database keeps only their object names.
+
+<br>
+
+---
+# 🪶 Built for free tiers
+
+The site runs on the free plans of Render, Vercel and Supabase, so the backend avoids work it does not need:
+
+| Technique | Effect |
+|---|---|
+| **Role and tags cache** (Caffeine, 60 s) | At most one query per user per minute instead of one per request |
+| **Catalog and picture URLs in memory** | Reloaded only after an admin changes them |
+| **Gzip** | JSON is compressed (the WoW data drops from about 1.8 MB to about 200 KB) |
+| **ETag on static JSON** | A browser that already has the data gets `304` with no body |
+| **Daily `select 1`** | The keep-alive call touches the database once a day, so Supabase never pauses the project |
+| **Small connection pool** | At most 5 connections to the Supabase pooler |
+| **JVM tuned for 512 MB** | Limited heap, light garbage collector, restart on out-of-memory |
 
 <br>
 
@@ -238,43 +277,47 @@ and a `requestId` that matches the logs:
 
 <br>
 
---- 
+---
 # 🚢 Run and deploy
 
 ### Requirements
 
-Java 25 and Maven. Configuration is **not committed**: it is provided through a local properties file or
-environment variables.
+Java 25 and Maven 3.9. Settings without secrets are versioned in `app/src/main/resources/application.yml`
+(compression, connection pool, Swagger off). Secrets come from a local `application.properties` next to it
+(ignored by git) or from environment variables, which override the versioned file.
 
 | Setting | Purpose |
 |---|---|
 | `spring.datasource.*` | PostgreSQL connection (Supabase) |
-| `supabase.url`, `supabase.anon-key`, `supabase.service-role-key` | Supabase Auth access |
-| `supabase.jwt.*` | How access tokens are verified (key set URL, or shared secret) |
+| `supabase.url`, `supabase.anon-key`, `supabase.service-role-key` | Supabase Auth and Storage access |
+| `supabase.jwt.*` | How access tokens are verified (key set URL or shared secret, expected audience) |
 | `app.frontend.url` | Where the email links point to |
 | `app.cors.allowed-origins` | Origins allowed to call the API |
 | `app.auth.*` | Session cookie options (`secure`, `same-site`, lifetime) |
 
 ```bash
-mvn -pl core -am clean package     # builds core and the game modules
-java -jar core/target/core-0.1.jar
+mvn clean install                  # builds every module and runs the tests
+java -jar app/target/ntg.jar       # starts the API on port 8080
 ```
+
+From an IDE, run `com.adrianpmdev.Application` in the `app` module.
 
 ### Deployment
 
-- A **multi-stage Dockerfile** builds the project with Maven and JDK 25 and ships only the JAR on a slim JRE image.
+- A **multi-stage Dockerfile** builds the `app` module with Maven and JDK 25 and ships only `ntg.jar` on a slim
+  JRE image, as an unprivileged user.
 - Hosted on **Render**; the frontend on Vercel forwards `/api/*` to it.
-- `GET /keep-alive` works as a health check.
-- All environment-specific values come from the platform's environment variables or secret files.
+- `GET /keep-alive` works as a health check and keeps the free instance awake.
+- All environment-specific values come from the platform's environment variables.
 
 <br>
 
 ---
 # 🗺️ Ideas for next steps
 
-- Automated tests for the security rules and the account flows (the Pokémon tournament rules already have unit tests).
-- Request rate limiting on the public endpoints.
-- A lightweight "player directory" endpoint (name and avatar only) for the game views.
+- Real data for the admin dashboard.
+- A screen for users to edit their own profile (the endpoint already exists).
+- More automated tests for the account flows.
 - More game modules following the same structure.
 
 <br>

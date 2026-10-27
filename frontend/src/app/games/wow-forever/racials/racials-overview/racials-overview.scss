@@ -1,0 +1,200 @@
+/**
+ * Racials overview styles.
+ *
+ * Faction tabs, the races as cards in a responsive grid (blue edge for the Alliance, red for the Horde) and the race-class
+ * table, which scrolls sideways on narrow screens. The page frame has its own component.
+ *
+ * @author @adrianpmdev
+ */
+
+@use 'mixins' as *;
+@use '../../styles/wow-forever' as wow;
+
+:host {
+    display: block;
+}
+
+.state {
+    @include wow.state;
+}
+
+.tabs {
+    @include wow.tab-buttons;
+}
+
+.section-title {
+    @include wow.section-title;
+}
+
+/* ─── RACES ─── */
+
+.races {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 12px;
+}
+
+.race {
+    @include wow.panel;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+    border-left: 3px solid wow.$alliance;
+
+    &.horde {
+        border-left-color: wow.$horde;
+    }
+}
+
+.race-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.race-icon {
+    @include wow.icon(40px);
+    flex: 0 0 auto;
+    border-radius: 3px;
+}
+
+.race-name {
+    margin: 0;
+    color: wow.$bright;
+    font-size: 1.05rem;
+}
+
+.faction {
+    color: wow.$muted;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.race-classes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.class-icon {
+    @include wow.icon(24px);
+}
+
+.ability-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.ability {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.ability-icon {
+    @include wow.icon(28px);
+    flex: 0 0 auto;
+}
+
+.ability-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.ability-name {
+    color: wow.$text;
+    font-size: 0.9rem;
+}
+
+.ability-desc {
+    color: wow.$muted;
+    font-size: 0.8rem;
+    line-height: 1.4;
+}
+
+.class-racials {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px solid wow.$line;
+}
+
+.class-racials-title {
+    margin: 0;
+    color: wow.$gold;
+    font-size: 0.75rem;
+    font-weight: normal;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* ─── MATRIX ─── */
+
+.matrix-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.matrix-wrapper {
+    @include wow.panel;
+    overflow-x: auto;
+}
+
+.matrix {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+
+    th,
+    td {
+        padding: 6px 8px;
+        border-bottom: 1px solid wow.$line;
+        text-align: center;
+    }
+
+    thead th {
+        background: linear-gradient(#26231b, #14130f);
+    }
+
+    tbody th {
+        border-left: 3px solid wow.$alliance;
+        color: wow.$text;
+        font-weight: normal;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    tr.horde th {
+        border-left-color: wow.$horde;
+    }
+
+    td.yes {
+        color: wow.$green;
+        font-weight: bold;
+    }
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+@include small {
+    .races {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

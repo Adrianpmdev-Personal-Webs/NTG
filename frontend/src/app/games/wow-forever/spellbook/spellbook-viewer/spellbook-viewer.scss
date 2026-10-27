@@ -1,0 +1,310 @@
+/**
+ * Spellbook viewer styles.
+ *
+ * Class highlights in a folding panel, tab buttons, the search and level filters, and the spells as cards in two
+ * columns (one on phones) with the tooltip of the selected rank. The page frame and the class picker have their own
+ * components.
+ *
+ * @author @adrianpmdev
+ */
+
+@use 'mixins' as *;
+@use '../../styles/wow-forever' as wow;
+
+:host {
+    display: block;
+}
+
+.state {
+    @include wow.state;
+}
+
+/* ─── HIGHLIGHTS ─── */
+
+.highlights {
+    @include wow.panel;
+    padding: 8px 14px;
+
+    summary {
+        color: wow.$gold;
+        letter-spacing: 1px;
+        cursor: pointer;
+    }
+}
+
+.ability-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 10px 0 4px;
+    padding: 0;
+    list-style: none;
+}
+
+.ability {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.ability-icon {
+    @include wow.icon(28px);
+    flex: 0 0 auto;
+}
+
+.ability-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.ability-name {
+    color: wow.$bright;
+    font-size: 0.9rem;
+}
+
+.ability-desc {
+    color: wow.$text;
+    font-size: 0.82rem;
+    line-height: 1.4;
+}
+
+/* ─── TABS AND FILTERS ─── */
+
+.tabs {
+    @include wow.tab-buttons;
+}
+
+.filters {
+    @include wow.panel;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 20px;
+    padding: 10px 14px;
+}
+
+.search {
+    flex: 1;
+    min-width: 200px;
+    max-width: 360px;
+    padding: 6px 10px;
+    border: 1px solid wow.$icon-border;
+    background: #0a0a0a;
+    color: wow.$text;
+    font: inherit;
+
+    &::placeholder {
+        color: wow.$dim;
+    }
+
+    &:focus-visible {
+        outline: 1px solid wow.$gold;
+    }
+}
+
+.level {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: wow.$gold;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.level-range {
+    width: 160px;
+    accent-color: wow.$gold;
+}
+
+.level-value {
+    min-width: 24px;
+    color: wow.$text;
+    text-align: right;
+}
+
+/* ─── SPELLS ─── */
+
+.spells {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.spell {
+    @include wow.panel;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    padding: 10px 12px;
+}
+
+.spell-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.spell-icon {
+    @include wow.icon(36px);
+    flex: 0 0 auto;
+    border-radius: 3px;
+}
+
+.spell-title {
+    flex: 1;
+    min-width: 0;
+}
+
+.spell-name {
+    margin: 0;
+    overflow: hidden;
+    color: wow.$bright;
+    font-size: 1rem;
+    font-weight: bold;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.spell-meta {
+    display: flex;
+    gap: 10px;
+    color: wow.$muted;
+    font-size: 0.75rem;
+}
+
+.badges {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 4px;
+}
+
+.badge {
+    @include wow.badge;
+}
+
+.ranks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.rank-btn {
+    min-width: 28px;
+    padding: 2px 6px;
+    border: 1px solid wow.$icon-border;
+    background: #0a0a0a;
+    color: wow.$muted;
+    font: inherit;
+    font-size: 0.75rem;
+    cursor: pointer;
+
+    &:hover {
+        color: wow.$text;
+    }
+
+    &.active {
+        border-color: wow.$gold;
+        background: rgba(216, 184, 102, 0.15);
+        color: wow.$gold;
+    }
+
+    &:focus-visible {
+        outline: 1px solid wow.$gold;
+        outline-offset: 1px;
+    }
+}
+
+.lines {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    color: wow.$text;
+    font-size: 0.8rem;
+}
+
+.line {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.description {
+    margin: 0;
+    color: wow.$text-strong;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    white-space: pre-line;
+}
+
+.details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+    margin: 0;
+    color: wow.$muted;
+    font-size: 0.75rem;
+}
+
+.learned {
+    margin: 0;
+    color: wow.$green;
+    font-size: 0.78rem;
+}
+
+.note {
+    margin: 0;
+    color: wow.$dim;
+    font-size: 0.78rem;
+    font-style: italic;
+    line-height: 1.35;
+}
+
+.classic {
+    color: wow.$muted;
+    font-size: 0.78rem;
+
+    summary {
+        color: wow.$dim;
+        cursor: pointer;
+    }
+
+    p {
+        margin: 6px 0 0;
+        line-height: 1.4;
+    }
+}
+
+.removed {
+    margin: 0;
+    color: wow.$dim;
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+/* ─── RESPONSIVE ─── */
+
+@include tablet {
+    .spells {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@include mobile {
+    .filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search {
+        max-width: none;
+    }
+
+    .level-range {
+        flex: 1;
+    }
+}

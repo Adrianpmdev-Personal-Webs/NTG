@@ -2,16 +2,28 @@
  * routes
  *
  * Application routes. Public auth pages, the terminal layout (welcome and admin) and one entry per game,
- * all lazy loaded. A new game adds its player routes and its admin routes here.
+ * all lazy loaded. The routes of the games are built from GAME_MODULES: each game is served at /<id> and its
+ * management area at /admin/<id>, so adding a game does not touch this file.
  *
  * @author @adrianpmdev
  */
 
-import { Routes } from '@angular/router';
+import { Route, Routes } from '@angular/router';
 import { adminGuard } from '@core/guards/admin';
 import { authGuard } from '@core/guards/auth';
 import { gameGuard } from '@core/guards/game';
 import { roleHomeGuard } from '@core/guards/role-home';
+import { GAME_MODULES } from '@games/games';
+
+const gameAdminRoutes: Route[] = GAME_MODULES
+    .filter(game => game.adminRoutes)
+    .map(game => ({ path: game.id, loadChildren: game.adminRoutes }));
+
+const gamePlayerRoutes: Route[] = GAME_MODULES.map(game => ({
+    path: game.id,
+    canActivate: [authGuard, gameGuard(game.id)],
+    loadChildren: game.routes
+}));
 
 export const routes: Routes = [
     {
@@ -33,16 +45,7 @@ export const routes: Routes = [
                 path: 'admin',
                 canActivate: [adminGuard],
                 children: [
-                    {
-                        path: 'pokemon',
-                        loadChildren: () => import('@features/pokemon/pokemon-admin.routes')
-                            .then(m => m.POKEMON_ADMIN_ROUTES)
-                    },
-                    {
-                        path: 'wow-forever',
-                        loadChildren: () => import('@features/wow-forever/wow-forever-admin.routes')
-                            .then(m => m.WOW_FOREVER_ADMIN_ROUTES)
-                    },
+                    ...gameAdminRoutes,
                     {
                         path: '',
                         loadChildren: () => import('@features/admin/admin.routes').then(m => m.ADMIN_ROUTES)
@@ -51,16 +54,7 @@ export const routes: Routes = [
             }
         ]
     },
-    {
-        path: 'pokemon',
-        canActivate: [authGuard, gameGuard('pokemon')],
-        loadChildren: () => import('@features/pokemon/pokemon.routes').then(m => m.POKEMON_ROUTES)
-    },
-    {
-        path: 'wow-forever',
-        canActivate: [authGuard, gameGuard('wow-forever')],
-        loadChildren: () => import('@features/wow-forever/wow-forever.routes').then(m => m.WOW_FOREVER_ROUTES)
-    },
+    ...gamePlayerRoutes,
     {
         // Public routes. /set-password is the target of the link in the email sent by Supabase:
         // /set-password#access_token=XXX&...

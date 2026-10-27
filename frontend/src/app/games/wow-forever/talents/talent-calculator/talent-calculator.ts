@@ -19,7 +19,8 @@ import { WowPage } from '../../ui/wow-page/wow-page';
 import { creditLine, hideBrokenIcon, wowIconUrl } from '../../wow-forever-config';
 import { TalentGrid } from '../talent-grid/talent-grid';
 import { TalentTooltip } from '../talent-tooltip/talent-tooltip';
-import { TALENT_POINT_LEVELS, TREE_ART_PATH } from '../talents-config';
+import { cssUrl, gameImages } from '../../game-data/game-images';
+import { TALENT_POINT_LEVELS } from '../talents-config';
 import {
     Ranks,
     canAdd,
@@ -43,6 +44,7 @@ import { ClassTalents, Talent, TalentHover, TalentTree } from '../talents-models
 export class TalentCalculator implements OnInit {
 
     private readonly gameData = inject(GameDataApi);
+    private readonly images = gameImages();
     private readonly route = inject(ActivatedRoute);
     private readonly router = inject(Router);
     private readonly notificationService = inject(NotificationService);
@@ -191,7 +193,7 @@ export class TalentCalculator implements OnInit {
     }
 
     treeBackground(tree: TalentTree): string {
-        return `url('${TREE_ART_PATH}/${this.selectedClass()?.slug}-${tree.slug}.jpg')`;
+        return cssUrl(this.images()[`talents/${this.selectedClass()?.slug}-${tree.slug}`]);
     }
 
     onCarouselScroll(): void {

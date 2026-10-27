@@ -4,7 +4,7 @@
             <app-launcher-header />
 
             <section class="launcher-main">
-                <div class="artwork-layer" [style.background-image]="'url(' + backgroundUrl() + ')'" aria-hidden="true"></div>
+                <div class="artwork-layer" [style.background-image]="backgroundImage()" aria-hidden="true"></div>
                 <div class="artwork-vignette" aria-hidden="true"></div>
                 <div class="content-spacer"></div>
                 <app-news-panel />

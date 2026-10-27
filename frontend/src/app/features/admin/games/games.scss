@@ -1,0 +1,53 @@
+/**
+ * Games page styles.
+ * Cover thumbnail, state badge and the cover upload button of the catalog table.
+ *
+ * @author @adrianpmdev
+ */
+
+.cover-thumb {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 40px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    color: var(--text-dim);
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
+.state-badge {
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+    color: var(--neon-yellow);
+
+    &.released {
+        color: var(--neon-green);
+    }
+}
+
+label.action-btn {
+    cursor: pointer;
+
+    &.disabled {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+}
+
+.checkbox-field {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+
+    .field-hint {
+        flex-basis: 100%;
+    }
+}

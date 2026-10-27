@@ -9,8 +9,8 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { GAMES } from '@core/config/games';
 import { AuthService } from '@core/services/auth';
+import { GameCatalogService } from '@core/services/game-catalog';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,17 +22,17 @@ import { AuthService } from '@core/services/auth';
 export class Welcome implements OnInit {
 
     private readonly authService = inject(AuthService);
+    private readonly catalog = inject(GameCatalogService);
 
     readonly currentUser = toSignal(this.authService.currentUser$, {
         initialValue: this.authService.getCurrentUser()
     });
 
-    /** Upcoming games are shown to everyone (locked for players); released ones only with the matching tag. */
-    readonly games = computed(() => {
-        this.currentUser();
-
-        return GAMES.filter(game => game.upcoming || this.authService.canAccessGame(game.id));
-    });
+    /**
+     * Games of the catalog as the backend lists them for this user: upcoming ones for everyone (locked for players)
+     * and released ones only with the matching tag.
+     */
+    readonly games = this.catalog.games;
     readonly isAdmin = computed(() => {
         this.currentUser();
 
@@ -43,7 +43,8 @@ export class Welcome implements OnInit {
     readonly hasNoTags = computed(() => !this.isAdmin() && (this.currentUser()?.tags.length ?? 0) === 0);
 
     ngOnInit(): void {
-        // Tags may have changed since login, so the list is refreshed when the user comes home.
+        // Tags may have changed since login, so the user and the catalog are refreshed when the user comes home.
         this.authService.reloadUser();
+        this.catalog.refresh();
     }
 }

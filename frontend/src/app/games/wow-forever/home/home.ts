@@ -7,7 +7,8 @@
  */
 
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
-import { FACTION_BACKGROUNDS, WOW_FEATURES } from '../wow-forever-config';
+import { cssUrl, gameImages } from '../game-data/game-images';
+import { WOW_FEATURES } from '../wow-forever-config';
 import { Faction } from '../wow-forever-models';
 import { LegalNotice } from '../ui/legal-notice/legal-notice';
 import { WowButton } from '../ui/wow-button/wow-button';
@@ -26,7 +27,11 @@ export class Home {
 
     readonly features = WOW_FEATURES;
     readonly faction = signal<Faction>('ALLIANCE');
-    readonly backgroundUrl = computed(() => FACTION_BACKGROUNDS[this.faction()]);
+
+    private readonly images = gameImages();
+
+    /** Artwork of the selected faction, uploaded by an admin. */
+    readonly backgroundImage = computed(() => cssUrl(this.images()[`backgrounds/${this.faction().toLowerCase()}`]));
 
     onFactionChange(value: string): void {
         this.faction.set(value === 'HORDE' ? 'HORDE' : 'ALLIANCE');

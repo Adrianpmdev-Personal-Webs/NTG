@@ -3,17 +3,17 @@
  *
  * Team pictures of the players of a tournament. Each card shows the picture when the caller can see it,
  * and an upload button when the backend says the caller may change it (their own team before the
- * reveal, or any team for admins). Pictures are compressed in the browser before they are sent.
+ * reveal, or any team for admins). The original picture is sent: the backend validates and compresses it.
  *
  * @author @adrianpmdev
  */
 
 import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
+import { ACCEPTED_IMAGE_TYPES, checkImageFile } from '@core/services/asset';
 import { NotificationService } from '@core/services/notification';
 import { resolveApiError } from '@shared/utils/api-error';
 import { PokemonApi } from '../../data/pokemon-api';
 import { TournamentDetail, TournamentPlayer } from '../../data/pokemon-models';
-import { ACCEPTED_TYPES, compressTeamImage } from '../../data/team-image';
 import { formatDateTime } from '../../data/tournament-view';
 
 @Component({
@@ -32,14 +32,14 @@ export class TeamGallery {
     /** Emitted after a picture changes, so the parent reloads the tournament. */
     readonly changed = output<void>();
 
-    readonly accepted = ACCEPTED_TYPES;
+    readonly accepted = ACCEPTED_IMAGE_TYPES;
     readonly busy = signal<string | null>(null);
 
     revealText(): string {
         return formatDateTime(this.detail().teamsRevealAt);
     }
 
-    async onFile(player: TournamentPlayer, event: Event): Promise<void> {
+    onFile(player: TournamentPlayer, event: Event): void {
         const inputElement = event.target as HTMLInputElement;
         const file = inputElement.files?.[0];
         inputElement.value = '';
@@ -48,25 +48,25 @@ export class TeamGallery {
             return;
         }
 
-        this.busy.set(player.id);
+        const problem = checkImageFile(file);
 
-        try {
-            const compressed = await compressTeamImage(file);
-            this.api.uploadTeamImage(player.id, compressed).subscribe({
-                next: () => {
-                    this.busy.set(null);
-                    this.notifications.success('Equipo subido');
-                    this.changed.emit();
-                },
-                error: error => {
-                    this.busy.set(null);
-                    this.notifications.error(resolveApiError(error, 'No se ha podido subir el equipo'));
-                }
-            });
-        } catch (error) {
-            this.busy.set(null);
-            this.notifications.error(error instanceof Error ? error.message : 'No se ha podido procesar la imagen');
+        if (problem) {
+            this.notifications.warning(problem);
+            return;
         }
+
+        this.busy.set(player.id);
+        this.api.uploadTeamImage(player.id, file).subscribe({
+            next: () => {
+                this.busy.set(null);
+                this.notifications.success('Equipo subido');
+                this.changed.emit();
+            },
+            error: error => {
+                this.busy.set(null);
+                this.notifications.error(resolveApiError(error, 'No se ha podido subir el equipo'));
+            }
+        });
     }
 
     remove(player: TournamentPlayer): void {

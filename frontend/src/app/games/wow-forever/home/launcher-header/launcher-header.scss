@@ -93,7 +93,7 @@
   transform: translate(-50%, -50%);
   background:
     radial-gradient(ellipse at center, rgba(211,166,47,.18), transparent 57%),
-    url('/images/wow-forever/logo.webp') center / contain no-repeat;
+    var(--logo-image, none) center / contain no-repeat;
   filter: drop-shadow(0 3px 2px rgba(0,0,0,.95));
 }
 

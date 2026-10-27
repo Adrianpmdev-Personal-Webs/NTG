@@ -13,7 +13,7 @@ import { UserService } from '@core/services/user';
 import { StatCard } from './dashboard-stats';
 import { User } from '@shared/models/user';
 import { AuthService } from '@core/services/auth';
-import { GAMES } from '@core/config/games';
+import { GameCatalogService } from '@core/services/game-catalog';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,7 +37,7 @@ export class Dashboard implements OnInit {
     adminsCount = signal(0);
     uptime = signal('00:00:00');
 
-    availableGames = signal(GAMES);
+    availableGames = inject(GameCatalogService).games;
 
     readonly circumference = 2 * Math.PI * 70;
 

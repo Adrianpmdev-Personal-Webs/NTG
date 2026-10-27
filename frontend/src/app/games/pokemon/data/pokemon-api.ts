@@ -158,10 +158,10 @@ export class PokemonApi {
 
     // ─── Team pictures ───
 
-    /** Uploads (or replaces) a team picture; compress it first with compressTeamImage. */
-    uploadTeamImage(tournamentPlayerId: string, file: Blob): Observable<{ url: string }> {
+    /** Uploads (or replaces) a team picture. The original is sent: the backend compresses it. */
+    uploadTeamImage(tournamentPlayerId: string, file: File): Observable<{ url: string }> {
         const body = new FormData();
-        body.append('file', file, 'team.webp');
+        body.append('file', file, file.name);
 
         return this.http.put<{ url: string }>(`${this.base}/tournament-players/${tournamentPlayerId}/team-image`, body);
     }

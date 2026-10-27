@@ -1,9 +1,9 @@
 /**
  * GameDataApi
  *
- * HTTP service for the game data of WoW Forever (talents, spellbooks, racials and the Legacy System). Every screen
- * reads its data through here: one request per screen (and per class), mapped by GameDataMappers and kept for the rest
- * of the session, so going back to a screen or a class does not download it again.
+ * HTTP service for the game data of WoW Forever (talents, spellbooks, racials, the Legacy System and the URLs of the
+ * pictures). Every screen reads its data through here: one request per screen (and per class), mapped by
+ * GameDataMappers and kept for the rest of the session, so going back to a screen or a class does not download it again.
  *
  * @author @adrianpmdev
  */
@@ -52,6 +52,14 @@ export class GameDataApi {
 
     getLegacy(): Observable<LegacyData> {
         return this.cached<LegacyResponseFile, LegacyData>('/legacy', toLegacy);
+    }
+
+    /**
+     * Public URLs of the pictures uploaded by an admin, by short key: `logo`, `backgrounds/alliance`,
+     * `backgrounds/horde` and `talents/<class>-<tree>`. Pictures not uploaded yet are missing.
+     */
+    getImages(): Observable<Readonly<Record<string, string>>> {
+        return this.cached<Record<string, string>, Readonly<Record<string, string>>>('/images', images => images);
     }
 
     /** One shared request per path. A failed one is forgotten, so the next attempt asks the server again. */

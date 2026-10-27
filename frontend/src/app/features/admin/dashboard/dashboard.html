@@ -225,9 +225,13 @@
         <section class="games-section">
             <div class="games-grid">
                 @for (game of availableGames(); track game.id) {
-                    <a class="game-card terminal-card animate-fade-up" [routerLink]="game.route">
+                    <a class="game-card terminal-card animate-fade-up" [routerLink]="'/' + game.id">
                         <div class="game-image-wrapper">
-                            <img class="game-image" [src]="game.imageUrl" [alt]="game.name" loading="lazy" />
+                            @if (game.coverUrl) {
+                                <img class="game-image" [src]="game.coverUrl" [alt]="game.name" loading="lazy" />
+                            } @else {
+                                <div class="game-image game-image-empty">{{ game.name.charAt(0).toUpperCase() }}</div>
+                            }
                         </div>
 
                         <div class="game-name">

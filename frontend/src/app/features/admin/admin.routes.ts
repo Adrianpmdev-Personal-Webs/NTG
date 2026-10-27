@@ -1,7 +1,8 @@
 /**
  * ADMIN_ROUTES
  *
- * General admin routes: dashboard and user management. Game management lives in each game feature.
+ * General admin routes: dashboard, users, the game catalog and the public pictures. The management of each game
+ * lives in its own module.
  *
  * @author @adrianpmdev
  */
@@ -21,5 +22,13 @@ export const ADMIN_ROUTES: Routes = [
     {
         path: 'users',
         loadComponent: () => import('./users/users').then(m => m.Users)
+    },
+    {
+        path: 'games',
+        loadComponent: () => import('./games/games').then(m => m.Games)
+    },
+    {
+        path: 'images',
+        loadComponent: () => import('./images/images').then(m => m.Images)
     }
 ];

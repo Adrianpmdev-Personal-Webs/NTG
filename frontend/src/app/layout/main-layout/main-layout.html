@@ -64,6 +64,32 @@
                         <span class="nav-label">USUARIOS</span>
                     }
                 </a>
+
+                <a
+                    routerLink="/admin/games"
+                    routerLinkActive="active"
+                    class="nav-item"
+                    [title]="sidebarCollapsed() ? 'Juegos' : ''"
+                    (click)="handleMenuItemNavigation()"
+                >
+                    <span class="nav-icon">▣</span>
+                    @if (!sidebarCollapsed()) {
+                        <span class="nav-label">JUEGOS</span>
+                    }
+                </a>
+
+                <a
+                    routerLink="/admin/images"
+                    routerLinkActive="active"
+                    class="nav-item"
+                    [title]="sidebarCollapsed() ? 'Imágenes' : ''"
+                    (click)="handleMenuItemNavigation()"
+                >
+                    <span class="nav-icon">▤</span>
+                    @if (!sidebarCollapsed()) {
+                        <span class="nav-label">IMÁGENES</span>
+                    }
+                </a>
             } @else {
                 <a
                     routerLink="/welcome"
@@ -99,14 +125,16 @@
 
                     @if (isSubmenuOpen(game.id) && !sidebarCollapsed()) {
                         <div class="nav-submenu">
-                            <a
-                                [routerLink]="game.route"
-                                class="nav-subitem"
-                                (click)="handleSubmenuItemNavigation()"
-                            >
-                                <span class="nav-subicon">▶</span>
-                                <span class="nav-sublabel">JUGAR</span>
-                            </a>
+                            @if (game.route) {
+                                <a
+                                    [routerLink]="game.route"
+                                    class="nav-subitem"
+                                    (click)="handleSubmenuItemNavigation()"
+                                >
+                                    <span class="nav-subicon">▶</span>
+                                    <span class="nav-sublabel">JUGAR</span>
+                                </a>
+                            }
 
                             @if (authService.isAdmin()) {
                                 @for (item of game.adminItems; track item.route) {

@@ -46,6 +46,3 @@ export const TALENT_TREE_IDS: Readonly<Partial<Record<string, number>>> = {
     'druid-feral-combat': 134,
     'druid-restoration': 573
 };
-
-/** One background picture per tree, named `<class>-<tree>.jpg` (e.g. warrior-arms.jpg). */
-export const TREE_ART_PATH = '/images/wow-forever/talents/trees';

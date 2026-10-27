@@ -15,7 +15,6 @@ import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, catchError, finalize, map, of, shareReplay, tap } from 'rxjs';
 import { User } from '@shared/models/user';
 import { API_BASE_URL } from '@core/config/api';
-import { GAMES } from '@core/config/games';
 
 export interface LoginRequest {
     email: string;
@@ -146,20 +145,6 @@ export class AuthService {
     /** Whether the user has the tag with this key. */
     hasTag(tagKey: string): boolean {
         return (this.getCurrentUser()?.tags ?? []).includes(tagKey);
-    }
-
-    /**
-     * Admins can open every game, including upcoming ones (to develop them). The rest need the tag whose key is
-     * the game id and the game must not be upcoming. The backend enforces the tag rule too.
-     */
-    canAccessGame(gameId: string): boolean {
-        if (this.isAdmin()) {
-            return true;
-        }
-
-        const game = GAMES.find(entry => entry.id === gameId);
-
-        return !!game && !game.upcoming && this.hasTag(gameId);
     }
 
     private handleAuthResponse(response: AuthTokensResponse): void {

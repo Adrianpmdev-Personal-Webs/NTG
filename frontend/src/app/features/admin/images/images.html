@@ -1,0 +1,94 @@
+<div class="admin-page">
+    <div class="admin-section-head">
+        <div>
+            <h1 class="admin-page-title">IMÁGENES</h1>
+            <p class="admin-page-subtitle">
+                Sube la imagen original (PNG o JPEG, hasta 4 MB): el servidor la redimensiona y la comprime.
+            </p>
+        </div>
+    </div>
+
+    @if (loading()) {
+        <div class="terminal-card admin-section">
+            <p class="admin-page-state">CARGANDO...</p>
+        </div>
+    } @else {
+        @for (group of groups(); track group.name) {
+            <section class="terminal-card admin-section">
+                <div class="admin-section-head">
+                    <h2 class="admin-section-title">{{ group.name.toUpperCase() }}</h2>
+                    <span class="admin-hint">{{ group.uploaded }} / {{ group.assets.length }} SUBIDAS</span>
+                </div>
+
+                <ul class="asset-grid">
+                    @for (asset of group.assets; track asset.key) {
+                        <li class="asset-card" [class.missing]="!asset.url" [class.unused]="!asset.declared">
+                            <div class="asset-preview">
+                                @if (asset.url) {
+                                    <img [src]="asset.url" [alt]="asset.label" loading="lazy" />
+                                } @else {
+                                    <span class="asset-empty">SIN IMAGEN</span>
+                                }
+                            </div>
+
+                            <div class="asset-info">
+                                <span class="asset-label">{{ asset.label }}</span>
+                                <span class="asset-key" [title]="asset.key">{{ asset.key }}</span>
+                                @if (asset.url) {
+                                    <span class="asset-meta">
+                                        {{ asset.width }}×{{ asset.height }} · {{ size(asset.sizeBytes) }} · {{ asset.updatedAt | date: 'dd/MM/yyyy HH:mm' }}
+                                    </span>
+                                }
+                            </div>
+
+                            <div class="asset-actions">
+                                @if (asset.declared) {
+                                    <label class="btn-neon action-btn" [class.disabled]="busyKey() === asset.key">
+                                        {{ busyKey() === asset.key ? 'SUBIENDO...' : asset.url ? '⟳ REEMPLAZAR' : '⬆ SUBIR' }}
+                                        <input type="file" hidden [accept]="accepted" [disabled]="busyKey() !== null"
+                                            (change)="upload(asset, $event)" />
+                                    </label>
+                                }
+                                @if (asset.url) {
+                                    <button class="btn-neon btn-neon-danger action-btn" type="button"
+                                        [disabled]="busyKey() !== null" (click)="askDelete(asset)">✕</button>
+                                }
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </section>
+        } @empty {
+            <div class="terminal-card admin-section">
+                <p class="admin-page-state">NO HAY IMÁGENES PREVISTAS</p>
+            </div>
+        }
+    }
+</div>
+
+@let target = confirmDelete();
+@if (target) {
+    <div class="modal-overlay" (click)="closeDelete()">
+        <div class="modal modal-sm terminal-card" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title danger-title">ELIMINAR IMAGEN</h2>
+                <button class="close-btn" type="button" aria-label="Cerrar" (click)="closeDelete()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="delete-warning">
+                    <span class="warning-icon">⚠</span>
+                    <div>
+                        <p class="warning-title">¿Eliminar <span class="highlight">{{ target.label }}</span>?</p>
+                        <p class="warning-desc">Las pantallas que la usan se mostrarán sin imagen hasta que subas otra.</p>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-neon" type="button" (click)="closeDelete()">CANCELAR</button>
+                    <button class="btn-neon btn-neon-danger" type="button" [disabled]="busyKey() !== null" (click)="delete()">
+                        CONFIRMAR ELIMINACIÓN
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

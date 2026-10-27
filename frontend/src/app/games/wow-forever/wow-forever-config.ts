@@ -85,12 +85,6 @@ export const hideBrokenIcon = (event: Event): void => {
     (event.target as HTMLImageElement).style.visibility = 'hidden';
 };
 
-/** Faction artwork shown behind the launcher screen. */
-export const FACTION_BACKGROUNDS: Readonly<Record<Faction, string>> = {
-    ALLIANCE: '/images/wow-forever/background-alliance.webp',
-    HORDE: '/images/wow-forever/background-horde.webp'
-};
-
 /** News shown in the launcher panel. Items without an image show the dark placeholder. */
 export const LAUNCHER_NEWS: readonly LauncherNewsItem[] = [
     {

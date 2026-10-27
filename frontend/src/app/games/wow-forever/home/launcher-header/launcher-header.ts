@@ -6,7 +6,8 @@
  * @author @adrianpmdev
  */
 
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed } from '@angular/core';
+import { cssUrl, gameImages } from '../../game-data/game-images';
 import { WowButton } from '../../ui/wow-button/wow-button';
 
 @Component({
@@ -16,4 +17,10 @@ import { WowButton } from '../../ui/wow-button/wow-button';
     styleUrl: './launcher-header.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LauncherHeader {}
+export class LauncherHeader {
+
+    private readonly images = gameImages();
+
+    /** Logo uploaded by an admin. */
+    readonly logoImage = computed(() => cssUrl(this.images()['logo']));
+}

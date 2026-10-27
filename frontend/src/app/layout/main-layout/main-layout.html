@@ -158,7 +158,11 @@
         <div class="sidebar-footer">
             @if (!sidebarCollapsed()) {
                 <div class="user-info">
-                    <img src="{{ currentUser()?.avatarUrl || '/images/default-avatar.png' }}" alt="Avatar" class="user-avatar" />
+                    @if (currentUser()?.avatarUrl) {
+                        <img [src]="currentUser()?.avatarUrl" alt="Avatar" class="user-avatar" />
+                    } @else {
+                        <span class="user-avatar user-avatar-initial" aria-hidden="true">{{ currentUser()?.username?.charAt(0)?.toUpperCase() }}</span>
+                    }
                     <div class="user-details">
                         <span class="user-name">{{ currentUser()?.username }}</span>
                         <span class="user-role">{{ currentUser()?.role?.toUpperCase() }}</span>

@@ -405,6 +405,16 @@
     flex-shrink: 0;
 }
 
+/* User without a picture: the first letter of the username. */
+.user-avatar-initial {
+    display: grid;
+    place-items: center;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    color: var(--neon-green);
+    background: rgba(0, 255, 65, 0.06);
+}
+
 .user-details {
     display: flex;
     flex-direction: column;

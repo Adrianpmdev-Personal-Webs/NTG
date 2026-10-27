@@ -138,15 +138,6 @@ export class AuthService {
         return this.getCurrentUserRole() === 'ADMIN';
     }
 
-    isUser(): boolean {
-        return this.getCurrentUserRole() === 'USUARIO';
-    }
-
-    /** Whether the user has the tag with this key. */
-    hasTag(tagKey: string): boolean {
-        return (this.getCurrentUser()?.tags ?? []).includes(tagKey);
-    }
-
     private handleAuthResponse(response: AuthTokensResponse): void {
         this.accessToken = response.accessToken;
         this.currentUserSubject.next(response.user);

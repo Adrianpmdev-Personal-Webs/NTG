@@ -1,17 +1,10 @@
 /**
- * DashboardStats
+ * StatCard
  *
- * Models of the numbers and cards displayed by the admin dashboard.
+ * Model of the stat cards displayed by the admin dashboard.
  *
  * @author @adrianpmdev
  */
-
-export interface DashboardStats {
-    totalUsers: number;
-    activeUsers: number;
-    admins: number;
-    registersToday: number;
-}
 
 export interface StatCard {
     label: string;

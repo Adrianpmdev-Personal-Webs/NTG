@@ -1,7 +1,6 @@
 HELP.md
 
 **/target/**
-!**/target/ntg-0.1.jar
 
 .mvn/wrapper/maven-wrapper.jar
 app/src/main/resources/application.properties

@@ -22,10 +22,6 @@ export class UserService {
         return this.http.get<User[]>(this.baseUrl);
     }
 
-    getUserById(id: string): Observable<User> {
-        return this.http.get<User>(`${this.baseUrl}/${id}`);
-    }
-
     /** Creates the user and makes the backend email them a link to choose their own password. */
     createUser(request: CreateUserRequest): Observable<CreatedUserResponse> {
         return this.http.post<CreatedUserResponse>(this.baseUrl, request);

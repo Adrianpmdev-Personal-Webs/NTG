@@ -112,14 +112,17 @@
                         class="nav-item nav-parent"
                         [class.active]="isGameActive(game)"
                         [class.open]="isSubmenuOpen(game.id)"
-                        [title]="sidebarCollapsed() ? game.name : ''"
-                        (click)="toggleSubmenu(game.id)"
+                        [class.no-links]="!game.hasLinks"
+                        [title]="sidebarCollapsed() ? game.name : (game.hasLinks ? '' : 'Próximamente')"
+                        (click)="game.hasLinks && toggleSubmenu(game.id)"
                     >
                         <span class="nav-icon">◎</span>
 
                         @if (!sidebarCollapsed()) {
                             <span class="nav-label">{{ game.name.toUpperCase() }}@if (game.upcoming) {<span class="upcoming-mark" title="Próximamente: solo visible para admins">*</span>}</span>
-                            <span class="nav-caret">{{ isSubmenuOpen(game.id) ? '▾' : '▸' }}</span>
+                            @if (game.hasLinks) {
+                                <span class="nav-caret">{{ isSubmenuOpen(game.id) ? '▾' : '▸' }}</span>
+                            }
                         }
                     </button>
 

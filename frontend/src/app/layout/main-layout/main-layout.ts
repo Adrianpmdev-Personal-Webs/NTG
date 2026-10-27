@@ -27,6 +27,8 @@ interface SidebarGame {
     route: string | null;
     adminRoute: string;
     adminItems: readonly GameAdminItem[];
+    /** False for a game with nothing to open yet (coming soon, no module in this client): it does not unfold. */
+    hasLinks: boolean;
 }
 
 @Component({
@@ -53,6 +55,7 @@ export class MainLayout {
         .filter(game => game.accessible)
         .map(game => {
             const module = GAME_MODULES.find(entry => entry.id === game.id);
+            const adminItems = module?.adminItems ?? [];
 
             return {
                 id: game.id,
@@ -60,7 +63,8 @@ export class MainLayout {
                 upcoming: game.upcoming,
                 route: module ? `/${game.id}` : null,
                 adminRoute: `/admin/${game.id}`,
-                adminItems: module?.adminItems ?? []
+                adminItems,
+                hasLinks: !!module || (this.authService.isAdmin() && adminItems.length > 0)
             };
         }));
 

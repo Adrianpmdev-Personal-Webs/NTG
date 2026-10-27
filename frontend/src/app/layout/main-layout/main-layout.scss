@@ -307,6 +307,12 @@
     cursor: pointer;
     text-align: left;
 
+    // A game with nothing to open yet is listed but does not unfold.
+    &.no-links {
+        cursor: default;
+        opacity: 0.6;
+    }
+
     &.open {
         color: var(--text-primary);
         background: rgba(0, 255, 65, 0.04);

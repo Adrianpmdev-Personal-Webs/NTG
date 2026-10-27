@@ -8,10 +8,18 @@
     <version>0.1</version>
     <packaging>pom</packaging>
 
+    <!--
+        platform-api : contracts shared by core and the games (no Spring Security, no Supabase)
+        core         : platform features (auth, users, tags), security and the Supabase integration
+        games/*      : one module per game, each one depends only on platform-api
+        app          : boots the application with core and every game, and builds the runnable jar
+    -->
     <modules>
+        <module>platform-api</module>
         <module>core</module>
-        <module>pokemon</module>
-        <module>wow-forever</module>
+        <module>games/pokemon</module>
+        <module>games/wow-forever</module>
+        <module>app</module>
     </modules>
 
     <properties>
@@ -20,20 +28,6 @@
         <springdoc.version>3.0.1</springdoc.version>
         <lombok.version>1.18.42</lombok.version>
     </properties>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
-                <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 
     <dependencyManagement>
         <dependencies>
@@ -44,6 +38,78 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
+            <!-- Internal modules -->
+            <dependency>
+                <groupId>com.adrianpmdev</groupId>
+                <artifactId>platform-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.adrianpmdev</groupId>
+                <artifactId>core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.adrianpmdev</groupId>
+                <artifactId>pokemon</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.adrianpmdev</groupId>
+                <artifactId>wow-forever</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <!-- Swagger/OpenAPI for endpoint documentation -->
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <dependencies>
+        <!-- Lombok, available to every module at compile time only -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring.boot.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <!-- Keeps method parameter names available at runtime for Spring and OpenAPI, and runs Lombok -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <parameters>true</parameters>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

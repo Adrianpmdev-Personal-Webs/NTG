@@ -1,7 +1,7 @@
 package com.adrianpmdev.core.integration.supabase.storage;
 
 import com.adrianpmdev.core.integration.supabase.config.SupabaseProperties;
-import com.adrianpmdev.pokemon.shared.port.ObjectStorage;
+import com.adrianpmdev.platform.port.ObjectStorage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;

@@ -5,6 +5,7 @@ import com.adrianpmdev.core.security.authorization.Authorities;
 import com.adrianpmdev.core.security.filter.SupabaseJwtAuthFilter;
 import com.adrianpmdev.core.config.AppProperties;
 import com.adrianpmdev.core.features.users.infrastructure.persistence.repository.UserRepository;
+import com.adrianpmdev.platform.module.GameModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -22,7 +23,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Security configuration.
@@ -46,18 +46,6 @@ public class SecurityConfig {
             "/v3/api-docs",
             "/v3/api-docs/**"
     };
-
-    /**
-     * Game modules. Reading under the path requires the tag (or ADMIN); writing requires ADMIN.
-     * To add a game, add its base path and tag key here, create the tag, and assign it to users.
-     */
-    private static final Map<String, String> GAME_TAGS = Map.of(
-            "/api/v1/pokemon/**", "pokemon",
-            "/api/v1/wow-forever/**", "wow-forever"
-    );
-
-    /** Team picture of a player inside a Pokémon tournament (upload and remove). */
-    private static final String POKEMON_TEAM_IMAGE = "/api/v1/pokemon/tournament-players/*/team-image";
 
     private static final long CORS_MAX_AGE_SECONDS = 3_600;
 
@@ -89,17 +77,21 @@ public class SecurityConfig {
     }
 
     /**
-     * Security chain for API endpoints.
+     * Security chain for API endpoints. The rules of each game come from the {@link GameModule} it declares:
+     * reading needs the game tag (or ADMIN), writing needs ADMIN except the routes the game opens to players.
+     * A new game needs no change here: declare its module, create the tag and assign it to users.
      *
      * @param http           HTTP security configuration
      * @param jwtDecoder     access token decoder
      * @param userRepository local user repository
+     * @param gameModules    game modules on the classpath
      * @return configured security filter chain
      * @throws Exception if the security chain cannot be built
      */
     @Bean
     @Order(2)
-    SecurityFilterChain apiChain(HttpSecurity http, JwtDecoder jwtDecoder, UserRepository userRepository) throws Exception {
+    SecurityFilterChain apiChain(HttpSecurity http, JwtDecoder jwtDecoder, UserRepository userRepository,
+                                 List<GameModule> gameModules) throws Exception {
         SupabaseJwtAuthFilter jwtFilter = new SupabaseJwtAuthFilter(jwtDecoder, userRepository);
 
         http
@@ -124,16 +116,18 @@ public class SecurityConfig {
                     auth.requestMatchers("/api/v1/users", "/api/v1/users/**").hasRole(ADMIN_ROLE);
                     auth.requestMatchers("/api/v1/tags", "/api/v1/tags/**").hasRole(ADMIN_ROLE);
 
-                    // Pokémon team pictures: the only game writes open to players. The pokemon module then
-                    // accepts only the player of that tournament entry (or an admin).
-                    auth.requestMatchers(HttpMethod.PUT, POKEMON_TEAM_IMAGE).hasAnyAuthority(ROLE_ADMIN, Authorities.tag("pokemon"));
-                    auth.requestMatchers(HttpMethod.DELETE, POKEMON_TEAM_IMAGE).hasAnyAuthority(ROLE_ADMIN, Authorities.tag("pokemon"));
+                    // Games: the writes each game opens to players, then read with the game tag and write as ADMIN.
+                    for (GameModule game : gameModules) {
+                        String tagAuthority = Authorities.tag(game.tag());
 
-                    // Games: read with the game tag, write as ADMIN.
-                    GAME_TAGS.forEach((pattern, tag) -> {
-                        auth.requestMatchers(HttpMethod.GET, pattern).hasAnyAuthority(ROLE_ADMIN, Authorities.tag(tag));
-                        auth.requestMatchers(pattern).hasRole(ADMIN_ROLE);
-                    });
+                        for (GameModule.PlayerWrite write : game.playerWrites()) {
+                            auth.requestMatchers(write.method(), game.apiPath() + write.path())
+                                    .hasAnyAuthority(ROLE_ADMIN, tagAuthority);
+                        }
+
+                        auth.requestMatchers(HttpMethod.GET, game.allRoutes()).hasAnyAuthority(ROLE_ADMIN, tagAuthority);
+                        auth.requestMatchers(game.allRoutes()).hasRole(ADMIN_ROLE);
+                    }
 
                     auth.anyRequest().denyAll();
                 })

@@ -1,0 +1,59 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.adrianpmdev</groupId>
+        <artifactId>ntg</artifactId>
+        <version>0.1</version>
+    </parent>
+
+    <artifactId>app</artifactId>
+    <packaging>jar</packaging>
+
+    <dependencies>
+        <!-- Platform -->
+        <dependency>
+            <groupId>com.adrianpmdev</groupId>
+            <artifactId>core</artifactId>
+        </dependency>
+
+        <!-- Games: adding a game to the application is adding its module here -->
+        <dependency>
+            <groupId>com.adrianpmdev</groupId>
+            <artifactId>pokemon</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.adrianpmdev</groupId>
+            <artifactId>wow-forever</artifactId>
+        </dependency>
+
+        <!-- Database driver -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>ntg</finalName>
+
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

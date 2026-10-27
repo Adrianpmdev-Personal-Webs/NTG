@@ -14,17 +14,10 @@
     <packaging>jar</packaging>
 
     <dependencies>
-        <!-- Internal module dependencies -->
+        <!-- Contracts that core implements for the games (current user, storage) and reads from them (game modules) -->
         <dependency>
             <groupId>com.adrianpmdev</groupId>
-            <artifactId>pokemon</artifactId>
-            <version>0.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.adrianpmdev</groupId>
-            <artifactId>wow-forever</artifactId>
-            <version>0.1</version>
+            <artifactId>platform-api</artifactId>
         </dependency>
 
         <!-- Spring Boot Web for REST controllers -->
@@ -51,60 +44,11 @@
             <artifactId>spring-security-oauth2-jose</artifactId>
         </dependency>
 
-        <!-- Database dependency -->
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-
         <!-- Swagger/OpenAPI for endpoint documentation -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>${springdoc.version}</version>
-        </dependency>
-
-        <!-- Lombok -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <!-- Keeps method parameter names available at runtime for Spring and OpenAPI -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <parameters>true</parameters>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>${lombok.version}</version>
-                        </path>
-                    </annotationProcessorPaths>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring.boot.version}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>repackage</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>

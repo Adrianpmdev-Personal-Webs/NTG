@@ -4,17 +4,21 @@ WORKDIR /workspace
 
 # Copiar todos los pom.xml
 COPY pom.xml .
+COPY platform-api/pom.xml platform-api/pom.xml
 COPY core/pom.xml core/pom.xml
-COPY pokemon/pom.xml pokemon/pom.xml
-COPY wow-forever/pom.xml wow-forever/pom.xml
+COPY games/pokemon/pom.xml games/pokemon/pom.xml
+COPY games/wow-forever/pom.xml games/wow-forever/pom.xml
+COPY app/pom.xml app/pom.xml
 
 # Copiar todo el código fuente
+COPY platform-api/src platform-api/src
 COPY core/src core/src
-COPY pokemon/src pokemon/src
-COPY wow-forever/src wow-forever/src
+COPY games/pokemon/src games/pokemon/src
+COPY games/wow-forever/src games/wow-forever/src
+COPY app/src app/src
 
-# Build: compila core (y el resto de modulos como dependencias)
-RUN mvn -pl core -am clean package -DskipTests
+# Build: compila app (y core, los juegos y platform-api como dependencias)
+RUN mvn -pl app -am clean package -DskipTests
 
 # Stage 2: Runtime (Java 25 JRE)
 FROM eclipse-temurin:25-jre
@@ -22,13 +26,13 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends curl ca-certificates \
   && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /core
+WORKDIR /app
 
 # Copiar el JAR generado
-COPY --from=build /workspace/core/target/core-0.1.jar core.jar
+COPY --from=build /workspace/app/target/ntg.jar ntg.jar
 
 # Exponer puerto
 EXPOSE 8080
 
 # Comando de inicio
-ENTRYPOINT ["java", "-jar", "core.jar"]
+ENTRYPOINT ["java", "-jar", "ntg.jar"]

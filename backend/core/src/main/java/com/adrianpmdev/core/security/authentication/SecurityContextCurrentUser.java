@@ -1,7 +1,7 @@
 package com.adrianpmdev.core.security.authentication;
 
 import com.adrianpmdev.core.security.authorization.Authorities;
-import com.adrianpmdev.pokemon.shared.port.CurrentUser;
+import com.adrianpmdev.platform.port.CurrentUser;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;

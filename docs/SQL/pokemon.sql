@@ -1,6 +1,26 @@
--- Pokémon schema (current). Created by pokemon-migration/01-schema.sql, which documents the model.
+-- =====================================================================================================
+-- Schema pokemon · Pokémon module
+--
+-- Games, players, randomlockes and their tournaments, plus the Storage bucket of the team pictures.
+--   games                One Pokémon game (artwork and description).
+--   lockes               A randomlocke: name, description and rules. It can span several games.
+--   players              Everybody who plays in a randomlocke. user_id links the platform account and
+--                        is what lets a player upload their own team picture.
+--   locke_players        The fixed roster of a randomlocke.
+--   tournaments          A tournament of a randomlocke, played in one game. Two formats: two groups
+--                        followed by a double-elimination bracket, or a round robin league.
+--   tournament_players   A player inside a tournament: group, team picture, points adjustment.
+--   matches              A best-of-3 series, placed by stage, round and slot.
+--   match_games          The games of a series. The score of a series is counted from them.
+--   rewards              The rewards of a tournament and the player who picked each one.
+-- Nothing derived is stored: standings, scores and winners are computed from match_games.
+--
+-- How to use: run it in the Supabase SQL editor of an empty project, after core.sql.
+-- =====================================================================================================
 
--- ─── games (kept as it is) ───────────────────────────────────────────────────────────────────────
+create schema if not exists pokemon;
+
+-- ─── games ───────────────────────────────────────────────────────────────────────────────────────
 
 create table pokemon.games (
     id          uuid         not null default gen_random_uuid(),
@@ -172,3 +192,30 @@ alter table pokemon.matches            enable row level security;
 alter table pokemon.match_games        enable row level security;
 alter table pokemon.rewards            enable row level security;
 
+-- ─── Storage: team pictures ──────────────────────────────────────────────────────────────────────
+-- Private bucket pokemon-teams. Only the backend reads and writes it, with the service role key (which
+-- bypasses RLS); browsers receive short-lived signed URLs from the API. The bucket refuses files over
+-- 1 MB and anything that is not WebP, JPEG or PNG, and a RESTRICTIVE policy denies the anon and
+-- authenticated roles any access to it, so a permissive policy added later by mistake cannot open it.
+-- Object names: tournaments/<tournament id>/<tournament player id>-<random>.<ext>
+--
+-- If the policy fails with "must be owner of table objects", create both from the Storage dashboard:
+-- private bucket pokemon-teams (1 MB, image/webp, image/jpeg, image/png) and a restrictive policy on
+-- objects for all operations, roles anon and authenticated, expression bucket_id <> 'pokemon-teams'.
+
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('pokemon-teams', 'pokemon-teams', false, 1048576, array['image/webp', 'image/jpeg', 'image/png'])
+on conflict (id) do update
+    set public             = false,
+        file_size_limit    = excluded.file_size_limit,
+        allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists "pokemon-teams: no client access" on storage.objects;
+
+create policy "pokemon-teams: no client access"
+    on storage.objects
+    as restrictive
+    for all
+    to anon, authenticated
+    using (bucket_id <> 'pokemon-teams')
+    with check (bucket_id <> 'pokemon-teams');

@@ -30,7 +30,7 @@
                     <tbody>
                         @for (game of games(); track game.id) {
                             <tr>
-                                <td>
+                                <td data-label="PORTADA">
                                     <div class="cover-thumb">
                                         @if (game.coverUrl) {
                                             <img [src]="game.coverUrl" [alt]="game.name" loading="lazy" />
@@ -39,14 +39,14 @@
                                         }
                                     </div>
                                 </td>
-                                <td class="strong">{{ game.name }}</td>
-                                <td>{{ game.id }}</td>
-                                <td>
+                                <td data-label="JUEGO" class="strong">{{ game.name }}</td>
+                                <td data-label="CLAVE / TAG">{{ game.id }}</td>
+                                <td data-label="ESTADO">
                                     <span class="state-badge" [class.released]="!game.upcoming">
                                         {{ game.upcoming ? 'PRÓXIMAMENTE' : 'PUBLICADO' }}
                                     </span>
                                 </td>
-                                <td>{{ game.sortOrder }}</td>
+                                <td data-label="ORDEN">{{ game.sortOrder }}</td>
                                 <td>
                                     <div class="actions">
                                         <label class="action-btn btn-neon" [class.disabled]="uploadingCover() === game.id">

@@ -4,6 +4,11 @@
  * @author @adrianpmdev
  */
 
+@use 'mixins' as *;
+
+/** Width of the position column, which the name column sticks next to on phones. */
+$position-width: 2.6rem;
+
 :host {
     display: block;
 }
@@ -61,5 +66,36 @@
 
     tr.mine td {
         background: rgba(255, 255, 255, 0.05);
+    }
+
+    // On phones the table scrolls sideways: the position and the name stay fixed on the left, so every number
+    // still says whose it is.
+    @include mobile {
+        .position,
+        .name,
+        th:nth-child(-n + 2) {
+            position: sticky;
+            z-index: 1;
+            background: var(--bg-card);
+        }
+
+        .position,
+        th:first-child {
+            left: 0;
+            min-width: $position-width;
+            max-width: $position-width;
+        }
+
+        .name,
+        th:nth-child(2) {
+            left: $position-width;
+            box-shadow: 6px 0 6px -6px rgba(0, 0, 0, 0.6);
+        }
+
+        // The highlight of the own row is translucent: it goes over a solid card so nothing shows through.
+        tr.mine .position,
+        tr.mine .name {
+            background: linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05)), var(--bg-card);
+        }
     }
 }

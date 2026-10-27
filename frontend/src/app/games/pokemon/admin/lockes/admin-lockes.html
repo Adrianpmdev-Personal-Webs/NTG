@@ -27,10 +27,10 @@
                     <tbody>
                         @for (locke of lockes(); track locke.id) {
                             <tr>
-                                <td class="strong">{{ locke.name }}</td>
-                                <td>{{ gameNames(locke) }}</td>
-                                <td>{{ locke.tournamentCount }}</td>
-                                <td>{{ locke.playerCount }}</td>
+                                <td data-label="RANDOMLOCKE" class="strong">{{ locke.name }}</td>
+                                <td data-label="JUEGOS">{{ gameNames(locke) }}</td>
+                                <td data-label="TORNEOS">{{ locke.tournamentCount }}</td>
+                                <td data-label="JUGADORES">{{ locke.playerCount }}</td>
                                 <td>
                                     <div class="actions">
                                         <a class="action-btn btn-neon btn-neon-accent" [routerLink]="['/admin/pokemon/lockes', locke.id]">▶ GESTIONAR</a>

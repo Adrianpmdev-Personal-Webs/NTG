@@ -16,3 +16,9 @@ body {
     height: 100%;
     overflow-x: hidden;
 }
+
+// Phones keep the font sizes of the styles when they are turned sideways instead of enlarging the text on their own.
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}

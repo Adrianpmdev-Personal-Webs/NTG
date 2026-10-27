@@ -229,7 +229,15 @@ $horde: #d45a4a;
 
         .tree-tab {
             flex: 1;
+            // Long single words (Resourcefulness) may break instead of pushing the tab out of a narrow screen.
+            min-width: 0;
+            overflow-wrap: anywhere;
             padding: 8px 4px;
+
+            @include small {
+                font-size: 0.66rem;
+                letter-spacing: 0;
+            }
             border: 0;
             border-bottom: 2px solid transparent;
             background: transparent;

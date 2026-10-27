@@ -39,12 +39,12 @@
                         <tbody>
                             @for (t of l.tournaments; track t.id) {
                                 <tr>
-                                    <td>{{ t.position }}</td>
-                                    <td class="strong">{{ t.name }}</td>
-                                    <td>{{ t.game.name }}</td>
-                                    <td>{{ formatLabels[t.format] }}</td>
-                                    <td>{{ statusLabels[t.status] }}</td>
-                                    <td>{{ t.champion?.name ?? '—' }}</td>
+                                    <td data-label="#">{{ t.position }}</td>
+                                    <td data-label="TORNEO" class="strong">{{ t.name }}</td>
+                                    <td data-label="JUEGO">{{ t.game.name }}</td>
+                                    <td data-label="FORMATO">{{ formatLabels[t.format] }}</td>
+                                    <td data-label="ESTADO">{{ statusLabels[t.status] }}</td>
+                                    <td data-label="CAMPEÓN">{{ t.champion?.name ?? '—' }}</td>
                                     <td>
                                         <div class="actions">
                                             <a class="action-btn btn-neon" [routerLink]="['/admin/pokemon/tournaments', t.id]">▶ GESTIONAR</a>

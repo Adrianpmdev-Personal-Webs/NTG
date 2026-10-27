@@ -54,9 +54,9 @@
                             <tbody>
                                 @for (player of t.players; track player.id) {
                                     <tr>
-                                        <td class="strong">{{ player.name }}</td>
+                                        <td data-label="JUGADOR" class="strong">{{ player.name }}</td>
                                         @if (t.format === 'groups_bracket') {
-                                            <td>
+                                            <td data-label="GRUPO">
                                                 <select class="neon-input" [ngModel]="player.group" (ngModelChange)="setGroup(player, $event)" [attr.aria-label]="'Grupo de ' + player.name">
                                                     <option [ngValue]="null">Sin grupo</option>
                                                     @for (group of groupNames; track group) {
@@ -65,11 +65,11 @@
                                                 </select>
                                             </td>
                                         }
-                                        <td>
+                                        <td data-label="AJUSTE">
                                             <input class="neon-input adjustment" type="number" min="-999" max="999" [value]="player.pointsAdjustment"
                                                 (change)="setAdjustment(player, $any($event.target).value)" [attr.aria-label]="'Ajuste de ' + player.name" />
                                         </td>
-                                        <td>{{ player.hasTeamImage ? 'Subido' : '—' }}</td>
+                                        <td data-label="EQUIPO">{{ player.hasTeamImage ? 'Subido' : '—' }}</td>
                                         <td>
                                             <div class="actions">
                                                 <button class="action-btn btn-neon btn-neon-danger" type="button" (click)="removePlayer(player)">✕ QUITAR</button>
@@ -224,11 +224,11 @@
                                 <tbody>
                                     @for (reward of t.rewards; track reward.id) {
                                         <tr>
-                                            <td>
+                                            <td data-label="RECOMPENSA">
                                                 <input class="neon-input" maxlength="150" [value]="reward.name"
                                                     (change)="setRewardName(reward, $any($event.target).value)" [attr.aria-label]="'Nombre de ' + reward.name" />
                                             </td>
-                                            <td>
+                                            <td data-label="ELEGIDA POR">
                                                 <select class="neon-input" [ngModel]="reward.chosenBy" (ngModelChange)="setRewardOwner(reward, $event)" [attr.aria-label]="'Quién eligió ' + reward.name">
                                                     <option [ngValue]="null">Disponible</option>
                                                     @for (player of pickers(reward); track player.id) {

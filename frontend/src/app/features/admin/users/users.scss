@@ -485,3 +485,57 @@ select.neon-input option {
     color: var(--text-dim);
 }
 
+
+/* ─── USERS TABLE ON PHONES ─── */
+/* Each user becomes a card: one line per column with its name on the left and the actions at the bottom, so no
+   column hides behind a sideways scroll. */
+@media (max-width: 640px) {
+    .neon-table {
+        min-width: 0;
+
+        thead {
+            display: none;
+        }
+
+        tbody,
+        tr,
+        td {
+            display: block;
+        }
+
+        tr {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            min-height: 30px;
+            padding: 4px 2px;
+            border-bottom: 0;
+            text-align: right;
+            overflow-wrap: anywhere;
+        }
+
+        td[data-label]::before {
+            content: attr(data-label);
+            flex: 0 0 auto;
+            font-size: 0.6rem;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            text-align: left;
+        }
+
+        .tag-list {
+            justify-content: flex-end;
+        }
+
+        .actions-col {
+            justify-content: flex-start;
+            padding-top: 6px;
+        }
+    }
+}

@@ -653,8 +653,9 @@
         letter-spacing: 1px;
     }
 
+    // Two columns still fit the longest type names and halve the list.
     .type-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .type-button {

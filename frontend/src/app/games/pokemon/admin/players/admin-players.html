@@ -25,8 +25,8 @@
                     <tbody>
                         @for (player of players(); track player.id) {
                             <tr>
-                                <td class="strong">{{ player.name }}</td>
-                                <td>{{ accountName(player.userId) }}</td>
+                                <td data-label="JUGADOR" class="strong">{{ player.name }}</td>
+                                <td data-label="CUENTA">{{ accountName(player.userId) }}</td>
                                 <td>
                                     <div class="actions">
                                         <button class="action-btn btn-neon" type="button" (click)="openEdit(player)">✎ EDITAR</button>

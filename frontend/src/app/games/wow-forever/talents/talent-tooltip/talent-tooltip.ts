@@ -15,6 +15,12 @@ import { Talent, TalentTree } from '../talents-models';
 /** Distance between the pointer and the card. */
 const OFFSET = 16;
 
+/** Widest the card gets (the same as its max-width in the styles). */
+const MAX_WIDTH = 320;
+
+/** Space kept between the card and the edges of the screen. */
+const EDGE = 16;
+
 const CLASSIC_LABELS: Readonly<Partial<Record<string, string>>> = {
     new: 'Nuevo en Forever',
     changed: 'Cambiado respecto a Classic',
@@ -75,15 +81,24 @@ export class TalentTooltip {
         return requirements;
     });
 
-    /** The card hangs from the pointer, on the side of it that has more room, so it never leaves the screen. */
+    /**
+     * The card hangs from the pointer, on the side of it that has more room. When neither side is wide enough (a phone),
+     * it is centred on the screen instead, so it never leaves it.
+     */
     readonly position = computed<Record<string, string>>(() => {
         const x = this.x();
         const y = this.y();
+        const screenWidth = window.innerWidth;
+        const width = Math.min(MAX_WIDTH, screenWidth - 2 * EDGE);
+        const onLeft = x > screenWidth / 2;
+        const room = (onLeft ? x : screenWidth - x) - OFFSET - EDGE;
 
         return {
-            ...(x > window.innerWidth / 2
-                ? { right: `${window.innerWidth - x + OFFSET}px` }
-                : { left: `${x + OFFSET}px` }),
+            ...(room < width
+                ? { left: `${(screenWidth - width) / 2}px` }
+                : onLeft
+                    ? { right: `${screenWidth - x + OFFSET}px` }
+                    : { left: `${x + OFFSET}px` }),
             ...(y > window.innerHeight / 2
                 ? { bottom: `${window.innerHeight - y + OFFSET}px` }
                 : { top: `${y + OFFSET}px` })

@@ -167,4 +167,54 @@
         gap: 6px;
         justify-content: flex-end;
     }
+
+    // On phones each row becomes a card: one line per column with its name (data-label) on the left and the
+    // actions at the bottom, so nothing hides behind a sideways scroll.
+    @include mobile {
+        thead {
+            display: none;
+        }
+
+        tbody,
+        tr,
+        td {
+            display: block;
+        }
+
+        tr {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        tr:hover td {
+            background: none;
+        }
+
+        td {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            min-height: 32px;
+            padding: 4px 2px;
+            border-bottom: 0;
+            text-align: right;
+            overflow-wrap: anywhere;
+        }
+
+        td[data-label]::before {
+            content: attr(data-label);
+            flex: 0 0 auto;
+            font-size: 0.62rem;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            text-align: left;
+        }
+
+        .actions {
+            justify-content: flex-start;
+            width: 100%;
+            padding-top: 6px;
+        }
+    }
 }

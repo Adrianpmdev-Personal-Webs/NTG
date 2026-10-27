@@ -4,6 +4,7 @@
  * @author @adrianpmdev
  */
 
+@use 'mixins' as *;
 @use '../styles/pokemon' as pk;
 
 .page {
@@ -105,6 +106,24 @@
     align-items: flex-end;
     gap: 4px;
     text-align: right;
+}
+
+// On phones the state and the champion go under the name, so long names keep the whole width.
+@include mobile {
+    .tournament {
+        flex-wrap: wrap;
+        gap: 6px 14px;
+    }
+
+    .tournament-side {
+        flex: 1 0 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px 10px;
+        padding-left: 54px;
+        text-align: left;
+    }
 }
 
 .status {

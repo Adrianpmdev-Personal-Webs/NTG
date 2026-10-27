@@ -26,9 +26,9 @@
                     <tbody>
                         @for (game of games(); track game.id) {
                             <tr>
-                                <td class="strong">{{ game.name }}</td>
-                                <td>{{ game.description ? (game.description.length > 90 ? game.description.slice(0, 90) + '…' : game.description) : '—' }}</td>
-                                <td>{{ game.lockeCount }}</td>
+                                <td data-label="JUEGO" class="strong">{{ game.name }}</td>
+                                <td data-label="DESCRIPCIÓN">{{ game.description ? (game.description.length > 90 ? game.description.slice(0, 90) + '…' : game.description) : '—' }}</td>
+                                <td data-label="RANDOMLOCKES">{{ game.lockeCount }}</td>
                                 <td>
                                     <div class="actions">
                                         <button class="action-btn btn-neon" type="button" (click)="openEdit(game)">✎ EDITAR</button>

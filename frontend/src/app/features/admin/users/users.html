@@ -60,17 +60,17 @@
                     <tbody>
                         @for (user of filteredUsers(); track user.id) {
                             <tr class="animate-fade-up" [class.selected]="selectedUser()?.id === user.id">
-                                <td class="uuid-col" (click)="selectUser(user)" title="{{ user.id }}">
+                                <td data-label="UUID" class="uuid-col" (click)="selectUser(user)" title="{{ user.id }}">
                                     {{ user.id.substring(0, 8) }}...
                                 </td>
-                                <td class="username-col">{{ user.username }}</td>
-                                <td class="email-col">{{ user.email }}</td>
-                                <td>
+                                <td data-label="USERNAME" class="username-col">{{ user.username }}</td>
+                                <td data-label="EMAIL" class="email-col">{{ user.email }}</td>
+                                <td data-label="ROL">
                                     <span class="role-badge" [class.role-admin]="isAdminRole(user.role)">
                                         {{ user.role.toUpperCase() }}
                                     </span>
                                 </td>
-                                <td>
+                                <td data-label="ETIQUETAS">
                                     <div class="tag-list">
                                         @for (tag of user.tags; track tag) {
                                             <span class="tag-chip">{{ tag.toUpperCase() }}</span>

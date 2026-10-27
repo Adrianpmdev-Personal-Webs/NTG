@@ -43,7 +43,7 @@ export const GAMES: readonly GameEntry[] = [
             { label: 'JUGADORES', route: '/admin/pokemon/players', icon: '◉' },
             { label: 'JUEGOS', route: '/admin/pokemon/games', icon: '◈' }
         ],
-        upcoming: true
+        upcoming: false
     },
     {
         id: 'wow-forever',
@@ -54,7 +54,7 @@ export const GAMES: readonly GameEntry[] = [
         adminItems: [
             { label: 'GESTIÓN', route: '/admin/wow-forever/management', icon: '▣' }
         ],
-        upcoming: true
+        upcoming: false
     },
     {
         id: 'lol',

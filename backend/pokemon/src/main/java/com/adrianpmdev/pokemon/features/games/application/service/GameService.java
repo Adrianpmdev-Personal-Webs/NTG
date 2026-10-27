@@ -1,20 +1,23 @@
 package com.adrianpmdev.pokemon.features.games.application.service;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
-import com.adrianpmdev.pokemon.features.games.api.dto.request.GameCreateRequest;
-import com.adrianpmdev.pokemon.features.games.api.dto.request.GameUpdateRequest;
+import com.adrianpmdev.pokemon.features.games.api.dto.request.GameRequest;
 import com.adrianpmdev.pokemon.features.games.api.dto.response.GameResponse;
 import com.adrianpmdev.pokemon.features.games.infrastructure.persistence.entity.Game;
-import com.adrianpmdev.pokemon.features.games.api.mapper.GameMapper;
 import com.adrianpmdev.pokemon.features.games.infrastructure.persistence.repository.GameRepository;
+import com.adrianpmdev.pokemon.features.tournaments.infrastructure.persistence.repository.TournamentRepository;
+import com.adrianpmdev.pokemon.shared.error.ApiErrors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
- * Service for managing games.
+ * Games: list, read, create, replace and delete. A game that has tournaments cannot be deleted (the
+ * database refuses it and the API answers 409).
  *
  * @author adrianpmdev
  */
@@ -23,45 +26,94 @@ import java.util.UUID;
 public class GameService {
 
     private final GameRepository gameRepository;
+    private final TournamentRepository tournamentRepository;
 
-    public GameResponse createGame(GameCreateRequest request) {
-        Game game = GameMapper.toEntity(request);
-        return GameMapper.toResponse(gameRepository.save(game));
-    }
+    /**
+     * Every game with the number of randomlockes played in it.
+     *
+     * @return games
+     */
+    @Transactional(readOnly = true)
+    public List<GameResponse> list() {
+        Map<UUID, Integer> lockes = lockeCounts();
 
-    public GameResponse getGameById(UUID id) {
-        return GameMapper.toResponse(getGameEntityById(id));
-    }
-
-    public List<GameResponse> getAllGames() {
-        return gameRepository.findAll()
-                .stream()
-                .map(GameMapper::toResponse)
+        return gameRepository.findAllByOrderByCreatedAtAsc().stream()
+                .map(game -> toResponse(game, lockes.getOrDefault(game.getId(), 0)))
                 .toList();
     }
 
-    public GameResponse updateGame(UUID id, GameUpdateRequest request) {
-        Game game = getGameEntityById(id);
-
-        GameMapper.updateEntity(game, request);
-
-        return GameMapper.toResponse(gameRepository.save(game));
+    /**
+     * One game.
+     *
+     * @param id game id
+     * @return the game
+     */
+    @Transactional(readOnly = true)
+    public GameResponse get(UUID id) {
+        return toResponse(find(id), lockeCounts().getOrDefault(id, 0));
     }
 
-    public void deleteGame(UUID id) {
-        Game game = getGameEntityById(id);
-        gameRepository.delete(game);
+    /**
+     * Creates a game.
+     *
+     * @param request game data
+     * @return the new game
+     */
+    @Transactional
+    public GameResponse create(GameRequest request) {
+        Game game = new Game();
+        apply(game, request);
+
+        return toResponse(gameRepository.save(game), 0);
     }
 
-    public List<GameResponse> searchGamesByName(String name) {
-        return gameRepository.findByNameContainingIgnoreCase(name)
-                .stream()
-                .map(GameMapper::toResponse)
-                .toList();
+    /**
+     * Replaces the data of a game.
+     *
+     * @param id      game id
+     * @param request game data
+     * @return the updated game
+     */
+    @Transactional
+    public GameResponse update(UUID id, GameRequest request) {
+        Game game = find(id);
+        apply(game, request);
+
+        return get(gameRepository.save(game).getId());
     }
 
-    private Game getGameEntityById(UUID id) {
-        return gameRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Game not found"));
+    /**
+     * Deletes a game without tournaments.
+     *
+     * @param id game id
+     */
+    @Transactional
+    public void delete(UUID id) {
+        gameRepository.delete(find(id));
+        // Flush now so a game in use fails here, as a 409, and not at commit time.
+        gameRepository.flush();
+    }
+
+    private Map<UUID, Integer> lockeCounts() {
+        return tournamentRepository.countLockesByGame().stream()
+                .collect(Collectors.toMap(TournamentRepository.GameLockeCount::getGameId, row -> (int) row.getLockes()));
+    }
+
+    private Game find(UUID id) {
+        return gameRepository.findById(id).orElseThrow(() -> ApiErrors.notFound("Game"));
+    }
+
+    private static void apply(Game game, GameRequest request) {
+        game.setName(request.name().trim());
+        game.setDescription(blankToNull(request.description()));
+        game.setImageUrl(request.imageUrl().trim());
+    }
+
+    private static GameResponse toResponse(Game game, int lockeCount) {
+        return new GameResponse(game.getId(), game.getName(), game.getDescription(), game.getImageUrl(), lockeCount);
+    }
+
+    private static String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
     }
 }

@@ -1,56 +1,52 @@
 package com.adrianpmdev.pokemon.features.lockes.infrastructure.persistence.entity;
 
-import com.adrianpmdev.pokemon.features.games.infrastructure.persistence.entity.Game;
-import com.adrianpmdev.pokemon.features.tournaments.infrastructure.persistence.entity.Tournament;
-import jakarta.persistence.CascadeType;
+import com.adrianpmdev.pokemon.features.players.infrastructure.persistence.entity.Player;
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
-
-import java.time.Instant;
-import java.util.List;
-
-import com.fasterxml.jackson.databind.JsonNode;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
+/**
+ * A randomlocke: a rule set played by a fixed group of players, with one or more tournaments. Its
+ * tournaments can be played in different games (a generational locke moves from game to game).
+ *
+ * @author adrianpmdev
+ */
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name = "lockes", schema = "pokemon")
 public class Locke {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private java.util.UUID id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "game_id", nullable = false)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private Game game;
+    private UUID id;
 
     @Column(length = 100, nullable = false)
     private String name;
 
-    @Column(length = 500)
+    @Column(length = 1000)
     private String description;
 
+    /** Free-form rules document (see the frontend LockeRules model). */
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private JsonNode rules;
@@ -58,13 +54,17 @@ public class Locke {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
-    @OneToMany(mappedBy = "locke", cascade = CascadeType.ALL, orphanRemoval = true)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private List<Tournament> tournaments;
+    /** Fixed roster. New tournaments of the locke start with these players. */
+    @ManyToMany
+    @JoinTable(
+            name = "locke_players",
+            schema = "pokemon",
+            joinColumns = @JoinColumn(name = "locke_id"),
+            inverseJoinColumns = @JoinColumn(name = "player_id"))
+    private Set<Player> roster = new HashSet<>();
 
     @PrePersist
-    protected void onCreate() {
+    void onCreate() {
         createdAt = Instant.now();
     }
 }

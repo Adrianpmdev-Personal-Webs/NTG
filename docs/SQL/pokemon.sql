@@ -62,6 +62,9 @@ create table pokemon.tournaments (
     points_per_win  smallint     not null default 1,
     -- Until this moment players only see their own team picture.
     teams_reveal_at timestamptz,
+    -- Size of the double-elimination bracket the app generated (4, 8, 16...). Null when there is no
+    -- bracket yet, or for the imported 6-player brackets, which are kept as they were played.
+    bracket_size    smallint,
     created_at      timestamptz  not null default now(),
     constraint tournaments_pkey primary key (id),
     constraint tournaments_locke_fkey foreign key (locke_id) references pokemon.lockes (id) on delete cascade,
@@ -69,7 +72,8 @@ create table pokemon.tournaments (
     constraint tournaments_position_key unique (locke_id, position),
     constraint tournaments_format_check check (format in ('groups_bracket', 'round_robin')),
     constraint tournaments_status_check check (status in ('draft', 'in_progress', 'finished')),
-    constraint tournaments_points_check check (points_per_win >= 0)
+    constraint tournaments_points_check check (points_per_win >= 0),
+    constraint tournaments_bracket_size_check check (bracket_size in (4, 8, 16, 32))
 );
 
 create index tournaments_game_idx on pokemon.tournaments (game_id);

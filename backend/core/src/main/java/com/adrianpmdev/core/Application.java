@@ -23,8 +23,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
     "com.adrianpmdev.core.features.tags.infrastructure.persistence.repository",
     "com.adrianpmdev.pokemon.features.games.infrastructure.persistence.repository",
     "com.adrianpmdev.pokemon.features.lockes.infrastructure.persistence.repository",
-    "com.adrianpmdev.pokemon.features.rankings.infrastructure.persistence.repository",
-    "com.adrianpmdev.pokemon.features.rewards.infrastructure.persistence.repository",
+    "com.adrianpmdev.pokemon.features.players.infrastructure.persistence.repository",
     "com.adrianpmdev.pokemon.features.tournaments.infrastructure.persistence.repository",
     "com.adrianpmdev.wowforever.features.settings.infrastructure.persistence.repository"
 })
@@ -33,8 +32,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
     "com.adrianpmdev.core.features.tags.infrastructure.persistence.entity",
     "com.adrianpmdev.pokemon.features.games.infrastructure.persistence.entity",
     "com.adrianpmdev.pokemon.features.lockes.infrastructure.persistence.entity",
-    "com.adrianpmdev.pokemon.features.rankings.infrastructure.persistence.entity",
-    "com.adrianpmdev.pokemon.features.rewards.infrastructure.persistence.entity",
+    "com.adrianpmdev.pokemon.features.players.infrastructure.persistence.entity",
     "com.adrianpmdev.pokemon.features.tournaments.infrastructure.persistence.entity",
     "com.adrianpmdev.wowforever.features.settings.infrastructure.persistence.entity"
 })

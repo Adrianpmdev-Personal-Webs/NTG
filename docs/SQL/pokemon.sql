@@ -1,152 +1,174 @@
-CREATE TABLE pokemon.games (
-  name character varying NOT NULL,
-  description character varying,
-  image_url character varying NOT NULL,
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  created_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT games_pkey PRIMARY KEY (id)
+-- Pokémon schema (current). Created by pokemon-migration/01-schema.sql, which documents the model.
+
+-- ─── games (kept as it is) ───────────────────────────────────────────────────────────────────────
+
+create table pokemon.games (
+    id          uuid         not null default gen_random_uuid(),
+    name        varchar(100) not null,
+    description varchar(1000),
+    image_url   varchar(500) not null,
+    created_at  timestamptz  not null default now(),
+    constraint games_pkey primary key (id)
 );
-CREATE TABLE pokemon.lockes (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  game_id uuid NOT NULL,
-  name character varying NOT NULL,
-  description character varying,
-  rules jsonb,
-  created_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT lockes_pkey PRIMARY KEY (id),
-  CONSTRAINT lockes_game_id_fkey FOREIGN KEY (game_id) REFERENCES pokemon.games(id)
+
+-- ─── lockes ──────────────────────────────────────────────────────────────────────────────────────
+
+create table pokemon.lockes (
+    id          uuid         not null default gen_random_uuid(),
+    name        varchar(100) not null,
+    description varchar(1000),
+    rules       jsonb,
+    created_at  timestamptz  not null default now(),
+    constraint lockes_pkey primary key (id)
 );
-CREATE TABLE pokemon.tournaments (
-  locke_id uuid NOT NULL,
-  name character varying NOT NULL,
-  description character varying,
-  tournament_type character varying NOT NULL CHECK (tournament_type::text = ANY (ARRAY['grupos'::character varying, 'bracket'::character varying, 'todos_vs_todos'::character varying]::text[])),
-  max_participants smallint,
-  start_date timestamp with time zone,
-  end_date timestamp with time zone,
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  status character varying NOT NULL DEFAULT 'draft'::character varying CHECK (status::text = ANY (ARRAY['draft'::character varying, 'grupos_en_curso'::character varying, 'grupos_finalizado'::character varying, 'bracket_en_curso'::character varying, 'finalizado'::character varying]::text[])),
-  created_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT tournaments_pkey PRIMARY KEY (id),
-  CONSTRAINT tournaments_locke_id_fkey FOREIGN KEY (locke_id) REFERENCES pokemon.lockes(id)
+
+-- ─── players ─────────────────────────────────────────────────────────────────────────────────────
+
+create table pokemon.players (
+    id         uuid        not null default gen_random_uuid(),
+    name       varchar(50) not null,
+    -- Platform account (core.user.id). A plain column, like every user reference in game schemas.
+    user_id    uuid,
+    created_at timestamptz not null default now(),
+    constraint players_pkey primary key (id),
+    constraint players_name_key unique (name),
+    constraint players_user_id_key unique (user_id)
 );
-CREATE TABLE pokemon.tournament_participants (
-  tournament_id uuid NOT NULL,
-  user_id uuid NOT NULL,
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  joined_at timestamp with time zone DEFAULT now(),
-  status character varying NOT NULL DEFAULT 'activo'::character varying CHECK (status::text = ANY (ARRAY['activo'::character varying, 'eliminado'::character varying, 'retirado'::character varying]::text[])),
-  CONSTRAINT tournament_participants_pkey PRIMARY KEY (id),
-  CONSTRAINT tournament_participants_tournament_id_fkey FOREIGN KEY (tournament_id) REFERENCES pokemon.tournaments(id)
+
+-- ─── locke_players ───────────────────────────────────────────────────────────────────────────────
+
+create table pokemon.locke_players (
+    locke_id  uuid not null,
+    player_id uuid not null,
+    constraint locke_players_pkey primary key (locke_id, player_id),
+    constraint locke_players_locke_fkey foreign key (locke_id) references pokemon.lockes (id) on delete cascade,
+    constraint locke_players_player_fkey foreign key (player_id) references pokemon.players (id)
 );
-CREATE TABLE pokemon.tournament_groups (
-  tournament_id uuid NOT NULL,
-  group_letter character varying NOT NULL,
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  status character varying NOT NULL DEFAULT 'en_curso'::character varying CHECK (status::text = ANY (ARRAY['en_curso'::character varying, 'finalizado'::character varying]::text[])),
-  created_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT tournament_groups_pkey PRIMARY KEY (id),
-  CONSTRAINT tournament_groups_tournament_id_fkey FOREIGN KEY (tournament_id) REFERENCES pokemon.tournaments(id)
+
+create index locke_players_player_idx on pokemon.locke_players (player_id);
+
+-- ─── tournaments ─────────────────────────────────────────────────────────────────────────────────
+
+create table pokemon.tournaments (
+    id              uuid         not null default gen_random_uuid(),
+    locke_id        uuid         not null,
+    game_id         uuid         not null,
+    -- Order inside the randomlocke; the cumulative standings follow it.
+    position        smallint     not null,
+    name            varchar(100) not null,
+    description     varchar(1000),
+    format          varchar(20)  not null,
+    status          varchar(20)  not null default 'draft',
+    points_per_win  smallint     not null default 1,
+    -- Until this moment players only see their own team picture.
+    teams_reveal_at timestamptz,
+    -- Size of the double-elimination bracket the app generated (4, 8, 16...). Null when there is no
+    -- bracket yet, or for the imported 6-player brackets, which are kept as they were played.
+    bracket_size    smallint,
+    created_at      timestamptz  not null default now(),
+    constraint tournaments_pkey primary key (id),
+    constraint tournaments_locke_fkey foreign key (locke_id) references pokemon.lockes (id) on delete cascade,
+    constraint tournaments_game_fkey foreign key (game_id) references pokemon.games (id),
+    constraint tournaments_position_key unique (locke_id, position),
+    constraint tournaments_format_check check (format in ('groups_bracket', 'round_robin')),
+    constraint tournaments_status_check check (status in ('draft', 'in_progress', 'finished')),
+    constraint tournaments_points_check check (points_per_win >= 0),
+    constraint tournaments_bracket_size_check check (bracket_size in (4, 8, 16, 32))
 );
-CREATE TABLE pokemon.group_participants (
-  group_id uuid NOT NULL,
-  tournament_participant_id uuid NOT NULL,
-  group_position smallint,
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  wins smallint DEFAULT 0,
-  losses smallint DEFAULT 0,
-  points smallint DEFAULT 0,
-  CONSTRAINT group_participants_pkey PRIMARY KEY (id),
-  CONSTRAINT group_participants_group_id_fkey FOREIGN KEY (group_id) REFERENCES pokemon.tournament_groups(id),
-  CONSTRAINT group_participants_tournament_participant_id_fkey FOREIGN KEY (tournament_participant_id) REFERENCES pokemon.tournament_participants(id)
+
+create index tournaments_game_idx on pokemon.tournaments (game_id);
+
+-- ─── tournament_players ──────────────────────────────────────────────────────────────────────────
+
+create table pokemon.tournament_players (
+    id                uuid         not null default gen_random_uuid(),
+    tournament_id     uuid         not null,
+    player_id         uuid         not null,
+    -- A or B in a groups_bracket tournament; null in a league, or for the player that skips the groups.
+    group_name        char(1),
+    -- Object name in the private Storage bucket pokemon-teams; the backend turns it into a signed URL.
+    team_image        varchar(200),
+    points_adjustment smallint     not null default 0,
+    constraint tournament_players_pkey primary key (id),
+    constraint tournament_players_tournament_fkey foreign key (tournament_id) references pokemon.tournaments (id) on delete cascade,
+    constraint tournament_players_player_fkey foreign key (player_id) references pokemon.players (id),
+    constraint tournament_players_player_key unique (tournament_id, player_id),
+    constraint tournament_players_group_check check (group_name in ('A', 'B'))
 );
-CREATE TABLE pokemon.group_matches (
-  group_id uuid NOT NULL,
-  participant1_id uuid NOT NULL,
-  participant2_id uuid NOT NULL,
-  winner_id uuid,
-  replay_url character varying,
-  scheduled_at timestamp with time zone,
-  completed_at timestamp with time zone,
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  status character varying NOT NULL DEFAULT 'pendiente'::character varying CHECK (status::text = ANY (ARRAY['pendiente'::character varying, 'en_curso'::character varying, 'completado'::character varying]::text[])),
-  created_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT group_matches_pkey PRIMARY KEY (id),
-  CONSTRAINT group_matches_group_id_fkey FOREIGN KEY (group_id) REFERENCES pokemon.tournament_groups(id),
-  CONSTRAINT group_matches_participant1_id_fkey FOREIGN KEY (participant1_id) REFERENCES pokemon.tournament_participants(id),
-  CONSTRAINT group_matches_participant2_id_fkey FOREIGN KEY (participant2_id) REFERENCES pokemon.tournament_participants(id),
-  CONSTRAINT group_matches_winner_id_fkey FOREIGN KEY (winner_id) REFERENCES pokemon.tournament_participants(id)
+
+create index tournament_players_player_idx on pokemon.tournament_players (player_id);
+
+-- ─── matches ─────────────────────────────────────────────────────────────────────────────────────
+
+create table pokemon.matches (
+    id            uuid        not null default gen_random_uuid(),
+    tournament_id uuid        not null,
+    -- group and league series; upper, lower and grand_final for the double-elimination bracket.
+    stage         varchar(12) not null,
+    round         smallint    not null,
+    slot          smallint    not null,
+    -- Null while the series is waiting for a previous result; a bracket series with a single
+    -- player is a bye.
+    player1_id    uuid,
+    player2_id    uuid,
+    created_at    timestamptz not null default now(),
+    constraint matches_pkey primary key (id),
+    constraint matches_tournament_fkey foreign key (tournament_id) references pokemon.tournaments (id) on delete cascade,
+    constraint matches_player1_fkey foreign key (player1_id) references pokemon.tournament_players (id) on delete cascade,
+    constraint matches_player2_fkey foreign key (player2_id) references pokemon.tournament_players (id) on delete cascade,
+    constraint matches_place_key unique (tournament_id, stage, round, slot),
+    constraint matches_stage_check check (stage in ('group', 'league', 'upper', 'lower', 'grand_final')),
+    constraint matches_round_check check (round >= 1 and slot >= 1),
+    constraint matches_players_check check (player1_id is null or player2_id is null or player1_id <> player2_id)
 );
-CREATE TABLE pokemon.bracket_stages (
-  tournament_id uuid NOT NULL,
-  stage_name character varying NOT NULL,
-  stage_order smallint NOT NULL,
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  status character varying NOT NULL DEFAULT 'pendiente'::character varying CHECK (status::text = ANY (ARRAY['pendiente'::character varying, 'en_curso'::character varying, 'finalizado'::character varying]::text[])),
-  created_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT bracket_stages_pkey PRIMARY KEY (id),
-  CONSTRAINT bracket_stages_tournament_id_fkey FOREIGN KEY (tournament_id) REFERENCES pokemon.tournaments(id)
+
+create index matches_player1_idx on pokemon.matches (player1_id);
+create index matches_player2_idx on pokemon.matches (player2_id);
+
+-- ─── match_games ─────────────────────────────────────────────────────────────────────────────────
+
+create table pokemon.match_games (
+    id          uuid         not null default gen_random_uuid(),
+    match_id    uuid         not null,
+    game_number smallint     not null,
+    -- 1 or 2: which side of the series won the game.
+    winner_side smallint     not null,
+    replay_url  varchar(500),
+    played_at   timestamptz  not null default now(),
+    constraint match_games_pkey primary key (id),
+    constraint match_games_match_fkey foreign key (match_id) references pokemon.matches (id) on delete cascade,
+    constraint match_games_number_key unique (match_id, game_number),
+    constraint match_games_number_check check (game_number between 1 and 3),
+    constraint match_games_winner_check check (winner_side in (1, 2))
 );
-CREATE TABLE pokemon.bracket_matches (
-  tournament_id uuid NOT NULL,
-  bracket_stage_id uuid NOT NULL,
-  match_number smallint NOT NULL,
-  participant1_id uuid,
-  participant2_id uuid,
-  winner_id uuid,
-  replay_url character varying,
-  scheduled_at timestamp with time zone,
-  completed_at timestamp with time zone,
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  status character varying NOT NULL DEFAULT 'pendiente'::character varying CHECK (status::text = ANY (ARRAY['pendiente'::character varying, 'en_curso'::character varying, 'completado'::character varying]::text[])),
-  created_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT bracket_matches_pkey PRIMARY KEY (id),
-  CONSTRAINT bracket_matches_tournament_id_fkey FOREIGN KEY (tournament_id) REFERENCES pokemon.tournaments(id),
-  CONSTRAINT bracket_matches_bracket_stage_id_fkey FOREIGN KEY (bracket_stage_id) REFERENCES pokemon.bracket_stages(id),
-  CONSTRAINT bracket_matches_participant1_id_fkey FOREIGN KEY (participant1_id) REFERENCES pokemon.tournament_participants(id),
-  CONSTRAINT bracket_matches_participant2_id_fkey FOREIGN KEY (participant2_id) REFERENCES pokemon.tournament_participants(id),
-  CONSTRAINT bracket_matches_winner_id_fkey FOREIGN KEY (winner_id) REFERENCES pokemon.tournament_participants(id)
+
+-- ─── rewards ─────────────────────────────────────────────────────────────────────────────────────
+
+create table pokemon.rewards (
+    id            uuid         not null default gen_random_uuid(),
+    tournament_id uuid         not null,
+    sort_order    smallint     not null,
+    name          varchar(150) not null,
+    -- Player who picked it; players pick in the order of the final standings of the tournament.
+    chosen_by     uuid,
+    constraint rewards_pkey primary key (id),
+    constraint rewards_tournament_fkey foreign key (tournament_id) references pokemon.tournaments (id) on delete cascade,
+    constraint rewards_chosen_by_fkey foreign key (chosen_by) references pokemon.tournament_players (id) on delete set null,
+    constraint rewards_order_key unique (tournament_id, sort_order),
+    constraint rewards_chosen_by_key unique (chosen_by)
 );
-CREATE TABLE pokemon.tournament_standings (
-  tournament_id uuid NOT NULL,
-  tournament_participant_id uuid NOT NULL,
-  final_position smallint,
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  total_wins smallint DEFAULT 0,
-  total_losses smallint DEFAULT 0,
-  total_points smallint DEFAULT 0,
-  updated_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT tournament_standings_pkey PRIMARY KEY (id),
-  CONSTRAINT tournament_standings_tournament_id_fkey FOREIGN KEY (tournament_id) REFERENCES pokemon.tournaments(id),
-  CONSTRAINT tournament_standings_tournament_participant_id_fkey FOREIGN KEY (tournament_participant_id) REFERENCES pokemon.tournament_participants(id)
-);
-CREATE TABLE pokemon.global_standings (
-  user_id uuid NOT NULL UNIQUE,
-  ranking_position smallint,
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  total_tournaments smallint DEFAULT 0,
-  tournaments_won smallint DEFAULT 0,
-  total_points integer DEFAULT 0,
-  updated_at timestamp with time zone DEFAULT now(),
-  CONSTRAINT global_standings_pkey PRIMARY KEY (id)
-);
-CREATE TABLE pokemon.rewards (
-  tournament_id uuid NOT NULL,
-  position smallint NOT NULL,
-  reward_name character varying NOT NULL,
-  reward_value smallint,
-  image_url character varying,
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  CONSTRAINT rewards_pkey PRIMARY KEY (id),
-  CONSTRAINT rewards_tournament_id_fkey FOREIGN KEY (tournament_id) REFERENCES pokemon.tournaments(id)
-);
-CREATE TABLE pokemon.user_rewards (
-  id uuid NOT NULL DEFAULT gen_random_uuid(),
-  claimed_at timestamp with time zone DEFAULT now(),
-  user_id uuid NOT NULL,
-  reward_id uuid NOT NULL,
-  tournament_id uuid NOT NULL,
-  CONSTRAINT user_rewards_pkey PRIMARY KEY (id),
-  CONSTRAINT user_rewards_reward_id_fkey FOREIGN KEY (reward_id) REFERENCES pokemon.rewards(id),
-  CONSTRAINT user_rewards_tournament_id_fkey FOREIGN KEY (tournament_id) REFERENCES pokemon.tournaments(id)
-);
+
+-- ─── Row level security ──────────────────────────────────────────────────────────────────────────
+-- The backend connects as the table owner, which bypasses RLS. Enabling it without policies closes
+-- the tables to the Supabase Data API (anon and authenticated roles) in case the schema is ever exposed.
+
+alter table pokemon.games              enable row level security;
+alter table pokemon.lockes             enable row level security;
+alter table pokemon.players            enable row level security;
+alter table pokemon.locke_players      enable row level security;
+alter table pokemon.tournaments        enable row level security;
+alter table pokemon.tournament_players enable row level security;
+alter table pokemon.matches            enable row level security;
+alter table pokemon.match_games        enable row level security;
+alter table pokemon.rewards            enable row level security;
+

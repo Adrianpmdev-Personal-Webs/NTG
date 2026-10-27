@@ -56,6 +56,9 @@ public class SecurityConfig {
             "/api/v1/wow-forever/**", "wow-forever"
     );
 
+    /** Team picture of a player inside a Pokémon tournament (upload and remove). */
+    private static final String POKEMON_TEAM_IMAGE = "/api/v1/pokemon/tournament-players/*/team-image";
+
     private static final long CORS_MAX_AGE_SECONDS = 3_600;
 
     /**
@@ -120,6 +123,11 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.PUT, "/api/v1/users/me").authenticated();
                     auth.requestMatchers("/api/v1/users", "/api/v1/users/**").hasRole(ADMIN_ROLE);
                     auth.requestMatchers("/api/v1/tags", "/api/v1/tags/**").hasRole(ADMIN_ROLE);
+
+                    // Pokémon team pictures: the only game writes open to players. The pokemon module then
+                    // accepts only the player of that tournament entry (or an admin).
+                    auth.requestMatchers(HttpMethod.PUT, POKEMON_TEAM_IMAGE).hasAnyAuthority(ROLE_ADMIN, Authorities.tag("pokemon"));
+                    auth.requestMatchers(HttpMethod.DELETE, POKEMON_TEAM_IMAGE).hasAnyAuthority(ROLE_ADMIN, Authorities.tag("pokemon"));
 
                     // Games: read with the game tag, write as ADMIN.
                     GAME_TAGS.forEach((pattern, tag) -> {

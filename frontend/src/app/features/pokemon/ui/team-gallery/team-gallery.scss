@@ -1,0 +1,114 @@
+/**
+ * Team gallery styles (terminal tokens, remapped by the Pokémon layout).
+ *
+ * @author @adrianpmdev
+ */
+
+:host {
+    display: block;
+}
+
+.notice {
+    margin: 0 0 14px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+}
+
+.team {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+
+    &.mine {
+        border-color: var(--neon-green);
+    }
+}
+
+.team-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.team-name {
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.team-group {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.team-picture img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: contain;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 6px;
+}
+
+.team-placeholder {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 3 / 2;
+    border: 1px dashed var(--border-color);
+    border-radius: 6px;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    text-align: center;
+    padding: 8px;
+}
+
+.team-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.upload,
+.remove {
+    flex: 1;
+    padding: 7px 10px;
+    border: 1px solid var(--neon-green);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--neon-green);
+    font: inherit;
+    font-size: 0.8rem;
+    text-align: center;
+    cursor: pointer;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.06);
+    }
+
+    &.disabled,
+    &:disabled {
+        opacity: 0.5;
+        cursor: progress;
+    }
+}
+
+.upload input {
+    display: none;
+}
+
+.remove {
+    flex: 0 0 auto;
+    border-color: var(--neon-red);
+    color: var(--neon-red);
+}

@@ -1,17 +1,17 @@
 package com.adrianpmdev.pokemon.features.games.api.dto.response;
 
-import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Response DTO for game data.
+ * A game.
+ *
+ * @param id          game id
+ * @param name        game name
+ * @param description description
+ * @param imageUrl    cover picture
+ * @param lockeCount  randomlockes with at least one tournament in this game
  *
  * @author adrianpmdev
  */
-public record GameResponse(
-        UUID id,
-        String name,
-        String description,
-        String imageUrl,
-        Instant createdAt
-) {}
+public record GameResponse(UUID id, String name, String description, String imageUrl, int lockeCount) {
+}

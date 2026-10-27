@@ -18,8 +18,8 @@
     --pk-font-body: 'Nunito', 'Segoe UI', sans-serif;
 
     /*
-     * The type calculator and Pokelike were written against the terminal tokens.
-     * Re-pointing those names here gives them the Pokemon palette without touching their styles.
+     * The type calculator and the shared tournament components (ui/) are written against the terminal tokens.
+     * Re-pointing those names here gives them the Pokemon palette, while the admin area shows them in green.
      */
     --bg-black: var(--pk-bg);
     --bg-dark: var(--pk-bg);

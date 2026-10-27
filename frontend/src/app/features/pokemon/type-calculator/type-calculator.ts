@@ -1,19 +1,31 @@
 /**
  * TypeCalculator
  *
- * Pokémon type calculator page.
- * Allows selecting up to two defending types and calculates received damage multipliers.
+ * Pokémon type calculator page with two modes.
+ * Defense: pick up to two types of a Pokémon and see the damage it receives from every attacking type.
+ * Attack: pick up to two attacking types (a Pokémon's moves) and see the best damage they deal to every type.
  *
  * @author @adrianpmdev
  */
 
 import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import {
+    CALCULATOR_MODES,
+    CalculatorMode,
+    MAX_SELECTED_TYPES,
     POKEMON_TYPES,
     PokemonType,
-    TYPE_CHART,
-    TypeDamageResult
+    RESULT_CATEGORIES,
+    ResultCategory,
+    TypeDamageResult,
+    typeMultiplier
 } from './type-calculator-constants';
+
+/** One block of results (for example the weaknesses) ready for the template. */
+interface ResultGroup {
+    category: ResultCategory;
+    results: TypeDamageResult[];
+}
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -24,53 +36,56 @@ import {
 })
 export class TypeCalculator {
 
-    private readonly maxSelectedTypes = 2;
-    private readonly defaultMultiplier = 1;
-
     readonly pokemonTypes = POKEMON_TYPES;
+    readonly modes = CALCULATOR_MODES;
+    readonly maxSelectedTypes = MAX_SELECTED_TYPES;
+
+    readonly mode = signal<CalculatorMode>(CALCULATOR_MODES[0]);
     readonly selectedTypes = signal<PokemonType[]>([]);
 
-    readonly damageResults = computed<TypeDamageResult[]>(() => {
-        return this.pokemonTypes.map(attackType => ({
-            type: attackType,
-            multiplier: this.calculateDamageMultiplier(attackType)
+    /** Multiplier against (attack) or from (defense) every type, for the current selection. */
+    private readonly damageResults = computed<TypeDamageResult[]>(() => {
+        const selected = this.selectedTypes();
+        const attacking = this.mode().id === 'attack';
+
+        return this.pokemonTypes.map(type => ({
+            type,
+            multiplier: attacking ? this.bestAttackMultiplier(selected, type) : this.defenseMultiplier(type, selected)
         }));
     });
 
-    readonly weaknesses = computed(() => {
-        return this.damageResults()
-            .filter(result => result.multiplier > 1)
-            .sort((first, second) => second.multiplier - first.multiplier);
+    /** Results split into weaknesses / resistances / immunities / neutral, strongest first. */
+    readonly resultGroups = computed<ResultGroup[]>(() => {
+        const results = this.damageResults();
+
+        return RESULT_CATEGORIES.map(category => ({
+            category,
+            results: results
+                .filter(result => category.matches(result.multiplier))
+                .sort((first, second) => second.multiplier - first.multiplier)
+        }));
     });
 
-    readonly resistances = computed(() => {
-        return this.damageResults()
-            .filter(result => result.multiplier > 0 && result.multiplier < 1)
-            .sort((first, second) => first.multiplier - second.multiplier);
-    });
+    setMode(modeId: CalculatorMode['id']): void {
+        const mode = this.modes.find(current => current.id === modeId);
 
-    readonly immunities = computed(() => {
-        return this.damageResults().filter(result => result.multiplier === 0);
-    });
-
-    readonly neutralTypes = computed(() => {
-        return this.damageResults().filter(result => result.multiplier === 1);
-    });
+        if (mode && mode !== this.mode()) {
+            this.mode.set(mode);
+            this.selectedTypes.set([]);
+        }
+    }
 
     toggleType(type: PokemonType): void {
-        const currentTypes = this.selectedTypes();
+        const current = this.selectedTypes();
 
-        if (currentTypes.includes(type)) {
-            this.selectedTypes.set(currentTypes.filter(currentType => currentType !== type));
-            return;
+        if (current.includes(type)) {
+            this.selectedTypes.set(current.filter(selected => selected !== type));
+        } else if (current.length >= this.maxSelectedTypes) {
+            // Replace the oldest pick so the user can keep clicking without clearing first.
+            this.selectedTypes.set([...current.slice(1), type]);
+        } else {
+            this.selectedTypes.set([...current, type]);
         }
-
-        if (currentTypes.length >= this.maxSelectedTypes) {
-            this.selectedTypes.set([currentTypes[1], type]);
-            return;
-        }
-
-        this.selectedTypes.set([...currentTypes, type]);
     }
 
     clearSelection(): void {
@@ -81,7 +96,7 @@ export class TypeCalculator {
         return this.selectedTypes().includes(type);
     }
 
-    getTypeClass(type: PokemonType): string {
+    typeClass(type: PokemonType): string {
         return `type-${type.toLowerCase()}`;
     }
 
@@ -89,19 +104,17 @@ export class TypeCalculator {
         return `${multiplier}x`;
     }
 
-    private calculateDamageMultiplier(attackType: PokemonType): number {
-        const defendingTypes = this.selectedTypes();
-
-        if (defendingTypes.length === 0) {
-            return this.defaultMultiplier;
-        }
-
-        return defendingTypes.reduce((totalMultiplier, defendingType) => {
-            return totalMultiplier * this.getTypeMultiplier(attackType, defendingType);
-        }, this.defaultMultiplier);
+    /** Damage a Pokémon with the defending types receives from one attacking type. */
+    private defenseMultiplier(attackType: PokemonType, defendingTypes: readonly PokemonType[]): number {
+        return defendingTypes.reduce((total, defendingType) => total * typeMultiplier(attackType, defendingType), 1);
     }
 
-    private getTypeMultiplier(attackType: PokemonType, defendingType: PokemonType): number {
-        return TYPE_CHART[attackType]?.[defendingType] ?? this.defaultMultiplier;
+    /** Best damage any of the attacking types deals to one defending type (move coverage). */
+    private bestAttackMultiplier(attackTypes: readonly PokemonType[], defendingType: PokemonType): number {
+        if (attackTypes.length === 0) {
+            return 1;
+        }
+
+        return Math.max(...attackTypes.map(attackType => typeMultiplier(attackType, defendingType)));
     }
 }

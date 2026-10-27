@@ -1,0 +1,43 @@
+@let m = match();
+<div
+    class="match"
+    [class.editable]="canEdit()"
+    [class.finished]="m.status === 'finished'"
+    [class.muted]="m.status === 'bye' || m.status === 'void'"
+    [attr.role]="canEdit() ? 'button' : null"
+    [attr.tabindex]="canEdit() ? 0 : null"
+    [attr.title]="canEdit() ? 'Editar resultado' : null"
+    (click)="onClick()"
+    (keydown.enter)="onClick()"
+>
+    <div class="side" [class.winner]="m.winnerId && m.winnerId === m.player1Id" [class.mine]="isMine(m.player1Id)">
+        <span class="player">{{ name(m.player1Id) }}</span>
+        <span class="score">{{ m.player1Id && m.player2Id ? m.score1 : '' }}</span>
+    </div>
+    <div class="side" [class.winner]="m.winnerId && m.winnerId === m.player2Id" [class.mine]="isMine(m.player2Id)">
+        <span class="player">{{ name(m.player2Id) }}</span>
+        <span class="score">{{ m.player1Id && m.player2Id ? m.score2 : '' }}</span>
+    </div>
+
+    <div class="footer">
+        <span class="status">{{ statusLabel() }}</span>
+        @if (m.games.length > 0) {
+            <span class="replays">
+                @for (game of m.games; track game.number) {
+                    @if (game.replayUrl) {
+                        <a
+                            class="replay"
+                            [href]="game.replayUrl"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            [title]="'Replay de la partida ' + game.number"
+                            (click)="$event.stopPropagation()"
+                        >▶{{ game.number }}</a>
+                    } @else {
+                        <span class="replay missing" [title]="'Partida ' + game.number + ' sin replay'">▶{{ game.number }}</span>
+                    }
+                }
+            </span>
+        }
+    </div>
+</div>

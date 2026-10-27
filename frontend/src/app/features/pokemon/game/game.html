@@ -1,0 +1,44 @@
+<section class="page">
+    <a class="back" routerLink="/pokemon/games">← Juegos</a>
+
+    @if (loading()) {
+        <p class="state">Cargando…</p>
+    } @else if (failed() || !game()) {
+        <p class="state error">No se ha podido cargar el juego.</p>
+    } @else {
+        @let current = game()!;
+        <header class="hero">
+            <img class="hero-image" [src]="current.imageUrl" [alt]="current.name" />
+            <div class="hero-text">
+                <h1 class="heading">{{ current.name }}</h1>
+                @if (current.description) {
+                    <p class="hero-description">{{ current.description }}</p>
+                }
+            </div>
+        </header>
+
+        <h2 class="section-title">Randomlockes</h2>
+
+        @if (lockes().length === 0) {
+            <p class="state">Todavía no se ha jugado ningún randomlocke en este juego.</p>
+        } @else {
+            <div class="grid">
+                @for (locke of lockes(); track locke.id) {
+                    <a class="locke" [routerLink]="['/pokemon/lockes', locke.id]">
+                        <h3 class="locke-name">{{ locke.name }}</h3>
+                        @if (locke.description) {
+                            <p class="locke-description">{{ locke.description }}</p>
+                        }
+                        <div class="chips">
+                            <span class="chip">{{ locke.tournamentCount }} torneos</span>
+                            <span class="chip">{{ locke.playerCount }} jugadores</span>
+                        </div>
+                        @if (locke.games.length > 1) {
+                            <p class="locke-games">{{ locke.games.length }} juegos: {{ gameNames(locke) }}</p>
+                        }
+                    </a>
+                }
+            </div>
+        }
+    }
+</section>

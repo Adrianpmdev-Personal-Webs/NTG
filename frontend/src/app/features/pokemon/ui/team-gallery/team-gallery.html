@@ -1,0 +1,38 @@
+@if (detail().teamsRevealAt && !detail().teamsRevealed) {
+    <p class="notice">Los equipos se revelan el {{ revealText() }}. Hasta entonces cada jugador solo ve el suyo.</p>
+}
+
+<div class="gallery">
+    @for (player of detail().players; track player.id) {
+        <article class="team" [class.mine]="player.mine">
+            <header class="team-head">
+                <span class="team-name">{{ player.name }}</span>
+                @if (player.group) {
+                    <span class="team-group">Grupo {{ player.group }}</span>
+                }
+            </header>
+
+            @if (player.teamImageUrl) {
+                <a class="team-picture" [href]="player.teamImageUrl" target="_blank" rel="noopener noreferrer" title="Ver a tamaño completo">
+                    <img [src]="player.teamImageUrl" [alt]="'Equipo de ' + player.name" loading="lazy" />
+                </a>
+            } @else {
+                <div class="team-placeholder">
+                    {{ player.hasTeamImage ? 'Equipo oculto hasta la revelación' : 'Sin equipo subido' }}
+                </div>
+            }
+
+            @if (player.canEditTeam) {
+                <div class="team-actions">
+                    <label class="upload" [class.disabled]="busy() === player.id">
+                        {{ busy() === player.id ? 'Subiendo…' : (player.hasTeamImage ? 'Cambiar equipo' : 'Subir equipo') }}
+                        <input type="file" [accept]="accepted" [disabled]="busy() === player.id" (change)="onFile(player, $event)" />
+                    </label>
+                    @if (player.hasTeamImage) {
+                        <button class="remove" type="button" [disabled]="busy() === player.id" (click)="remove(player)">Quitar</button>
+                    }
+                </div>
+            }
+        </article>
+    }
+</div>

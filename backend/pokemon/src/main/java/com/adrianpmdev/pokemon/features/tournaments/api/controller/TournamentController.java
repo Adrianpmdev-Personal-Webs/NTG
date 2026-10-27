@@ -1,30 +1,36 @@
 package com.adrianpmdev.pokemon.features.tournaments.api.controller;
 
-
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import com.adrianpmdev.pokemon.features.tournaments.api.dto.request.MatchCreateRequest;
+import com.adrianpmdev.pokemon.features.tournaments.api.dto.request.RewardRequest;
+import com.adrianpmdev.pokemon.features.tournaments.api.dto.request.ScheduleRequest;
+import com.adrianpmdev.pokemon.features.tournaments.api.dto.request.TournamentCreateRequest;
+import com.adrianpmdev.pokemon.features.tournaments.api.dto.request.TournamentPlayerAddRequest;
+import com.adrianpmdev.pokemon.features.tournaments.api.dto.request.TournamentUpdateRequest;
+import com.adrianpmdev.pokemon.features.tournaments.api.dto.response.TournamentDetailResponse;
+import com.adrianpmdev.pokemon.features.tournaments.application.service.MatchService;
+import com.adrianpmdev.pokemon.features.tournaments.application.service.RewardService;
+import com.adrianpmdev.pokemon.features.tournaments.application.service.ScheduleService;
+import com.adrianpmdev.pokemon.features.tournaments.application.service.TournamentPlayerService;
+import com.adrianpmdev.pokemon.features.tournaments.application.service.TournamentQueryService;
+import com.adrianpmdev.pokemon.features.tournaments.application.service.TournamentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.adrianpmdev.pokemon.features.tournaments.api.dto.request.TournamentCreateRequest;
-import com.adrianpmdev.pokemon.features.tournaments.api.dto.request.TournamentUpdateRequest;
-import com.adrianpmdev.pokemon.features.tournaments.api.dto.response.TournamentResponse;
-import com.adrianpmdev.pokemon.features.tournaments.application.service.TournamentService;
-
-import java.util.List;
 import java.util.UUID;
 
 /**
- * REST controller for managing tournaments.
+ * Tournaments. GET returns the whole tournament page; every admin action answers with the updated
+ * tournament, so the client never has to put several responses together.
  *
  * @author adrianpmdev
  */
@@ -33,58 +39,64 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TournamentController {
 
+    private final TournamentQueryService queryService;
     private final TournamentService tournamentService;
-
-    @PostMapping
-    public ResponseEntity<TournamentResponse> createTournament(
-            @Valid @RequestBody TournamentCreateRequest request
-    ) {
-        TournamentResponse createdTournament = tournamentService.createTournament(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdTournament);
-    }
+    private final TournamentPlayerService tournamentPlayerService;
+    private final ScheduleService scheduleService;
+    private final MatchService matchService;
+    private final RewardService rewardService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<TournamentResponse> getTournamentById(@PathVariable UUID id) {
-        TournamentResponse tournament = tournamentService.getTournamentById(id);
-        return ResponseEntity.ok(tournament);
+    public TournamentDetailResponse get(@PathVariable UUID id) {
+        return queryService.detail(id);
     }
 
-    @GetMapping
-    public ResponseEntity<List<TournamentResponse>> getAllTournaments() {
-        List<TournamentResponse> tournaments = tournamentService.getAllTournaments();
-        return ResponseEntity.ok(tournaments);
-    }
-
-    @GetMapping("/locke/{lockeId}")
-    public ResponseEntity<List<TournamentResponse>> getTournamentsByLockeId(@PathVariable UUID lockeId) {
-        List<TournamentResponse> tournaments = tournamentService.getTournamentsByLockeId(lockeId);
-        return ResponseEntity.ok(tournaments);
-    }
-
-    @GetMapping("/status/{status}")
-    public ResponseEntity<List<TournamentResponse>> getTournamentsByStatus(@PathVariable String status) {
-        List<TournamentResponse> tournaments = tournamentService.getTournamentsByStatus(status);
-        return ResponseEntity.ok(tournaments);
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public TournamentDetailResponse create(@Valid @RequestBody TournamentCreateRequest request) {
+        return tournamentService.create(request);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TournamentResponse> updateTournament(
-            @PathVariable UUID id,
-            @RequestBody TournamentUpdateRequest request
-    ) {
-        TournamentResponse updatedTournament = tournamentService.updateTournament(id, request);
-        return ResponseEntity.ok(updatedTournament);
+    public TournamentDetailResponse update(@PathVariable UUID id, @Valid @RequestBody TournamentUpdateRequest request) {
+        return tournamentService.update(id, request);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTournament(@PathVariable UUID id) {
-        tournamentService.deleteTournament(id);
-        return ResponseEntity.noContent().build();
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable UUID id) {
+        tournamentService.delete(id);
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<List<TournamentResponse>> searchTournaments(@RequestParam String name) {
-        List<TournamentResponse> tournaments = tournamentService.searchTournamentsByName(name);
-        return ResponseEntity.ok(tournaments);
+    /** Adds a player of the platform list to the tournament. */
+    @PostMapping("/{id}/players")
+    public TournamentDetailResponse addPlayer(@PathVariable UUID id, @Valid @RequestBody TournamentPlayerAddRequest request) {
+        return tournamentPlayerService.add(id, request.playerId());
+    }
+
+    /** Generates the league, or the groups and their series, replacing the previous calendar. */
+    @PostMapping("/{id}/schedule")
+    public TournamentDetailResponse generateCalendar(@PathVariable UUID id, @RequestBody ScheduleRequest request) {
+        scheduleService.generateCalendar(id, request.randomGroups());
+        return queryService.detail(id);
+    }
+
+    /** Generates the double-elimination bracket from the final group tables. */
+    @PostMapping("/{id}/bracket")
+    public TournamentDetailResponse generateBracket(@PathVariable UUID id) {
+        scheduleService.generateBracket(id);
+        return queryService.detail(id);
+    }
+
+    /** Adds a series by hand. */
+    @PostMapping("/{id}/matches")
+    public TournamentDetailResponse addMatch(@PathVariable UUID id, @Valid @RequestBody MatchCreateRequest request) {
+        return matchService.create(id, request);
+    }
+
+    /** Adds a reward. */
+    @PostMapping("/{id}/rewards")
+    public TournamentDetailResponse addReward(@PathVariable UUID id, @Valid @RequestBody RewardRequest request) {
+        return rewardService.create(id, request);
     }
 }

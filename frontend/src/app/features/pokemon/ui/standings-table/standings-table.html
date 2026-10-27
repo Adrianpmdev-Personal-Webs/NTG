@@ -1,0 +1,42 @@
+@if (rows().length === 0) {
+    <p class="empty">Todavía no hay clasificación.</p>
+} @else {
+    <div class="table-wrap">
+        <table class="standings">
+            <thead>
+                <tr>
+                    <th class="num">#</th>
+                    <th>Jugador</th>
+                    <th class="num" title="Series jugadas">PJ</th>
+                    <th class="num" title="Series ganadas">V</th>
+                    <th class="num" title="Series perdidas">D</th>
+                    @if (rows()[0].games !== null) {
+                        <th class="num" title="Partidas ganadas-perdidas">Partidas</th>
+                    }
+                    @if (extraLabel()) {
+                        <th class="num">{{ extraLabel() }}</th>
+                    }
+                    <th class="num">Pts</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (row of rows(); track row.id) {
+                    <tr [class.podium]="row.position <= podium()" [class.mine]="row.highlight">
+                        <td class="num position">{{ row.position }}</td>
+                        <td class="name">{{ row.name }}</td>
+                        <td class="num">{{ row.played }}</td>
+                        <td class="num">{{ row.wins }}</td>
+                        <td class="num">{{ row.losses }}</td>
+                        @if (row.games !== null) {
+                            <td class="num">{{ row.games }}</td>
+                        }
+                        @if (extraLabel()) {
+                            <td class="num">{{ row.extra }}</td>
+                        }
+                        <td class="num points">{{ row.points }}</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

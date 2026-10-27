@@ -1,0 +1,28 @@
+<section class="page">
+    <h1 class="heading">Juegos</h1>
+
+    @if (loading()) {
+        <p class="state">Cargando…</p>
+    } @else if (failed()) {
+        <p class="state error">No se han podido cargar los juegos.</p>
+    } @else if (games().length === 0) {
+        <p class="state">Todavía no hay juegos.</p>
+    } @else {
+        <div class="grid">
+            @for (game of games(); track game.id) {
+                <a class="game" [routerLink]="['/pokemon/games', game.id]">
+                    <img class="game-image" [src]="game.imageUrl" [alt]="game.name" loading="lazy" />
+                    <div class="game-body">
+                        <h2 class="game-name">{{ game.name }}</h2>
+                        @if (game.description) {
+                            <p class="game-description">{{ game.description }}</p>
+                        }
+                        <span class="chip">
+                            {{ game.lockeCount }} {{ game.lockeCount === 1 ? 'randomlocke' : 'randomlockes' }}
+                        </span>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+</section>

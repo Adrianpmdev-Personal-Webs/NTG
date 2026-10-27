@@ -1,0 +1,69 @@
+@let doc = rules();
+@if (!doc?.rules?.length) {
+    <p class="empty">Este randomlocke no tiene reglas publicadas.</p>
+} @else {
+    @if (doc?.name) {
+        <h3 class="doc-name">{{ doc?.name }}</h3>
+    }
+    <ol class="rules">
+        @for (rule of doc?.rules; track rule.number) {
+            <li class="rule">
+                <div class="rule-title"><span class="rule-number">{{ rule.number }}.</span> {{ rule.title }}</div>
+                <p class="rule-description">{{ rule.description }}</p>
+
+                @if (rule.conditions?.length) {
+                    <div class="rule-block">
+                        <span class="rule-label">Condiciones</span>
+                        <ul>
+                            @for (item of rule.conditions; track $index) {
+                                <li>{{ item }}</li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                @if (rule.exceptions?.length) {
+                    <div class="rule-block">
+                        <span class="rule-label">Excepciones</span>
+                        <ul>
+                            @for (item of rule.exceptions; track $index) {
+                                <li>{{ item }}</li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                @if (rule.levelCaps?.length) {
+                    <div class="rule-block">
+                        <span class="rule-label">Niveles máximos</span>
+                        <ul class="chips">
+                            @for (cap of rule.levelCaps; track $index) {
+                                <li>{{ cap.battle }}: <strong>{{ cap.level }}</strong></li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                @if (rule.tournaments?.length) {
+                    <div class="rule-block">
+                        <span class="rule-label">Torneos</span>
+                        <ul>
+                            @for (tournament of rule.tournaments; track $index) {
+                                <li>
+                                    <strong>{{ tournament.name }}</strong> · nivel {{ tournament.level }}
+                                    @if (tournament.rewards?.length) {
+                                        · {{ tournament.rewards?.join(', ') }}
+                                    }
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                @if (rule.extra) {
+                    <p class="rule-extra">{{ rule.extra }}</p>
+                }
+            </li>
+        }
+    </ol>
+}

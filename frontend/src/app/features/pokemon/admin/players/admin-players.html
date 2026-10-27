@@ -1,0 +1,101 @@
+<div class="admin-page">
+    <div class="admin-section-head">
+        <div>
+            <h1 class="admin-page-title">POKÉMON :: JUGADORES</h1>
+            <p class="admin-page-subtitle">Vincula cada jugador con su cuenta para que pueda subir sus equipos.</p>
+        </div>
+        <button class="btn-neon" type="button" (click)="openCreate()">+ NUEVO JUGADOR</button>
+    </div>
+
+    <div class="terminal-card admin-section">
+        @if (loading()) {
+            <p class="admin-page-state">CARGANDO...</p>
+        } @else if (players().length === 0) {
+            <p class="admin-page-state">SIN JUGADORES</p>
+        } @else {
+            <div class="admin-table-scroll">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>JUGADOR</th>
+                            <th>CUENTA</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (player of players(); track player.id) {
+                            <tr>
+                                <td class="strong">{{ player.name }}</td>
+                                <td>{{ accountName(player.userId) }}</td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="action-btn btn-neon" type="button" (click)="openEdit(player)">✎ EDITAR</button>
+                                        <button class="action-btn btn-neon btn-neon-danger" type="button" (click)="openDelete(player)">✕ ELIMINAR</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+@let d = dialog();
+@if (d && d.mode !== 'delete') {
+    <div class="modal-overlay" (click)="close()">
+        <div class="modal modal-sm terminal-card" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title">{{ d.mode === 'create' ? 'NUEVO JUGADOR' : 'EDITAR JUGADOR' }}</h2>
+                <button class="close-btn" type="button" aria-label="Cerrar" (click)="close()">✕</button>
+            </div>
+            <form class="modal-body" (ngSubmit)="save()" #playerForm="ngForm">
+                <div class="form-grid">
+                    <label class="form-field">
+                        <span class="field-label">NOMBRE</span>
+                        <input class="neon-input" name="name" required maxlength="50" [(ngModel)]="form.name" />
+                    </label>
+                    <label class="form-field">
+                        <span class="field-label">CUENTA DE LA PLATAFORMA</span>
+                        <select class="neon-input" name="userId" [(ngModel)]="form.userId">
+                            <option [ngValue]="null">Sin cuenta</option>
+                            @for (user of availableUsers(d.mode === 'edit' ? d.player.userId : null); track user.id) {
+                                <option [ngValue]="user.id">{{ user.username }}</option>
+                            }
+                        </select>
+                        <span class="field-hint">Con cuenta, el jugador puede subir su propio equipo antes de la revelación.</span>
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-neon btn-neon-danger" type="button" (click)="close()">CANCELAR</button>
+                    <button class="btn-neon" type="submit" [disabled]="saving() || playerForm.invalid">GUARDAR</button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
+@if (d && d.mode === 'delete') {
+    <div class="modal-overlay" (click)="close()">
+        <div class="modal modal-sm terminal-card" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title danger-title">ELIMINAR JUGADOR</h2>
+                <button class="close-btn" type="button" aria-label="Cerrar" (click)="close()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="delete-warning">
+                    <span class="warning-icon">⚠</span>
+                    <div>
+                        <p class="warning-title">¿Eliminar a <span class="highlight">{{ d.player.name }}</span>?</p>
+                        <p class="warning-desc">Solo se puede eliminar un jugador que no haya jugado ningún torneo.</p>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-neon" type="button" (click)="close()">CANCELAR</button>
+                    <button class="btn-neon btn-neon-danger" type="button" [disabled]="saving()" (click)="confirmDelete()">CONFIRMAR ELIMINACIÓN</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

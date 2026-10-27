@@ -1,0 +1,104 @@
+/**
+ * Series card styles (terminal tokens, remapped by the Pokémon layout).
+ *
+ * @author @adrianpmdev
+ */
+
+:host {
+    display: block;
+}
+
+.match {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 190px;
+    padding: 8px 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    transition: border-color 0.15s, transform 0.15s;
+
+    &.editable {
+        cursor: pointer;
+
+        &:hover,
+        &:focus-visible {
+            border-color: var(--neon-green);
+            transform: translateY(-1px);
+        }
+    }
+
+    &.muted {
+        opacity: 0.55;
+    }
+}
+
+.side {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    color: var(--text-secondary);
+
+    &.winner {
+        color: var(--text-primary);
+        font-weight: 700;
+
+        .score {
+            color: var(--neon-green);
+        }
+    }
+
+    &.mine .player {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+}
+
+.player {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.score {
+    font-family: var(--font-display);
+    min-width: 1ch;
+    text-align: right;
+}
+
+.footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top: 1px dashed var(--border-color);
+    font-size: 0.7rem;
+}
+
+.status {
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.replays {
+    display: flex;
+    gap: 6px;
+}
+
+.replay {
+    color: var(--neon-cyan);
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+    }
+
+    &.missing {
+        color: var(--text-dim);
+    }
+}

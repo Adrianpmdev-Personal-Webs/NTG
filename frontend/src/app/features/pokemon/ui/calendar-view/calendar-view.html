@@ -1,0 +1,19 @@
+@if (rounds().length === 0) {
+    <p class="empty">Todavía no hay calendario.</p>
+}
+
+<div class="rounds">
+    @for (round of rounds(); track round.round) {
+        <div class="round">
+            <div class="round-label">Jornada {{ round.round }}</div>
+            @for (match of round.matches; track match.id) {
+                <app-pokemon-match-card
+                    [match]="match"
+                    [players]="players()"
+                    [editable]="editable()"
+                    (edit)="edit.emit($event)"
+                />
+            }
+        </div>
+    }
+</div>

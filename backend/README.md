@@ -93,6 +93,7 @@ backend/
 │   └── validation/                 Custom validators (only where needed)
 ├── application/                    🧠 What the feature does
 │   └── service/                    Business rules and orchestration
+├── domain/                         🧩 Pure rules without Spring (only where needed, e.g. Pokémon tournaments)
 └── infrastructure/                 🗄️ How it is stored
     └── persistence/
         ├── entity/                 JPA entities
@@ -105,6 +106,9 @@ backend/
   repositories and to the Supabase client.
 - Requests are validated at the edge and responses are DTOs, so the database model never leaks into the API.
 - Game modules never depend on `core`'s security: the access policy lives in one place.
+- When a game needs something from the platform (who is calling, file storage), it declares a small interface
+  (a *port*) in its own `shared/port` package and `core` implements it. The dependency keeps pointing from
+  `core` to the game, never back.
 
 <br>
 
@@ -130,6 +134,7 @@ requests without permission receive `403`.
 | **CORS** | Explicit **origin allow-list** from configuration, with credentials. |
 | **Swagger** | Interactive API docs are protected with **Basic Auth** (admin only) and can be turned off per environment. |
 | **Secrets** | Keys, database credentials and the token secret live **outside the repository** (environment variables or secret files). |
+| **Uploaded files** | Pokémon team pictures go through the backend to a **private Storage bucket** closed to clients by a restrictive policy. Only the player of that tournament entry (or an admin) may upload, files are checked by their bytes and size, the database keeps only object names and clients get short-lived signed URLs. |
 | **Auditability** | Admin actions (create/delete user, change tags…) are written to a dedicated `AUDIT` log with who did what to whom. |
 
 ### Who can call what
@@ -143,6 +148,7 @@ requests without permission receive `403`.
 | Tags | `/tags/**` | **Admin** |
 | Games | `GET /<game>/**` | Users with the game's **tag**, and admins |
 | Games | `POST` · `PUT` · `DELETE /<game>/**` | **Admin** |
+| Games | `PUT` · `DELETE /pokemon/tournament-players/*/team-image` | Users with the `pokemon` tag; the module only accepts the owner of the entry (or an admin) |
 | Health | `GET /keep-alive` | Public |
 | Anything else | | ⛔ Denied |
 
@@ -266,7 +272,7 @@ java -jar core/target/core-0.1.jar
 ---
 # 🗺️ Ideas for next steps
 
-- Automated tests for the security rules and the account flows.
+- Automated tests for the security rules and the account flows (the Pokémon tournament rules already have unit tests).
 - Request rate limiting on the public endpoints.
 - A lightweight "player directory" endpoint (name and avatar only) for the game views.
 - More game modules following the same structure.

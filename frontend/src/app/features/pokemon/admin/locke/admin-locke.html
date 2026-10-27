@@ -1,0 +1,135 @@
+<div class="admin-page">
+    <a class="admin-page-subtitle" routerLink="/admin/pokemon/lockes">← RANDOMLOCKES</a>
+
+    @if (loading()) {
+        <p class="admin-page-state">CARGANDO...</p>
+    } @else if (locke()) {
+        @let l = locke()!;
+        <div class="admin-section-head">
+            <div>
+                <h1 class="admin-page-title">{{ l.name }}</h1>
+                @if (l.description) {
+                    <p class="admin-page-subtitle">{{ l.description }}</p>
+                }
+            </div>
+            <a class="btn-neon btn-neon-accent" [routerLink]="['/pokemon/lockes', l.id]">VER COMO JUGADOR</a>
+        </div>
+
+        <section class="terminal-card admin-section">
+            <div class="admin-section-head">
+                <h2 class="admin-section-title">TORNEOS</h2>
+                <button class="btn-neon" type="button" (click)="openCreate()">+ NUEVO TORNEO</button>
+            </div>
+            @if (l.tournaments.length === 0) {
+                <p class="admin-page-state">SIN TORNEOS</p>
+            } @else {
+                <div class="admin-table-scroll">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>TORNEO</th>
+                                <th>JUEGO</th>
+                                <th>FORMATO</th>
+                                <th>ESTADO</th>
+                                <th>CAMPEÓN</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (t of l.tournaments; track t.id) {
+                                <tr>
+                                    <td>{{ t.position }}</td>
+                                    <td class="strong">{{ t.name }}</td>
+                                    <td>{{ t.game.name }}</td>
+                                    <td>{{ formatLabels[t.format] }}</td>
+                                    <td>{{ statusLabels[t.status] }}</td>
+                                    <td>{{ t.champion?.name ?? '—' }}</td>
+                                    <td>
+                                        <div class="actions">
+                                            <a class="action-btn btn-neon" [routerLink]="['/admin/pokemon/tournaments', t.id]">▶ GESTIONAR</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </section>
+
+        <section class="terminal-card admin-section">
+            <div class="admin-section-head">
+                <h2 class="admin-section-title">PLANTILLA</h2>
+                <button class="btn-neon" type="button" [disabled]="saving()" (click)="saveRoster()">GUARDAR PLANTILLA</button>
+            </div>
+            <p class="admin-hint">Los torneos nuevos empiezan con estos jugadores. Los torneos ya creados no cambian.</p>
+            <div class="check-group">
+                @for (player of players(); track player.id) {
+                    <label class="check-option">
+                        <input type="checkbox" [checked]="roster().has(player.id)" (change)="toggleRoster(player.id)" />
+                        {{ player.name }}
+                    </label>
+                } @empty {
+                    <p class="admin-page-state">No hay jugadores: créalos en la pantalla de jugadores.</p>
+                }
+            </div>
+        </section>
+    }
+</div>
+
+@if (creating()) {
+    <div class="modal-overlay" (click)="creating.set(false)">
+        <div class="modal terminal-card" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title">NUEVO TORNEO</h2>
+                <button class="close-btn" type="button" aria-label="Cerrar" (click)="creating.set(false)">✕</button>
+            </div>
+            <form class="modal-body" (ngSubmit)="createTournament()" #tournamentForm="ngForm">
+                <div class="form-grid">
+                    <label class="form-field">
+                        <span class="field-label">NOMBRE</span>
+                        <input class="neon-input" name="name" required maxlength="100" [(ngModel)]="form.name" placeholder="Torneo 1 - LvL 20" />
+                    </label>
+                    <div class="form-row">
+                        <label class="form-field">
+                            <span class="field-label">JUEGO</span>
+                            <select class="neon-input" name="gameId" required [(ngModel)]="form.gameId">
+                                @for (game of games(); track game.id) {
+                                    <option [value]="game.id">{{ game.name }}</option>
+                                }
+                            </select>
+                        </label>
+                        <label class="form-field">
+                            <span class="field-label">FORMATO</span>
+                            <select class="neon-input" name="format" required [(ngModel)]="form.format">
+                                @for (option of formatOptions; track option.value) {
+                                    <option [value]="option.value">{{ option.label }}</option>
+                                }
+                            </select>
+                        </label>
+                    </div>
+                    <div class="form-row">
+                        <label class="form-field">
+                            <span class="field-label">PUNTOS POR VICTORIA</span>
+                            <input class="neon-input" name="pointsPerWin" type="number" min="0" max="100" required [(ngModel)]="form.pointsPerWin" />
+                        </label>
+                        <label class="form-field">
+                            <span class="field-label">REVELACIÓN DE EQUIPOS</span>
+                            <input class="neon-input" name="revealAt" type="datetime-local" [(ngModel)]="revealAt" />
+                        </label>
+                    </div>
+                    <label class="form-field">
+                        <span class="field-label">DESCRIPCIÓN</span>
+                        <textarea class="neon-input" name="description" rows="3" maxlength="1000" [(ngModel)]="form.description"></textarea>
+                    </label>
+                    <p class="admin-hint">El torneo empieza en preparación, con la plantilla del randomlocke como jugadores.</p>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-neon btn-neon-danger" type="button" (click)="creating.set(false)">CANCELAR</button>
+                    <button class="btn-neon" type="submit" [disabled]="saving() || tournamentForm.invalid">CREAR</button>
+                </div>
+            </form>
+        </div>
+    </div>
+}

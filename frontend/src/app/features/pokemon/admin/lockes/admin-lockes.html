@@ -1,0 +1,106 @@
+<div class="admin-page">
+    <div class="admin-section-head">
+        <div>
+            <h1 class="admin-page-title">POKÉMON :: RANDOMLOCKES</h1>
+            <p class="admin-page-subtitle">Cada randomlocke tiene sus reglas, su plantilla de jugadores y sus torneos.</p>
+        </div>
+        <button class="btn-neon" type="button" (click)="openCreate()">+ NUEVO RANDOMLOCKE</button>
+    </div>
+
+    <div class="terminal-card admin-section">
+        @if (loading()) {
+            <p class="admin-page-state">CARGANDO...</p>
+        } @else if (lockes().length === 0) {
+            <p class="admin-page-state">SIN RANDOMLOCKES</p>
+        } @else {
+            <div class="admin-table-scroll">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>RANDOMLOCKE</th>
+                            <th>JUEGOS</th>
+                            <th>TORNEOS</th>
+                            <th>JUGADORES</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (locke of lockes(); track locke.id) {
+                            <tr>
+                                <td class="strong">{{ locke.name }}</td>
+                                <td>{{ gameNames(locke) }}</td>
+                                <td>{{ locke.tournamentCount }}</td>
+                                <td>{{ locke.playerCount }}</td>
+                                <td>
+                                    <div class="actions">
+                                        <a class="action-btn btn-neon btn-neon-accent" [routerLink]="['/admin/pokemon/lockes', locke.id]">▶ GESTIONAR</a>
+                                        <button class="action-btn btn-neon" type="button" (click)="openEdit(locke)">✎ EDITAR</button>
+                                        <button class="action-btn btn-neon btn-neon-danger" type="button" (click)="openDelete(locke)">✕ ELIMINAR</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+@let d = dialog();
+@if (d && d.mode !== 'delete') {
+    <div class="modal-overlay" (click)="close()">
+        <div class="modal modal-lg terminal-card" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title">{{ d.mode === 'create' ? 'NUEVO RANDOMLOCKE' : 'EDITAR RANDOMLOCKE' }}</h2>
+                <button class="close-btn" type="button" aria-label="Cerrar" (click)="close()">✕</button>
+            </div>
+            <form class="modal-body" (ngSubmit)="save()" #lockeForm="ngForm">
+                <div class="form-grid">
+                    <label class="form-field">
+                        <span class="field-label">NOMBRE</span>
+                        <input class="neon-input" name="name" required maxlength="100" [(ngModel)]="form.name" />
+                    </label>
+                    <label class="form-field">
+                        <span class="field-label">DESCRIPCIÓN</span>
+                        <textarea class="neon-input" name="description" rows="3" maxlength="1000" [(ngModel)]="form.description"></textarea>
+                    </label>
+                    <label class="form-field">
+                        <span class="field-label">REGLAS (JSON)</span>
+                        <textarea class="neon-input" name="rules" rows="14" spellcheck="false" [(ngModel)]="form.rules"
+                            placeholder='{ "name": "...", "rules": [{ "number": 1, "title": "...", "description": "..." }] }'></textarea>
+                        <span class="field-hint">Cada regla admite conditions, exceptions, levelCaps, tournaments y extra. Déjalo vacío si no hay reglas.</span>
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-neon btn-neon-danger" type="button" (click)="close()">CANCELAR</button>
+                    <button class="btn-neon" type="submit" [disabled]="saving() || lockeForm.invalid">GUARDAR</button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
+@if (d && d.mode === 'delete') {
+    <div class="modal-overlay" (click)="close()">
+        <div class="modal modal-sm terminal-card" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title danger-title">ELIMINAR RANDOMLOCKE</h2>
+                <button class="close-btn" type="button" aria-label="Cerrar" (click)="close()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="delete-warning">
+                    <span class="warning-icon">⚠</span>
+                    <div>
+                        <p class="warning-title">¿Eliminar <span class="highlight">{{ d.locke.name }}</span>?</p>
+                        <p class="warning-desc">Se eliminan también sus {{ d.locke.tournamentCount }} torneos, sus resultados y los equipos subidos.</p>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-neon" type="button" (click)="close()">CANCELAR</button>
+                    <button class="btn-neon btn-neon-danger" type="button" [disabled]="saving()" (click)="confirmDelete()">CONFIRMAR ELIMINACIÓN</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

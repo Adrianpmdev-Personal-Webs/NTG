@@ -39,7 +39,9 @@ export const GAMES: readonly GameEntry[] = [
         route: '/pokemon',
         adminRoute: '/admin/pokemon',
         adminItems: [
-            { label: 'GESTIÓN', route: '/admin/pokemon/games', icon: '▣' }
+            { label: 'RANDOMLOCKES', route: '/admin/pokemon/lockes', icon: '▣' },
+            { label: 'JUGADORES', route: '/admin/pokemon/players', icon: '◉' },
+            { label: 'JUEGOS', route: '/admin/pokemon/games', icon: '◈' }
         ],
         upcoming: true
     },

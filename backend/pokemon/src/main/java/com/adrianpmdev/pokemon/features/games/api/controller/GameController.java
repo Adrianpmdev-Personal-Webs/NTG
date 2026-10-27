@@ -1,30 +1,26 @@
 package com.adrianpmdev.pokemon.features.games.api.controller;
 
-
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import com.adrianpmdev.pokemon.features.games.api.dto.request.GameRequest;
+import com.adrianpmdev.pokemon.features.games.api.dto.response.GameResponse;
+import com.adrianpmdev.pokemon.features.games.application.service.GameService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
-import com.adrianpmdev.pokemon.features.games.api.dto.request.GameCreateRequest;
-import com.adrianpmdev.pokemon.features.games.api.dto.request.GameUpdateRequest;
-import com.adrianpmdev.pokemon.features.games.api.dto.response.GameResponse;
-import com.adrianpmdev.pokemon.features.games.application.service.GameService;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.UUID;
 
 /**
- * REST controller for managing games.
+ * Pokémon games. Reading needs the pokemon tag; writing is admin only (core security rules).
  *
  * @author adrianpmdev
  */
@@ -35,42 +31,30 @@ public class GameController {
 
     private final GameService gameService;
 
-    @PostMapping
-    public ResponseEntity<GameResponse> createGame(@Valid @RequestBody GameCreateRequest request) {
-        GameResponse createdGame = gameService.createGame(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdGame);
+    @GetMapping
+    public List<GameResponse> list() {
+        return gameService.list();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GameResponse> getGameById(@PathVariable UUID id) {
-        GameResponse game = gameService.getGameById(id);
-        return ResponseEntity.ok(game);
+    public GameResponse get(@PathVariable UUID id) {
+        return gameService.get(id);
     }
 
-    @GetMapping
-    public ResponseEntity<List<GameResponse>> getAllGames() {
-        List<GameResponse> games = gameService.getAllGames();
-        return ResponseEntity.ok(games);
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public GameResponse create(@Valid @RequestBody GameRequest request) {
+        return gameService.create(request);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<GameResponse> updateGame(
-            @PathVariable UUID id,
-            @RequestBody GameUpdateRequest request
-    ) {
-        GameResponse updatedGame = gameService.updateGame(id, request);
-        return ResponseEntity.ok(updatedGame);
+    public GameResponse update(@PathVariable UUID id, @Valid @RequestBody GameRequest request) {
+        return gameService.update(id, request);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteGame(@PathVariable UUID id) {
-        gameService.deleteGame(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/search")
-    public ResponseEntity<List<GameResponse>> searchGames(@RequestParam String name) {
-        List<GameResponse> games = gameService.searchGamesByName(name);
-        return ResponseEntity.ok(games);
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable UUID id) {
+        gameService.delete(id);
     }
 }

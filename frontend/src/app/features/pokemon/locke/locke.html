@@ -1,0 +1,76 @@
+<section class="page">
+    <a class="back" routerLink="/pokemon/games">← Juegos</a>
+
+    @if (loading()) {
+        <p class="state">Cargando…</p>
+    } @else if (failed() || !locke()) {
+        <p class="state error">No se ha podido cargar el randomlocke.</p>
+    } @else {
+        @let current = locke()!;
+        <header class="head">
+            <h1 class="heading">{{ current.name }}</h1>
+            @if (current.description) {
+                <p class="description">{{ current.description }}</p>
+            }
+            @if (current.games.length > 0) {
+                <div class="games">
+                    @for (game of current.games; track game.id) {
+                        <a class="chip" [routerLink]="['/pokemon/games', game.id]">{{ game.name }}</a>
+                    }
+                </div>
+            }
+        </header>
+
+        <nav class="tabs" aria-label="Secciones del randomlocke">
+            @for (tab of tabs; track tab.id) {
+                <button class="tab" type="button" [class.active]="activeTab() === tab.id" (click)="activeTab.set(tab.id)">{{ tab.label }}</button>
+            }
+        </nav>
+
+        @switch (activeTab()) {
+            @case ('tournaments') {
+                @if (current.tournaments.length === 0) {
+                    <p class="state">Este randomlocke todavía no tiene torneos.</p>
+                } @else {
+                    <div class="tournaments">
+                        @for (tournament of current.tournaments; track tournament.id) {
+                            <a class="tournament" [routerLink]="['/pokemon/tournaments', tournament.id]">
+                                <span class="tournament-position">{{ tournament.position }}</span>
+                                <div class="tournament-body">
+                                    <h2 class="tournament-name">{{ tournament.name }}</h2>
+                                    <p class="tournament-meta">
+                                        {{ tournament.game.name }} · {{ formatLabels[tournament.format] }}
+                                    </p>
+                                </div>
+                                <div class="tournament-side">
+                                    <span class="status" [class]="'status ' + tournament.status">{{ statusLabels[tournament.status] }}</span>
+                                    @if (tournament.champion) {
+                                        <span class="champion">🏆 {{ tournament.champion.name }}</span>
+                                    }
+                                </div>
+                            </a>
+                        }
+                    </div>
+                }
+            }
+            @case ('standings') {
+                <div class="card">
+                    <p class="hint">Puntos acumulados en todos los torneos del randomlocke.</p>
+                    <app-pokemon-standings-table [rows]="standingRows()" extraLabel="Títulos" />
+                </div>
+            }
+            @case ('rules') {
+                <app-pokemon-rules-view [rules]="current.rules" />
+            }
+            @case ('players') {
+                <div class="players">
+                    @for (player of current.roster; track player.id) {
+                        <span class="player">{{ player.name }}</span>
+                    } @empty {
+                        <p class="state">Sin jugadores.</p>
+                    }
+                </div>
+            }
+        }
+    }
+</section>

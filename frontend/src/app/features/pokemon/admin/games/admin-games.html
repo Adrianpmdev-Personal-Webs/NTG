@@ -1,0 +1,101 @@
+<div class="admin-page">
+    <div class="admin-section-head">
+        <div>
+            <h1 class="admin-page-title">POKÉMON :: JUEGOS</h1>
+            <p class="admin-page-subtitle">Los juegos en los que se juegan los torneos de los randomlockes.</p>
+        </div>
+        <button class="btn-neon" type="button" (click)="openCreate()">+ NUEVO JUEGO</button>
+    </div>
+
+    <div class="terminal-card admin-section">
+        @if (loading()) {
+            <p class="admin-page-state">CARGANDO...</p>
+        } @else if (games().length === 0) {
+            <p class="admin-page-state">SIN JUEGOS</p>
+        } @else {
+            <div class="admin-table-scroll">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>JUEGO</th>
+                            <th>DESCRIPCIÓN</th>
+                            <th>RANDOMLOCKES</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (game of games(); track game.id) {
+                            <tr>
+                                <td class="strong">{{ game.name }}</td>
+                                <td>{{ game.description ? (game.description.length > 90 ? game.description.slice(0, 90) + '…' : game.description) : '—' }}</td>
+                                <td>{{ game.lockeCount }}</td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="action-btn btn-neon" type="button" (click)="openEdit(game)">✎ EDITAR</button>
+                                        <button class="action-btn btn-neon btn-neon-danger" type="button" (click)="openDelete(game)">✕ ELIMINAR</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+@let d = dialog();
+@if (d && d.mode !== 'delete') {
+    <div class="modal-overlay" (click)="close()">
+        <div class="modal terminal-card" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title">{{ d.mode === 'create' ? 'NUEVO JUEGO' : 'EDITAR JUEGO' }}</h2>
+                <button class="close-btn" type="button" aria-label="Cerrar" (click)="close()">✕</button>
+            </div>
+            <form class="modal-body" (ngSubmit)="save()" #gameForm="ngForm">
+                <div class="form-grid">
+                    <label class="form-field">
+                        <span class="field-label">NOMBRE</span>
+                        <input class="neon-input" name="name" required maxlength="100" [(ngModel)]="form.name" />
+                    </label>
+                    <label class="form-field">
+                        <span class="field-label">URL DE LA IMAGEN</span>
+                        <input class="neon-input" name="imageUrl" type="url" required maxlength="500" pattern="https?://\S+" [(ngModel)]="form.imageUrl" />
+                    </label>
+                    <label class="form-field">
+                        <span class="field-label">DESCRIPCIÓN</span>
+                        <textarea class="neon-input" name="description" rows="5" maxlength="1000" [(ngModel)]="form.description"></textarea>
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-neon btn-neon-danger" type="button" (click)="close()">CANCELAR</button>
+                    <button class="btn-neon" type="submit" [disabled]="saving() || gameForm.invalid">GUARDAR</button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
+@if (d && d.mode === 'delete') {
+    <div class="modal-overlay" (click)="close()">
+        <div class="modal modal-sm terminal-card" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+                <h2 class="modal-title danger-title">ELIMINAR JUEGO</h2>
+                <button class="close-btn" type="button" aria-label="Cerrar" (click)="close()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="delete-warning">
+                    <span class="warning-icon">⚠</span>
+                    <div>
+                        <p class="warning-title">¿Eliminar <span class="highlight">{{ d.game.name }}</span>?</p>
+                        <p class="warning-desc">Solo se puede eliminar un juego sin torneos.</p>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-neon" type="button" (click)="close()">CANCELAR</button>
+                    <button class="btn-neon btn-neon-danger" type="button" [disabled]="saving()" (click)="confirmDelete()">CONFIRMAR ELIMINACIÓN</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

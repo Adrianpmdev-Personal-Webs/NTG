@@ -25,6 +25,7 @@ class GameDataServiceTest {
     void indexHasClassesToolsAndPointLevels() throws Exception {
         JsonNode index = read(service.getIndex());
 
+        assertThat(index.path("credit").path("build").asText()).matches("\\d+\\.\\d+\\.\\d+\\.\\d+");
         assertThat(index.path("classes")).hasSize(9);
         assertThat(index.path("classes").path(0).path("icon").asText()).startsWith(ICON_PREFIX).endsWith(".jpg");
         assertThat(index.path("features").isArray()).isTrue();

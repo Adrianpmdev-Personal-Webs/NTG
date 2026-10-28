@@ -30,7 +30,7 @@ class GameDataControllerTest {
         MvcResult first = mockMvc.perform(get("/api/v1/wow-forever/data/talents/warrior"))
                 .andExpect(status().isOk())
                 .andExpect(header().exists(HttpHeaders.ETAG))
-                .andExpect(header().string(HttpHeaders.CACHE_CONTROL, "max-age=3600, private"))
+                .andExpect(header().string(HttpHeaders.CACHE_CONTROL, "no-cache, private"))
                 .andReturn();
         String etag = first.getResponse().getHeader(HttpHeaders.ETAG);
 

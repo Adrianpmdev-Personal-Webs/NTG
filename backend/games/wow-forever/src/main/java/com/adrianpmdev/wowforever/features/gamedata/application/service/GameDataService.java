@@ -57,7 +57,10 @@ public class GameDataService {
                             GameDataMapper mapper) {
     }
 
-    /** Credit, classes with their icons, tools and news of the home, faction names and talent point levels. */
+    /**
+     * Credit (with the game build of the first class whose talents name one), classes with their icons, tools and news
+     * of the home, faction names and talent point levels.
+     */
     public String getIndex() {
         return cached("index", () -> {
             GameData gameData = data();
@@ -65,6 +68,10 @@ public class GameDataService {
             List<GameClass> classes = new ArrayList<>();
 
             gameData.classNamesBySlug().forEach((slug, name) -> classes.add(gameClass(gameData, slug, name)));
+
+            String[] talentSources = gameData.classNamesBySlug().values().stream()
+                    .map(name -> gameData.root().path("talents").path(name).path("source").asText(null))
+                    .toArray(String[]::new);
 
             List<Feature> features = config.features().stream()
                     .map(feature -> new Feature(feature.id(), feature.label(), feature.description(), feature.available()))
@@ -77,8 +84,8 @@ public class GameDataService {
                     .boxed()
                     .toList();
 
-            return new GameIndex(gameData.mapper().credit(gameData.root()), classes, features, news, config.factions(),
-                    pointLevels);
+            return new GameIndex(gameData.mapper().credit(gameData.root(), talentSources), classes, features, news,
+                    config.factions(), pointLevels);
         });
     }
 

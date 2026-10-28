@@ -37,6 +37,7 @@ export class Home {
     protected readonly features = computed(() => this.index()?.features ?? []);
     protected readonly news = computed(() => this.index()?.news ?? []);
     protected readonly factions = computed(() => this.index()?.factions ?? null);
+    protected readonly build = computed(() => this.index()?.credit.build ?? null);
     protected readonly faction = signal<Faction>('ALLIANCE');
 
     private readonly images = gameImages();

@@ -41,7 +41,13 @@
                 </nav>
 
                 <div class="play-area">
-                    <app-wow-button [large]="true">JUGAR</app-wow-button>
+                    <app-wow-button [large]="true" [disabled]="true">
+                        @if (build(); as version) {
+                            <span class="play-build">{{ version }}</span>
+                        } @else {
+                            JUGAR
+                        }
+                    </app-wow-button>
                 </div>
             </section>
 

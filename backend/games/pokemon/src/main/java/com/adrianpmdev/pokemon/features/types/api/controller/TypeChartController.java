@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * REST controller for the Pokémon types and their damage chart (read only), used by the type calculator.
  *
@@ -22,8 +20,11 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class TypeChartController {
 
-    /** The chart only changes with a new deploy: the browser keeps it a day and then checks its ETag (304 if unchanged). */
-    private static final CacheControl CACHE = CacheControl.maxAge(1, TimeUnit.DAYS).cachePrivate();
+    /**
+     * The chart only changes with a new deploy, and players must see it right after one: the browser keeps it but checks
+     * its ETag on every request (a 304 with no body if unchanged).
+     */
+    private static final CacheControl CACHE = CacheControl.noCache().cachePrivate();
 
     private final TypeChartService typeChartService;
 

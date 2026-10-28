@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * REST controller for the game data (talents, spellbooks, racials and the Legacy System), already turned into the models
@@ -27,8 +26,11 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class GameDataController {
 
-    /** The data only changes with a new deploy: the browser keeps it an hour and then checks its ETag (304 if unchanged). */
-    private static final CacheControl CACHE = CacheControl.maxAge(1, TimeUnit.HOURS).cachePrivate();
+    /**
+     * The data only changes with a new deploy, and players must see it right after one: the browser keeps it but checks
+     * its ETag on every request (a 304 with no body if unchanged).
+     */
+    private static final CacheControl CACHE = CacheControl.noCache().cachePrivate();
 
     private final GameDataService gameDataService;
     private final GameImagesService gameImagesService;

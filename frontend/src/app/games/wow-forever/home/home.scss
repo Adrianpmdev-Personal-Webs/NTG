@@ -213,6 +213,11 @@ app-news-panel {
     justify-content: flex-end;
 }
 
+.play-build {
+    font-size: 15px;
+    letter-spacing: 0.04em;
+}
+
 @include tablet {
     :host {
         height: auto;

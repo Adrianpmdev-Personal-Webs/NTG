@@ -24,23 +24,28 @@ import { NewsPanel } from './news-panel/news-panel';
     imports: [LegalNotice, WowButton, WowFrame, LauncherHeader, NewsPanel],
     templateUrl: './home.html',
     styleUrl: './home.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Home {
+    private readonly index = toSignal(
+        inject(GameDataApi)
+            .getIndex()
+            .pipe(catchError(() => of(null))),
+        { initialValue: null },
+    );
 
-    private readonly index = toSignal(inject(GameDataApi).getIndex().pipe(catchError(() => of(null))), { initialValue: null });
-
-    readonly features = computed(() => this.index()?.features ?? []);
-    readonly news = computed(() => this.index()?.news ?? []);
-    readonly factions = computed(() => this.index()?.factions ?? null);
-    readonly faction = signal<Faction>('ALLIANCE');
+    protected readonly features = computed(() => this.index()?.features ?? []);
+    protected readonly news = computed(() => this.index()?.news ?? []);
+    protected readonly factions = computed(() => this.index()?.factions ?? null);
+    protected readonly faction = signal<Faction>('ALLIANCE');
 
     private readonly images = gameImages();
 
-    /** Artwork of the selected faction, uploaded by an admin. */
-    readonly backgroundImage = computed(() => cssUrl(this.images()[`backgrounds/${this.faction().toLowerCase()}`]));
+    protected readonly backgroundImage = computed(() =>
+        cssUrl(this.images()[`backgrounds/${this.faction().toLowerCase()}`]),
+    );
 
-    onFactionChange(value: string): void {
+    protected selectFaction(value: string): void {
         this.faction.set(value === 'HORDE' ? 'HORDE' : 'ALLIANCE');
     }
 }

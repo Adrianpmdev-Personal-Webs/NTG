@@ -13,10 +13,8 @@ import { LauncherNewsItem } from '../../wow-forever-models';
     selector: 'app-news-panel',
     templateUrl: './news-panel.html',
     styleUrl: './news-panel.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NewsPanel {
-
-    /** News of the launcher, from the backend index. */
     readonly news = input<readonly LauncherNewsItem[]>([]);
 }

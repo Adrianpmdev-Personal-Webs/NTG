@@ -8,7 +8,7 @@
  */
 
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { NotificationService } from '@core/services/notification';
+import { NotificationCenter } from '@core/notifications/notification-center';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -17,5 +17,5 @@ import { NotificationService } from '@core/services/notification';
     styleUrl: './notifications.scss',
 })
 export class Notifications {
-    readonly notificationService = inject(NotificationService);
+    protected readonly notificationCenter = inject(NotificationCenter);
 }

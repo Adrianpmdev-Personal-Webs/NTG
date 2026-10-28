@@ -12,7 +12,6 @@ export interface User {
     username: string;
     avatarUrl?: string;
     role: string;
-    /** Tag keys granted to the user. A tag with the id of a game gives access to that game. */
     tags: string[];
     createdAt?: string;
 }
@@ -25,7 +24,6 @@ export interface CreateUserRequest {
 
 export interface CreatedUserResponse {
     user: User;
-    /** False when the user was created but the email with the password link could not be sent. */
     inviteEmailSent: boolean;
 }
 

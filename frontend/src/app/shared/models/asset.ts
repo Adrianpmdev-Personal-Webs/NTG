@@ -7,11 +7,9 @@
  */
 
 export interface Asset {
-    /** Where the picture is used, for example platform/games/pokemon or wow-forever/talents/warrior-arms. */
     key: string;
     group: string;
     label: string;
-    /** False for an uploaded picture that no module expects any more. */
     declared: boolean;
     url: string | null;
     contentType: string | null;

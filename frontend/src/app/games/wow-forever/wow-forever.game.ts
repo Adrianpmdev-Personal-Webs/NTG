@@ -7,9 +7,9 @@
  * @author @adrianpmdev
  */
 
-import { GameModule } from '@core/config/game-module';
+import { GameModule } from '@core/games/game-module';
 
 export const WOW_FOREVER_GAME: GameModule = {
     id: 'wow-forever',
-    routes: () => import('./wow-forever.routes').then(m => m.WOW_FOREVER_ROUTES)
+    routes: () => import('./wow-forever.routes').then((m) => m.WOW_FOREVER_ROUTES),
 };

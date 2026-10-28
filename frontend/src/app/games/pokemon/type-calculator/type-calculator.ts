@@ -22,10 +22,9 @@ import {
     ResultCategory,
     TypeChart,
     TypeDamageResult,
-    typeMultiplier
+    typeMultiplier,
 } from './type-calculator-constants';
 
-/** One block of results (for example the weaknesses) ready for the template. */
 interface ResultGroup {
     category: ResultCategory;
     results: TypeDamageResult[];
@@ -36,52 +35,50 @@ interface ResultGroup {
     selector: 'app-pokemon-type-calculator',
     imports: [],
     templateUrl: './type-calculator.html',
-    styleUrl: './type-calculator.scss'
+    styleUrl: './type-calculator.scss',
 })
 export class TypeCalculator {
-
     private readonly emptyChart: TypeChart = { types: [], chart: {} };
 
-    /** Types and chart from the backend; empty until they arrive (or if they cannot be loaded). */
     private readonly typeChart = toSignal(
-        inject(PokemonApi).getTypeChart().pipe(catchError(() => of(this.emptyChart))),
-        { initialValue: null }
+        inject(PokemonApi)
+            .getTypeChart()
+            .pipe(catchError(() => of(this.emptyChart))),
+        { initialValue: null },
     );
 
-    readonly loading = computed(() => this.typeChart() === null);
-    readonly failed = computed(() => this.typeChart()?.types.length === 0);
-    readonly pokemonTypes = computed<PokemonType[]>(() => this.typeChart()?.types ?? []);
-    readonly modes = CALCULATOR_MODES;
-    readonly maxSelectedTypes = MAX_SELECTED_TYPES;
+    protected readonly loading = computed(() => this.typeChart() === null);
+    protected readonly failed = computed(() => this.typeChart()?.types.length === 0);
+    protected readonly pokemonTypes = computed<PokemonType[]>(() => this.typeChart()?.types ?? []);
+    protected readonly modes = CALCULATOR_MODES;
+    protected readonly maxSelectedTypes = MAX_SELECTED_TYPES;
 
-    readonly mode = signal<CalculatorMode>(CALCULATOR_MODES[0]);
-    readonly selectedTypes = signal<PokemonType[]>([]);
+    protected readonly mode = signal<CalculatorMode>(CALCULATOR_MODES[0]);
+    protected readonly selectedTypes = signal<PokemonType[]>([]);
 
-    /** Multiplier against (attack) or from (defense) every type, for the current selection. */
     private readonly damageResults = computed<TypeDamageResult[]>(() => {
         const selected = this.selectedTypes();
         const attacking = this.mode().id === 'attack';
 
-        return this.pokemonTypes().map(type => ({
+        return this.pokemonTypes().map((type) => ({
             type,
-            multiplier: attacking ? this.bestAttackMultiplier(selected, type) : this.defenseMultiplier(type, selected)
+            multiplier: attacking ? this.bestAttackMultiplier(selected, type) : this.defenseMultiplier(type, selected),
         }));
     });
 
-    /** Results split into weaknesses / resistances / immunities / neutral, strongest first. */
-    readonly resultGroups = computed<ResultGroup[]>(() => {
+    protected readonly resultGroups = computed<ResultGroup[]>(() => {
         const results = this.damageResults();
 
-        return RESULT_CATEGORIES.map(category => ({
+        return RESULT_CATEGORIES.map((category) => ({
             category,
             results: results
-                .filter(result => category.matches(result.multiplier))
-                .sort((first, second) => second.multiplier - first.multiplier)
+                .filter((result) => category.matches(result.multiplier))
+                .sort((first, second) => second.multiplier - first.multiplier),
         }));
     });
 
-    setMode(modeId: CalculatorMode['id']): void {
-        const mode = this.modes.find(current => current.id === modeId);
+    protected setMode(modeId: CalculatorMode['id']): void {
+        const mode = this.modes.find((current) => current.id === modeId);
 
         if (mode && mode !== this.mode()) {
             this.mode.set(mode);
@@ -89,43 +86,43 @@ export class TypeCalculator {
         }
     }
 
-    toggleType(type: PokemonType): void {
+    protected toggleType(type: PokemonType): void {
         const current = this.selectedTypes();
 
         if (current.includes(type)) {
-            this.selectedTypes.set(current.filter(selected => selected !== type));
+            this.selectedTypes.set(current.filter((selected) => selected !== type));
         } else if (current.length >= this.maxSelectedTypes) {
-            // Replace the oldest pick so the user can keep clicking without clearing first.
             this.selectedTypes.set([...current.slice(1), type]);
         } else {
             this.selectedTypes.set([...current, type]);
         }
     }
 
-    clearSelection(): void {
+    protected clearSelection(): void {
         this.selectedTypes.set([]);
     }
 
-    isTypeSelected(type: PokemonType): boolean {
+    protected isTypeSelected(type: PokemonType): boolean {
         return this.selectedTypes().includes(type);
     }
 
-    typeClass(type: PokemonType): string {
+    protected typeClass(type: PokemonType): string {
         return `type-${type.toLowerCase()}`;
     }
 
-    formatMultiplier(multiplier: number): string {
+    protected formatMultiplier(multiplier: number): string {
         return `${multiplier}x`;
     }
 
-    /** Damage a Pokémon with the defending types receives from one attacking type. */
     private defenseMultiplier(attackType: PokemonType, defendingTypes: readonly PokemonType[]): number {
         const chart = this.typeChart() ?? this.emptyChart;
 
-        return defendingTypes.reduce((total, defendingType) => total * typeMultiplier(chart, attackType, defendingType), 1);
+        return defendingTypes.reduce(
+            (total, defendingType) => total * typeMultiplier(chart, attackType, defendingType),
+            1,
+        );
     }
 
-    /** Best damage any of the attacking types deals to one defending type (move coverage). */
     private bestAttackMultiplier(attackTypes: readonly PokemonType[], defendingType: PokemonType): number {
         if (attackTypes.length === 0) {
             return 1;
@@ -133,6 +130,6 @@ export class TypeCalculator {
 
         const chart = this.typeChart() ?? this.emptyChart;
 
-        return Math.max(...attackTypes.map(attackType => typeMultiplier(chart, attackType, defendingType)));
+        return Math.max(...attackTypes.map((attackType) => typeMultiplier(chart, attackType, defendingType)));
     }
 }

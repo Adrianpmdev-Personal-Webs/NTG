@@ -10,94 +10,99 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Observable, forkJoin } from 'rxjs';
-import { NotificationService } from '@core/services/notification';
-import { UserService } from '@core/services/user';
+import { NotificationCenter } from '@core/notifications/notification-center';
+import { UserApi } from '@core/users/user-api';
 import { User } from '@shared/models/user';
 import { resolveApiError } from '@shared/utils/api-error';
 import { PokemonApi } from '../../data/pokemon-api';
 import { Player, PlayerRequest } from '../../data/pokemon-models';
+import { ModalOverlay } from '@shared/directives/modal-overlay';
 
 type Dialog = { mode: 'create' } | { mode: 'edit'; player: Player } | { mode: 'delete'; player: Player } | null;
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-pokemon-admin-players',
-    imports: [FormsModule],
-    templateUrl: './admin-players.html'
+    imports: [ModalOverlay, FormsModule],
+    templateUrl: './admin-players.html',
 })
 export class AdminPlayers {
-
     private readonly api = inject(PokemonApi);
-    private readonly userService = inject(UserService);
-    private readonly notifications = inject(NotificationService);
+    private readonly userApi = inject(UserApi);
+    private readonly notifications = inject(NotificationCenter);
 
-    readonly players = signal<Player[]>([]);
-    readonly users = signal<User[]>([]);
-    readonly loading = signal(true);
-    readonly saving = signal(false);
-    readonly dialog = signal<Dialog>(null);
+    protected readonly players = signal<Player[]>([]);
+    private readonly users = signal<User[]>([]);
+    protected readonly loading = signal(true);
+    protected readonly saving = signal(false);
+    protected readonly dialog = signal<Dialog>(null);
 
-    /** Accounts that already belong to a player (an account links to one player only). */
-    readonly linkedAccounts = computed(() => new Set(this.players().map(player => player.userId).filter(Boolean)));
+    private readonly linkedAccounts = computed(
+        () =>
+            new Set(
+                this.players()
+                    .map((player) => player.userId)
+                    .filter(Boolean),
+            ),
+    );
 
-    form: PlayerRequest = { name: '', userId: null };
+    protected form: PlayerRequest = { name: '', userId: null };
 
     constructor() {
         this.load();
     }
 
-    load(): void {
-        forkJoin({ players: this.api.getPlayers(), users: this.userService.getAllUsers() }).subscribe({
+    private load(): void {
+        forkJoin({ players: this.api.getPlayers(), users: this.userApi.getAllUsers() }).subscribe({
             next: ({ players, users }) => {
                 this.players.set(players);
                 this.users.set([...users].sort((a, b) => a.username.localeCompare(b.username)));
                 this.loading.set(false);
             },
-            error: error => {
+            error: (error) => {
                 this.loading.set(false);
                 this.notifications.error(resolveApiError(error, 'No se han podido cargar los jugadores'));
-            }
+            },
         });
     }
 
-    accountName(userId: string | null): string {
-        return userId ? this.users().find(user => user.id === userId)?.username ?? 'Cuenta desconocida' : '—';
+    protected accountName(userId: string | null): string {
+        return userId ? (this.users().find((user) => user.id === userId)?.username ?? 'Cuenta desconocida') : '—';
     }
 
-    /** Accounts offered in the form: free ones plus the one already linked to this player. */
-    availableUsers(current: string | null): User[] {
-        return this.users().filter(user => user.id === current || !this.linkedAccounts().has(user.id));
+    protected availableUsers(current: string | null): User[] {
+        return this.users().filter((user) => user.id === current || !this.linkedAccounts().has(user.id));
     }
 
-    openCreate(): void {
+    protected openCreate(): void {
         this.form = { name: '', userId: null };
         this.dialog.set({ mode: 'create' });
     }
 
-    openEdit(player: Player): void {
+    protected openEdit(player: Player): void {
         this.form = { name: player.name, userId: player.userId };
         this.dialog.set({ mode: 'edit', player });
     }
 
-    openDelete(player: Player): void {
+    protected openDelete(player: Player): void {
         this.dialog.set({ mode: 'delete', player });
     }
 
-    close(): void {
+    protected close(): void {
         this.dialog.set(null);
     }
 
-    save(): void {
+    protected save(): void {
         const dialog = this.dialog();
         const request: PlayerRequest = { name: this.form.name, userId: this.form.userId || null };
 
         this.run(
             dialog?.mode === 'edit' ? this.api.updatePlayer(dialog.player.id, request) : this.api.createPlayer(request),
-            dialog?.mode === 'edit' ? 'Jugador actualizado' : 'Jugador creado'
+            dialog?.mode === 'edit' ? 'Jugador actualizado' : 'Jugador creado',
         );
     }
 
-    confirmDelete(): void {
+    protected confirmDelete(): void {
         const dialog = this.dialog();
 
         if (dialog?.mode === 'delete') {
@@ -114,10 +119,10 @@ export class AdminPlayers {
                 this.notifications.success(message);
                 this.load();
             },
-            error: error => {
+            error: (error) => {
                 this.saving.set(false);
                 this.notifications.error(resolveApiError(error, 'No se ha podido guardar'));
-            }
+            },
         });
     }
 }

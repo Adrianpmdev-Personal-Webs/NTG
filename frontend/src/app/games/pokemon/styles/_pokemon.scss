@@ -1,14 +1,5 @@
-/**
- * Pokémon partial.
- * Building blocks shared by the Pokémon player pages (games, randomlockes, tournaments, ranking). They use
- * the --pk-* tokens of the Pokémon layout. Use it with a relative path, e.g. `@use '../styles/pokemon' as pk;`.
- *
- * @author @adrianpmdev
- */
-
 @use 'mixins' as *;
 
-/** Centered page column. */
 @mixin page {
     display: flex;
     flex-direction: column;
@@ -17,7 +8,6 @@
     margin: 0 auto;
 }
 
-/** Big page title. */
 @mixin heading {
     margin: 0;
     font-family: var(--pk-font-display);
@@ -29,7 +19,6 @@
     }
 }
 
-/** Section title inside a page. */
 @mixin section-title {
     margin: 0 0 12px;
     font-family: var(--pk-font-display);
@@ -37,7 +26,6 @@
     color: var(--pk-text);
 }
 
-/** Loading, error and empty messages. */
 @mixin state {
     color: var(--pk-muted);
 
@@ -46,7 +34,6 @@
     }
 }
 
-/** Rounded surface with the yellow border. */
 @mixin card {
     padding: 18px;
     background: var(--pk-surface);
@@ -54,7 +41,6 @@
     border-radius: var(--pk-radius);
 }
 
-/** Card that is a link to another page. */
 @mixin link-card {
     @include card;
     display: flex;
@@ -62,7 +48,9 @@
     gap: 8px;
     color: var(--pk-text);
     text-decoration: none;
-    transition: transform 0.15s, border-color 0.15s;
+    transition:
+        transform 0.15s,
+        border-color 0.15s;
 
     &:hover,
     &:focus-visible {
@@ -71,14 +59,12 @@
     }
 }
 
-/** Responsive grid of cards. */
 @mixin grid($min: 260px) {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax($min, 1fr));
     gap: 16px;
 }
 
-/** Small rounded label. */
 @mixin chip {
     display: inline-block;
     padding: 2px 10px;
@@ -89,7 +75,6 @@
     font-weight: 700;
 }
 
-/** "← Back" link above a title. */
 @mixin back-link {
     align-self: flex-start;
     color: var(--pk-muted);
@@ -102,7 +87,6 @@
     }
 }
 
-/** Row of pill tabs. Put `.tab` buttons inside, `.active` on the selected one. */
 @mixin tabs {
     display: flex;
     gap: 6px;

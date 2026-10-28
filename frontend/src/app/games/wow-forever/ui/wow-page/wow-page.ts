@@ -16,11 +16,9 @@ import { WowFrame } from '../wow-frame/wow-frame';
     imports: [WowButton, WowFrame],
     templateUrl: './wow-page.html',
     styleUrl: './wow-page.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WowPage {
-
     readonly title = input.required<string>();
-    /** Credit line shown at the bottom; nothing is shown while it is null (for example while loading). */
     readonly credit = input<string | null>(null);
 }

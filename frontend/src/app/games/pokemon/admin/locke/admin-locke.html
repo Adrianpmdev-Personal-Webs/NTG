@@ -47,7 +47,11 @@
                                     <td data-label="CAMPEÓN">{{ t.champion?.name ?? '—' }}</td>
                                     <td>
                                         <div class="actions">
-                                            <a class="action-btn btn-neon" [routerLink]="['/admin/pokemon/tournaments', t.id]">▶ GESTIONAR</a>
+                                            <a
+                                                class="action-btn btn-neon"
+                                                [routerLink]="['/admin/pokemon/tournaments', t.id]"
+                                                >▶ GESTIONAR</a
+                                            >
                                         </div>
                                     </td>
                                 </tr>
@@ -61,9 +65,13 @@
         <section class="terminal-card admin-section">
             <div class="admin-section-head">
                 <h2 class="admin-section-title">PLANTILLA</h2>
-                <button class="btn-neon" type="button" [disabled]="saving()" (click)="saveRoster()">GUARDAR PLANTILLA</button>
+                <button class="btn-neon" type="button" [disabled]="saving()" (click)="saveRoster()">
+                    GUARDAR PLANTILLA
+                </button>
             </div>
-            <p class="admin-hint">Los torneos nuevos empiezan con estos jugadores. Los torneos ya creados no cambian.</p>
+            <p class="admin-hint">
+                Los torneos nuevos empiezan con estos jugadores. Los torneos ya creados no cambian.
+            </p>
             <div class="check-group">
                 @for (player of players(); track player.id) {
                     <label class="check-option">
@@ -79,8 +87,8 @@
 </div>
 
 @if (creating()) {
-    <div class="modal-overlay" (click)="creating.set(false)">
-        <div class="modal terminal-card" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" appModalOverlay (dismiss)="creating.set(false)">
+        <div class="modal terminal-card" role="dialog" aria-modal="true">
             <div class="modal-header">
                 <h2 class="modal-title">NUEVO TORNEO</h2>
                 <button class="close-btn" type="button" aria-label="Cerrar" (click)="creating.set(false)">✕</button>
@@ -89,7 +97,14 @@
                 <div class="form-grid">
                     <label class="form-field">
                         <span class="field-label">NOMBRE</span>
-                        <input class="neon-input" name="name" required maxlength="100" [(ngModel)]="form.name" placeholder="Torneo 1 - LvL 20" />
+                        <input
+                            class="neon-input"
+                            name="name"
+                            required
+                            maxlength="100"
+                            [(ngModel)]="form.name"
+                            placeholder="Torneo 1 - LvL 20"
+                        />
                     </label>
                     <div class="form-row">
                         <label class="form-field">
@@ -112,7 +127,15 @@
                     <div class="form-row">
                         <label class="form-field">
                             <span class="field-label">PUNTOS POR VICTORIA</span>
-                            <input class="neon-input" name="pointsPerWin" type="number" min="0" max="100" required [(ngModel)]="form.pointsPerWin" />
+                            <input
+                                class="neon-input"
+                                name="pointsPerWin"
+                                type="number"
+                                min="0"
+                                max="100"
+                                required
+                                [(ngModel)]="form.pointsPerWin"
+                            />
                         </label>
                         <label class="form-field">
                             <span class="field-label">REVELACIÓN DE EQUIPOS</span>
@@ -121,13 +144,25 @@
                     </div>
                     <label class="form-field">
                         <span class="field-label">DESCRIPCIÓN</span>
-                        <textarea class="neon-input" name="description" rows="3" maxlength="1000" [(ngModel)]="form.description"></textarea>
+                        <textarea
+                            class="neon-input"
+                            name="description"
+                            rows="3"
+                            maxlength="1000"
+                            [(ngModel)]="form.description"
+                        ></textarea>
                     </label>
-                    <p class="admin-hint">El torneo empieza en preparación, con la plantilla del randomlocke como jugadores.</p>
+                    <p class="admin-hint">
+                        El torneo empieza en preparación, con la plantilla del randomlocke como jugadores.
+                    </p>
                 </div>
                 <div class="modal-actions">
-                    <button class="btn-neon btn-neon-danger" type="button" (click)="creating.set(false)">CANCELAR</button>
-                    <button class="btn-neon" type="submit" [disabled]="saving() || tournamentForm.invalid">CREAR</button>
+                    <button class="btn-neon btn-neon-danger" type="button" (click)="creating.set(false)">
+                        CANCELAR
+                    </button>
+                    <button class="btn-neon" type="submit" [disabled]="saving() || tournamentForm.invalid">
+                        CREAR
+                    </button>
                 </div>
             </form>
         </div>

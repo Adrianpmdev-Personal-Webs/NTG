@@ -17,18 +17,15 @@ export interface LegacyChallenge {
 }
 
 export interface ChallengeGroup {
-    /** Group name as the data writes it (Classes, Crafting...). */
     name: string;
     challenges: LegacyChallenge[];
     points: number;
 }
 
 export interface LegacyData {
-    /** Points every character can spend in its trees. */
     points: number;
     trees: TalentTree[];
     challengeGroups: ChallengeGroup[];
-    /** Points all the challenges give together. */
     challengePoints: number;
     credit: DataCredit;
 }

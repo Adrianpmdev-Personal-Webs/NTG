@@ -1,49 +1,45 @@
 <div class="usuarios-page">
-    <!-- Header -->
     <div class="page-header">
         <div class="header-left">
             <div class="page-label">// GESTIÓN DE ACCESOS</div>
             <h1 class="page-title">USUARIOS</h1>
         </div>
-        <button class="btn-neon" (click)="openCreate()">
-            + NUEVO USUARIO
-        </button>
+        <button class="btn-neon" (click)="openCreate()">+ NUEVO USUARIO</button>
     </div>
 
-    <!-- Search & filters -->
     <div class="toolbar terminal-card">
         <div class="search-wrapper">
             <span class="search-prefix">&gt; BUSCAR:</span>
-            <input class="neon-input search-input" type="text" placeholder="username, email, rol..."
-                [(ngModel)]="searchTerm" (ngModelChange)="onSearch()" />
+            <input
+                class="neon-input search-input"
+                type="text"
+                placeholder="username, email, rol..."
+                [(ngModel)]="searchTerm"
+                (ngModelChange)="searchUsers()"
+            />
         </div>
         <div class="filter-group">
             <span class="filter-label">ROL:</span>
             <button class="filter-btn" [class.active]="roleFilter() === ''" (click)="setRoleFilter('')">TODOS</button>
-            <button class="filter-btn" [class.active]="roleFilter() === 'admin'"
-                (click)="setRoleFilter('admin')">ADMIN</button>
-            <button class="filter-btn" [class.active]="roleFilter() === 'usuario'"
-                (click)="setRoleFilter('usuario')">USUARIO</button>
+            <button class="filter-btn" [class.active]="roleFilter() === 'admin'" (click)="setRoleFilter('admin')">
+                ADMIN
+            </button>
+            <button class="filter-btn" [class.active]="roleFilter() === 'usuario'" (click)="setRoleFilter('usuario')">
+                USUARIO
+            </button>
         </div>
-        <div class="count-badge">
-            {{ filteredUsers().length }} / {{ users().length }} REGISTROS
-        </div>
+        <div class="count-badge">{{ filteredUsers().length }} / {{ users().length }} REGISTROS</div>
     </div>
 
-    <!-- Table -->
     <div class="terminal-card table-wrapper">
         <div class="table-header">
             <span class="card-title">// BASE DE DATOS :: USUARIOS</span>
         </div>
 
         @if (loading()) {
-            <div class="table-loading">
-                <span>CARGANDO REGISTROS</span><span class="cursor"> </span>
-            </div>
+            <div class="table-loading"><span>CARGANDO REGISTROS</span><span class="cursor"> </span></div>
         } @else if (filteredUsers().length === 0) {
-            <div class="table-empty">
-                [404] NO SE ENCONTRARON REGISTROS
-            </div>
+            <div class="table-empty">[404] NO SE ENCONTRARON REGISTROS</div>
         } @else {
             <div class="table-scroll">
                 <table class="neon-table">
@@ -60,8 +56,16 @@
                     <tbody>
                         @for (user of filteredUsers(); track user.id) {
                             <tr class="animate-fade-up" [class.selected]="selectedUser()?.id === user.id">
-                                <td data-label="UUID" class="uuid-col" (click)="selectUser(user)" title="{{ user.id }}">
-                                    {{ user.id.substring(0, 8) }}...
+                                <td data-label="UUID" class="uuid-col">
+                                    <button
+                                        type="button"
+                                        class="uuid-btn"
+                                        [title]="user.id"
+                                        [attr.aria-pressed]="selectedUser()?.id === user.id"
+                                        (click)="selectUser(user)"
+                                    >
+                                        {{ user.id.substring(0, 8) }}...
+                                    </button>
                                 </td>
                                 <td data-label="USERNAME" class="username-col">{{ user.username }}</td>
                                 <td data-label="EMAIL" class="email-col">{{ user.email }}</td>
@@ -83,18 +87,23 @@
                                     <button class="action-btn btn-neon" (click)="openEdit(user)" title="Editar">
                                         ✎ EDITAR
                                     </button>
-                                    <button class="action-btn btn-neon btn-neon-accent"
+                                    <button
+                                        class="action-btn btn-neon btn-neon-accent"
                                         (click)="sendInvite(user)"
                                         [disabled]="inviting() === user.id"
-                                        title="Reenviar el correo para elegir contraseña">
+                                        title="Reenviar el correo para elegir contraseña"
+                                    >
                                         @if (inviting() === user.id) {
                                             ⟳ ENVIANDO...
                                         } @else {
                                             ✉ INVITAR
                                         }
                                     </button>
-                                    <button class="action-btn btn-neon btn-neon-danger" (click)="openDelete(user)"
-                                        title="Eliminar">
+                                    <button
+                                        class="action-btn btn-neon btn-neon-danger"
+                                        (click)="openDelete(user)"
+                                        title="Eliminar"
+                                    >
                                         ✕ ELIMINAR
                                     </button>
                                 </td>
@@ -106,12 +115,11 @@
         }
     </div>
 
-    <!-- User detail panel -->
     @if (selectedUser()) {
         <div class="detail-panel terminal-card animate-slide-in">
             <div class="detail-header">
                 <span class="card-title">// DETALLES DEL NODO</span>
-                <button class="close-btn" (click)="selectedUser.set(null)">✕</button>
+                <button class="close-btn" type="button" aria-label="Cerrar" (click)="selectedUser.set(null)">✕</button>
             </div>
             <div class="detail-grid">
                 <div class="detail-field">
@@ -151,16 +159,13 @@
     }
 </div>
 
-<!-- Modal overlay -->
 @if (modalMode()) {
-    <div class="modal-overlay" (click)="closeModal()">
-        <div class="modal terminal-card animate-fade-up" (click)="$event.stopPropagation()">
-
-            <!-- CREATE modal -->
+    <div class="modal-overlay" appModalOverlay (dismiss)="closeModal()">
+        <div class="modal terminal-card animate-fade-up" role="dialog" aria-modal="true">
             @if (modalMode() === 'create') {
                 <div class="modal-header">
                     <span class="modal-title">// CREAR NUEVO USUARIO</span>
-                    <button type="button" class="close-btn" (click)="closeModal()">✕</button>
+                    <button type="button" class="close-btn" aria-label="Cerrar" (click)="closeModal()">✕</button>
                 </div>
                 <div class="modal-body">
                     <div class="terminal-line">
@@ -168,20 +173,35 @@
                     </div>
                     <div class="form-grid">
                         <div class="form-field">
-                            <label class="field-label">// EMAIL</label>
-                            <input class="neon-input" type="email" [(ngModel)]="form.email" placeholder="user&#64;domain.com" />
+                            <label class="field-label" for="user-create-email">// EMAIL</label>
+                            <input
+                                id="user-create-email"
+                                class="neon-input"
+                                type="email"
+                                [(ngModel)]="form.email"
+                                placeholder="user&#64;domain.com"
+                            />
                         </div>
                         <div class="form-field">
-                            <label class="field-label">// USERNAME</label>
-                            <input class="neon-input" type="text" [(ngModel)]="form.username" placeholder="username" />
+                            <label class="field-label" for="user-create-username">// USERNAME</label>
+                            <input
+                                id="user-create-username"
+                                class="neon-input"
+                                type="text"
+                                [(ngModel)]="form.username"
+                                placeholder="username"
+                            />
                         </div>
                         <div class="form-field">
-                            <label class="field-label">// ETIQUETAS (ACCESO A JUEGOS)</label>
-                            <div class="check-group">
+                            <span class="field-label" id="user-create-tags-label">// ETIQUETAS (ACCESO A JUEGOS)</span>
+                            <div class="check-group" role="group" aria-labelledby="user-create-tags-label">
                                 @for (tag of availableTags(); track tag.key) {
                                     <label class="check-option">
-                                        <input type="checkbox" [checked]="form.tags.includes(tag.key)"
-                                            (change)="toggleCreateTag(tag.key)" />
+                                        <input
+                                            type="checkbox"
+                                            [checked]="form.tags.includes(tag.key)"
+                                            (change)="toggleCreateTag(tag.key)"
+                                        />
                                         <span>{{ tag.name }}</span>
                                     </label>
                                 } @empty {
@@ -195,38 +215,54 @@
                     </div>
                     <div class="modal-actions">
                         <button class="btn-neon" (click)="submitCreate()" [disabled]="submitting()">
-                            @if (submitting()) { PROCESANDO... } @else { ⟶ EJECUTAR }
+                            @if (submitting()) {
+                                PROCESANDO...
+                            } @else {
+                                ⟶ EJECUTAR
+                            }
                         </button>
                         <button class="btn-neon btn-neon-danger" (click)="closeModal()">CANCELAR</button>
                     </div>
                 </div>
             }
 
-            <!-- EDIT modal -->
             @if (modalMode() === 'edit') {
                 <div class="modal-header">
                     <span class="modal-title">// MODIFICAR USUARIO :: {{ editTarget()?.username }}</span>
-                    <button type="button" class="close-btn" (click)="closeModal()">✕</button>
+                    <button type="button" class="close-btn" aria-label="Cerrar" (click)="closeModal()">✕</button>
                 </div>
                 <div class="modal-body">
                     <div class="form-grid">
                         <div class="form-field">
-                            <label class="field-label">// USERNAME</label>
-                            <input class="neon-input" type="text" [(ngModel)]="editForm.username"
-                                [placeholder]="editTarget()?.username || ''" />
+                            <label class="field-label" for="user-edit-username">// USERNAME</label>
+                            <input
+                                id="user-edit-username"
+                                class="neon-input"
+                                type="text"
+                                [(ngModel)]="editForm.username"
+                                [placeholder]="editTarget()?.username || ''"
+                            />
                         </div>
                         <div class="form-field">
-                            <label class="field-label">// AVATAR URL</label>
-                            <input class="neon-input" type="text" [(ngModel)]="editForm.avatarUrl"
-                                [placeholder]="editTarget()?.avatarUrl || ''" />
+                            <label class="field-label" for="user-edit-avatar">// AVATAR URL</label>
+                            <input
+                                id="user-edit-avatar"
+                                class="neon-input"
+                                type="text"
+                                [(ngModel)]="editForm.avatarUrl"
+                                [placeholder]="editTarget()?.avatarUrl || ''"
+                            />
                         </div>
                         <div class="form-field">
-                            <label class="field-label">// ETIQUETAS (ACCESO A JUEGOS)</label>
-                            <div class="check-group">
+                            <span class="field-label" id="user-edit-tags-label">// ETIQUETAS (ACCESO A JUEGOS)</span>
+                            <div class="check-group" role="group" aria-labelledby="user-edit-tags-label">
                                 @for (tag of availableTags(); track tag.key) {
                                     <label class="check-option">
-                                        <input type="checkbox" [checked]="editTags.includes(tag.key)"
-                                            (change)="toggleEditTag(tag.key)" />
+                                        <input
+                                            type="checkbox"
+                                            [checked]="editTags.includes(tag.key)"
+                                            (change)="toggleEditTag(tag.key)"
+                                        />
                                         <span>{{ tag.name }}</span>
                                     </label>
                                 } @empty {
@@ -237,18 +273,21 @@
                     </div>
                     <div class="modal-actions">
                         <button class="btn-neon" (click)="submitEdit()" [disabled]="submitting()">
-                            @if (submitting()) { PROCESANDO... } @else { ⟶ ACTUALIZAR }
+                            @if (submitting()) {
+                                PROCESANDO...
+                            } @else {
+                                ⟶ ACTUALIZAR
+                            }
                         </button>
                         <button class="btn-neon btn-neon-danger" (click)="closeModal()">CANCELAR</button>
                     </div>
                 </div>
             }
 
-            <!-- DELETE modal -->
             @if (modalMode() === 'delete') {
                 <div class="modal-header">
                     <span class="modal-title danger-title">// ELIMINAR USUARIO</span>
-                    <button type="button" class="close-btn" (click)="closeModal()">✕</button>
+                    <button type="button" class="close-btn" aria-label="Cerrar" (click)="closeModal()">✕</button>
                 </div>
                 <div class="modal-body">
                     <div class="delete-warning">
@@ -266,7 +305,11 @@
                     </div>
                     <div class="modal-actions">
                         <button class="btn-neon btn-neon-danger" (click)="submitDelete()" [disabled]="submitting()">
-                            @if (submitting()) { ELIMINANDO... } @else { ⟶ CONFIRMAR ELIMINACIÓN }
+                            @if (submitting()) {
+                                ELIMINANDO...
+                            } @else {
+                                ⟶ CONFIRMAR ELIMINACIÓN
+                            }
                         </button>
                         <button class="btn-neon" (click)="closeModal()">CANCELAR</button>
                     </div>

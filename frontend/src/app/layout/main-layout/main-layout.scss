@@ -1,18 +1,8 @@
-/**
- * Main application layout, top bar and content area.
- *
- * @author @adrianpmdev
- */
-
-/* ─── HOST ─── */
-
 :host {
     display: block;
     height: 100dvh;
     overflow: hidden;
 }
-
-/* ─── LAYOUT ─── */
 
 .layout {
     display: flex;
@@ -21,8 +11,6 @@
     background: var(--bg-black);
     overflow: hidden;
 }
-
-/* ─── SIDEBAR ─── */
 
 .sidebar {
     width: 240px;
@@ -294,8 +282,6 @@
     text-overflow: ellipsis;
 }
 
-/* ─── NAV SUBMENU ─── */
-
 .nav-group {
     display: flex;
     flex-direction: column;
@@ -307,7 +293,6 @@
     cursor: pointer;
     text-align: left;
 
-    // A game with nothing to open yet is listed but does not unfold.
     &.no-links {
         cursor: default;
         opacity: 0.6;
@@ -411,7 +396,6 @@
     flex-shrink: 0;
 }
 
-/* User without a picture: the first letter of the username. */
 .user-avatar-initial {
     display: grid;
     place-items: center;
@@ -450,8 +434,6 @@
     width: 100%;
 }
 
-/* ─── MAIN ─── */
-
 .main-content {
     flex: 1;
     display: flex;
@@ -485,8 +467,6 @@
     .content-area {
         padding: 24px;
     }
-
-    
 }
 
 @media (max-width: 900px) {
@@ -599,8 +579,6 @@
     .content-area {
         padding: 22px;
     }
-
-    
 }
 
 @media (max-width: 640px) {
@@ -683,8 +661,6 @@
     .content-area {
         padding: 18px 16px;
     }
-
-    
 }
 
 @media (max-width: 420px) {
@@ -699,8 +675,6 @@
     .content-area {
         padding: 16px 12px;
     }
-
-    
 }
 
 app-header,

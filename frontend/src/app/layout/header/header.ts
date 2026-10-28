@@ -16,10 +16,9 @@ import { filter, map } from 'rxjs';
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-header',
     templateUrl: './header.html',
-    styleUrl: './header.scss'
+    styleUrl: './header.scss',
 })
 export class Header {
-
     readonly menuToggle = output<void>();
 
     private readonly router = inject(Router);
@@ -29,16 +28,21 @@ export class Header {
     private readonly currentUrl = toSignal(
         this.router.events.pipe(
             filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-            map(event => event.urlAfterRedirects)
+            map((event) => event.urlAfterRedirects),
         ),
-        { initialValue: this.router.url }
+        { initialValue: this.router.url },
     );
 
-    readonly currentPath = computed(() =>
-        this.currentUrl().split('?')[0].split('/').filter(Boolean)
-            .map(pathPart => pathPart.toUpperCase()).join(' / ') || 'INICIO'
+    protected readonly currentPath = computed(
+        () =>
+            this.currentUrl()
+                .split('?')[0]
+                .split('/')
+                .filter(Boolean)
+                .map((pathPart) => pathPart.toUpperCase())
+                .join(' / ') || 'INICIO',
     );
-    readonly currentTime = signal(this.formatTime());
+    protected readonly currentTime = signal(this.formatTime());
 
     constructor() {
         const intervalId = setInterval(() => this.currentTime.set(this.formatTime()), this.clockRefreshIntervalMs);

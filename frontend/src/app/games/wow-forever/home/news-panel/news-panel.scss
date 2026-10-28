@@ -1,118 +1,111 @@
-/**
- * News panel styles.
- *
- * Parchment news panel of the launcher screen, copied from the original WoW Forever web.
- *
- * @author @adrianpmdev
- */
-
-/* ─── HOST ─── */
-
 :host {
-  display: block;
-  min-height: 0;
+    display: block;
+    min-height: 0;
 }
-
-/* ─── PANEL ─── */
 
 .news-panel {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
 }
 
-/* ─── TITLE BAR ─── */
-
 .news-titlebar {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  min-height: 31px;
-  padding: 0 13px;
-  border: 2px solid #0d0b07;
-  border-bottom: 0;
-  color: #f0d394;
-  font: 700 12px/1 Georgia, 'Times New Roman', serif;
-  text-shadow: 1px 1px 0 #000;
-  background:
-    linear-gradient(90deg, rgba(255,255,255,.1), transparent 18%, transparent 82%, rgba(255,255,255,.1)),
-    linear-gradient(#771d11, #3a0b05 58%, #180200);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 2px 4px rgba(0,0,0,.65);
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 31px;
+    padding: 0 13px;
+    border: 2px solid #0d0b07;
+    border-bottom: 0;
+    color: #f0d394;
+    font:
+        700 12px/1 Georgia,
+        'Times New Roman',
+        serif;
+    text-shadow: 1px 1px 0 #000;
+    background:
+        linear-gradient(90deg, rgba(255, 255, 255, 0.1), transparent 18%, transparent 82%, rgba(255, 255, 255, 0.1)),
+        linear-gradient(#771d11, #3a0b05 58%, #180200);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        0 2px 4px rgba(0, 0, 0, 0.65);
 }
 
 .news-gem {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #ffda54, #b53a09 45%, #250100 80%);
-  box-shadow: 0 0 4px rgba(236,111,18,.85);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #ffda54, #b53a09 45%, #250100 80%);
+    box-shadow: 0 0 4px rgba(236, 111, 18, 0.85);
 }
-
-/* ─── PAPER ─── */
 
 .news-paper {
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-  border: 2px solid #14110e;
-  background:
-    radial-gradient(circle at 20% 14%, rgba(255,255,255,.4), transparent 18%),
-    radial-gradient(circle at 78% 72%, rgba(92,67,32,.11), transparent 26%),
-    repeating-linear-gradient(0deg, rgba(74,51,22,.035) 0 1px, transparent 1px 3px),
-    linear-gradient(150deg, #ebe7da, #cdc8b5 82%, #aea693);
-  box-shadow:
-    inset 0 0 24px rgba(55,43,29,.35),
-    inset 0 0 0 1px rgba(255,255,255,.5);
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    border: 2px solid #14110e;
+    background:
+        radial-gradient(circle at 20% 14%, rgba(255, 255, 255, 0.4), transparent 18%),
+        radial-gradient(circle at 78% 72%, rgba(92, 67, 32, 0.11), transparent 26%),
+        repeating-linear-gradient(0deg, rgba(74, 51, 22, 0.035) 0 1px, transparent 1px 3px),
+        linear-gradient(150deg, #ebe7da, #cdc8b5 82%, #aea693);
+    box-shadow:
+        inset 0 0 24px rgba(55, 43, 29, 0.35),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.5);
 }
 
-/* ─── NEWS ITEMS ─── */
-
 .news-item {
-  display: grid;
-  grid-template-columns: 84px 1fr;
-  gap: 10px;
-  padding: 10px 11px;
-  color: #262119;
-  text-decoration: none;
-  border-bottom: 1px solid rgba(57,45,29,.22);
+    display: grid;
+    grid-template-columns: 84px 1fr;
+    gap: 10px;
+    padding: 10px 11px;
+    color: #262119;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(57, 45, 29, 0.22);
 }
 
 .news-item:hover {
-  background: rgba(255,255,255,.18);
+    background: rgba(255, 255, 255, 0.18);
 }
 
 .news-thumb {
-  width: 84px;
-  height: 50px;
-  border: 2px solid #251f15;
-  background-color: #35312a;
-  background-position: center;
-  background-size: cover;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), 0 2px 4px rgba(0,0,0,.45);
+    width: 84px;
+    height: 50px;
+    border: 2px solid #251f15;
+    background-color: #35312a;
+    background-position: center;
+    background-size: cover;
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.22),
+        0 2px 4px rgba(0, 0, 0, 0.45);
 }
 
 .news-copy {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-width: 0;
-  gap: 4px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    gap: 4px;
 }
 
 .news-date {
-  color: #7b6a4c;
-  font: 700 10px/1 Georgia, 'Times New Roman', serif;
+    color: #7b6a4c;
+    font:
+        700 10px/1 Georgia,
+        'Times New Roman',
+        serif;
 }
 
 .news-item-title {
-  color: #3b3429;
-  font: 700 12px/1.18 Georgia, 'Times New Roman', serif;
-  text-shadow: 0 1px 0 rgba(255,255,255,.55);
+    color: #3b3429;
+    font:
+        700 12px/1.18 Georgia,
+        'Times New Roman',
+        serif;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
 }
-
-/* ─── RESPONSIVE ─── */
 
 @media (max-width: 420px) {
     .news-item {

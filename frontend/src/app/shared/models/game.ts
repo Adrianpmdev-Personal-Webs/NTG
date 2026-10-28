@@ -7,14 +7,10 @@
  */
 
 export interface CatalogGame {
-    /** Game id: key of the tag that unlocks it and its URL segment. */
     id: string;
     name: string;
-    /** Public URL of the cover, or null when no cover has been uploaded. */
     coverUrl: string | null;
-    /** Coming soon: listed for everyone, but only admins can open it. */
     upcoming: boolean;
-    /** Whether the current user can open it. */
     accessible: boolean;
     sortOrder: number;
 }

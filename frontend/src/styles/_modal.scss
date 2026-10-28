@@ -1,22 +1,4 @@
-/**
- * Modal partial.
- * Shared look of every modal, form field and delete confirmation of the management screens
- * (users, WoW Forever, games, lockes and tournaments). Do not restyle these classes inside a component.
- *
- * Structure:
- *   .modal-overlay > .modal.terminal-card (+ .modal-sm | .modal-lg)
- *     .modal-header > .modal-title (+ .danger-title) and .close-btn
- *     .modal-body > .form-grid > .form-field (.field-label + .neon-input) ... and .modal-actions
- *
- * Buttons of .modal-actions: the main action is a plain .btn-neon (green), CANCELAR is .btn-neon.btn-neon-danger (red).
- * In delete confirmations it is the other way round: CONFIRMAR ELIMINACIÓN is red and CANCELAR is green.
- *
- * @author @adrianpmdev
- */
-
 @use 'mixins' as *;
-
-/* ─── OVERLAY AND WINDOW ─── */
 
 .modal-overlay {
     position: fixed;
@@ -100,8 +82,6 @@
     gap: 12px;
 }
 
-/* ─── FORMS ─── */
-
 .terminal-line {
     padding: 8px 12px;
     border-left: 2px solid var(--neon-green-dark);
@@ -152,7 +132,6 @@ textarea.neon-input {
     resize: vertical;
 }
 
-/* Checkbox and radio groups (tags, factions, classes...) */
 .check-group {
     display: flex;
     flex-wrap: wrap;
@@ -172,8 +151,6 @@ textarea.neon-input {
         cursor: pointer;
     }
 }
-
-/* ─── DELETE CONFIRMATION ─── */
 
 .delete-warning {
     display: flex;
@@ -214,8 +191,6 @@ textarea.neon-input {
     font-size: 0.68rem;
     word-break: break-all;
 }
-
-/* ─── RESPONSIVE ─── */
 
 @include mobile {
     .modal-overlay {

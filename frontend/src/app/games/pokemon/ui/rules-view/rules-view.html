@@ -8,7 +8,9 @@
     <ol class="rules">
         @for (rule of doc?.rules; track rule.number) {
             <li class="rule">
-                <div class="rule-title"><span class="rule-number">{{ rule.number }}.</span> {{ rule.title }}</div>
+                <div class="rule-title">
+                    <span class="rule-number">{{ rule.number }}.</span> {{ rule.title }}
+                </div>
                 <p class="rule-description">{{ rule.description }}</p>
 
                 @if (rule.conditions?.length) {
@@ -38,7 +40,9 @@
                         <span class="rule-label">Niveles máximos</span>
                         <ul class="chips">
                             @for (cap of rule.levelCaps; track $index) {
-                                <li>{{ cap.battle }}: <strong>{{ cap.level }}</strong></li>
+                                <li>
+                                    {{ cap.battle }}: <strong>{{ cap.level }}</strong>
+                                </li>
                             }
                         </ul>
                     </div>

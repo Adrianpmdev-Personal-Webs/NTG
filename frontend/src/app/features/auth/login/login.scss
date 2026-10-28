@@ -1,10 +1,3 @@
-/**
- * Login screen styles.
- * Responsive cyberpunk login layout with Matrix background.
- *
- * @author @adrianpmdev
- */
-
 @use 'auth-screen';
 
 .error-msg {
@@ -15,8 +8,6 @@
     background: rgba(255, 0, 64, 0.05);
     letter-spacing: 1px;
 }
-
-/* ─── RESPONSIVE ─── */
 
 @media (max-width: 768px) {
     .login-container {
@@ -170,8 +161,6 @@
     }
 }
 
-/* ─── SESSION CHECK INDICATOR ─── */
-
 .session-check {
     display: flex;
     flex-direction: column;
@@ -197,12 +186,24 @@
         box-shadow: 0 0 8px var(--neon-green);
         animation: dot-pulse 1.2s ease-in-out infinite;
 
-        &:nth-child(2) { animation-delay: 0.2s; }
-        &:nth-child(3) { animation-delay: 0.4s; }
+        &:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        &:nth-child(3) {
+            animation-delay: 0.4s;
+        }
     }
 }
 
 @keyframes dot-pulse {
-    0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
-    40%           { opacity: 1;   transform: scale(1.2); }
+    0%,
+    80%,
+    100% {
+        opacity: 0.2;
+        transform: scale(0.8);
+    }
+    40% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
 }

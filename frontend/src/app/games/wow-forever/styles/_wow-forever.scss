@@ -1,15 +1,4 @@
-/**
- * WoW Forever partial.
- * Palette and building blocks shared by the WoW Forever tool pages (talents, spellbook, racials, Legacy): a dark
- * panel with a gold border, the state messages, the tab buttons and the three-tree layout that becomes a swipeable
- * carousel on phones. Use it with a relative path, e.g. `@use '../../styles/wow-forever' as wow;`.
- *
- * @author @adrianpmdev
- */
-
 @use 'mixins' as *;
-
-/* ─── PALETTE ─── */
 
 $gold: #d8b866;
 $bright: #f2c94c;
@@ -26,22 +15,17 @@ $red: #ff5a4a;
 $alliance: #6f9de0;
 $horde: #d45a4a;
 
-/* ─── BLOCKS ─── */
-
-/** Loading, error and empty messages. */
 @mixin state {
     margin: 24px 0;
     color: $muted;
     text-align: center;
 }
 
-/** Dark box with a thin gold border, used for controls and lists. */
 @mixin panel {
     border: 1px solid $line;
     background: $panel-bg;
 }
 
-/** Square game icon with the gold border. */
 @mixin icon($size) {
     width: $size;
     height: $size;
@@ -49,7 +33,6 @@ $horde: #d45a4a;
     object-fit: cover;
 }
 
-/** Small uppercase heading of a section. */
 @mixin section-title {
     margin: 0;
     color: $gold;
@@ -59,7 +42,6 @@ $horde: #d45a4a;
     text-transform: uppercase;
 }
 
-/** Small label next to a name, for example "Nuevo" or "Talento". */
 @mixin badge {
     display: inline-block;
     padding: 0 6px;
@@ -71,7 +53,6 @@ $horde: #d45a4a;
     white-space: nowrap;
 }
 
-/** Row of tab buttons with a gold underline on the active one. Put `.tab` buttons inside. */
 @mixin tab-buttons {
     display: flex;
     flex-wrap: wrap;
@@ -107,10 +88,6 @@ $horde: #d45a4a;
     }
 }
 
-/**
- * Bar with the point counters on one side and the action buttons on the other. Expects `.points` (with `<strong>`
- * values and an optional `.over` item) and `.actions` inside.
- */
 @mixin controls {
     @include panel;
     display: flex;
@@ -151,10 +128,6 @@ $horde: #d45a4a;
     }
 }
 
-/**
- * The three trees of a talent or Legacy planner: side by side on wide screens, one per screen (swipe or tabs) on
- * phones. Expects `.tree-tabs > .tree-tab` and `.trees > .tree > (.tree-header, .tree-body)`.
- */
 @mixin talent-trees {
     .tree-tabs {
         display: none;
@@ -229,7 +202,6 @@ $horde: #d45a4a;
 
         .tree-tab {
             flex: 1;
-            // Long single words (Resourcefulness) may break instead of pushing the tab out of a narrow screen.
             min-width: 0;
             overflow-wrap: anywhere;
             padding: 8px 4px;
@@ -285,7 +257,6 @@ $horde: #d45a4a;
     }
 }
 
-/** Short help line under a planner. */
 @mixin hint {
     margin: 0;
     color: $dim;

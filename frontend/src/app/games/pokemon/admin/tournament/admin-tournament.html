@@ -8,19 +8,27 @@
         <div class="admin-section-head">
             <div>
                 <h1 class="admin-page-title">{{ t.name }}</h1>
-                <p class="admin-page-subtitle">{{ t.game.name }} · {{ formatLabels[t.format] }} · {{ t.pointsPerWin }} pts por victoria</p>
+                <p class="admin-page-subtitle">
+                    {{ t.game.name }} · {{ formatLabels[t.format] }} · {{ t.pointsPerWin }} pts por victoria
+                </p>
             </div>
             <a class="btn-neon btn-neon-accent" [routerLink]="['/pokemon/tournaments', t.id]">VER COMO JUGADOR</a>
         </div>
 
         <nav class="admin-tabs" aria-label="Secciones del torneo">
             @for (tab of tabs(); track tab.id) {
-                <button class="admin-tab" type="button" [class.active]="activeTab() === tab.id" (click)="activeTab.set(tab.id)">{{ tab.label }}</button>
+                <button
+                    class="admin-tab"
+                    type="button"
+                    [class.active]="activeTab() === tab.id"
+                    (click)="activeTab.set(tab.id)"
+                >
+                    {{ tab.label }}
+                </button>
             }
         </nav>
 
         @switch (activeTab()) {
-            <!-- ─── Players ─── -->
             @case ('players') {
                 <section class="terminal-card admin-section">
                     <div class="admin-section-head">
@@ -32,11 +40,21 @@
                                     <option [ngValue]="player.id">{{ player.name }}</option>
                                 }
                             </select>
-                            <button class="btn-neon" type="button" [disabled]="!playerToAdd || saving()" (click)="addPlayer()">AÑADIR</button>
+                            <button
+                                class="btn-neon"
+                                type="button"
+                                [disabled]="!playerToAdd || saving()"
+                                (click)="addPlayer()"
+                            >
+                                AÑADIR
+                            </button>
                         </div>
                     </div>
                     @if (t.format === 'groups_bracket') {
-                        <p class="admin-hint">Dos grupos del mismo tamaño. Con un número impar de jugadores, uno queda sin grupo y pasa directo al bracket. También puedes sortearlos al generar el calendario.</p>
+                        <p class="admin-hint">
+                            Dos grupos del mismo tamaño. Con un número impar de jugadores, uno queda sin grupo y pasa
+                            directo al bracket. También puedes sortearlos al generar el calendario.
+                        </p>
                     }
                     <div class="admin-table-scroll">
                         <table class="admin-table">
@@ -57,7 +75,12 @@
                                         <td data-label="JUGADOR" class="strong">{{ player.name }}</td>
                                         @if (t.format === 'groups_bracket') {
                                             <td data-label="GRUPO">
-                                                <select class="neon-input" [ngModel]="player.group" (ngModelChange)="setGroup(player, $event)" [attr.aria-label]="'Grupo de ' + player.name">
+                                                <select
+                                                    class="neon-input"
+                                                    [ngModel]="player.group"
+                                                    (ngModelChange)="setGroup(player, $event)"
+                                                    [attr.aria-label]="'Grupo de ' + player.name"
+                                                >
                                                     <option [ngValue]="null">Sin grupo</option>
                                                     @for (group of groupNames; track group) {
                                                         <option [ngValue]="group">{{ group }}</option>
@@ -66,13 +89,26 @@
                                             </td>
                                         }
                                         <td data-label="AJUSTE">
-                                            <input class="neon-input adjustment" type="number" min="-999" max="999" [value]="player.pointsAdjustment"
-                                                (change)="setAdjustment(player, $any($event.target).value)" [attr.aria-label]="'Ajuste de ' + player.name" />
+                                            <input
+                                                class="neon-input adjustment"
+                                                type="number"
+                                                min="-999"
+                                                max="999"
+                                                [value]="player.pointsAdjustment"
+                                                (change)="setAdjustment(player, $any($event.target).value)"
+                                                [attr.aria-label]="'Ajuste de ' + player.name"
+                                            />
                                         </td>
                                         <td data-label="EQUIPO">{{ player.hasTeamImage ? 'Subido' : '—' }}</td>
                                         <td>
                                             <div class="actions">
-                                                <button class="action-btn btn-neon btn-neon-danger" type="button" (click)="removePlayer(player)">✕ QUITAR</button>
+                                                <button
+                                                    class="action-btn btn-neon btn-neon-danger"
+                                                    type="button"
+                                                    (click)="removePlayer(player)"
+                                                >
+                                                    ✕ QUITAR
+                                                </button>
                                             </div>
                                         </td>
                                     </tr>
@@ -88,11 +124,12 @@
                 </section>
             }
 
-            <!-- ─── Calendar ─── -->
             @case ('calendar') {
                 <section class="terminal-card admin-section">
                     <div class="admin-section-head">
-                        <h2 class="admin-section-title">{{ t.format === 'round_robin' ? 'LIGA' : 'FASE DE GRUPOS' }}</h2>
+                        <h2 class="admin-section-title">
+                            {{ t.format === 'round_robin' ? 'LIGA' : 'FASE DE GRUPOS' }}
+                        </h2>
                         <div class="admin-toolbar">
                             @if (t.format === 'groups_bracket') {
                                 <label class="check-option">
@@ -104,25 +141,43 @@
                             </button>
                         </div>
                     </div>
-                    <p class="admin-hint">Pulsa una serie para registrar sus partidas. No se puede regenerar un calendario con partidas registradas.</p>
+                    <p class="admin-hint">
+                        Pulsa una serie para registrar sus partidas. No se puede regenerar un calendario con partidas
+                        registradas.
+                    </p>
                     @if (t.format === 'groups_bracket' && ungrouped().length > 1) {
-                        <p class="admin-hint">Hay {{ ungrouped().length }} jugadores sin grupo: asígnalos en Jugadores o marca «Sortear grupos».</p>
+                        <p class="admin-hint">
+                            Hay {{ ungrouped().length }} jugadores sin grupo: asígnalos en Jugadores o marca «Sortear
+                            grupos».
+                        </p>
                     }
 
                     @if (t.format === 'round_robin') {
-                        <app-pokemon-calendar-view [detail]="t" [matches]="leagueMatches()" [editable]="true" (edit)="editing.set($event)" />
+                        <app-pokemon-calendar-view
+                            [detail]="t"
+                            [matches]="leagueMatches()"
+                            [editable]="true"
+                            (edit)="editing.set($event)"
+                        />
                     } @else {
                         @for (group of groupNames; track group) {
                             <h3 class="admin-section-title">GRUPO {{ group }}</h3>
                             <app-pokemon-standings-table [rows]="groupRows(group)" [podium]="0" />
-                            <app-pokemon-calendar-view [detail]="t" [matches]="groupSeries(group)" [editable]="true" (edit)="editing.set($event)" />
+                            <app-pokemon-calendar-view
+                                [detail]="t"
+                                [matches]="groupSeries(group)"
+                                [editable]="true"
+                                (edit)="editing.set($event)"
+                            />
                         }
                     }
                 </section>
 
                 <details class="terminal-card admin-section">
                     <summary class="admin-section-title">AÑADIR SERIE A MANO</summary>
-                    <p class="admin-hint">Para correcciones. Los calendarios y el bracket normalmente se generan solos.</p>
+                    <p class="admin-hint">
+                        Para correcciones. Los calendarios y el bracket normalmente se generan solos.
+                    </p>
                     <form class="form-grid" (ngSubmit)="createManualMatch()" #manualForm="ngForm">
                         <div class="form-row">
                             <label class="form-field">
@@ -135,11 +190,27 @@
                             </label>
                             <label class="form-field">
                                 <span class="field-label">RONDA</span>
-                                <input class="neon-input" name="round" type="number" min="1" max="99" required [(ngModel)]="manual.round" />
+                                <input
+                                    class="neon-input"
+                                    name="round"
+                                    type="number"
+                                    min="1"
+                                    max="99"
+                                    required
+                                    [(ngModel)]="manual.round"
+                                />
                             </label>
                             <label class="form-field">
                                 <span class="field-label">POSICIÓN</span>
-                                <input class="neon-input" name="slot" type="number" min="1" max="99" required [(ngModel)]="manual.slot" />
+                                <input
+                                    class="neon-input"
+                                    name="slot"
+                                    type="number"
+                                    min="1"
+                                    max="99"
+                                    required
+                                    [(ngModel)]="manual.slot"
+                                />
                             </label>
                         </div>
                         <div class="form-row">
@@ -161,13 +232,14 @@
                             </label>
                         </div>
                         <div class="modal-actions">
-                            <button class="btn-neon" type="submit" [disabled]="saving() || manualForm.invalid">AÑADIR SERIE</button>
+                            <button class="btn-neon" type="submit" [disabled]="saving() || manualForm.invalid">
+                                AÑADIR SERIE
+                            </button>
                         </div>
                     </form>
                 </details>
             }
 
-            <!-- ─── Bracket ─── -->
             @case ('bracket') {
                 <section class="terminal-card admin-section">
                     <div class="admin-section-head">
@@ -177,37 +249,51 @@
                         </button>
                     </div>
                     <p class="admin-hint">
-                        Pasan todos los jugadores: el primero de un grupo contra el último del otro. Los huecos se convierten en pases directos.
-                        Al corregir un resultado, las series siguientes que cambian de jugadores pierden sus partidas.
+                        Pasan todos los jugadores: el primero de un grupo contra el último del otro. Los huecos se
+                        convierten en pases directos. Al corregir un resultado, las series siguientes que cambian de
+                        jugadores pierden sus partidas.
                     </p>
                     @if (t.bracketSize === null && showsBracket()) {
-                        <p class="admin-hint">Bracket importado: se muestra tal y como se jugó y los ganadores no avanzan solos.</p>
+                        <p class="admin-hint">
+                            Bracket importado: se muestra tal y como se jugó y los ganadores no avanzan solos.
+                        </p>
                     }
                     <app-pokemon-bracket-view [detail]="t" [editable]="true" (edit)="editing.set($event)" />
                 </section>
             }
 
-            <!-- ─── Standings ─── -->
             @case ('standings') {
                 <section class="terminal-card admin-section">
                     <h2 class="admin-section-title">CLASIFICACIÓN FINAL</h2>
-                    <p class="admin-hint">Puntos = victorias × puntos por victoria + ajuste. Este orden es el de elección de recompensas.</p>
+                    <p class="admin-hint">
+                        Puntos = victorias × puntos por victoria + ajuste. Este orden es el de elección de recompensas.
+                    </p>
                     <app-pokemon-standings-table [rows]="standingRows()" />
                 </section>
             }
 
-            <!-- ─── Rewards ─── -->
             @case ('rewards') {
                 <section class="terminal-card admin-section">
                     <div class="admin-section-head">
                         <h2 class="admin-section-title">RECOMPENSAS</h2>
                         <form class="admin-toolbar" (ngSubmit)="addReward()">
-                            <input class="neon-input" name="newReward" maxlength="150" placeholder="Nueva recompensa" [(ngModel)]="newReward" />
-                            <button class="btn-neon" type="submit" [disabled]="!newReward.trim() || saving()">AÑADIR</button>
+                            <input
+                                class="neon-input"
+                                name="newReward"
+                                maxlength="150"
+                                placeholder="Nueva recompensa"
+                                [(ngModel)]="newReward"
+                            />
+                            <button class="btn-neon" type="submit" [disabled]="!newReward.trim() || saving()">
+                                AÑADIR
+                            </button>
                         </form>
                     </div>
                     <p class="admin-hint">
-                        Orden de elección: @for (player of pickOrder(); track player.id) {<span>{{ $index + 1 }}. {{ player.name }}{{ $last ? '' : ' · ' }}</span>}
+                        Orden de elección:
+                        @for (player of pickOrder(); track player.id) {
+                            <span>{{ $index + 1 }}. {{ player.name }}{{ $last ? '' : ' · ' }}</span>
+                        }
                     </p>
                     @if (t.rewards.length === 0) {
                         <p class="admin-page-state">SIN RECOMPENSAS</p>
@@ -225,20 +311,39 @@
                                     @for (reward of t.rewards; track reward.id) {
                                         <tr>
                                             <td data-label="RECOMPENSA">
-                                                <input class="neon-input" maxlength="150" [value]="reward.name"
-                                                    (change)="setRewardName(reward, $any($event.target).value)" [attr.aria-label]="'Nombre de ' + reward.name" />
+                                                <input
+                                                    class="neon-input"
+                                                    maxlength="150"
+                                                    [value]="reward.name"
+                                                    (change)="setRewardName(reward, $any($event.target).value)"
+                                                    [attr.aria-label]="'Nombre de ' + reward.name"
+                                                />
                                             </td>
                                             <td data-label="ELEGIDA POR">
-                                                <select class="neon-input" [ngModel]="reward.chosenBy" (ngModelChange)="setRewardOwner(reward, $event)" [attr.aria-label]="'Quién eligió ' + reward.name">
+                                                <select
+                                                    class="neon-input"
+                                                    [ngModel]="reward.chosenBy"
+                                                    (ngModelChange)="setRewardOwner(reward, $event)"
+                                                    [attr.aria-label]="'Quién eligió ' + reward.name"
+                                                >
                                                     <option [ngValue]="null">Disponible</option>
                                                     @for (player of pickers(reward); track player.id) {
-                                                        <option [ngValue]="player.id">{{ positionOf(player.id) }}. {{ player.name }}</option>
+                                                        <option [ngValue]="player.id">
+                                                            {{ positionOf(player.id) }}. {{ player.name }}
+                                                        </option>
                                                     }
                                                 </select>
                                             </td>
                                             <td>
                                                 <div class="actions">
-                                                    <button class="action-btn btn-neon btn-neon-danger" type="button" (click)="removeReward(reward)">✕</button>
+                                                    <button
+                                                        class="action-btn btn-neon btn-neon-danger"
+                                                        type="button"
+                                                        [attr.aria-label]="'Quitar ' + reward.name"
+                                                        (click)="removeReward(reward)"
+                                                    >
+                                                        ✕
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -250,14 +355,19 @@
                 </section>
             }
 
-            <!-- ─── Settings ─── -->
             @case ('settings') {
                 <section class="terminal-card admin-section">
                     <h2 class="admin-section-title">AJUSTES</h2>
                     <form class="form-grid" (ngSubmit)="saveSettings()" #settingsForm="ngForm">
                         <label class="form-field">
                             <span class="field-label">NOMBRE</span>
-                            <input class="neon-input" name="name" required maxlength="100" [(ngModel)]="settings.name" />
+                            <input
+                                class="neon-input"
+                                name="name"
+                                required
+                                maxlength="100"
+                                [(ngModel)]="settings.name"
+                            />
                         </label>
                         <div class="form-row">
                             <label class="form-field">
@@ -280,21 +390,51 @@
                         <div class="form-row">
                             <label class="form-field">
                                 <span class="field-label">PUNTOS POR VICTORIA</span>
-                                <input class="neon-input" name="pointsPerWin" type="number" min="0" max="100" required [(ngModel)]="settings.pointsPerWin" />
+                                <input
+                                    class="neon-input"
+                                    name="pointsPerWin"
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    required
+                                    [(ngModel)]="settings.pointsPerWin"
+                                />
                             </label>
                             <label class="form-field">
                                 <span class="field-label">REVELACIÓN DE EQUIPOS</span>
-                                <input class="neon-input" name="revealAt" type="datetime-local" [(ngModel)]="revealAt" />
-                                <span class="field-hint">Hasta entonces cada jugador solo ve (y puede cambiar) su equipo.</span>
+                                <input
+                                    class="neon-input"
+                                    name="revealAt"
+                                    type="datetime-local"
+                                    [(ngModel)]="revealAt"
+                                />
+                                <span class="field-hint"
+                                    >Hasta entonces cada jugador solo ve (y puede cambiar) su equipo.</span
+                                >
                             </label>
                         </div>
                         <label class="form-field">
                             <span class="field-label">DESCRIPCIÓN</span>
-                            <textarea class="neon-input" name="description" rows="3" maxlength="1000" [(ngModel)]="settings.description"></textarea>
+                            <textarea
+                                class="neon-input"
+                                name="description"
+                                rows="3"
+                                maxlength="1000"
+                                [(ngModel)]="settings.description"
+                            ></textarea>
                         </label>
                         <div class="modal-actions">
-                            <button class="btn-neon btn-neon-danger" type="button" [disabled]="saving()" (click)="deleteTournament()">ELIMINAR TORNEO</button>
-                            <button class="btn-neon" type="submit" [disabled]="saving() || settingsForm.invalid">GUARDAR</button>
+                            <button
+                                class="btn-neon btn-neon-danger"
+                                type="button"
+                                [disabled]="saving()"
+                                (click)="deleteTournament()"
+                            >
+                                ELIMINAR TORNEO
+                            </button>
+                            <button class="btn-neon" type="submit" [disabled]="saving() || settingsForm.invalid">
+                                GUARDAR
+                            </button>
                         </div>
                     </form>
                 </section>
@@ -311,13 +451,13 @@
         [removable]="canRemove(match)"
         (save)="saveGames($event)"
         (remove)="removeMatch()"
-        (cancel)="editing.set(null)"
+        (dismiss)="editing.set(null)"
     />
 }
 
 @if (confirmation(); as c) {
-    <div class="modal-overlay" (click)="confirmation.set(null)">
-        <div class="modal modal-sm terminal-card" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" appModalOverlay (dismiss)="confirmation.set(null)">
+        <div class="modal modal-sm terminal-card" role="dialog" aria-modal="true">
             <div class="modal-header">
                 <h2 class="modal-title danger-title">{{ c.title }}</h2>
                 <button class="close-btn" type="button" aria-label="Cerrar" (click)="confirmation.set(null)">✕</button>

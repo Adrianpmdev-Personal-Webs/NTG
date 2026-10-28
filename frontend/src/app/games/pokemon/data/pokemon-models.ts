@@ -8,9 +8,6 @@
 
 import { LockeRules } from './locke-rules';
 
-// ─── Shared ───
-
-/** Short reference to another resource. */
 export interface Ref {
     id: string;
     name: string;
@@ -22,14 +19,11 @@ export type MatchStage = 'group' | 'league' | 'upper' | 'lower' | 'grand_final';
 export type MatchStatus = 'pending' | 'ready' | 'finished' | 'bye' | 'void';
 export type GroupName = 'A' | 'B';
 
-// ─── Games ───
-
 export interface Game {
     id: string;
     name: string;
     description: string | null;
     imageUrl: string;
-    /** Randomlockes with at least one tournament in this game. */
     lockeCount: number;
 }
 
@@ -39,12 +33,9 @@ export interface GameRequest {
     imageUrl: string;
 }
 
-// ─── Players ───
-
 export interface Player {
     id: string;
     name: string;
-    /** Linked platform account; only sent to admins. */
     userId: string | null;
 }
 
@@ -52,8 +43,6 @@ export interface PlayerRequest {
     name: string;
     userId: string | null;
 }
-
-// ─── Randomlockes ───
 
 export interface LockeSummary {
     id: string;
@@ -74,7 +63,6 @@ export interface TournamentSummary {
     champion: Ref | null;
 }
 
-/** A player in the standings of a randomlocke or in the global ranking. */
 export interface PlayerStanding {
     playerId: string;
     name: string;
@@ -104,17 +92,13 @@ export interface LockeRequest {
     rules: LockeRules | null;
 }
 
-// ─── Tournaments ───
-
 export interface TournamentPlayer {
-    /** Tournament player id (used by series, standings and rewards). */
     id: string;
     playerId: string;
     name: string;
     group: GroupName | null;
     pointsAdjustment: number;
     hasTeamImage: boolean;
-    /** Temporary URL; null when there is no picture or it is still hidden for the caller. */
     teamImageUrl: string | null;
     mine: boolean;
     canEditTeam: boolean;
@@ -179,7 +163,6 @@ export interface TournamentDetail {
     bracketSize: number | null;
     players: TournamentPlayer[];
     matches: Match[];
-    /** Final standings: the order in which players pick their rewards. */
     standings: Standing[];
     groups: GroupStandings[];
     rewards: Reward[];

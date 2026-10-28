@@ -12,7 +12,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, shareReplay, throwError } from 'rxjs';
-import { API_BASE_URL } from '@core/config/api';
+import { API_BASE_URL } from '@core/api/api';
 import { LegacyData } from '../legacy/legacy-models';
 import { RacialsData } from '../racials/racials-models';
 import { ClassSpellbook } from '../spellbook/spellbook-models';
@@ -21,12 +21,10 @@ import { GameIndex } from './game-data-models';
 
 @Injectable({ providedIn: 'root' })
 export class GameDataApi {
-
     private readonly http = inject(HttpClient);
     private readonly baseUrl = `${API_BASE_URL}/wow-forever/data`;
     private readonly cache = new Map<string, Observable<unknown>>();
 
-    /** Classes, credit, tools and news of the home, faction names and the levels that give a talent point. */
     getIndex(): Observable<GameIndex> {
         return this.cached<GameIndex>('');
     }
@@ -47,15 +45,10 @@ export class GameDataApi {
         return this.cached<LegacyData>('/legacy');
     }
 
-    /**
-     * Public URLs of the pictures uploaded by an admin, by short key: `logo`, `backgrounds/alliance`,
-     * `backgrounds/horde` and `talents/<class>-<tree>`. Pictures not uploaded yet are missing.
-     */
     getImages(): Observable<Readonly<Record<string, string>>> {
         return this.cached<Readonly<Record<string, string>>>('/images');
     }
 
-    /** One shared request per path. A failed one is forgotten, so the next attempt asks the server again. */
     private cached<Model>(path: string): Observable<Model> {
         const known = this.cache.get(path) as Observable<Model> | undefined;
 
@@ -64,11 +57,11 @@ export class GameDataApi {
         }
 
         const request = this.http.get<Model>(`${this.baseUrl}${path}`).pipe(
-            catchError(error => {
+            catchError((error) => {
                 this.cache.delete(path);
                 return throwError(() => error);
             }),
-            shareReplay({ bufferSize: 1, refCount: false })
+            shareReplay({ bufferSize: 1, refCount: false }),
         );
 
         this.cache.set(path, request);

@@ -12,50 +12,46 @@ import { hideBrokenIcon } from '../../wow-forever-config';
 import { Ranks, pointsTowardsGate, prerequisitesOf, rankText } from '../talents-logic';
 import { Talent, TalentTree } from '../talents-models';
 
-/** Distance between the pointer and the card. */
 const OFFSET = 16;
 
-/** Widest the card gets (the same as its max-width in the styles). */
 const MAX_WIDTH = 320;
 
-/** Space kept between the card and the edges of the screen. */
 const EDGE = 16;
 
 const CLASSIC_LABELS: Readonly<Partial<Record<string, string>>> = {
     new: 'Nuevo en Forever',
     changed: 'Cambiado respecto a Classic',
-    moved: 'Movido de sitio respecto a Classic'
+    moved: 'Movido de sitio respecto a Classic',
 };
 
 @Component({
     selector: 'app-talent-tooltip',
     templateUrl: './talent-tooltip.html',
     styleUrl: './talent-tooltip.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TalentTooltip {
-
     readonly talent = input.required<Talent>();
     readonly tree = input.required<TalentTree>();
     readonly ranks = input.required<Ranks>();
-    /** Pointer position on the screen. */
     readonly x = input(0);
     readonly y = input(0);
 
-    readonly rank = computed(() => this.ranks()[this.talent().id] ?? 0);
+    protected readonly rank = computed(() => this.ranks()[this.talent().id] ?? 0);
 
-    readonly current = computed(() => (this.rank() > 0 ? rankText(this.talent(), this.rank()) : null));
+    protected readonly current = computed(() => (this.rank() > 0 ? rankText(this.talent(), this.rank()) : null));
 
-    readonly next = computed(() =>
-        this.rank() < this.talent().maxRanks ? rankText(this.talent(), this.rank() + 1) : null);
+    protected readonly next = computed(() =>
+        this.rank() < this.talent().maxRanks ? rankText(this.talent(), this.rank() + 1) : null,
+    );
 
-    readonly classicLabel = computed(() => {
+    protected readonly classicLabel = computed(() => {
         const classic = this.talent().classic;
 
-        return classic ? CLASSIC_LABELS[classic] ?? null : null;
+        return classic ? (CLASSIC_LABELS[classic] ?? null) : null;
     });
 
-    readonly requirements = computed<string[]>(() => {
+    protected readonly requirements = computed<string[]>(() => {
         const talent = this.talent();
         const tree = this.tree();
         const ranks = this.ranks();
@@ -71,9 +67,14 @@ export class TalentTooltip {
 
         const prerequisites = prerequisitesOf(tree, talent);
 
-        if (prerequisites.length > 0 && !prerequisites.some(required => (ranks[required.id] ?? 0) >= required.maxRanks)) {
-            const options = prerequisites.map(required =>
-                `${required.maxRanks} ${required.maxRanks === 1 ? 'punto' : 'puntos'} en ${required.name}`);
+        if (
+            prerequisites.length > 0 &&
+            !prerequisites.some((required) => (ranks[required.id] ?? 0) >= required.maxRanks)
+        ) {
+            const options = prerequisites.map(
+                (required) =>
+                    `${required.maxRanks} ${required.maxRanks === 1 ? 'punto' : 'puntos'} en ${required.name}`,
+            );
 
             requirements.push(`Requiere ${options.join(' o ')}`);
         }
@@ -81,11 +82,7 @@ export class TalentTooltip {
         return requirements;
     });
 
-    /**
-     * The card hangs from the pointer, on the side of it that has more room. When neither side is wide enough (a phone),
-     * it is centred on the screen instead, so it never leaves it.
-     */
-    readonly position = computed<Record<string, string>>(() => {
+    protected readonly position = computed<Record<string, string>>(() => {
         const x = this.x();
         const y = this.y();
         const screenWidth = window.innerWidth;
@@ -97,13 +94,13 @@ export class TalentTooltip {
             ...(room < width
                 ? { left: `${(screenWidth - width) / 2}px` }
                 : onLeft
-                    ? { right: `${screenWidth - x + OFFSET}px` }
-                    : { left: `${x + OFFSET}px` }),
+                  ? { right: `${screenWidth - x + OFFSET}px` }
+                  : { left: `${x + OFFSET}px` }),
             ...(y > window.innerHeight / 2
                 ? { bottom: `${window.innerHeight - y + OFFSET}px` }
-                : { top: `${y + OFFSET}px` })
+                : { top: `${y + OFFSET}px` }),
         };
     });
 
-    readonly onIconError = hideBrokenIcon;
+    protected readonly hideBrokenIcon = hideBrokenIcon;
 }

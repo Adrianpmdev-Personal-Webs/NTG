@@ -1,19 +1,8 @@
-/**
- * Pokémon type calculator page styles.
- * Responsive Pokémon type selector and damage results layout.
- *
- * Author: Adrián Pérez Morales
- */
-
-/* ─── POKEMON PAGE ─── */
-
 .pokemon-page {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
-
-/* ─── PAGE HEADER ─── */
 
 .page-header {
     display: flex;
@@ -57,8 +46,6 @@
     white-space: nowrap;
 }
 
-/* ─── MODE SWITCH ─── */
-
 .mode-switch {
     display: flex;
     border: 1px solid var(--border-color);
@@ -84,8 +71,6 @@
         background: var(--neon-green);
     }
 }
-
-/* ─── INTRO ─── */
 
 .calculator-intro {
     display: flex;
@@ -133,8 +118,6 @@
     padding: 8px 12px;
 }
 
-/* ─── SECTIONS ─── */
-
 .type-selector-card {
     padding: 18px;
 }
@@ -160,8 +143,6 @@
     color: var(--text-dim);
     letter-spacing: 1.5px;
 }
-
-/* ─── TYPE SELECTOR ─── */
 
 .type-grid {
     display: grid;
@@ -197,8 +178,6 @@
         text-shadow: none;
     }
 }
-
-/* ─── RESULTS ─── */
 
 .results-grid {
     display: grid;
@@ -306,8 +285,6 @@
     text-shadow: 0 0 8px rgba(255, 255, 0, 0.35);
 }
 
-/* ─── TYPE CHIPS ─── */
-
 .type-chip {
     display: inline-flex;
     align-items: center;
@@ -331,8 +308,6 @@
     min-width: 96px;
     padding: 7px 10px;
 }
-
-/* ─── TYPE COLORS ─── */
 
 .type-normal {
     color: #a8a878;
@@ -405,8 +380,6 @@
 .type-hada {
     color: #ee99ac;
 }
-
-/* ─── RESPONSIVE ─── */
 
 @media (max-width: 1180px) {
     .results-grid {
@@ -653,7 +626,6 @@
         letter-spacing: 1px;
     }
 
-    // Two columns still fit the longest type names and halve the list.
     .type-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }

@@ -4,7 +4,11 @@
     } @else if (failed()) {
         <p class="state">No se han podido cargar los datos. Inténtalo de nuevo más tarde.</p>
     } @else {
-        <app-class-picker [classes]="classes()" [selected]="selectedClass()?.slug ?? null" (pick)="selectClass($event)" />
+        <app-class-picker
+            [classes]="classes()"
+            [selected]="selectedClass()?.slug ?? null"
+            (pick)="selectClass($event)"
+        />
 
         @if (loadingBook()) {
             <p class="state">Cargando spellbook…</p>
@@ -15,7 +19,13 @@
                     <ul class="ability-list">
                         @for (highlight of book.highlights; track highlight.name) {
                             <li class="ability">
-                                <img class="ability-icon" [src]="highlight.icon" alt="" loading="lazy" (error)="onIconError($event)" />
+                                <img
+                                    class="ability-icon"
+                                    [src]="highlight.icon"
+                                    alt=""
+                                    loading="lazy"
+                                    (error)="hideBrokenIcon($event)"
+                                />
                                 <span class="ability-text">
                                     <span class="ability-name">{{ highlight.name }}</span>
                                     <span class="ability-desc">{{ highlight.text }}</span>
@@ -34,7 +44,8 @@
                         role="tab"
                         [class.active]="activeTab() === index"
                         [attr.aria-selected]="activeTab() === index"
-                        (click)="selectTab(index)">
+                        (click)="selectTab(index)"
+                    >
                         {{ tab.name }}
                     </button>
                 }
@@ -47,7 +58,8 @@
                     placeholder="Buscar hechizo…"
                     aria-label="Buscar hechizo"
                     [value]="query()"
-                    (input)="changeQuery($any($event.target).value)" />
+                    (input)="changeQuery($any($event.target).value)"
+                />
 
                 <div class="level">
                     <label for="level-limit">Hasta nivel</label>
@@ -58,7 +70,8 @@
                         [min]="minLevel"
                         [max]="maxLevel"
                         [value]="levelLimit()"
-                        (input)="changeLevel($any($event.target).value)" />
+                        (input)="changeLevel($any($event.target).value)"
+                    />
                     <span class="level-value">{{ levelLimit() }}</span>
                 </div>
             </section>
@@ -70,7 +83,13 @@
                     @for (view of views(); track view.spell.name) {
                         <article class="spell">
                             <header class="spell-header">
-                                <img class="spell-icon" [src]="view.spell.icon" alt="" loading="lazy" (error)="onIconError($event)" />
+                                <img
+                                    class="spell-icon"
+                                    [src]="view.spell.icon"
+                                    alt=""
+                                    loading="lazy"
+                                    (error)="hideBrokenIcon($event)"
+                                />
                                 <div class="spell-title">
                                     <h2 class="spell-name">{{ view.spell.name }}</h2>
                                     <div class="spell-meta">
@@ -101,7 +120,8 @@
                                             [class.active]="view.selected === index"
                                             [attr.aria-pressed]="view.selected === index"
                                             [title]="rank.level !== null ? 'Nivel ' + rank.level : rank.label"
-                                            (click)="pickRank(view.spell, index)">
+                                            (click)="pickRank(view.spell, index)"
+                                        >
                                             {{ rankButton(rank, index) }}
                                         </button>
                                     }

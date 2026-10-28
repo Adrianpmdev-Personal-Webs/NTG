@@ -1,6 +1,6 @@
 <div class="tooltip" role="tooltip" [style]="position()">
     <div class="tooltip-head">
-        <img class="tooltip-icon" [src]="talent().icon" alt="" (error)="onIconError($event)" />
+        <img class="tooltip-icon" [src]="talent().icon" alt="" (error)="hideBrokenIcon($event)" />
         <div>
             <div class="tooltip-name">{{ talent().name }}</div>
             <div class="tooltip-rank">Rango {{ rank() }}/{{ talent().maxRanks }} · {{ tree().name }}</div>

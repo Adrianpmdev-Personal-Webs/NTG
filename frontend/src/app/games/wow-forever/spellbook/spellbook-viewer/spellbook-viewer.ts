@@ -11,7 +11,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { NotificationService } from '@core/services/notification';
+import { NotificationCenter } from '@core/notifications/notification-center';
 import { GameDataApi } from '../../game-data/game-data-api';
 import { ClassicStatus, DataCredit, GameClass } from '../../game-data/game-data-models';
 import { ClassPicker } from '../../ui/class-picker/class-picker';
@@ -21,9 +21,7 @@ import { ClassSpellbook, Spell, SpellRank } from '../spellbook-models';
 
 interface SpellView {
     spell: Spell;
-    /** Ranks up to the level filter, lowest first. */
     ranks: SpellRank[];
-    /** Index (in `ranks`) of the rank shown. */
     selected: number;
     rank: SpellRank;
 }
@@ -33,10 +31,9 @@ const MAX_LEVEL = 60;
 
 const CLASSIC_BADGES: Readonly<Partial<Record<ClassicStatus, string>>> = {
     new: 'Nuevo',
-    changed: 'Cambiado'
+    changed: 'Cambiado',
 };
 
-/** Lower case without accents, so the search ignores both. */
 const normalize = (text: string): string =>
     text
         .normalize('NFD')
@@ -49,36 +46,34 @@ const normalize = (text: string): string =>
     imports: [ClassPicker, WowPage],
     templateUrl: './spellbook-viewer.html',
     styleUrl: './spellbook-viewer.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SpellbookViewer implements OnInit {
-
     private readonly gameData = inject(GameDataApi);
     private readonly route = inject(ActivatedRoute);
     private readonly router = inject(Router);
-    private readonly notificationService = inject(NotificationService);
+    private readonly notificationCenter = inject(NotificationCenter);
 
     private classLoad: Subscription | null = null;
 
-    readonly minLevel = MIN_LEVEL;
-    readonly maxLevel = MAX_LEVEL;
+    protected readonly minLevel = MIN_LEVEL;
+    protected readonly maxLevel = MAX_LEVEL;
 
-    readonly classes = signal<GameClass[]>([]);
-    readonly selectedClass = signal<GameClass | null>(null);
-    readonly spellbook = signal<ClassSpellbook | null>(null);
+    protected readonly classes = signal<GameClass[]>([]);
+    protected readonly selectedClass = signal<GameClass | null>(null);
+    protected readonly spellbook = signal<ClassSpellbook | null>(null);
     private readonly indexCredit = signal<DataCredit | null>(null);
-    readonly loading = signal(true);
-    readonly loadingBook = signal(false);
-    readonly failed = signal(false);
-    readonly activeTab = signal(0);
-    readonly query = signal('');
-    readonly levelLimit = signal(MAX_LEVEL);
-    /** Rank picked by hand for each spell (index among the ranks shown); without one, the highest is shown. */
+    protected readonly loading = signal(true);
+    protected readonly loadingBook = signal(false);
+    protected readonly failed = signal(false);
+    protected readonly activeTab = signal(0);
+    protected readonly query = signal('');
+    protected readonly levelLimit = signal(MAX_LEVEL);
     private readonly pickedRanks = signal<Readonly<Record<string, number>>>({});
 
-    readonly tabs = computed(() => this.spellbook()?.tabs ?? []);
+    protected readonly tabs = computed(() => this.spellbook()?.tabs ?? []);
 
-    readonly views = computed<SpellView[]>(() => {
+    protected readonly views = computed<SpellView[]>(() => {
         const tab = this.tabs()[this.activeTab()];
         const query = normalize(this.query());
         const limit = this.levelLimit();
@@ -88,12 +83,12 @@ export class SpellbookViewer implements OnInit {
             return [];
         }
 
-        return tab.spells.flatMap(spell => {
+        return tab.spells.flatMap((spell) => {
             if (query && !normalize(spell.name).includes(query)) {
                 return [];
             }
 
-            const ranks = spell.ranks.filter(rank => rank.level === null || rank.level <= limit);
+            const ranks = spell.ranks.filter((rank) => rank.level === null || rank.level <= limit);
 
             if (ranks.length === 0) {
                 return [];
@@ -106,9 +101,9 @@ export class SpellbookViewer implements OnInit {
         });
     });
 
-    readonly credit = computed(() => creditLine(this.spellbook()?.credit ?? this.indexCredit()));
+    protected readonly credit = computed(() => creditLine(this.spellbook()?.credit ?? this.indexCredit()));
 
-    readonly onIconError = hideBrokenIcon;
+    protected readonly hideBrokenIcon = hideBrokenIcon;
 
     constructor() {
         inject(DestroyRef).onDestroy(() => this.classLoad?.unsubscribe());
@@ -116,12 +111,14 @@ export class SpellbookViewer implements OnInit {
 
     ngOnInit(): void {
         this.gameData.getIndex().subscribe({
-            next: index => {
+            next: (index) => {
                 this.classes.set(index.classes);
                 this.indexCredit.set(index.credit);
                 this.loading.set(false);
 
-                const fromUrl = index.classes.find(gameClass => gameClass.slug === this.route.snapshot.queryParamMap.get('class'));
+                const fromUrl = index.classes.find(
+                    (gameClass) => gameClass.slug === this.route.snapshot.queryParamMap.get('class'),
+                );
                 const first = fromUrl ?? index.classes[0];
 
                 if (first) {
@@ -131,11 +128,11 @@ export class SpellbookViewer implements OnInit {
             error: () => {
                 this.failed.set(true);
                 this.loading.set(false);
-            }
+            },
         });
     }
 
-    selectClass(gameClass: GameClass): void {
+    protected selectClass(gameClass: GameClass): void {
         this.selectedClass.set(gameClass);
         this.spellbook.set(null);
         this.activeTab.set(0);
@@ -144,28 +141,28 @@ export class SpellbookViewer implements OnInit {
         this.classLoad?.unsubscribe();
         this.loadingBook.set(true);
         this.classLoad = this.gameData.getSpellbook(gameClass.slug).subscribe({
-            next: spellbook => {
+            next: (spellbook) => {
                 this.spellbook.set(spellbook);
                 this.loadingBook.set(false);
             },
             error: () => {
                 this.loadingBook.set(false);
-                this.notificationService.error(`No se ha podido cargar el spellbook de ${gameClass.name}`);
-            }
+                this.notificationCenter.error(`No se ha podido cargar el spellbook de ${gameClass.name}`);
+            },
         });
 
         this.router.navigate([], { relativeTo: this.route, queryParams: { class: gameClass.slug }, replaceUrl: true });
     }
 
-    selectTab(index: number): void {
+    protected selectTab(index: number): void {
         this.activeTab.set(index);
     }
 
-    changeQuery(value: string): void {
+    protected changeQuery(value: string): void {
         this.query.set(value);
     }
 
-    changeLevel(value: number | string): void {
+    protected changeLevel(value: number | string): void {
         const parsed = Number(value);
 
         if (Number.isFinite(parsed)) {
@@ -173,16 +170,15 @@ export class SpellbookViewer implements OnInit {
         }
     }
 
-    pickRank(spell: Spell, index: number): void {
-        this.pickedRanks.update(picked => ({ ...picked, [spell.name]: index }));
+    protected pickRank(spell: Spell, index: number): void {
+        this.pickedRanks.update((picked) => ({ ...picked, [spell.name]: index }));
     }
 
-    /** Short name of a rank for its button: the number ("3"), or "1" for spells with a single unnamed rank. */
-    rankButton(rank: SpellRank, index: number): string {
+    protected rankButton(rank: SpellRank, index: number): string {
         return /\d+/.exec(rank.label)?.[0] ?? String(index + 1);
     }
 
-    classicBadge(rank: SpellRank): string | null {
-        return rank.classic ? CLASSIC_BADGES[rank.classic] ?? null : null;
+    protected classicBadge(rank: SpellRank): string | null {
+        return rank.classic ? (CLASSIC_BADGES[rank.classic] ?? null) : null;
     }
 }

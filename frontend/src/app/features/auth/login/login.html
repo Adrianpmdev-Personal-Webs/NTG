@@ -1,21 +1,21 @@
 <div class="login-container">
-    <!-- Matrix background -->
     <div class="matrix-bg" aria-hidden="true">
         @for (col of matrixCols; track col.id) {
-            <div class="matrix-col" [style.left.%]="col.x" [style.animation-duration]="col.speed + 's'"
-                [style.animation-delay]="col.delay + 's'">
+            <div
+                class="matrix-col"
+                [style.left.%]="col.x"
+                [style.animation-duration]="col.speed + 's'"
+                [style.animation-delay]="col.delay + 's'"
+            >
                 {{ col.chars }}
             </div>
         }
     </div>
 
     @if (checkingSession()) {
-        <!-- Silent session restore in progress — show a minimal indicator -->
         <div class="session-check animate-fade-up">
             <div class="sys-label">[SYS] // VERIFICANDO SESIÓN</div>
-            <div class="session-check-dots">
-                <span></span><span></span><span></span>
-            </div>
+            <div class="session-check-dots"><span></span><span></span><span></span></div>
         </div>
     } @else {
         <div class="login-box animate-fade-up">
@@ -29,29 +29,43 @@
                 <span class="prompt-text">root&#64;ntg:~$ ssh admin&#64;sys.internal</span><span class="cursor"> </span>
             </div>
 
-            <form (ngSubmit)="onLogin()" class="login-form">
+            <form (ngSubmit)="signIn()" class="login-form">
                 <div class="field-group">
-                    <label class="field-label">// EMAIL</label>
+                    <label class="field-label" for="login-email">// EMAIL</label>
                     <div class="input-wrapper">
                         <span class="input-prefix">&gt;</span>
-                        <input class="neon-input" type="email" [(ngModel)]="email" name="email"
-                            placeholder="user&#64;domain.com" autocomplete="email" required />
+                        <input
+                            id="login-email"
+                            class="neon-input"
+                            type="email"
+                            [(ngModel)]="email"
+                            name="email"
+                            placeholder="user&#64;domain.com"
+                            autocomplete="email"
+                            required
+                        />
                     </div>
                 </div>
 
                 <div class="field-group">
-                    <label class="field-label">// PASSWORD</label>
+                    <label class="field-label" for="login-password">// PASSWORD</label>
                     <div class="input-wrapper">
                         <span class="input-prefix">&gt;</span>
-                        <input class="neon-input" type="password" [(ngModel)]="password" name="password"
-                            placeholder="••••••••••••" autocomplete="current-password" required />
+                        <input
+                            id="login-password"
+                            class="neon-input"
+                            type="password"
+                            [(ngModel)]="password"
+                            name="password"
+                            placeholder="••••••••••••"
+                            autocomplete="current-password"
+                            required
+                        />
                     </div>
                 </div>
 
                 @if (error()) {
-                    <div class="error-msg">
-                        [ERR] {{ error() }}
-                    </div>
+                    <div class="error-msg">[ERR] {{ error() }}</div>
                 }
 
                 <button type="submit" class="btn-neon login-btn" [disabled]="loading()">

@@ -23,37 +23,35 @@ type FactionFilter = Faction | 'ALL';
     imports: [WowPage],
     templateUrl: './racials-overview.html',
     styleUrl: './racials-overview.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RacialsOverview implements OnInit {
-
     private readonly gameData = inject(GameDataApi);
 
-    /** Faction names from the backend index. */
-    readonly factionLabels = signal<Record<Faction, string>>({ ALLIANCE: '', HORDE: '' });
+    protected readonly factionLabels = signal<Record<Faction, string>>({ ALLIANCE: '', HORDE: '' });
 
-    readonly filters = computed<readonly { id: FactionFilter; label: string }[]>(() => [
+    protected readonly filters = computed<readonly { id: FactionFilter; label: string }[]>(() => [
         { id: 'ALL', label: 'Todas' },
         { id: 'ALLIANCE', label: this.factionLabels().ALLIANCE },
-        { id: 'HORDE', label: this.factionLabels().HORDE }
+        { id: 'HORDE', label: this.factionLabels().HORDE },
     ]);
 
-    readonly data = signal<RacialsData | null>(null);
-    readonly classes = signal<GameClass[]>([]);
-    readonly loading = signal(true);
-    readonly failed = signal(false);
-    readonly filter = signal<FactionFilter>('ALL');
+    private readonly data = signal<RacialsData | null>(null);
+    protected readonly classes = signal<GameClass[]>([]);
+    protected readonly loading = signal(true);
+    protected readonly failed = signal(false);
+    protected readonly filter = signal<FactionFilter>('ALL');
 
-    readonly races = computed<Race[]>(() => {
+    protected readonly races = computed<Race[]>(() => {
         const filter = this.filter();
         const races = this.data()?.races ?? [];
 
-        return filter === 'ALL' ? races : races.filter(race => race.faction === filter);
+        return filter === 'ALL' ? races : races.filter((race) => race.faction === filter);
     });
 
-    readonly credit = computed(() => creditLine(this.data()?.credit ?? null));
+    protected readonly credit = computed(() => creditLine(this.data()?.credit ?? null));
 
-    readonly onIconError = hideBrokenIcon;
+    protected readonly hideBrokenIcon = hideBrokenIcon;
 
     ngOnInit(): void {
         forkJoin({ index: this.gameData.getIndex(), racials: this.gameData.getRacials() }).subscribe({
@@ -66,20 +64,19 @@ export class RacialsOverview implements OnInit {
             error: () => {
                 this.failed.set(true);
                 this.loading.set(false);
-            }
+            },
         });
     }
 
-    setFilter(filter: FactionFilter): void {
+    protected setFilter(filter: FactionFilter): void {
         this.filter.set(filter);
     }
 
-    canPlay(race: Race, gameClass: GameClass): boolean {
+    protected canPlay(race: Race, gameClass: GameClass): boolean {
         return race.classNames.includes(gameClass.name);
     }
 
-    /** Classes of the race in the order of the class list, with their icons. */
-    classesOf(race: Race): GameClass[] {
-        return this.classes().filter(gameClass => this.canPlay(race, gameClass));
+    protected classesOf(race: Race): GameClass[] {
+        return this.classes().filter((gameClass) => this.canPlay(race, gameClass));
     }
 }

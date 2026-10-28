@@ -15,12 +15,10 @@ import { WowButton } from '../../ui/wow-button/wow-button';
     imports: [WowButton],
     templateUrl: './launcher-header.html',
     styleUrl: './launcher-header.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LauncherHeader {
-
     private readonly images = gameImages();
 
-    /** Logo uploaded by an admin. */
-    readonly logoImage = computed(() => cssUrl(this.images()['logo']));
+    protected readonly logoImage = computed(() => cssUrl(this.images()['logo']));
 }

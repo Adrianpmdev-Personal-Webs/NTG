@@ -15,6 +15,6 @@ import { Notifications } from '@shared/components/notifications/notifications';
     selector: 'app-root',
     imports: [RouterOutlet, Notifications],
     templateUrl: './app.html',
-    styleUrl: './app.scss'
+    styleUrl: './app.scss',
 })
 export class App {}

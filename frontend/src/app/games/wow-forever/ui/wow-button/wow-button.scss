@@ -1,126 +1,129 @@
-/**
- * WoW button styles.
- *
- * Metal launcher button, copied from the original WoW Forever web. It is the only button style of the WoW Forever area:
- * action buttons, links back to NTG or the launcher and the tool links of the home all use it (see WowButton).
- *
- * @author @adrianpmdev
- */
-
 @use 'mixins' as *;
 
 :host {
-  display: inline-block;
+    display: inline-block;
 }
 
 .wow-button {
-  position: relative;
-  isolation: isolate;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  text-decoration: none;
-  white-space: nowrap;
-  min-width: 112px;
-  min-height: 34px;
-  padding: 0 14px;
-  border: 2px solid #080d12;
-  border-radius: 1px;
-  overflow: hidden;
-  cursor: pointer;
-  color: #e7ca75;
-  font: 700 11px/1 Arial, Helvetica, sans-serif;
-  letter-spacing: .02em;
-  text-shadow: 1px 1px 0 #000, 0 0 3px rgba(0,0,0,.9);
-  background:
-    radial-gradient(circle at 34% 18%, rgba(179,208,232,.20), transparent 24%),
-    linear-gradient(180deg, rgba(145,176,205,.16), transparent 45%),
-    linear-gradient(#40566c 0%, #253746 46%, #101a22 100%);
-  box-shadow:
-    inset 0 1px 0 rgba(223,233,240,.34),
-    inset 0 -2px 0 rgba(0,0,0,.83),
-    inset 0 0 0 1px rgba(198,165,88,.22),
-    0 0 0 1px rgba(0,0,0,.75),
-    0 3px 7px rgba(0,0,0,.75);
-  transition: filter .12s ease, transform .08s ease;
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    text-decoration: none;
+    white-space: nowrap;
+    min-width: 112px;
+    min-height: 34px;
+    padding: 0 14px;
+    border: 2px solid #080d12;
+    border-radius: 1px;
+    overflow: hidden;
+    cursor: pointer;
+    color: #e7ca75;
+    font:
+        700 11px/1 Arial,
+        Helvetica,
+        sans-serif;
+    letter-spacing: 0.02em;
+    text-shadow:
+        1px 1px 0 #000,
+        0 0 3px rgba(0, 0, 0, 0.9);
+    background:
+        radial-gradient(circle at 34% 18%, rgba(179, 208, 232, 0.2), transparent 24%),
+        linear-gradient(180deg, rgba(145, 176, 205, 0.16), transparent 45%),
+        linear-gradient(#40566c 0%, #253746 46%, #101a22 100%);
+    box-shadow:
+        inset 0 1px 0 rgba(223, 233, 240, 0.34),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.83),
+        inset 0 0 0 1px rgba(198, 165, 88, 0.22),
+        0 0 0 1px rgba(0, 0, 0, 0.75),
+        0 3px 7px rgba(0, 0, 0, 0.75);
+    transition:
+        filter 0.12s ease,
+        transform 0.08s ease;
 }
 
 .wow-button::before,
 .wow-button::after,
 .wow-button__shine {
-  content: '';
-  position: absolute;
-  pointer-events: none;
+    content: '';
+    position: absolute;
+    pointer-events: none;
 }
 
 .wow-button::before {
-  inset: 2px;
-  border: 1px solid rgba(211,187,120,.23);
-  box-shadow: inset 0 0 14px rgba(0,0,0,.54);
-  z-index: -1;
+    inset: 2px;
+    border: 1px solid rgba(211, 187, 120, 0.23);
+    box-shadow: inset 0 0 14px rgba(0, 0, 0, 0.54);
+    z-index: -1;
 }
 
 .wow-button::after {
-  inset: 0;
-  background:
-    radial-gradient(circle at 13% 53%, rgba(255,255,255,.12) 0 1px, transparent 1.5px),
-    radial-gradient(circle at 82% 34%, rgba(0,0,0,.25) 0 1px, transparent 1.7px),
-    radial-gradient(circle at 52% 72%, rgba(255,255,255,.08) 0 1px, transparent 1.5px);
-  background-size: 11px 11px, 13px 13px, 17px 17px;
-  mix-blend-mode: overlay;
-  opacity: .72;
-  z-index: -1;
+    inset: 0;
+    background:
+        radial-gradient(circle at 13% 53%, rgba(255, 255, 255, 0.12) 0 1px, transparent 1.5px),
+        radial-gradient(circle at 82% 34%, rgba(0, 0, 0, 0.25) 0 1px, transparent 1.7px),
+        radial-gradient(circle at 52% 72%, rgba(255, 255, 255, 0.08) 0 1px, transparent 1.5px);
+    background-size:
+        11px 11px,
+        13px 13px,
+        17px 17px;
+    mix-blend-mode: overlay;
+    opacity: 0.72;
+    z-index: -1;
 }
 
 .wow-button__shine {
-  top: 0;
-  left: 5px;
-  right: 5px;
-  height: 9px;
-  background: linear-gradient(to bottom, rgba(255,255,255,.20), transparent);
-  opacity: .72;
+    top: 0;
+    left: 5px;
+    right: 5px;
+    height: 9px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.2), transparent);
+    opacity: 0.72;
 }
 
 .wow-button__label {
-  position: relative;
-  z-index: 1;
+    position: relative;
+    z-index: 1;
 }
 
 .wow-button:hover:not(:disabled) {
-  filter: brightness(1.17) saturate(1.08);
+    filter: brightness(1.17) saturate(1.08);
 }
 
 .wow-button:active:not(:disabled) {
-  transform: translateY(1px);
-  filter: brightness(.95);
+    transform: translateY(1px);
+    filter: brightness(0.95);
 }
 
 .wow-button:disabled {
-  cursor: default;
-  opacity: .55;
+    cursor: default;
+    opacity: 0.55;
 }
 
 .wow-button--large {
-  width: 186px;
-  min-width: 186px;
-  min-height: 76px;
-  padding: 0 28px;
-  border-width: 3px;
-  color: #f0d179;
-  font-size: 24px;
-  letter-spacing: .08em;
-  text-shadow: 1px 2px 0 #000, 0 0 7px rgba(0,0,0,.85);
-  background:
-    radial-gradient(circle at 35% 15%, rgba(177,210,236,.24), transparent 23%),
-    linear-gradient(180deg, rgba(123,156,184,.22), transparent 44%),
-    linear-gradient(#405b74 0%, #243b4c 48%, #101a22 100%);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.42),
-    inset 0 -3px 0 rgba(0,0,0,.85),
-    inset 0 0 0 1px rgba(211,178,94,.38),
-    0 0 0 1px rgba(0,0,0,.84),
-    0 6px 12px rgba(0,0,0,.85);
+    width: 186px;
+    min-width: 186px;
+    min-height: 76px;
+    padding: 0 28px;
+    border-width: 3px;
+    color: #f0d179;
+    font-size: 24px;
+    letter-spacing: 0.08em;
+    text-shadow:
+        1px 2px 0 #000,
+        0 0 7px rgba(0, 0, 0, 0.85);
+    background:
+        radial-gradient(circle at 35% 15%, rgba(177, 210, 236, 0.24), transparent 23%),
+        linear-gradient(180deg, rgba(123, 156, 184, 0.22), transparent 44%),
+        linear-gradient(#405b74 0%, #243b4c 48%, #101a22 100%);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.42),
+        inset 0 -3px 0 rgba(0, 0, 0, 0.85),
+        inset 0 0 0 1px rgba(211, 178, 94, 0.38),
+        0 0 0 1px rgba(0, 0, 0, 0.84),
+        0 6px 12px rgba(0, 0, 0, 0.85);
 }
 
 .wow-button:focus-visible {
@@ -128,22 +131,19 @@
     outline-offset: 2px;
 }
 
-/* ─── RESPONSIVE ─── */
-
-/* Narrow screens: tighter buttons so rows of them wrap instead of overflowing. The large variant keeps its own size. */
 @include mobile {
-  .wow-button:not(.wow-button--large) {
-    min-width: 84px;
-    padding: 0 8px;
-  }
+    .wow-button:not(.wow-button--large) {
+        min-width: 84px;
+        padding: 0 8px;
+    }
 }
 
 @include small {
-  .wow-button--large {
-    width: 150px;
-    min-width: 150px;
-    min-height: 64px;
-    padding: 0 16px;
-    font-size: 20px;
-  }
+    .wow-button--large {
+        width: 150px;
+        min-width: 150px;
+        min-height: 64px;
+        padding: 0 16px;
+        font-size: 20px;
+    }
 }

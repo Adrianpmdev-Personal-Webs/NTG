@@ -11,79 +11,78 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { NotificationService } from '@core/services/notification';
+import { NotificationCenter } from '@core/notifications/notification-center';
 import { resolveApiError } from '@shared/utils/api-error';
 import { parseRules, rulesToText } from '../../data/locke-rules';
 import { PokemonApi } from '../../data/pokemon-api';
 import { LockeSummary } from '../../data/pokemon-models';
+import { ModalOverlay } from '@shared/directives/modal-overlay';
 
 type Dialog = { mode: 'create' } | { mode: 'edit'; id: string } | { mode: 'delete'; locke: LockeSummary } | null;
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-pokemon-admin-lockes',
-    imports: [FormsModule, RouterLink],
-    templateUrl: './admin-lockes.html'
+    imports: [ModalOverlay, FormsModule, RouterLink],
+    templateUrl: './admin-lockes.html',
 })
 export class AdminLockes {
-
     private readonly api = inject(PokemonApi);
-    private readonly notifications = inject(NotificationService);
+    private readonly notifications = inject(NotificationCenter);
     private readonly router = inject(Router);
 
-    readonly lockes = signal<LockeSummary[]>([]);
-    readonly loading = signal(true);
-    readonly saving = signal(false);
-    readonly dialog = signal<Dialog>(null);
+    protected readonly lockes = signal<LockeSummary[]>([]);
+    protected readonly loading = signal(true);
+    protected readonly saving = signal(false);
+    protected readonly dialog = signal<Dialog>(null);
 
-    form = { name: '', description: '', rules: '' };
+    protected form = { name: '', description: '', rules: '' };
 
     constructor() {
         this.load();
     }
 
-    load(): void {
+    private load(): void {
         this.api.getLockes().subscribe({
-            next: lockes => {
+            next: (lockes) => {
                 this.lockes.set(lockes);
                 this.loading.set(false);
             },
-            error: error => {
+            error: (error) => {
                 this.loading.set(false);
                 this.notifications.error(resolveApiError(error, 'No se han podido cargar los randomlockes'));
-            }
+            },
         });
     }
 
-    gameNames(locke: LockeSummary): string {
-        return locke.games.map(game => game.name).join(', ') || '—';
+    protected gameNames(locke: LockeSummary): string {
+        return locke.games.map((game) => game.name).join(', ') || '—';
     }
 
-    openCreate(): void {
+    protected openCreate(): void {
         this.form = { name: '', description: '', rules: '' };
         this.dialog.set({ mode: 'create' });
     }
 
-    openEdit(summary: LockeSummary): void {
-        // The list has no rules: read the full randomlocke first.
+    protected openEdit(summary: LockeSummary): void {
         this.api.getLocke(summary.id).subscribe({
-            next: locke => {
+            next: (locke) => {
                 this.form = { name: locke.name, description: locke.description ?? '', rules: rulesToText(locke.rules) };
                 this.dialog.set({ mode: 'edit', id: locke.id });
             },
-            error: error => this.notifications.error(resolveApiError(error, 'No se ha podido cargar el randomlocke'))
+            error: (error) => this.notifications.error(resolveApiError(error, 'No se ha podido cargar el randomlocke')),
         });
     }
 
-    openDelete(locke: LockeSummary): void {
+    protected openDelete(locke: LockeSummary): void {
         this.dialog.set({ mode: 'delete', locke });
     }
 
-    close(): void {
+    protected close(): void {
         this.dialog.set(null);
     }
 
-    save(): void {
+    protected save(): void {
         const dialog = this.dialog();
         const rules = parseRules(this.form.rules);
 
@@ -97,7 +96,7 @@ export class AdminLockes {
 
         this.saving.set(true);
         call.subscribe({
-            next: locke => {
+            next: (locke) => {
                 this.saving.set(false);
                 this.dialog.set(null);
                 this.notifications.success(dialog?.mode === 'edit' ? 'Randomlocke actualizado' : 'Randomlocke creado');
@@ -108,14 +107,14 @@ export class AdminLockes {
                     this.load();
                 }
             },
-            error: error => {
+            error: (error) => {
                 this.saving.set(false);
                 this.notifications.error(resolveApiError(error, 'No se ha podido guardar'));
-            }
+            },
         });
     }
 
-    confirmDelete(): void {
+    protected confirmDelete(): void {
         const dialog = this.dialog();
 
         if (dialog?.mode !== 'delete') {
@@ -130,10 +129,10 @@ export class AdminLockes {
                 this.notifications.success('Randomlocke eliminado');
                 this.load();
             },
-            error: error => {
+            error: (error) => {
                 this.saving.set(false);
                 this.notifications.error(resolveApiError(error, 'No se ha podido eliminar'));
-            }
+            },
         });
     }
 }

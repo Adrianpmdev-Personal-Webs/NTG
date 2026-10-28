@@ -9,37 +9,38 @@
  */
 
 import { Route, Routes } from '@angular/router';
-import { adminGuard } from '@core/guards/admin';
-import { authGuard } from '@core/guards/auth';
-import { gameGuard } from '@core/guards/game';
-import { roleHomeGuard } from '@core/guards/role-home';
+import { adminGuard } from '@core/auth/admin-guard';
+import { authGuard } from '@core/auth/auth-guard';
+import { gameGuard } from '@core/games/game-guard';
+import { roleHomeGuard } from '@core/auth/role-home-guard';
 import { GAME_MODULES } from '@games/games';
 
-const gameAdminRoutes: Route[] = GAME_MODULES
-    .filter(game => game.adminRoutes)
-    .map(game => ({ path: game.id, loadChildren: game.adminRoutes }));
+const gameAdminRoutes: Route[] = GAME_MODULES.filter((game) => game.adminRoutes).map((game) => ({
+    path: game.id,
+    loadChildren: game.adminRoutes,
+}));
 
-const gamePlayerRoutes: Route[] = GAME_MODULES.map(game => ({
+const gamePlayerRoutes: Route[] = GAME_MODULES.map((game) => ({
     path: game.id,
     canActivate: [authGuard, gameGuard(game.id)],
-    loadChildren: game.routes
+    loadChildren: game.routes,
 }));
 
 export const routes: Routes = [
     {
         path: '',
-        loadComponent: () => import('@layout/main-layout/main-layout').then(m => m.MainLayout),
+        loadComponent: () => import('@layout/main-layout/main-layout').then((m) => m.MainLayout),
         canActivate: [authGuard],
         children: [
             {
                 path: '',
                 pathMatch: 'full',
                 canActivate: [roleHomeGuard],
-                children: []
+                children: [],
             },
             {
                 path: 'welcome',
-                loadChildren: () => import('@features/welcome/welcome.routes').then(m => m.WELCOME_ROUTES)
+                loadChildren: () => import('@features/welcome/welcome.routes').then((m) => m.WELCOME_ROUTES),
             },
             {
                 path: 'admin',
@@ -48,21 +49,19 @@ export const routes: Routes = [
                     ...gameAdminRoutes,
                     {
                         path: '',
-                        loadChildren: () => import('@features/admin/admin.routes').then(m => m.ADMIN_ROUTES)
-                    }
-                ]
-            }
-        ]
+                        loadChildren: () => import('@features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
+                    },
+                ],
+            },
+        ],
     },
     ...gamePlayerRoutes,
     {
-        // Public routes. /set-password is the target of the link in the email sent by Supabase:
-        // /set-password#access_token=XXX&...
         path: '',
-        loadChildren: () => import('@features/auth/auth.routes').then(m => m.AUTH_ROUTES)
+        loadChildren: () => import('@features/auth/auth.routes').then((m) => m.AUTH_ROUTES),
     },
     {
         path: '**',
-        redirectTo: ''
-    }
+        redirectTo: '',
+    },
 ];

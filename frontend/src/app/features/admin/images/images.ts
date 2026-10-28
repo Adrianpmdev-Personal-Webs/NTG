@@ -10,11 +10,12 @@
 
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { ACCEPTED_IMAGE_TYPES, AssetService, checkImageFile } from '@core/services/asset';
-import { GameCatalogService } from '@core/services/game-catalog';
-import { NotificationService } from '@core/services/notification';
+import { ACCEPTED_IMAGE_TYPES, AssetApi, checkImageFile } from '@core/assets/asset-api';
+import { GameCatalog } from '@core/games/game-catalog';
+import { NotificationCenter } from '@core/notifications/notification-center';
 import { Asset } from '@shared/models/asset';
 import { resolveApiError } from '@shared/utils/api-error';
+import { ModalOverlay } from '@shared/directives/modal-overlay';
 
 interface AssetGroup {
     name: string;
@@ -25,25 +26,22 @@ interface AssetGroup {
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-admin-images',
-    imports: [DatePipe],
+    imports: [ModalOverlay, DatePipe],
     templateUrl: './images.html',
-    styleUrl: './images.scss'
+    styleUrl: './images.scss',
 })
 export class Images {
+    private readonly assetApi = inject(AssetApi);
+    private readonly catalog = inject(GameCatalog);
+    private readonly notifications = inject(NotificationCenter);
 
-    private readonly assetService = inject(AssetService);
-    private readonly catalog = inject(GameCatalogService);
-    private readonly notifications = inject(NotificationService);
+    protected readonly accepted = ACCEPTED_IMAGE_TYPES;
+    protected readonly assets = signal<Asset[]>([]);
+    protected readonly loading = signal(true);
+    protected readonly busyKey = signal<string | null>(null);
+    protected readonly confirmDelete = signal<Asset | null>(null);
 
-    readonly accepted = ACCEPTED_IMAGE_TYPES;
-    readonly assets = signal<Asset[]>([]);
-    readonly loading = signal(true);
-    /** Key of the picture being uploaded or deleted. */
-    readonly busyKey = signal<string | null>(null);
-    readonly confirmDelete = signal<Asset | null>(null);
-
-    /** Pictures grouped as the backend orders them. */
-    readonly groups = computed<AssetGroup[]>(() => {
+    protected readonly groups = computed<AssetGroup[]>(() => {
         const groups = new Map<string, Asset[]>();
 
         for (const asset of this.assets()) {
@@ -53,7 +51,7 @@ export class Images {
         return [...groups.entries()].map(([name, assets]) => ({
             name,
             assets,
-            uploaded: assets.filter(asset => asset.url).length
+            uploaded: assets.filter((asset) => asset.url).length,
         }));
     });
 
@@ -61,20 +59,20 @@ export class Images {
         this.load();
     }
 
-    load(): void {
-        this.assetService.getAll().subscribe({
-            next: assets => {
+    private load(): void {
+        this.assetApi.getAll().subscribe({
+            next: (assets) => {
                 this.assets.set(assets);
                 this.loading.set(false);
             },
-            error: error => {
+            error: (error) => {
                 this.loading.set(false);
                 this.notifications.error(resolveApiError(error, 'No se han podido cargar las imágenes'));
-            }
+            },
         });
     }
 
-    upload(asset: Asset, event: Event): void {
+    protected upload(asset: Asset, event: Event): void {
         const input = event.target as HTMLInputElement;
         const file = input.files?.[0];
         input.value = '';
@@ -91,29 +89,29 @@ export class Images {
         }
 
         this.busyKey.set(asset.key);
-        this.assetService.upload(asset.key, file).subscribe({
-            next: stored => {
+        this.assetApi.upload(asset.key, file).subscribe({
+            next: (stored) => {
                 this.busyKey.set(null);
-                this.assets.update(assets => assets.map(item => item.key === stored.key ? stored : item));
+                this.assets.update((assets) => assets.map((item) => (item.key === stored.key ? stored : item)));
                 this.notifications.success(`${asset.label}: imagen guardada (${this.size(stored.sizeBytes)})`);
                 this.refreshCatalogIfCover(asset.key);
             },
-            error: error => {
+            error: (error) => {
                 this.busyKey.set(null);
                 this.notifications.error(resolveApiError(error, 'No se ha podido subir la imagen'));
-            }
+            },
         });
     }
 
-    askDelete(asset: Asset): void {
+    protected askDelete(asset: Asset): void {
         this.confirmDelete.set(asset);
     }
 
-    closeDelete(): void {
+    protected closeDelete(): void {
         this.confirmDelete.set(null);
     }
 
-    delete(): void {
+    protected delete(): void {
         const asset = this.confirmDelete();
 
         if (!asset) {
@@ -121,7 +119,7 @@ export class Images {
         }
 
         this.busyKey.set(asset.key);
-        this.assetService.delete(asset.key).subscribe({
+        this.assetApi.delete(asset.key).subscribe({
             next: () => {
                 this.busyKey.set(null);
                 this.confirmDelete.set(null);
@@ -129,15 +127,14 @@ export class Images {
                 this.refreshCatalogIfCover(asset.key);
                 this.load();
             },
-            error: error => {
+            error: (error) => {
                 this.busyKey.set(null);
                 this.notifications.error(resolveApiError(error, 'No se ha podido eliminar la imagen'));
-            }
+            },
         });
     }
 
-    /** "245 KB", "1.2 MB" or "—". */
-    size(bytes: number | null): string {
+    protected size(bytes: number | null): string {
         if (bytes === null) {
             return '—';
         }
@@ -145,7 +142,6 @@ export class Images {
         return bytes < 1024 * 1024 ? `${Math.round(bytes / 1024)} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
     }
 
-    /** Covers are shown by the sidebar, the welcome page and the dashboard through the catalog. */
     private refreshCatalogIfCover(key: string): void {
         if (key.startsWith('platform/games/')) {
             this.catalog.refresh();

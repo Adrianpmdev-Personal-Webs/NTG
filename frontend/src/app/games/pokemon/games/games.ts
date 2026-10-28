@@ -17,26 +17,25 @@ import { Game } from '../data/pokemon-models';
     selector: 'app-pokemon-games',
     imports: [RouterLink],
     templateUrl: './games.html',
-    styleUrl: './games.scss'
+    styleUrl: './games.scss',
 })
 export class Games {
-
     private readonly api = inject(PokemonApi);
 
-    readonly loading = signal(true);
-    readonly failed = signal(false);
-    readonly games = signal<Game[]>([]);
+    protected readonly loading = signal(true);
+    protected readonly failed = signal(false);
+    protected readonly games = signal<Game[]>([]);
 
     constructor() {
         this.api.getGames().subscribe({
-            next: games => {
+            next: (games) => {
                 this.games.set(games);
                 this.loading.set(false);
             },
             error: () => {
                 this.failed.set(true);
                 this.loading.set(false);
-            }
+            },
         });
     }
 }

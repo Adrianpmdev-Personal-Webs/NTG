@@ -24,37 +24,40 @@ type LockeTab = 'tournaments' | 'standings' | 'rules' | 'players';
     selector: 'app-pokemon-locke',
     imports: [RouterLink, StandingsTable, RulesView],
     templateUrl: './locke.html',
-    styleUrl: './locke.scss'
+    styleUrl: './locke.scss',
 })
 export class LockePage {
-
     private readonly api = inject(PokemonApi);
 
-    readonly tabs: readonly { id: LockeTab; label: string }[] = [
+    protected readonly tabs: readonly { id: LockeTab; label: string }[] = [
         { id: 'tournaments', label: 'Torneos' },
         { id: 'standings', label: 'Clasificación' },
         { id: 'rules', label: 'Reglas' },
-        { id: 'players', label: 'Jugadores' }
+        { id: 'players', label: 'Jugadores' },
     ];
 
-    readonly formatLabels = FORMAT_LABELS;
-    readonly statusLabels = STATUS_LABELS;
+    protected readonly formatLabels = FORMAT_LABELS;
+    protected readonly statusLabels = STATUS_LABELS;
 
-    readonly loading = signal(true);
-    readonly failed = signal(false);
-    readonly locke = signal<LockeDetail | null>(null);
-    readonly activeTab = signal<LockeTab>('tournaments');
+    protected readonly loading = signal(true);
+    protected readonly failed = signal(false);
+    protected readonly locke = signal<LockeDetail | null>(null);
+    protected readonly activeTab = signal<LockeTab>('tournaments');
 
-    readonly standingRows = computed(() => playerRows(this.locke()?.standings ?? [], row => `${row.titles}`));
+    protected readonly standingRows = computed(() =>
+        playerRows(this.locke()?.standings ?? [], (row) => `${row.titles}`),
+    );
 
     constructor() {
-        inject(ActivatedRoute).paramMap
-            .pipe(switchMap(params => {
-                this.loading.set(true);
-                return this.api.getLocke(params.get('lockeId') ?? '');
-            }))
+        inject(ActivatedRoute)
+            .paramMap.pipe(
+                switchMap((params) => {
+                    this.loading.set(true);
+                    return this.api.getLocke(params.get('lockeId') ?? '');
+                }),
+            )
             .subscribe({
-                next: locke => {
+                next: (locke) => {
                     this.locke.set(locke);
                     this.failed.set(false);
                     this.loading.set(false);
@@ -62,7 +65,7 @@ export class LockePage {
                 error: () => {
                     this.failed.set(true);
                     this.loading.set(false);
-                }
+                },
             });
     }
 }

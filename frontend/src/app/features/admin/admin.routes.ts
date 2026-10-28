@@ -13,22 +13,22 @@ export const ADMIN_ROUTES: Routes = [
     {
         path: '',
         pathMatch: 'full',
-        redirectTo: 'dashboard'
+        redirectTo: 'dashboard',
     },
     {
         path: 'dashboard',
-        loadComponent: () => import('./dashboard/dashboard').then(m => m.Dashboard)
+        loadComponent: () => import('./dashboard/dashboard').then((m) => m.Dashboard),
     },
     {
         path: 'users',
-        loadComponent: () => import('./users/users').then(m => m.Users)
+        loadComponent: () => import('./users/users').then((m) => m.Users),
     },
     {
         path: 'games',
-        loadComponent: () => import('./games/games').then(m => m.Games)
+        loadComponent: () => import('./games/games').then((m) => m.Games),
     },
     {
         path: 'images',
-        loadComponent: () => import('./images/images').then(m => m.Images)
-    }
+        loadComponent: () => import('./images/images').then((m) => m.Images),
+    },
 ];

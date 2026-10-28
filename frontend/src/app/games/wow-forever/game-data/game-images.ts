@@ -12,9 +12,12 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { catchError, of } from 'rxjs';
 import { GameDataApi } from './game-data-api';
 
-/** Must be called in an injection context (a field initializer or the constructor of a component). */
 export const gameImages = (): Signal<Readonly<Record<string, string>>> =>
-    toSignal(inject(GameDataApi).getImages().pipe(catchError(() => of({}))), { initialValue: {} });
+    toSignal(
+        inject(GameDataApi)
+            .getImages()
+            .pipe(catchError(() => of({}))),
+        { initialValue: {} },
+    );
 
-/** CSS `url(...)` of a picture, or `none` when it has not been uploaded. */
-export const cssUrl = (url: string | undefined): string => url ? `url('${url}')` : 'none';
+export const cssUrl = (url: string | undefined): string => (url ? `url('${url}')` : 'none');

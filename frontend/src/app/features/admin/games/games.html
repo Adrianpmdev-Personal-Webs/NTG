@@ -3,7 +3,8 @@
         <div>
             <h1 class="admin-page-title">JUEGOS</h1>
             <p class="admin-page-subtitle">
-                Catálogo de juegos de la plataforma. Un juego "próximamente" se muestra a todos, pero solo los admins pueden entrar.
+                Catálogo de juegos de la plataforma. Un juego "próximamente" se muestra a todos, pero solo los admins
+                pueden entrar.
             </p>
         </div>
         <button class="btn-neon" type="button" (click)="openCreate()">+ NUEVO JUEGO</button>
@@ -49,13 +50,29 @@
                                 <td data-label="ORDEN">{{ game.sortOrder }}</td>
                                 <td>
                                     <div class="actions">
-                                        <label class="action-btn btn-neon" [class.disabled]="uploadingCover() === game.id">
+                                        <label
+                                            class="action-btn btn-neon"
+                                            [class.disabled]="uploadingCover() === game.id"
+                                        >
                                             {{ uploadingCover() === game.id ? 'SUBIENDO...' : '⬆ PORTADA' }}
-                                            <input type="file" hidden [accept]="accepted" [disabled]="uploadingCover() !== null"
-                                                (change)="uploadCover(game, $event)" />
+                                            <input
+                                                type="file"
+                                                hidden
+                                                [accept]="accepted"
+                                                [disabled]="uploadingCover() !== null"
+                                                (change)="uploadCover(game, $event)"
+                                            />
                                         </label>
-                                        <button class="action-btn btn-neon" type="button" (click)="openEdit(game)">✎ EDITAR</button>
-                                        <button class="action-btn btn-neon btn-neon-danger" type="button" (click)="openDelete(game)">✕ ELIMINAR</button>
+                                        <button class="action-btn btn-neon" type="button" (click)="openEdit(game)">
+                                            ✎ EDITAR
+                                        </button>
+                                        <button
+                                            class="action-btn btn-neon btn-neon-danger"
+                                            type="button"
+                                            (click)="openDelete(game)"
+                                        >
+                                            ✕ ELIMINAR
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -69,8 +86,8 @@
 
 @let d = dialog();
 @if (d && d.mode !== 'delete') {
-    <div class="modal-overlay" (click)="close()">
-        <div class="modal modal-sm terminal-card" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" appModalOverlay (dismiss)="close()">
+        <div class="modal modal-sm terminal-card" role="dialog" aria-modal="true">
             <div class="modal-header">
                 <h2 class="modal-title">{{ d.mode === 'create' ? 'NUEVO JUEGO' : 'EDITAR JUEGO' }}</h2>
                 <button class="close-btn" type="button" aria-label="Cerrar" (click)="close()">✕</button>
@@ -80,10 +97,18 @@
                     @if (d.mode === 'create') {
                         <label class="form-field">
                             <span class="field-label">CLAVE</span>
-                            <input class="neon-input" name="key" required minlength="2" maxlength="30"
-                                pattern="[a-z0-9][a-z0-9_\-]{1,29}" [(ngModel)]="form.key" />
+                            <input
+                                class="neon-input"
+                                name="key"
+                                required
+                                minlength="2"
+                                maxlength="30"
+                                pattern="[a-z0-9][a-z0-9_\-]{1,29}"
+                                [(ngModel)]="form.key"
+                            />
                             <span class="field-hint">
-                                Minúsculas, números, "-" o "_". Es la dirección del juego (/clave) y la clave de su etiqueta de acceso, que se crea sola si no existe. No se puede cambiar.
+                                Minúsculas, números, "-" o "_". Es la dirección del juego (/clave) y la clave de su
+                                etiqueta de acceso, que se crea sola si no existe. No se puede cambiar.
                             </span>
                         </label>
                     }
@@ -93,12 +118,22 @@
                     </label>
                     <label class="form-field">
                         <span class="field-label">ORDEN</span>
-                        <input class="neon-input" name="sortOrder" type="number" required min="0" max="999" [(ngModel)]="form.sortOrder" />
+                        <input
+                            class="neon-input"
+                            name="sortOrder"
+                            type="number"
+                            required
+                            min="0"
+                            max="999"
+                            [(ngModel)]="form.sortOrder"
+                        />
                     </label>
                     <label class="form-field checkbox-field">
                         <input type="checkbox" name="upcoming" [(ngModel)]="form.upcoming" />
                         <span class="field-label">PRÓXIMAMENTE</span>
-                        <span class="field-hint">Desmárcalo para publicar el juego a los jugadores con su etiqueta.</span>
+                        <span class="field-hint"
+                            >Desmárcalo para publicar el juego a los jugadores con su etiqueta.</span
+                        >
                     </label>
                 </div>
                 <div class="modal-actions">
@@ -111,8 +146,8 @@
 }
 
 @if (d && d.mode === 'delete') {
-    <div class="modal-overlay" (click)="close()">
-        <div class="modal modal-sm terminal-card" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" appModalOverlay (dismiss)="close()">
+        <div class="modal modal-sm terminal-card" role="dialog" aria-modal="true">
             <div class="modal-header">
                 <h2 class="modal-title danger-title">ELIMINAR JUEGO</h2>
                 <button class="close-btn" type="button" aria-label="Cerrar" (click)="close()">✕</button>
@@ -121,13 +156,22 @@
                 <div class="delete-warning">
                     <span class="warning-icon">⚠</span>
                     <div>
-                        <p class="warning-title">¿Quitar <span class="highlight">{{ d.game.name }}</span> del catálogo?</p>
+                        <p class="warning-title">
+                            ¿Quitar <span class="highlight">{{ d.game.name }}</span> del catálogo?
+                        </p>
                         <p class="warning-desc">Se borra su portada. Su etiqueta y sus datos no se tocan.</p>
                     </div>
                 </div>
                 <div class="modal-actions">
                     <button class="btn-neon" type="button" (click)="close()">CANCELAR</button>
-                    <button class="btn-neon btn-neon-danger" type="button" [disabled]="saving()" (click)="confirmDelete()">CONFIRMAR ELIMINACIÓN</button>
+                    <button
+                        class="btn-neon btn-neon-danger"
+                        type="button"
+                        [disabled]="saving()"
+                        (click)="confirmDelete()"
+                    >
+                        CONFIRMAR ELIMINACIÓN
+                    </button>
                 </div>
             </div>
         </div>

@@ -29,8 +29,16 @@
                                 <td data-label="CUENTA">{{ accountName(player.userId) }}</td>
                                 <td>
                                     <div class="actions">
-                                        <button class="action-btn btn-neon" type="button" (click)="openEdit(player)">✎ EDITAR</button>
-                                        <button class="action-btn btn-neon btn-neon-danger" type="button" (click)="openDelete(player)">✕ ELIMINAR</button>
+                                        <button class="action-btn btn-neon" type="button" (click)="openEdit(player)">
+                                            ✎ EDITAR
+                                        </button>
+                                        <button
+                                            class="action-btn btn-neon btn-neon-danger"
+                                            type="button"
+                                            (click)="openDelete(player)"
+                                        >
+                                            ✕ ELIMINAR
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -44,8 +52,8 @@
 
 @let d = dialog();
 @if (d && d.mode !== 'delete') {
-    <div class="modal-overlay" (click)="close()">
-        <div class="modal modal-sm terminal-card" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" appModalOverlay (dismiss)="close()">
+        <div class="modal modal-sm terminal-card" role="dialog" aria-modal="true">
             <div class="modal-header">
                 <h2 class="modal-title">{{ d.mode === 'create' ? 'NUEVO JUGADOR' : 'EDITAR JUGADOR' }}</h2>
                 <button class="close-btn" type="button" aria-label="Cerrar" (click)="close()">✕</button>
@@ -64,7 +72,9 @@
                                 <option [ngValue]="user.id">{{ user.username }}</option>
                             }
                         </select>
-                        <span class="field-hint">Con cuenta, el jugador puede subir su propio equipo antes de la revelación.</span>
+                        <span class="field-hint"
+                            >Con cuenta, el jugador puede subir su propio equipo antes de la revelación.</span
+                        >
                     </label>
                 </div>
                 <div class="modal-actions">
@@ -77,8 +87,8 @@
 }
 
 @if (d && d.mode === 'delete') {
-    <div class="modal-overlay" (click)="close()">
-        <div class="modal modal-sm terminal-card" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" appModalOverlay (dismiss)="close()">
+        <div class="modal modal-sm terminal-card" role="dialog" aria-modal="true">
             <div class="modal-header">
                 <h2 class="modal-title danger-title">ELIMINAR JUGADOR</h2>
                 <button class="close-btn" type="button" aria-label="Cerrar" (click)="close()">✕</button>
@@ -87,13 +97,23 @@
                 <div class="delete-warning">
                     <span class="warning-icon">⚠</span>
                     <div>
-                        <p class="warning-title">¿Eliminar a <span class="highlight">{{ d.player.name }}</span>?</p>
+                        <p class="warning-title">
+                            ¿Eliminar a <span class="highlight">{{ d.player.name }}</span
+                            >?
+                        </p>
                         <p class="warning-desc">Solo se puede eliminar un jugador que no haya jugado ningún torneo.</p>
                     </div>
                 </div>
                 <div class="modal-actions">
                     <button class="btn-neon" type="button" (click)="close()">CANCELAR</button>
-                    <button class="btn-neon btn-neon-danger" type="button" [disabled]="saving()" (click)="confirmDelete()">CONFIRMAR ELIMINACIÓN</button>
+                    <button
+                        class="btn-neon btn-neon-danger"
+                        type="button"
+                        [disabled]="saving()"
+                        (click)="confirmDelete()"
+                    >
+                        CONFIRMAR ELIMINACIÓN
+                    </button>
                 </div>
             </div>
         </div>

@@ -14,152 +14,152 @@ import { switchMap } from 'rxjs';
 import { CreateUserRequest, UpdateUserRequest, User } from '@shared/models/user';
 import { Tag } from '@shared/models/tag';
 import { resolveApiError } from '@shared/utils/api-error';
-import { NotificationService } from '@core/services/notification';
-import { TagService } from '@core/services/tag';
-import { UserService } from '@core/services/user';
+import { NotificationCenter } from '@core/notifications/notification-center';
+import { TagApi } from '@core/tags/tag-api';
+import { UserApi } from '@core/users/user-api';
+import { ModalOverlay } from '@shared/directives/modal-overlay';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-usuarios',
-    imports: [FormsModule],
+    imports: [ModalOverlay, FormsModule],
     templateUrl: './users.html',
-    styleUrl: './users.scss'
+    styleUrl: './users.scss',
 })
 export class Users implements OnInit {
+    private readonly userApi = inject(UserApi);
+    private readonly tagApi = inject(TagApi);
+    private readonly notificationCenter = inject(NotificationCenter);
 
-    private readonly userService = inject(UserService);
-    private readonly tagService = inject(TagService);
-    private readonly notificationService = inject(NotificationService);
+    protected readonly users = signal<User[]>([]);
+    protected readonly filteredUsers = signal<User[]>([]);
+    protected readonly loading = signal(true);
+    protected readonly submitting = signal(false);
+    protected readonly inviting = signal<string | null>(null);
+    protected readonly availableTags = signal<Tag[]>([]);
+    protected readonly modalMode = signal<'create' | 'edit' | 'delete' | null>(null);
+    protected readonly selectedUser = signal<User | null>(null);
+    protected readonly editTarget = signal<User | null>(null);
+    protected readonly roleFilter = signal('');
 
-    readonly users = signal<User[]>([]);
-    readonly filteredUsers = signal<User[]>([]);
-    readonly loading = signal(true);
-    readonly submitting = signal(false);
-    readonly inviting = signal<string | null>(null);   // holds the id of the user being emailed
-    readonly availableTags = signal<Tag[]>([]);
-    readonly modalMode = signal<'create' | 'edit' | 'delete' | null>(null);
-    readonly selectedUser = signal<User | null>(null);
-    readonly editTarget = signal<User | null>(null);
-    readonly roleFilter = signal('');
+    protected searchTerm = '';
 
-    searchTerm = '';
-
-    form: CreateUserRequest = {
+    protected form: CreateUserRequest = {
         email: '',
         username: '',
-        tags: []
+        tags: [],
     };
 
-    editForm: UpdateUserRequest = {
+    protected editForm: UpdateUserRequest = {
         username: '',
-        avatarUrl: ''
+        avatarUrl: '',
     };
 
-    editTags: string[] = [];
+    protected editTags: string[] = [];
 
     ngOnInit(): void {
         this.loadUsers();
         this.loadTags();
     }
 
-    loadTags(): void {
-        this.tagService.getAllTags().subscribe({
-            next: tags => this.availableTags.set(tags),
-            error: error => this.notificationService.error(resolveApiError(error, 'Error al cargar etiquetas'))
+    private loadTags(): void {
+        this.tagApi.getAllTags().subscribe({
+            next: (tags) => this.availableTags.set(tags),
+            error: (error) => this.notificationCenter.error(resolveApiError(error, 'Error al cargar etiquetas')),
         });
     }
 
-    toggleCreateTag(key: string): void {
+    protected toggleCreateTag(key: string): void {
         this.form.tags = this.toggle(this.form.tags, key);
     }
 
-    toggleEditTag(key: string): void {
+    protected toggleEditTag(key: string): void {
         this.editTags = this.toggle(this.editTags, key);
     }
 
-    loadUsers(): void {
+    private loadUsers(): void {
         this.loading.set(true);
 
-        this.userService.getAllUsers().subscribe({
-            next: users => {
+        this.userApi.getAllUsers().subscribe({
+            next: (users) => {
                 this.users.set(users);
                 this.applyFilters();
                 this.loading.set(false);
             },
-            error: error => {
-                this.notificationService.error(resolveApiError(error, 'Error al cargar usuarios'));
+            error: (error) => {
+                this.notificationCenter.error(resolveApiError(error, 'Error al cargar usuarios'));
                 this.loading.set(false);
-            }
+            },
         });
     }
 
-    onSearch(): void {
+    protected searchUsers(): void {
         this.applyFilters();
     }
 
-    setRoleFilter(role: string): void {
+    protected setRoleFilter(role: string): void {
         this.roleFilter.set(role);
         this.applyFilters();
     }
 
-    selectUser(user: User): void {
+    protected selectUser(user: User): void {
         this.selectedUser.set(this.selectedUser()?.id === user.id ? null : user);
     }
 
-    openCreate(): void {
+    protected openCreate(): void {
         this.form = {
             email: '',
             username: '',
-            tags: []
+            tags: [],
         };
 
         this.modalMode.set('create');
     }
 
-    openEdit(user: User): void {
+    protected openEdit(user: User): void {
         this.editTarget.set(user);
         this.editForm = {
             username: user.username,
-            avatarUrl: user.avatarUrl
+            avatarUrl: user.avatarUrl,
         };
         this.editTags = [...user.tags];
 
         this.modalMode.set('edit');
     }
 
-    openDelete(user: User): void {
+    protected openDelete(user: User): void {
         this.editTarget.set(user);
         this.modalMode.set('delete');
     }
 
-    closeModal(): void {
+    protected closeModal(): void {
         this.modalMode.set(null);
         this.editTarget.set(null);
         this.submitting.set(false);
     }
 
-    sendInvite(user: User): void {
+    protected sendInvite(user: User): void {
         if (this.inviting()) {
             return;
         }
 
         this.inviting.set(user.id);
 
-        this.userService.resendInvite(user.id).subscribe({
+        this.userApi.resendInvite(user.id).subscribe({
             next: () => {
-                this.notificationService.success(`Correo enviado a ${user.email}`);
+                this.notificationCenter.success(`Correo enviado a ${user.email}`);
                 this.inviting.set(null);
             },
-            error: error => {
-                this.notificationService.error(resolveApiError(error, 'Error al enviar el correo'));
+            error: (error) => {
+                this.notificationCenter.error(resolveApiError(error, 'Error al enviar el correo'));
                 this.inviting.set(null);
-            }
+            },
         });
     }
 
-    submitCreate(): void {
+    protected submitCreate(): void {
         if (!this.form.email.trim() || !this.form.username.trim()) {
-            this.notificationService.warning('El email y el username son obligatorios');
+            this.notificationCenter.warning('El email y el username son obligatorios');
             return;
         }
 
@@ -168,30 +168,32 @@ export class Users implements OnInit {
         const request: CreateUserRequest = {
             email: this.form.email.trim(),
             username: this.form.username.trim(),
-            tags: this.form.tags
+            tags: this.form.tags,
         };
 
-        this.userService.createUser(request).subscribe({
-            next: result => {
+        this.userApi.createUser(request).subscribe({
+            next: (result) => {
                 if (result.inviteEmailSent) {
-                    this.notificationService.success(
-                        `Usuario ${result.user.username} creado. Se ha enviado un correo a ${result.user.email} para que elija su contraseña`);
+                    this.notificationCenter.success(
+                        `Usuario ${result.user.username} creado. Se ha enviado un correo a ${result.user.email} para que elija su contraseña`,
+                    );
                 } else {
-                    this.notificationService.warning(
-                        `Usuario ${result.user.username} creado, pero el correo NO se pudo enviar. Usa INVITAR para reenviarlo`);
+                    this.notificationCenter.warning(
+                        `Usuario ${result.user.username} creado, pero el correo NO se pudo enviar. Usa INVITAR para reenviarlo`,
+                    );
                 }
 
                 this.closeModal();
                 this.loadUsers();
             },
-            error: error => {
-                this.notificationService.error(resolveApiError(error, 'Error al crear usuario'));
+            error: (error) => {
+                this.notificationCenter.error(resolveApiError(error, 'Error al crear usuario'));
                 this.submitting.set(false);
-            }
+            },
         });
     }
 
-    submitEdit(): void {
+    protected submitEdit(): void {
         const target = this.editTarget();
 
         if (!target) {
@@ -199,31 +201,31 @@ export class Users implements OnInit {
         }
 
         if (!this.editForm.username?.trim()) {
-            this.notificationService.warning('El username es obligatorio');
+            this.notificationCenter.warning('El username es obligatorio');
             return;
         }
 
         this.submitting.set(true);
 
-        const update$ = this.userService.updateUser(target.id, this.editForm);
+        const update$ = this.userApi.updateUser(target.id, this.editForm);
         const request$ = this.sameTags(this.editTags, target.tags)
             ? update$
-            : update$.pipe(switchMap(() => this.userService.setUserTags(target.id, this.editTags)));
+            : update$.pipe(switchMap(() => this.userApi.setUserTags(target.id, this.editTags)));
 
         request$.subscribe({
             next: () => {
-                this.notificationService.success('Usuario actualizado correctamente');
+                this.notificationCenter.success('Usuario actualizado correctamente');
                 this.closeModal();
                 this.loadUsers();
             },
-            error: error => {
-                this.notificationService.error(resolveApiError(error, 'Error al actualizar usuario'));
+            error: (error) => {
+                this.notificationCenter.error(resolveApiError(error, 'Error al actualizar usuario'));
                 this.submitting.set(false);
-            }
+            },
         });
     }
 
-    submitDelete(): void {
+    protected submitDelete(): void {
         const target = this.editTarget();
 
         if (!target) {
@@ -232,20 +234,20 @@ export class Users implements OnInit {
 
         this.submitting.set(true);
 
-        this.userService.deleteUser(target.id).subscribe({
+        this.userApi.deleteUser(target.id).subscribe({
             next: () => {
-                this.notificationService.success(`Usuario ${target.username} eliminado`);
+                this.notificationCenter.success(`Usuario ${target.username} eliminado`);
                 this.closeModal();
                 this.loadUsers();
             },
-            error: error => {
-                this.notificationService.error(resolveApiError(error, 'Error al eliminar usuario'));
+            error: (error) => {
+                this.notificationCenter.error(resolveApiError(error, 'Error al eliminar usuario'));
                 this.submitting.set(false);
-            }
+            },
         });
     }
 
-    isAdminRole(role: string): boolean {
+    protected isAdminRole(role: string): boolean {
         return this.normalizeRole(role) === 'admin';
     }
 
@@ -253,11 +255,12 @@ export class Users implements OnInit {
         const searchTerm = this.searchTerm.toLowerCase().trim();
         const selectedRole = this.roleFilter();
 
-        const filteredUsers = this.users().filter(user => {
-            const matchesSearch = !searchTerm
-                || user.username?.toLowerCase().includes(searchTerm)
-                || user.email?.toLowerCase().includes(searchTerm)
-                || user.role?.toLowerCase().includes(searchTerm);
+        const filteredUsers = this.users().filter((user) => {
+            const matchesSearch =
+                !searchTerm ||
+                user.username?.toLowerCase().includes(searchTerm) ||
+                user.email?.toLowerCase().includes(searchTerm) ||
+                user.role?.toLowerCase().includes(searchTerm);
 
             const matchesRole = !selectedRole || this.normalizeRole(user.role) === selectedRole;
 
@@ -268,11 +271,11 @@ export class Users implements OnInit {
     }
 
     private toggle(list: string[], key: string): string[] {
-        return list.includes(key) ? list.filter(item => item !== key) : [...list, key];
+        return list.includes(key) ? list.filter((item) => item !== key) : [...list, key];
     }
 
     private sameTags(first: string[], second: string[]): boolean {
-        return first.length === second.length && first.every(tag => second.includes(tag));
+        return first.length === second.length && first.every((tag) => second.includes(tag));
     }
 
     private normalizeRole(role: string): string {

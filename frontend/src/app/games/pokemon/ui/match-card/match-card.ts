@@ -15,22 +15,22 @@ import { Match, TournamentPlayer } from '../../data/pokemon-models';
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-pokemon-match-card',
     templateUrl: './match-card.html',
-    styleUrl: './match-card.scss'
+    styleUrl: './match-card.scss',
 })
 export class MatchCard {
-
     readonly match = input.required<Match>();
     readonly players = input.required<Map<string, TournamentPlayer>>();
     readonly editable = input(false);
 
     readonly edit = output<Match>();
 
-    readonly statusLabel = computed(() => MATCH_STATUS_LABELS[this.match().status]);
+    protected readonly statusLabel = computed(() => MATCH_STATUS_LABELS[this.match().status]);
 
-    /** Admins can edit series with two players; byes and void series have nothing to record. */
-    readonly canEdit = computed(() => this.editable() && !!this.match().player1Id && !!this.match().player2Id);
+    protected readonly canEdit = computed(
+        () => this.editable() && !!this.match().player1Id && !!this.match().player2Id,
+    );
 
-    name(playerId: string | null): string {
+    protected name(playerId: string | null): string {
         if (!playerId) {
             return this.match().status === 'bye' || this.match().status === 'void' ? '—' : 'Por decidir';
         }
@@ -38,11 +38,11 @@ export class MatchCard {
         return this.players().get(playerId)?.name ?? '—';
     }
 
-    isMine(playerId: string | null): boolean {
+    protected isMine(playerId: string | null): boolean {
         return !!playerId && !!this.players().get(playerId)?.mine;
     }
 
-    onClick(): void {
+    protected editMatch(): void {
         if (this.canEdit()) {
             this.edit.emit(this.match());
         }

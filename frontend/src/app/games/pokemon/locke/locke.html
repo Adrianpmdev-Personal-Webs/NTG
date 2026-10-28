@@ -23,7 +23,14 @@
 
         <nav class="tabs" aria-label="Secciones del randomlocke">
             @for (tab of tabs; track tab.id) {
-                <button class="tab" type="button" [class.active]="activeTab() === tab.id" (click)="activeTab.set(tab.id)">{{ tab.label }}</button>
+                <button
+                    class="tab"
+                    type="button"
+                    [class.active]="activeTab() === tab.id"
+                    (click)="activeTab.set(tab.id)"
+                >
+                    {{ tab.label }}
+                </button>
             }
         </nav>
 
@@ -43,7 +50,9 @@
                                     </p>
                                 </div>
                                 <div class="tournament-side">
-                                    <span class="status" [class]="'status ' + tournament.status">{{ statusLabels[tournament.status] }}</span>
+                                    <span class="status" [class]="'status ' + tournament.status">{{
+                                        statusLabels[tournament.status]
+                                    }}</span>
                                     @if (tournament.champion) {
                                         <span class="champion">🏆 {{ tournament.champion.name }}</span>
                                     }

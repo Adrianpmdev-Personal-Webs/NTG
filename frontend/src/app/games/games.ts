@@ -7,11 +7,8 @@
  * @author @adrianpmdev
  */
 
-import { GameModule } from '@core/config/game-module';
+import { GameModule } from '@core/games/game-module';
 import { POKEMON_GAME } from './pokemon/pokemon.game';
 import { WOW_FOREVER_GAME } from './wow-forever/wow-forever.game';
 
-export const GAME_MODULES: readonly GameModule[] = [
-    POKEMON_GAME,
-    WOW_FOREVER_GAME
-];
+export const GAME_MODULES: readonly GameModule[] = [POKEMON_GAME, WOW_FOREVER_GAME];

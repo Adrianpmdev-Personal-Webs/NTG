@@ -1,14 +1,4 @@
-/**
- * Admin page partial.
- *
- * Shared chrome of the admin management screens: page container, title, tabs and toolbar.
- *
- * @author @adrianpmdev
- */
-
 @use 'mixins' as *;
-
-/* ─── PAGE ─── */
 
 .admin-page {
     display: flex;
@@ -43,8 +33,6 @@
     color: var(--text-secondary);
     font-size: 0.8rem;
 }
-
-/* ─── TABS AND TOOLBAR ─── */
 
 .admin-tabs {
     display: flex;
@@ -87,9 +75,6 @@
     gap: 12px;
 }
 
-/* ─── SECTIONS AND TABLES ─── */
-
-/* Titled block of a management screen (a .terminal-card with a heading and its content). */
 .admin-section {
     display: flex;
     flex-direction: column;
@@ -124,7 +109,6 @@
     line-height: 1.5;
 }
 
-/* Data table of a management screen. Wrap it in .admin-table-scroll for small screens. */
 .admin-table-scroll {
     overflow-x: auto;
 }
@@ -168,8 +152,6 @@
         justify-content: flex-end;
     }
 
-    // On phones each row becomes a card: one line per column with its name (data-label) on the left and the
-    // actions at the bottom, so nothing hides behind a sideways scroll.
     @include mobile {
         thead {
             display: none;

@@ -11,10 +11,10 @@ import { Routes } from '@angular/router';
 export const AUTH_ROUTES: Routes = [
     {
         path: 'login',
-        loadComponent: () => import('./login/login').then(m => m.Login)
+        loadComponent: () => import('./login/login').then((m) => m.Login),
     },
     {
         path: 'set-password',
-        loadComponent: () => import('./set-password/set-password').then(m => m.SetPassword)
-    }
+        loadComponent: () => import('./set-password/set-password').then((m) => m.SetPassword),
+    },
 ];

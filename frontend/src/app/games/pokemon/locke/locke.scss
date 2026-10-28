@@ -1,9 +1,3 @@
-/**
- * Randomlocke page styles.
- *
- * @author @adrianpmdev
- */
-
 @use 'mixins' as *;
 @use '../styles/pokemon' as pk;
 
@@ -108,7 +102,6 @@
     text-align: right;
 }
 
-// On phones the state and the champion go under the name, so long names keep the whole width.
 @include mobile {
     .tournament {
         flex-wrap: wrap;

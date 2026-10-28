@@ -18,28 +18,27 @@ import { StandingsTable } from '../ui/standings-table/standings-table';
     selector: 'app-pokemon-ranking',
     imports: [StandingsTable],
     templateUrl: './ranking.html',
-    styleUrl: './ranking.scss'
+    styleUrl: './ranking.scss',
 })
 export class RankingPage {
-
     private readonly api = inject(PokemonApi);
 
-    readonly loading = signal(true);
-    readonly failed = signal(false);
-    readonly ranking = signal<PlayerStanding[]>([]);
+    protected readonly loading = signal(true);
+    protected readonly failed = signal(false);
+    protected readonly ranking = signal<PlayerStanding[]>([]);
 
-    readonly rows = computed(() => playerRows(this.ranking(), row => `${row.titles} / ${row.tournaments}`));
+    protected readonly rows = computed(() => playerRows(this.ranking(), (row) => `${row.titles} / ${row.tournaments}`));
 
     constructor() {
         this.api.getRanking().subscribe({
-            next: ranking => {
+            next: (ranking) => {
                 this.ranking.set(ranking);
                 this.loading.set(false);
             },
             error: () => {
                 this.failed.set(true);
                 this.loading.set(false);
-            }
+            },
         });
     }
 }

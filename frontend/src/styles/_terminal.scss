@@ -1,10 +1,3 @@
-/**
- * Terminal theme partial.
- * Applied by the layouts and pages that carry the "terminal" class.
- *
- * @author @adrianpmdev
- */
-
 @use 'mixins' as *;
 
 .terminal {
@@ -37,7 +30,6 @@
     }
 }
 
-/* Buttons */
 .btn-neon {
     background: transparent;
     border: 1px solid var(--neon-green);
@@ -65,7 +57,9 @@
 
     &:hover {
         background: rgba(0, 255, 65, 0.08);
-        box-shadow: 0 0 15px var(--neon-green-glow), inset 0 0 15px rgba(0, 255, 65, 0.05);
+        box-shadow:
+            0 0 15px var(--neon-green-glow),
+            inset 0 0 15px rgba(0, 255, 65, 0.05);
         text-shadow: 0 0 8px var(--neon-green);
 
         &::before {
@@ -91,7 +85,6 @@
     }
 }
 
-/* Variants: always combined with .btn-neon (green main action, red cancel/delete, cyan secondary) */
 .btn-neon-danger {
     border-color: var(--neon-red);
     color: var(--neon-red);
@@ -129,7 +122,6 @@
     }
 }
 
-/* Size modifiers for .btn-neon: small text button and square icon button */
 .btn-sm {
     font-size: 0.68rem;
     padding: 5px 12px;
@@ -142,7 +134,6 @@
     padding: 0;
 }
 
-/* Row actions: compact buttons for table rows, used together with .btn-neon and its variants (EDITAR, ELIMINAR...) */
 .actions-col {
     display: flex;
     gap: 8px;
@@ -164,7 +155,6 @@
     }
 }
 
-/* Forms */
 .neon-input {
     background: rgba(0, 255, 65, 0.03);
     border: 1px solid var(--border-color);
@@ -182,24 +172,23 @@
 
     &:focus {
         border-color: var(--neon-green);
-        box-shadow: 0 0 10px rgba(0, 255, 65, 0.2), inset 0 0 10px rgba(0, 255, 65, 0.03);
+        box-shadow:
+            0 0 10px rgba(0, 255, 65, 0.2),
+            inset 0 0 10px rgba(0, 255, 65, 0.03);
         background: rgba(0, 255, 65, 0.05);
     }
 
-    /* On touch screens a font under 16px makes iOS zoom the page when the field gets focus */
     @media (pointer: coarse) {
         font-size: 16px;
     }
 }
 
-/* Upcoming mark: asterisk next to the name of a game that is coming soon (only admins see those) */
 .upcoming-mark {
     margin-left: 4px;
     color: var(--neon-yellow);
     cursor: help;
 }
 
-/* Card */
 .terminal-card {
     background: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -217,7 +206,6 @@
     }
 }
 
-/* Blinking cursor */
 @keyframes blink {
     0%,
     100% {
@@ -235,7 +223,6 @@
     color: var(--neon-green);
 }
 
-/* Pulse animation */
 @keyframes pulse-neon {
     0%,
     100% {
@@ -243,11 +230,12 @@
     }
 
     50% {
-        box-shadow: 0 0 20px var(--neon-green-glow), 0 0 40px rgba(0, 255, 65, 0.1);
+        box-shadow:
+            0 0 20px var(--neon-green-glow),
+            0 0 40px rgba(0, 255, 65, 0.1);
     }
 }
 
-/* Matrix rain animation chars */
 @keyframes matrix-fall {
     0% {
         transform: translateY(-100%);
@@ -260,7 +248,6 @@
     }
 }
 
-/* Slide in */
 @keyframes slide-in-left {
     from {
         transform: translateX(-20px);
@@ -293,7 +280,6 @@
     animation: fade-up 0.4s ease forwards;
 }
 
-/* Notification */
 @keyframes notif-in {
     from {
         transform: translateX(120%);

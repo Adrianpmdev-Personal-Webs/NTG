@@ -16,12 +16,10 @@ import { RouterLink } from '@angular/router';
     imports: [NgTemplateOutlet, RouterLink],
     templateUrl: './wow-button.html',
     styleUrl: './wow-button.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WowButton {
-
     readonly large = input(false);
-    /** Route to go to. When set the button is a link instead of a button. */
     readonly link = input<string>();
     readonly disabled = input(false);
 }

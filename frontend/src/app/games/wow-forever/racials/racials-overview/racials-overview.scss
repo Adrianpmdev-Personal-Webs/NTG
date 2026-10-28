@@ -1,12 +1,3 @@
-/**
- * Racials overview styles.
- *
- * Faction tabs, the races as cards in a responsive grid (blue edge for the Alliance, red for the Horde) and the race-class
- * table, which scrolls sideways on narrow screens. The page frame has its own component.
- *
- * @author @adrianpmdev
- */
-
 @use 'mixins' as *;
 @use '../../styles/wow-forever' as wow;
 
@@ -25,8 +16,6 @@
 .section-title {
     @include wow.section-title;
 }
-
-/* ─── RACES ─── */
 
 .races {
     display: grid;
@@ -135,8 +124,6 @@
     letter-spacing: 1px;
     text-transform: uppercase;
 }
-
-/* ─── MATRIX ─── */
 
 .matrix-section {
     display: flex;

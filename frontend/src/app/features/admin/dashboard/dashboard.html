@@ -1,5 +1,4 @@
 <div class="dashboard">
-    <!-- Header -->
     <div class="page-header">
         <div class="header-left">
             <div class="page-label">
@@ -11,7 +10,7 @@
                 @if (this.isAdmin) {
                     DASHBOARD
                 } @else {
-                    Bienvenido, NTG {{ authService.getCurrentUser()?.username }}
+                    Bienvenido, NTG {{ authSession.getCurrentUser()?.username }}
                 }
             </h1>
         </div>
@@ -26,12 +25,15 @@
     </div>
 
     @if (this.isAdmin) {
-        <!-- Stats grid -->
         <div class="stats-grid">
             @for (stat of stats(); track stat.label) {
                 <div class="stat-card terminal-card animate-fade-up">
                     <div class="stat-top">
-                        <span class="stat-icon" [style.color]="stat.color" [style.text-shadow]="'0 0 10px ' + stat.color">
+                        <span
+                            class="stat-icon"
+                            [style.color]="stat.color"
+                            [style.text-shadow]="'0 0 10px ' + stat.color"
+                        >
                             {{ stat.icon }}
                         </span>
                         <div class="stat-label">{{ stat.label }}</div>
@@ -45,15 +47,17 @@
                     </div>
 
                     <div class="stat-bar">
-                        <div class="stat-bar-fill" [style.background]="stat.color" [style.width]="getBarWidth(stat.value)"></div>
+                        <div
+                            class="stat-bar-fill"
+                            [style.background]="stat.color"
+                            [style.width]="getBarWidth(stat.value)"
+                        ></div>
                     </div>
                 </div>
             }
         </div>
 
-        <!-- Charts row -->
         <div class="charts-row">
-            <!-- User roles donut chart -->
             <div class="chart-card terminal-card">
                 <div class="card-header">
                     <span class="card-title">// DISTRIBUCIÓN DE ROLES</span>
@@ -62,10 +66,8 @@
 
                 <div class="donut-container">
                     <svg viewBox="0 0 200 200" class="donut-svg">
-                        <!-- Background circle -->
                         <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(0,255,65,0.08)" stroke-width="24" />
 
-                        <!-- Users segment -->
                         <circle
                             cx="100"
                             cy="100"
@@ -76,10 +78,9 @@
                             [attr.stroke-dasharray]="usersArc() + ' ' + circumference"
                             [attr.stroke-dashoffset]="circumference / 4"
                             class="donut-seg"
-                            style="transition: stroke-dasharray 1s ease"
+                            style="transition: stroke-dasharray 1s ease 0.3s"
                         />
 
-                        <!-- Admin segment -->
                         <circle
                             cx="100"
                             cy="100"
@@ -92,7 +93,6 @@
                             class="donut-seg"
                         />
 
-                        <!-- Center text -->
                         <text
                             x="100"
                             y="96"
@@ -133,7 +133,6 @@
                 </div>
             </div>
 
-            <!-- Activity log -->
             <div class="chart-card terminal-card activity-log">
                 <div class="card-header">
                     <span class="card-title">// LOG DE ACTIVIDAD</span>
@@ -151,7 +150,6 @@
                 </div>
             </div>
 
-            <!-- System metrics -->
             <div class="chart-card terminal-card">
                 <div class="card-header">
                     <span class="card-title">// MÉTRICAS DEL SISTEMA</span>
@@ -168,8 +166,7 @@
                                     [style.width.%]="metric.value"
                                     [style.background]="metric.color"
                                     [style.box-shadow]="'0 0 6px ' + metric.color"
-                                >
-                                </div>
+                                ></div>
                             </div>
 
                             <span class="metric-value" [style.color]="metric.color">{{ metric.value }}%</span>
@@ -179,7 +176,6 @@
             </div>
         </div>
 
-        <!-- Recent users table -->
         <div class="terminal-card recent-users">
             <div class="card-header">
                 <span class="card-title">// ÚLTIMOS USUARIOS REGISTRADOS</span>
@@ -187,9 +183,7 @@
             </div>
 
             @if (loading()) {
-                <div class="loading-state">
-                    <span>CARGANDO DATOS</span><span class="cursor"> </span>
-                </div>
+                <div class="loading-state"><span>CARGANDO DATOS</span><span class="cursor"> </span></div>
             } @else {
                 <table class="neon-table">
                     <thead>
@@ -221,7 +215,6 @@
             }
         </div>
     } @else {
-        <!-- Games -->
         <section class="games-section">
             <div class="games-grid">
                 @for (game of availableGames(); track game.id) {

@@ -1,19 +1,8 @@
-/**
- * Dashboard screen styles.
- * Responsive dashboard layout with admin metrics and user game library.
- *
- * @author @adrianpmdev
- */
-
-/* ─── DASHBOARD LAYOUT ─── */
-
 .dashboard {
     display: flex;
     flex-direction: column;
     gap: 24px;
 }
-
-/* ─── PAGE HEADER ─── */
 
 .page-header {
     display: flex;
@@ -65,8 +54,6 @@
     box-shadow: 0 0 8px var(--neon-green);
     animation: pulse-neon 1.5s infinite;
 }
-
-/* ─── STATS ─── */
 
 .stats-grid {
     display: grid;
@@ -128,8 +115,6 @@
     box-shadow: 0 0 6px currentColor;
 }
 
-/* ─── CHARTS ─── */
-
 .charts-row {
     display: grid;
     grid-template-columns: minmax(260px, 280px) minmax(0, 1fr) minmax(0, 1fr);
@@ -171,8 +156,6 @@
     }
 }
 
-/* ─── DONUT ─── */
-
 .donut-container {
     padding: 20px;
     display: flex;
@@ -189,7 +172,7 @@
 }
 
 .donut-seg {
-    transition: stroke-dasharray 1.5s ease;
+    transition: stroke-dasharray 1.5s ease 0.3s;
 }
 
 .donut-legend {
@@ -220,8 +203,6 @@
     font-size: 1rem;
     color: var(--neon-green);
 }
-
-/* ─── ACTIVITY LOG ─── */
 
 .log-container {
     padding: 12px;
@@ -285,8 +266,6 @@
     overflow-wrap: anywhere;
 }
 
-/* ─── METRICS ─── */
-
 .metrics-list {
     padding: 20px 18px;
     display: flex;
@@ -328,8 +307,6 @@
     text-align: right;
     flex-shrink: 0;
 }
-
-/* ─── RECENT USERS ─── */
 
 .recent-users {
     overflow: hidden;
@@ -403,8 +380,6 @@
     text-shadow: 0 0 6px rgba(0, 255, 65, 0.5);
     white-space: nowrap;
 }
-
-/* ─── GAMES ─── */
 
 .games-section {
     display: flex;
@@ -491,8 +466,7 @@
     border: 1px solid rgba(0, 255, 65, 0.28);
     background:
         radial-gradient(circle at center, rgba(0, 255, 65, 0.12), transparent 58%),
-        linear-gradient(135deg, rgba(0, 255, 65, 0.08), transparent 45%),
-        var(--bg-panel);
+        linear-gradient(135deg, rgba(0, 255, 65, 0.08), transparent 45%), var(--bg-panel);
 }
 
 .game-image {
@@ -517,8 +491,6 @@
     text-transform: uppercase;
     transition: all 0.25s ease;
 }
-
-/* ─── RESPONSIVE ─── */
 
 @media (max-width: 1200px) {
     .charts-row {
@@ -603,7 +575,6 @@
         min-height: 44px;
         font-size: 0.9rem;
     }
-
 }
 
 @media (max-width: 640px) {
@@ -789,7 +760,6 @@
         font-size: 0.82rem;
         letter-spacing: 2px;
     }
-
 }
 
 @media (max-width: 420px) {
@@ -868,10 +838,8 @@
         min-height: 40px;
         font-size: 0.78rem;
     }
-
 }
 
-/* Game without an uploaded cover: its initial on a dim panel. */
 .game-image-empty {
     display: flex;
     align-items: center;

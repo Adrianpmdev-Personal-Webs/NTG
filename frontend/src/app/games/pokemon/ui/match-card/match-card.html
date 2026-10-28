@@ -7,8 +7,8 @@
     [attr.role]="canEdit() ? 'button' : null"
     [attr.tabindex]="canEdit() ? 0 : null"
     [attr.title]="canEdit() ? 'Editar resultado' : null"
-    (click)="onClick()"
-    (keydown.enter)="onClick()"
+    (click)="editMatch()"
+    (keydown.enter)="editMatch()"
 >
     <div class="side" [class.winner]="m.winnerId && m.winnerId === m.player1Id" [class.mine]="isMine(m.player1Id)">
         <span class="player">{{ name(m.player1Id) }}</span>
@@ -32,9 +32,12 @@
                             rel="noopener noreferrer"
                             [title]="'Replay de la partida ' + game.number"
                             (click)="$event.stopPropagation()"
-                        >▶{{ game.number }}</a>
+                            >▶{{ game.number }}</a
+                        >
                     } @else {
-                        <span class="replay missing" [title]="'Partida ' + game.number + ' sin replay'">▶{{ game.number }}</span>
+                        <span class="replay missing" [title]="'Partida ' + game.number + ' sin replay'"
+                            >▶{{ game.number }}</span
+                        >
                     }
                 }
             </span>

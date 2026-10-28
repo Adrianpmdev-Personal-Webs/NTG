@@ -14,15 +14,12 @@ import { StandingRow } from '../../data/tournament-view';
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-pokemon-standings-table',
     templateUrl: './standings-table.html',
-    styleUrl: './standings-table.scss'
+    styleUrl: './standings-table.scss',
 })
 export class StandingsTable {
-
     readonly rows = input.required<StandingRow[]>();
 
-    /** Header of the extra column, or null to hide it. */
     readonly extraLabel = input<string | null>(null);
 
-    /** Positions highlighted as podium. */
     readonly podium = input(3);
 }

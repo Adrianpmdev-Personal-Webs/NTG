@@ -1,5 +1,5 @@
 /**
- * AssetService
+ * AssetApi
  *
  * HTTP service for the public pictures (admins only). Pictures are sent as they are: the backend validates and
  * compresses them, so this client has no image code.
@@ -10,18 +10,15 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { API_BASE_URL } from '@core/config/api';
+import { API_BASE_URL } from '@core/api/api';
 import { Asset } from '@shared/models/asset';
 
-/** Formats the backend accepts. */
 export const ACCEPTED_IMAGE_TYPES = 'image/png,image/jpeg';
 
-/** Largest original the backend accepts. */
 export const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 
 @Injectable({ providedIn: 'root' })
-export class AssetService {
-
+export class AssetApi {
     private readonly http = inject(HttpClient);
     private readonly baseUrl = `${API_BASE_URL}/assets`;
 
@@ -41,11 +38,6 @@ export class AssetService {
     }
 }
 
-/**
- * Checks a picture before sending it, so the user gets the message without waiting for the upload.
- *
- * @returns message for the user, or null when the picture can be sent
- */
 export const checkImageFile = (file: File): string | null => {
     if (!ACCEPTED_IMAGE_TYPES.split(',').includes(file.type)) {
         return 'La imagen debe ser PNG o JPEG';

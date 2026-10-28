@@ -14,18 +14,14 @@ export interface TooltipLine {
 }
 
 export interface SpellRank {
-    /** Rank as the game writes it ("Rank 3"), empty for spells with a single rank. */
     label: string;
-    /** Level the rank is learned at, when known. */
     level: number | null;
     description: string;
     lines: TooltipLine[];
     school: string | null;
-    /** Spell power coefficient. */
     coefficient: string | null;
     classic: ClassicStatus | null;
     classicDescription: string | null;
-    /** Where the rank is learned when it is not the class trainer. */
     learnedFrom: string | null;
     note: string | null;
 }
@@ -33,9 +29,7 @@ export interface SpellRank {
 export interface Spell {
     name: string;
     icon: string;
-    /** A talent puts it in the book. */
     fromTalent: boolean;
-    /** Lowest rank first. */
     ranks: SpellRank[];
 }
 
@@ -47,9 +41,7 @@ export interface SpellbookTab {
 export interface ClassSpellbook {
     gameClass: GameClass;
     tabs: SpellbookTab[];
-    /** What changed for the class, in short. */
     highlights: Ability[];
-    /** Classic spells the class no longer has. */
     removed: string[];
     credit: DataCredit;
 }

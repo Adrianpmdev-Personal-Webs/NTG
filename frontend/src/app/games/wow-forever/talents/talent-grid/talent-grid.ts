@@ -7,7 +7,7 @@
  * @author @adrianpmdev
  */
 
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, input, output } from '@angular/core';
 import { hideBrokenIcon } from '../../wow-forever-config';
 import { Ranks, TalentState, prerequisitesOf, talentState } from '../talents-logic';
 import { Talent, TalentHover, TalentTree } from '../talents-models';
@@ -24,7 +24,6 @@ interface Arrow {
     active: boolean;
 }
 
-/** Space around each icon inside its cell, as a fraction of the cell. Arrows start and end at the icon edge. */
 const PADDING = 0.12;
 const LONG_PRESS_MS = 450;
 const CONTEXT_MENU_GUARD_MS = 800;
@@ -33,62 +32,62 @@ const CONTEXT_MENU_GUARD_MS = 800;
     selector: 'app-talent-grid',
     templateUrl: './talent-grid.html',
     styleUrl: './talent-grid.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TalentGrid {
-
     readonly tree = input.required<TalentTree>();
     readonly ranks = input<Ranks>({});
     readonly pointsLeft = input(0);
 
-    /** The player clicked a talent (+1 point). */
     readonly add = output<Talent>();
-    /** Right click or long press (-1 point). */
     readonly remove = output<Talent>();
-    /** The pointer (or keyboard focus) is on a talent, or null when it leaves. */
     readonly hover = output<TalentHover | null>();
 
-    readonly views = computed<TalentView[]>(() => {
+    protected readonly views = computed<TalentView[]>(() => {
         const tree = this.tree();
         const ranks = this.ranks();
 
-        return tree.talents.map(talent => ({
+        return tree.talents.map((talent) => ({
             talent,
             rank: ranks[talent.id] ?? 0,
-            state: talentState(talent, tree, ranks, this.pointsLeft())
+            state: talentState(talent, tree, ranks, this.pointsLeft()),
         }));
     });
 
-    readonly arrows = computed<Arrow[]>(() => {
+    protected readonly arrows = computed<Arrow[]>(() => {
         const tree = this.tree();
         const ranks = this.ranks();
 
-        return tree.talents.flatMap(talent =>
-            prerequisitesOf(tree, talent).map(required => ({
+        return tree.talents.flatMap((talent) =>
+            prerequisitesOf(tree, talent).map((required) => ({
                 id: `${required.id}-${talent.id}`,
                 path: this.pathBetween(required, talent),
-                active: (ranks[required.id] ?? 0) >= required.maxRanks
-            }))
+                active: (ranks[required.id] ?? 0) >= required.maxRanks,
+            })),
         );
     });
 
-    readonly onIconError = hideBrokenIcon;
+    protected readonly hideBrokenIcon = hideBrokenIcon;
 
     private pressTimer: ReturnType<typeof setTimeout> | null = null;
     private suppressClick = false;
     private lastLongPress = 0;
 
-    onMouseMove(event: MouseEvent, talent: Talent): void {
+    constructor() {
+        inject(DestroyRef).onDestroy(() => this.cancelPress());
+    }
+
+    protected showTooltipAtPointer(event: MouseEvent, talent: Talent): void {
         this.hover.emit({ talent, x: event.clientX, y: event.clientY });
     }
 
-    onFocus(event: FocusEvent, talent: Talent): void {
+    protected showTooltipBelow(event: FocusEvent, talent: Talent): void {
         const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
 
         this.hover.emit({ talent, x: rect.left + rect.width / 2, y: rect.bottom });
     }
 
-    onClick(talent: Talent): void {
+    protected addPoint(talent: Talent): void {
         if (this.suppressClick) {
             this.suppressClick = false;
             return;
@@ -97,16 +96,15 @@ export class TalentGrid {
         this.add.emit(talent);
     }
 
-    onContextMenu(event: MouseEvent, talent: Talent): void {
+    protected removePointFromMenu(event: MouseEvent, talent: Talent): void {
         event.preventDefault();
 
-        // A long press on touch screens can also fire this event: the long press already removed the point.
         if (Date.now() - this.lastLongPress > CONTEXT_MENU_GUARD_MS) {
             this.remove.emit(talent);
         }
     }
 
-    onPointerDown(event: PointerEvent, talent: Talent): void {
+    protected startLongPress(event: PointerEvent, talent: Talent): void {
         if (event.pointerType !== 'touch') {
             return;
         }
@@ -120,21 +118,20 @@ export class TalentGrid {
         }, LONG_PRESS_MS);
     }
 
-    cancelPress(): void {
+    protected cancelPress(): void {
         if (this.pressTimer !== null) {
             clearTimeout(this.pressTimer);
             this.pressTimer = null;
         }
     }
 
-    onKeyDown(event: KeyboardEvent, talent: Talent): void {
+    protected removeOnDeleteKey(event: KeyboardEvent, talent: Talent): void {
         if (event.key === 'Backspace' || event.key === 'Delete') {
             event.preventDefault();
             this.remove.emit(talent);
         }
     }
 
-    /** SVG path (in cell units) from the edge of the required talent to the edge of the talent that needs it. */
     private pathBetween(from: Talent, to: Talent): string {
         const fromX = from.column + 0.5;
         const fromBottom = from.row + 1 - PADDING;

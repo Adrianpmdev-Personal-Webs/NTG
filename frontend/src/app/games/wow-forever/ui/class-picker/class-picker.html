@@ -5,8 +5,9 @@
             class="class-btn"
             [class.active]="selected() === gameClass.slug"
             [attr.aria-pressed]="selected() === gameClass.slug"
-            (click)="pick.emit(gameClass)">
-            <img class="class-icon" [src]="gameClass.icon" alt="" (error)="onIconError($event)" />
+            (click)="pick.emit(gameClass)"
+        >
+            <img class="class-icon" [src]="gameClass.icon" alt="" (error)="hideBrokenIcon($event)" />
             <span class="class-name">{{ gameClass.name }}</span>
         </button>
     }

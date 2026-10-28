@@ -1,13 +1,4 @@
-/**
- * Welcome screen styles.
- * Greeting card and the grid of games the user can open.
- *
- * @author @adrianpmdev
- */
-
 @use 'mixins' as *;
-
-/* ─── WELCOME ─── */
 
 .welcome {
     display: flex;
@@ -37,8 +28,6 @@
     line-height: 1.6;
 }
 
-/* ─── GAME GRID ─── */
-
 .game-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -53,7 +42,9 @@
     padding: 20px;
     text-decoration: none;
     color: var(--text-primary);
-    transition: border-color 0.2s, transform 0.2s;
+    transition:
+        border-color 0.2s,
+        transform 0.2s;
 
     &:not(.upcoming):hover {
         border-color: var(--border-bright);
@@ -86,15 +77,12 @@
     letter-spacing: 2px;
 }
 
-/* ─── RESPONSIVE ─── */
-
 @include tablet {
     .welcome-title {
         font-size: 1.2rem;
     }
 }
 
-/* Game without an uploaded cover: its initial on a dim panel. */
 .game-image-empty {
     display: flex;
     align-items: center;

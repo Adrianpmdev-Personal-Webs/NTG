@@ -12,6 +12,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-footer',
     templateUrl: './footer.html',
-    styleUrl: './footer.scss'
+    styleUrl: './footer.scss',
 })
 export class Footer {}

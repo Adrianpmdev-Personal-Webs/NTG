@@ -1,216 +1,205 @@
-/**
- * Launcher screen styles.
- *
- * Layout, artwork and riveted navigation bar of the WoW Forever launcher, copied from the original web and adapted to the NTG breakpoints.
- *
- * @author @adrianpmdev
- */
-
 @use 'mixins' as *;
 
-/* ─── HOST ─── */
-
 :host {
-  display: block;
-  width: 100%;
-  height: 100dvh;
-  min-height: 0;
-  overflow: hidden;
+    display: block;
+    width: 100%;
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
 }
 
-/* ─── PAGE AND SHELL ─── */
-
 .launcher-page {
-  height: 100dvh;
-  min-height: 0;
-  width: 100%;
-  display: block;
-  padding: 0;
-  box-sizing: border-box;
-  background:
-    radial-gradient(circle at 50% 35%, rgba(71,80,87,.16), transparent 42%),
-    linear-gradient(#151719, #070809 72%);
+    height: 100dvh;
+    min-height: 0;
+    width: 100%;
+    display: block;
+    padding: 0;
+    box-sizing: border-box;
+    background:
+        radial-gradient(circle at 50% 35%, rgba(71, 80, 87, 0.16), transparent 42%),
+        linear-gradient(#151719, #070809 72%);
 }
 
 .launcher-shell {
-  height: 100%;
-  min-height: 0;
-  display: grid;
-  grid-template-rows: 108px minmax(0, 1fr) 122px auto;
-  overflow: hidden;
-  background: #080808;
-  border: 1px solid #050505;
-  box-shadow: inset 0 0 0 2px #252525;
+    height: 100%;
+    min-height: 0;
+    display: grid;
+    grid-template-rows: 108px minmax(0, 1fr) 122px auto;
+    overflow: hidden;
+    background: #080808;
+    border: 1px solid #050505;
+    box-shadow: inset 0 0 0 2px #252525;
 }
 
-/* ─── ARTWORK AND NEWS ─── */
-
 .launcher-main {
-  position: relative;
-  min-height: 0;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(430px, 39%);
-  overflow: hidden;
-  background: #090909;
+    position: relative;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(430px, 39%);
+    overflow: hidden;
+    background: #090909;
 }
 
 .artwork-layer,
 .artwork-vignette {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
 }
 
 .artwork-layer {
-  top: 0;
-  right: 39%;
-  bottom: 0;
-  left: 0;
-  background-color: #101313;
-  background-position: center;
-  background-size: contain;
-  background-repeat: no-repeat;
-  filter: saturate(.95) contrast(1.03) brightness(.83);
+    top: 0;
+    right: 39%;
+    bottom: 0;
+    left: 0;
+    background-color: #101313;
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    filter: saturate(0.95) contrast(1.03) brightness(0.83);
 }
 
 .artwork-vignette {
-  background:
-    radial-gradient(circle at 25% 43%, transparent 0 26%, rgba(0,0,0,.05) 43%, rgba(0,0,0,.75) 100%),
-    linear-gradient(90deg, transparent 0 52%, rgba(0,0,0,.18) 72%, rgba(0,0,0,.58) 100%);
+    background:
+        radial-gradient(circle at 25% 43%, transparent 0 26%, rgba(0, 0, 0, 0.05) 43%, rgba(0, 0, 0, 0.75) 100%),
+        linear-gradient(90deg, transparent 0 52%, rgba(0, 0, 0, 0.18) 72%, rgba(0, 0, 0, 0.58) 100%);
 }
 
 .content-spacer {
-  grid-column: 1;
-  position: relative;
-  z-index: 1;
+    grid-column: 1;
+    position: relative;
+    z-index: 1;
 }
 
 app-news-panel {
-  grid-column: 2;
-  align-self: stretch;
-  position: relative;
-  z-index: 2;
-  min-width: 0;
+    grid-column: 2;
+    align-self: stretch;
+    position: relative;
+    z-index: 2;
+    min-width: 0;
 }
-
-/* ─── NAVIGATION BAR ─── */
 
 .launcher-navigation {
-  position: relative;
-  z-index: 5;
-  display: grid;
-  grid-template-columns: minmax(185px, 215px) minmax(330px, 1fr) minmax(180px, 220px);
-  align-items: center;
-  gap: 24px;
-  min-height: 122px;
-  padding: 18px 24px 16px;
-  box-sizing: border-box;
-  background:
-    radial-gradient(circle at 8% 40%, rgba(255,255,255,.15) 0 1px, transparent 2px),
-    radial-gradient(circle at 16% 73%, rgba(255,255,255,.10) 0 1px, transparent 2px),
-    radial-gradient(circle at 27% 25%, rgba(255,255,255,.12) 0 1px, transparent 2px),
-    radial-gradient(circle at 39% 76%, rgba(0,0,0,.56) 0 2px, transparent 4px),
-    radial-gradient(circle at 54% 31%, rgba(0,0,0,.48) 0 2px, transparent 4px),
-    radial-gradient(circle at 67% 73%, rgba(0,0,0,.6) 0 2px, transparent 4px),
-    radial-gradient(circle at 81% 30%, rgba(255,255,255,.09) 0 1px, transparent 3px),
-    radial-gradient(circle at 93% 69%, rgba(0,0,0,.56) 0 2px, transparent 4px),
-    linear-gradient(160deg, #767676 0%, #4a4b4c 17%, #222426 48%, #0b0d0e 100%);
-  box-shadow:
-    inset 0 -1px 0 #050606,
-    inset 0 12px 20px rgba(0,0,0,.34),
-    0 0 12px rgba(0,0,0,.7);
+    position: relative;
+    z-index: 5;
+    display: grid;
+    grid-template-columns: minmax(185px, 215px) minmax(330px, 1fr) minmax(180px, 220px);
+    align-items: center;
+    gap: 24px;
+    min-height: 122px;
+    padding: 18px 24px 16px;
+    box-sizing: border-box;
+    background:
+        radial-gradient(circle at 8% 40%, rgba(255, 255, 255, 0.15) 0 1px, transparent 2px),
+        radial-gradient(circle at 16% 73%, rgba(255, 255, 255, 0.1) 0 1px, transparent 2px),
+        radial-gradient(circle at 27% 25%, rgba(255, 255, 255, 0.12) 0 1px, transparent 2px),
+        radial-gradient(circle at 39% 76%, rgba(0, 0, 0, 0.56) 0 2px, transparent 4px),
+        radial-gradient(circle at 54% 31%, rgba(0, 0, 0, 0.48) 0 2px, transparent 4px),
+        radial-gradient(circle at 67% 73%, rgba(0, 0, 0, 0.6) 0 2px, transparent 4px),
+        radial-gradient(circle at 81% 30%, rgba(255, 255, 255, 0.09) 0 1px, transparent 3px),
+        radial-gradient(circle at 93% 69%, rgba(0, 0, 0, 0.56) 0 2px, transparent 4px),
+        linear-gradient(160deg, #767676 0%, #4a4b4c 17%, #222426 48%, #0b0d0e 100%);
+    box-shadow:
+        inset 0 -1px 0 #050606,
+        inset 0 12px 20px rgba(0, 0, 0, 0.34),
+        0 0 12px rgba(0, 0, 0, 0.7);
 }
 
-/* Matching riveted metal divider between the central artwork and lower controls. */
 .launcher-navigation::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: -9px;
-  height: 18px;
-  z-index: 20;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 8px 50%, #b6b6b6 0 2px, #45484a 2.4px 4.2px, #090a0b 4.6px 5.4px, transparent 5.8px) 0 0 / 46px 18px repeat-x,
-    linear-gradient(180deg, #6a6d6e 0%, #222527 25%, #090a0b 50%, #343739 75%, #77797a 100%);
-  border-top: 1px solid #0a0b0c;
-  border-bottom: 1px solid #090a0a;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.24),
-    inset 0 -1px 0 rgba(255,255,255,.08),
-    0 3px 7px rgba(0,0,0,.65);
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -9px;
+    height: 18px;
+    z-index: 20;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 8px 50%, #b6b6b6 0 2px, #45484a 2.4px 4.2px, #090a0b 4.6px 5.4px, transparent 5.8px) 0
+            0 / 46px 18px repeat-x,
+        linear-gradient(180deg, #6a6d6e 0%, #222527 25%, #090a0b 50%, #343739 75%, #77797a 100%);
+    border-top: 1px solid #0a0b0c;
+    border-bottom: 1px solid #090a0a;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.24),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+        0 3px 7px rgba(0, 0, 0, 0.65);
 }
 
-/* Irregular stone/metal cracks rather than a repeating diagonal pattern. */
 .launcher-navigation::after {
-  content: '';
-  position: absolute;
-  inset: 10px 12px;
-  pointer-events: none;
-  opacity: .85;
-  background:
-    linear-gradient(117deg, transparent 0 12%, rgba(4,5,6,.65) 12.08% 12.28%, transparent 12.45% 100%),
-    linear-gradient(78deg, transparent 0 28%, rgba(238,238,238,.12) 28.08% 28.28%, transparent 28.5% 100%),
-    linear-gradient(145deg, transparent 0 45%, rgba(2,3,3,.8) 45.08% 45.25%, transparent 45.5% 100%),
-    linear-gradient(24deg, transparent 0 58%, rgba(238,238,238,.10) 58.12% 58.33%, transparent 58.55% 100%),
-    linear-gradient(132deg, transparent 0 74%, rgba(0,0,0,.72) 74.08% 74.3%, transparent 74.6% 100%),
-    linear-gradient(101deg, transparent 0 84%, rgba(255,255,255,.09) 84.1% 84.26%, transparent 84.5% 100%),
-    linear-gradient(33deg, transparent 0 91%, rgba(0,0,0,.72) 91.05% 91.24%, transparent 91.5% 100%);
-  mix-blend-mode: overlay;
+    content: '';
+    position: absolute;
+    inset: 10px 12px;
+    pointer-events: none;
+    opacity: 0.85;
+    background:
+        linear-gradient(117deg, transparent 0 12%, rgba(4, 5, 6, 0.65) 12.08% 12.28%, transparent 12.45% 100%),
+        linear-gradient(78deg, transparent 0 28%, rgba(238, 238, 238, 0.12) 28.08% 28.28%, transparent 28.5% 100%),
+        linear-gradient(145deg, transparent 0 45%, rgba(2, 3, 3, 0.8) 45.08% 45.25%, transparent 45.5% 100%),
+        linear-gradient(24deg, transparent 0 58%, rgba(238, 238, 238, 0.1) 58.12% 58.33%, transparent 58.55% 100%),
+        linear-gradient(132deg, transparent 0 74%, rgba(0, 0, 0, 0.72) 74.08% 74.3%, transparent 74.6% 100%),
+        linear-gradient(101deg, transparent 0 84%, rgba(255, 255, 255, 0.09) 84.1% 84.26%, transparent 84.5% 100%),
+        linear-gradient(33deg, transparent 0 91%, rgba(0, 0, 0, 0.72) 91.05% 91.24%, transparent 91.5% 100%);
+    mix-blend-mode: overlay;
 }
 
 .launcher-version,
 .utility-links,
 .play-area {
-  position: relative;
-  z-index: 2;
+    position: relative;
+    z-index: 2;
 }
 
 .launcher-version {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 5px;
-  align-content: center;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 5px;
+    align-content: center;
 }
 
 .launcher-version label {
-  color: #e0bd62;
-  font: 700 14px/1 Georgia, 'Times New Roman', serif;
-  text-shadow: 1px 1px 0 #000, 0 0 3px rgba(0,0,0,.75);
+    color: #e0bd62;
+    font:
+        700 14px/1 Georgia,
+        'Times New Roman',
+        serif;
+    text-shadow:
+        1px 1px 0 #000,
+        0 0 3px rgba(0, 0, 0, 0.75);
 }
 
 .launcher-version select {
-  width: 100%;
-  height: 26px;
-  box-sizing: border-box;
-  padding: 2px 27px 2px 7px;
-  color: #191919;
-  border: 1px solid #0a0a0a;
-  border-radius: 0;
-  outline: 1px solid rgba(197,170,100,.38);
-  font: 700 12px/1 Arial, Helvetica, sans-serif;
-  background: linear-gradient(#f4f1e9, #d8d4c9);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.95),
-    inset 0 -1px 0 rgba(0,0,0,.25),
-    0 2px 4px rgba(0,0,0,.56);
+    width: 100%;
+    height: 26px;
+    box-sizing: border-box;
+    padding: 2px 27px 2px 7px;
+    color: #191919;
+    border: 1px solid #0a0a0a;
+    border-radius: 0;
+    outline: 1px solid rgba(197, 170, 100, 0.38);
+    font:
+        700 12px/1 Arial,
+        Helvetica,
+        sans-serif;
+    background: linear-gradient(#f4f1e9, #d8d4c9);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.95),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.25),
+        0 2px 4px rgba(0, 0, 0, 0.56);
 }
 
-/* ─── FEATURE BUTTONS ─── */
-
 .utility-links {
-  display: grid;
-  justify-items: center;
-  align-content: center;
-  gap: 8px;
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: 8px;
 }
 
 .resource-link-row {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 8px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .launcher-version select:focus-visible {
@@ -218,17 +207,12 @@ app-news-panel {
     outline-offset: 2px;
 }
 
-/* ─── PLAY BUTTON ─── */
-
 .play-area {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
 }
 
-/* ─── RESPONSIVE ─── */
-
-/* Desktop keeps the fixed full-screen launcher; narrower screens let the page grow and scroll. */
 @include tablet {
     :host {
         height: auto;

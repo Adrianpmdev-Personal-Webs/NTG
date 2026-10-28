@@ -14,9 +14,8 @@ import { LockeRules } from '../../data/locke-rules';
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-pokemon-rules-view',
     templateUrl: './rules-view.html',
-    styleUrl: './rules-view.scss'
+    styleUrl: './rules-view.scss',
 })
 export class RulesView {
-
     readonly rules = input<LockeRules | null>(null);
 }

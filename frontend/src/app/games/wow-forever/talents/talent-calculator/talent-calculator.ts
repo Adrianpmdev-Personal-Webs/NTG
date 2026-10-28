@@ -7,10 +7,20 @@
  * @author @adrianpmdev
  */
 
-import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, OnInit, computed, inject, signal, viewChild } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    DestroyRef,
+    ElementRef,
+    OnInit,
+    computed,
+    inject,
+    signal,
+    viewChild,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { NotificationService } from '@core/services/notification';
+import { NotificationCenter } from '@core/notifications/notification-center';
 import { GameDataApi } from '../../game-data/game-data-api';
 import { DataCredit, GameClass } from '../../game-data/game-data-models';
 import { ClassPicker } from '../../ui/class-picker/class-picker';
@@ -29,7 +39,7 @@ import {
     minLevelFor,
     pointsAtLevel,
     pointsInTree,
-    totalPoints
+    totalPoints,
 } from '../talents-logic';
 import { ClassTalents, Talent, TalentHover, TalentTree } from '../talents-models';
 
@@ -38,56 +48,52 @@ import { ClassTalents, Talent, TalentHover, TalentTree } from '../talents-models
     imports: [ClassPicker, TalentGrid, TalentTooltip, WowButton, WowPage],
     templateUrl: './talent-calculator.html',
     styleUrl: './talent-calculator.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TalentCalculator implements OnInit {
-
     private readonly gameData = inject(GameDataApi);
     private readonly images = gameImages();
     private readonly route = inject(ActivatedRoute);
     private readonly router = inject(Router);
-    private readonly notificationService = inject(NotificationService);
+    private readonly notificationCenter = inject(NotificationCenter);
 
     private readonly carousel = viewChild<ElementRef<HTMLElement>>('carousel');
     private classLoad: Subscription | null = null;
 
-    readonly classes = signal<GameClass[]>([]);
-    readonly selectedClass = signal<GameClass | null>(null);
-    readonly classTalents = signal<ClassTalents | null>(null);
+    protected readonly classes = signal<GameClass[]>([]);
+    protected readonly selectedClass = signal<GameClass | null>(null);
+    private readonly classTalents = signal<ClassTalents | null>(null);
     private readonly indexCredit = signal<DataCredit | null>(null);
-    readonly ranks = signal<Ranks>({});
-    readonly level = signal(0);
-    readonly loading = signal(true);
-    readonly loadingTrees = signal(false);
-    readonly failed = signal(false);
-    readonly hover = signal<TalentHover | null>(null);
-    readonly activeTree = signal(0);
+    protected readonly ranks = signal<Ranks>({});
+    protected readonly level = signal(0);
+    protected readonly loading = signal(true);
+    protected readonly loadingTrees = signal(false);
+    protected readonly failed = signal(false);
+    protected readonly hover = signal<TalentHover | null>(null);
+    protected readonly activeTree = signal(0);
 
-    readonly trees = computed<TalentTree[]>(() => this.classTalents()?.trees ?? []);
+    protected readonly trees = computed<TalentTree[]>(() => this.classTalents()?.trees ?? []);
 
-    /** Levels that give a talent point (from the backend index): the first and the last one are the ends of the level control. */
     private readonly levels = signal<readonly number[]>([]);
-    readonly firstLevel = computed(() => this.levels()[0] ?? 0);
-    readonly maxLevel = computed(() => this.levels().at(-1) ?? 0);
+    protected readonly firstLevel = computed(() => this.levels()[0] ?? 0);
+    protected readonly maxLevel = computed(() => this.levels().at(-1) ?? 0);
 
-    readonly pointsTotal = computed(() => pointsAtLevel(this.levels(), this.level()));
-    readonly pointsSpent = computed(() => totalPoints(this.trees(), this.ranks()));
-    readonly pointsLeft = computed(() => this.pointsTotal() - this.pointsSpent());
-    readonly treePoints = computed(() => this.trees().map(tree => pointsInTree(tree, this.ranks())));
-    /** The level cannot go below what the spent points need. */
-    readonly minLevel = computed(() => minLevelFor(this.levels(), this.pointsSpent()));
+    protected readonly pointsTotal = computed(() => pointsAtLevel(this.levels(), this.level()));
+    protected readonly pointsSpent = computed(() => totalPoints(this.trees(), this.ranks()));
+    protected readonly pointsLeft = computed(() => this.pointsTotal() - this.pointsSpent());
+    protected readonly treePoints = computed(() => this.trees().map((tree) => pointsInTree(tree, this.ranks())));
+    private readonly minLevel = computed(() => minLevelFor(this.levels(), this.pointsSpent()));
 
-    /** The talent under the pointer with its tree, for the tooltip card. */
-    readonly hovered = computed(() => {
+    protected readonly hovered = computed(() => {
         const hover = this.hover();
         const tree = hover ? this.treeOf(hover.talent) : undefined;
 
         return hover && tree ? { ...hover, tree } : null;
     });
 
-    readonly credit = computed(() => creditLine(this.classTalents()?.credit ?? this.indexCredit()));
+    protected readonly credit = computed(() => creditLine(this.classTalents()?.credit ?? this.indexCredit()));
 
-    readonly onIconError = hideBrokenIcon;
+    protected readonly hideBrokenIcon = hideBrokenIcon;
 
     constructor() {
         inject(DestroyRef).onDestroy(() => this.classLoad?.unsubscribe());
@@ -95,7 +101,7 @@ export class TalentCalculator implements OnInit {
 
     ngOnInit(): void {
         this.gameData.getIndex().subscribe({
-            next: index => {
+            next: (index) => {
                 this.classes.set(index.classes);
                 this.indexCredit.set(index.credit);
                 this.levels.set(index.talentPointLevels);
@@ -106,11 +112,11 @@ export class TalentCalculator implements OnInit {
             error: () => {
                 this.failed.set(true);
                 this.loading.set(false);
-            }
+            },
         });
     }
 
-    selectClass(gameClass: GameClass, build?: string, level?: number): void {
+    protected selectClass(gameClass: GameClass, build?: string, level?: number): void {
         this.selectedClass.set(gameClass);
         this.classTalents.set(null);
         this.ranks.set({});
@@ -124,7 +130,7 @@ export class TalentCalculator implements OnInit {
         this.classLoad?.unsubscribe();
         this.loadingTrees.set(true);
         this.classLoad = this.gameData.getTalents(gameClass.slug).subscribe({
-            next: talents => {
+            next: (talents) => {
                 this.classTalents.set(talents);
                 this.loadingTrees.set(false);
 
@@ -136,35 +142,35 @@ export class TalentCalculator implements OnInit {
             },
             error: () => {
                 this.loadingTrees.set(false);
-                this.notificationService.error(`No se han podido cargar los talentos de ${gameClass.name}`);
-            }
+                this.notificationCenter.error(`No se han podido cargar los talentos de ${gameClass.name}`);
+            },
         });
     }
 
-    addPoint(talent: Talent): void {
+    protected addPoint(talent: Talent): void {
         const tree = this.treeOf(talent);
 
         if (tree && canAdd(talent, tree, this.ranks(), this.pointsLeft())) {
-            this.ranks.update(ranks => ({ ...ranks, [talent.id]: (ranks[talent.id] ?? 0) + 1 }));
+            this.ranks.update((ranks) => ({ ...ranks, [talent.id]: (ranks[talent.id] ?? 0) + 1 }));
             this.syncUrl();
         }
     }
 
-    removePoint(talent: Talent): void {
+    protected removePoint(talent: Talent): void {
         const tree = this.treeOf(talent);
 
         if (tree && canRemove(talent, tree, this.ranks())) {
-            this.ranks.update(ranks => ({ ...ranks, [talent.id]: (ranks[talent.id] ?? 0) - 1 }));
+            this.ranks.update((ranks) => ({ ...ranks, [talent.id]: (ranks[talent.id] ?? 0) - 1 }));
             this.syncUrl();
         }
     }
 
-    reset(): void {
+    protected reset(): void {
         this.ranks.set({});
         this.syncUrl();
     }
 
-    changeLevel(value: number | string): void {
+    protected changeLevel(value: number | string): void {
         const parsed = Number(value);
 
         if (!Number.isFinite(parsed)) {
@@ -175,24 +181,24 @@ export class TalentCalculator implements OnInit {
         this.syncUrl();
     }
 
-    share(): void {
+    protected share(): void {
         const url = `${window.location.origin}${this.router.url}`;
 
         navigator.clipboard.writeText(url).then(
-            () => this.notificationService.success('Enlace de la build copiado'),
-            () => this.notificationService.error('No se ha podido copiar el enlace')
+            () => this.notificationCenter.success('Enlace de la build copiado'),
+            () => this.notificationCenter.error('No se ha podido copiar el enlace'),
         );
     }
 
-    onHover(hover: TalentHover | null): void {
+    protected setHoveredTalent(hover: TalentHover | null): void {
         this.hover.set(hover);
     }
 
-    treeBackground(tree: TalentTree): string {
+    protected treeBackground(tree: TalentTree): string {
         return cssUrl(this.images()[`talents/${this.selectedClass()?.slug}-${tree.slug}`]);
     }
 
-    onCarouselScroll(): void {
+    protected trackCarouselPosition(): void {
         const element = this.carousel()?.nativeElement;
 
         if (element && element.clientWidth > 0) {
@@ -200,7 +206,7 @@ export class TalentCalculator implements OnInit {
         }
     }
 
-    goToTree(index: number): void {
+    protected goToTree(index: number): void {
         const element = this.carousel()?.nativeElement;
 
         this.activeTree.set(index);
@@ -208,7 +214,7 @@ export class TalentCalculator implements OnInit {
     }
 
     private treeOf(talent: Talent): TalentTree | undefined {
-        return this.trees().find(tree => tree.id === talent.treeId);
+        return this.trees().find((tree) => tree.id === talent.treeId);
     }
 
     private applyBuild(build: string): void {
@@ -219,15 +225,14 @@ export class TalentCalculator implements OnInit {
             return;
         }
 
-        // The shared build may use more points than the level in the link allows.
-        this.level.update(level => Math.max(level, minLevelFor(this.levels(), spent)));
+        this.level.update((level) => Math.max(level, minLevelFor(this.levels(), spent)));
         this.ranks.set(decoded);
     }
 
     private openFromUrl(): void {
         const params = this.route.snapshot.queryParamMap;
         const classes = this.classes();
-        const fromUrl = classes.find(gameClass => gameClass.slug === params.get('class')) ?? classes[0];
+        const fromUrl = classes.find((gameClass) => gameClass.slug === params.get('class')) ?? classes[0];
 
         if (fromUrl) {
             this.selectClass(fromUrl, params.get('build') ?? undefined, Number(params.get('level')) || undefined);
@@ -246,7 +251,7 @@ export class TalentCalculator implements OnInit {
         this.router.navigate([], {
             relativeTo: this.route,
             queryParams: { class: gameClass.slug, level: this.level(), build },
-            replaceUrl: true
+            replaceUrl: true,
         });
     }
 }

@@ -1,13 +1,3 @@
-/**
- * Spellbook viewer styles.
- *
- * Class highlights in a folding panel, tab buttons, the search and level filters, and the spells as cards in two
- * columns (one on phones) with the tooltip of the selected rank. The page frame and the class picker have their own
- * components.
- *
- * @author @adrianpmdev
- */
-
 @use 'mixins' as *;
 @use '../../styles/wow-forever' as wow;
 
@@ -18,8 +8,6 @@
 .state {
     @include wow.state;
 }
-
-/* ─── HIGHLIGHTS ─── */
 
 .highlights {
     @include wow.panel;
@@ -68,8 +56,6 @@
     font-size: 0.82rem;
     line-height: 1.4;
 }
-
-/* ─── TABS AND FILTERS ─── */
 
 .tabs {
     @include wow.tab-buttons;
@@ -124,8 +110,6 @@
     color: wow.$text;
     text-align: right;
 }
-
-/* ─── SPELLS ─── */
 
 .spells {
     display: grid;
@@ -285,8 +269,6 @@
     font-size: 0.8rem;
     text-align: center;
 }
-
-/* ─── RESPONSIVE ─── */
 
 @include tablet {
     .spells {

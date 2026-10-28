@@ -8,11 +8,11 @@
 
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthService } from '../services/auth';
+import { AuthSession } from './auth-session';
 
 export const adminGuard: CanActivateFn = () => {
-    const authService = inject(AuthService);
+    const authSession = inject(AuthSession);
     const router = inject(Router);
 
-    return authService.isAdmin() ? true : router.createUrlTree(['/']);
+    return authSession.isAdmin() ? true : router.createUrlTree(['/']);
 };

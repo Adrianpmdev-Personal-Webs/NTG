@@ -11,13 +11,13 @@ import { MatchStage, MatchStatus, TournamentFormat, TournamentStatus } from './p
 
 export const FORMAT_LABELS: Record<TournamentFormat, string> = {
     groups_bracket: 'Grupos + bracket',
-    round_robin: 'Todos contra todos'
+    round_robin: 'Todos contra todos',
 };
 
 export const STATUS_LABELS: Record<TournamentStatus, string> = {
     draft: 'Preparación',
     in_progress: 'En curso',
-    finished: 'Finalizado'
+    finished: 'Finalizado',
 };
 
 export const MATCH_STATUS_LABELS: Record<MatchStatus, string> = {
@@ -25,7 +25,7 @@ export const MATCH_STATUS_LABELS: Record<MatchStatus, string> = {
     ready: 'Por jugar',
     finished: 'Jugada',
     bye: 'Pase directo',
-    void: 'Sin jugadores'
+    void: 'Sin jugadores',
 };
 
 export const STAGE_LABELS: Record<MatchStage, string> = {
@@ -33,19 +33,18 @@ export const STAGE_LABELS: Record<MatchStage, string> = {
     league: 'Liga',
     upper: 'Cuadro superior',
     lower: 'Cuadro inferior',
-    grand_final: 'Gran final'
+    grand_final: 'Gran final',
 };
 
-export const FORMAT_OPTIONS = Object.entries(FORMAT_LABELS).map(([value, label]) => ({ value: value as TournamentFormat, label }));
-export const STATUS_OPTIONS = Object.entries(STATUS_LABELS).map(([value, label]) => ({ value: value as TournamentStatus, label }));
+export const FORMAT_OPTIONS = Object.entries(FORMAT_LABELS).map(([value, label]) => ({
+    value: value as TournamentFormat,
+    label,
+}));
+export const STATUS_OPTIONS = Object.entries(STATUS_LABELS).map(([value, label]) => ({
+    value: value as TournamentStatus,
+    label,
+}));
 
-/**
- * Name of a bracket round.
- *
- * @param stage upper, lower or grand_final
- * @param round round number
- * @param rounds number of rounds of that side
- */
 export function roundLabel(stage: MatchStage, round: number, rounds: number): string {
     if (stage === 'grand_final') {
         return 'Gran final';
@@ -54,7 +53,13 @@ export function roundLabel(stage: MatchStage, round: number, rounds: number): st
     if (stage === 'upper') {
         const fromEnd = rounds - round;
 
-        return fromEnd === 0 ? 'Final superior' : fromEnd === 1 ? 'Semifinales' : fromEnd === 2 ? 'Cuartos' : `Ronda ${round}`;
+        return fromEnd === 0
+            ? 'Final superior'
+            : fromEnd === 1
+              ? 'Semifinales'
+              : fromEnd === 2
+                ? 'Cuartos'
+                : `Ronda ${round}`;
     }
 
     if (stage === 'lower') {

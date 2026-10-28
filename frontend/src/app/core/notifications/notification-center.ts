@@ -1,5 +1,5 @@
 /**
- * NotificationService
+ * NotificationCenter
  *
  * Service for managing global notifications in the admin panel.
  * Allows showing success, error, warning and info messages with auto-dismiss behavior.
@@ -9,7 +9,6 @@
 
 import { Injectable, signal } from '@angular/core';
 
-
 export interface Notification {
     id: string;
     type: 'success' | 'error' | 'warning' | 'info';
@@ -18,23 +17,22 @@ export interface Notification {
 }
 
 @Injectable({ providedIn: 'root' })
-export class NotificationService {
-
+export class NotificationCenter {
     private readonly defaultDurationMs = 4_000;
     private readonly errorDurationMs = 5_000;
     private readonly exitAnimationDurationMs = 400;
 
-    notifications = signal<Notification[]>([]);
+    readonly notifications = signal<Notification[]>([]);
 
     show(message: string, type: Notification['type'] = 'info', duration = this.defaultDurationMs): void {
         const id = Date.now().toString();
         const notification: Notification = {
             id,
             type,
-            message
+            message,
         };
 
-        this.notifications.update(notifications => [...notifications, notification]);
+        this.notifications.update((notifications) => [...notifications, notification]);
         setTimeout(() => this.dismiss(id), duration);
     }
 
@@ -55,15 +53,15 @@ export class NotificationService {
     }
 
     dismiss(id: string): void {
-        this.notifications.update(notifications =>
-            notifications.map(notification =>
-                notification.id === id ? { ...notification, leaving: true } : notification
-            )
+        this.notifications.update((notifications) =>
+            notifications.map((notification) =>
+                notification.id === id ? { ...notification, leaving: true } : notification,
+            ),
         );
 
         setTimeout(() => {
-            this.notifications.update(notifications =>
-                notifications.filter(notification => notification.id !== id)
+            this.notifications.update((notifications) =>
+                notifications.filter((notification) => notification.id !== id),
             );
         }, this.exitAnimationDurationMs);
     }

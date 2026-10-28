@@ -1,23 +1,10 @@
-/**
- * Talent grid styles.
- *
- * Square cells with round-cornered icons, rank counters and arrows. The state classes follow the in-game colours: grey locked, green available or in progress, gold complete.
- *
- * @author @adrianpmdev
- */
-
 @use 'mixins' as *;
-
-/* ─── HOST ─── */
 
 :host {
     display: block;
-    /* The grid keeps the proportions of the tree; without a cap it would grow with the width of the column. */
     max-width: 280px;
     margin: 0 auto;
 }
-
-/* ─── GRID ─── */
 
 .grid {
     position: relative;
@@ -36,8 +23,6 @@
     min-height: 0;
     padding: 12%;
 }
-
-/* ─── ARROWS ─── */
 
 .arrows {
     position: absolute;
@@ -66,8 +51,6 @@
     }
 }
 
-/* ─── TALENT ─── */
-
 .talent {
     position: relative;
     width: 100%;
@@ -77,7 +60,9 @@
     border-radius: 4px;
     background: #101010;
     cursor: pointer;
-    transition: transform 0.1s ease, box-shadow 0.15s ease;
+    transition:
+        transform 0.1s ease,
+        box-shadow 0.15s ease;
 
     &:hover {
         transform: scale(1.06);
@@ -131,7 +116,9 @@
     border-radius: 3px;
     background: #000;
     color: #9a9a9a;
-    font: bold 0.7rem/16px Arial, sans-serif;
+    font:
+        bold 0.7rem/16px Arial,
+        sans-serif;
     text-align: center;
     pointer-events: none;
 
@@ -146,8 +133,6 @@
         color: #f2c94c;
     }
 }
-
-/* ─── RESPONSIVE ─── */
 
 @include small {
     .rank {

@@ -11,9 +11,15 @@
 
         <section class="controls">
             <div class="points" aria-live="polite">
-                <span>Puntos: <strong>{{ pointsTotal() }}</strong></span>
-                <span>Gastados: <strong>{{ pointsSpent() }}</strong></span>
-                <span [class.over]="pointsLeft() === 0">Restantes: <strong>{{ pointsLeft() }}</strong></span>
+                <span
+                    >Puntos: <strong>{{ pointsTotal() }}</strong></span
+                >
+                <span
+                    >Gastados: <strong>{{ pointsSpent() }}</strong></span
+                >
+                <span [class.over]="pointsLeft() === 0"
+                    >Restantes: <strong>{{ pointsLeft() }}</strong></span
+                >
             </div>
 
             <div class="actions">
@@ -33,17 +39,18 @@
                         role="tab"
                         [class.active]="activeTree() === index"
                         [attr.aria-selected]="activeTree() === index"
-                        (click)="goToTree(index)">
+                        (click)="goToTree(index)"
+                    >
                         {{ tree.name }} <span class="tab-points">{{ treePoints()[index] }}</span>
                     </button>
                 }
             </div>
 
-            <div class="trees" #carousel (scroll)="onCarouselScroll()">
+            <div class="trees" #carousel (scroll)="trackCarouselPosition()">
                 @for (tree of trees(); track tree.id; let index = $index) {
                     <section class="tree">
                         <header class="tree-header">
-                            <img class="tree-icon" [src]="tree.icon" alt="" (error)="onIconError($event)" />
+                            <img class="tree-icon" [src]="tree.icon" alt="" (error)="hideBrokenIcon($event)" />
                             <span class="tree-name">{{ tree.name }}</span>
                             <span class="tree-points">{{ treePoints()[index] }}</span>
                         </header>
@@ -55,19 +62,26 @@
                                 [pointsLeft]="pointsLeft()"
                                 (add)="addPoint($event)"
                                 (remove)="removePoint($event)"
-                                (hover)="onHover($event)" />
+                                (hover)="setHoveredTalent($event)"
+                            />
                         </div>
                     </section>
                 }
             </div>
 
             @if (hovered(); as info) {
-                <app-talent-tooltip [talent]="info.talent" [tree]="info.tree" [ranks]="ranks()" [x]="info.x" [y]="info.y" />
+                <app-talent-tooltip
+                    [talent]="info.talent"
+                    [tree]="info.tree"
+                    [ranks]="ranks()"
+                    [x]="info.x"
+                    [y]="info.y"
+                />
             }
 
             <p class="hint">
-                Pulsa un perk para ganar un punto. Clic derecho, o mantén pulsado en el móvil, para quitarlo. Las casillas
-                con interrogación son perks que llegarán más adelante.
+                Pulsa un perk para ganar un punto. Clic derecho, o mantén pulsado en el móvil, para quitarlo. Las
+                casillas con interrogación son perks que llegarán más adelante.
             </p>
         }
 
@@ -75,8 +89,8 @@
             <header class="challenges-header">
                 <h2 class="section-title">Desafíos de la cuenta</h2>
                 <p class="progress">
-                    Completados: <strong>{{ completedCount() }}/{{ challengeCount() }}</strong>
-                    · Puntos ganados: <strong>{{ earnedPoints() }}</strong>
+                    Completados: <strong>{{ completedCount() }}/{{ challengeCount() }}</strong> · Puntos ganados:
+                    <strong>{{ earnedPoints() }}</strong>
                 </p>
             </header>
 
@@ -97,7 +111,8 @@
                                         <input
                                             type="checkbox"
                                             [checked]="isCompleted(challenge.name)"
-                                            (change)="toggleChallenge(challenge.name)" />
+                                            (change)="toggleChallenge(challenge.name)"
+                                        />
                                         <span class="challenge-text">
                                             <span class="challenge-name">{{ challenge.name }}</span>
                                             @if (challenge.description) {

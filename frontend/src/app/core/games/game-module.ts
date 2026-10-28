@@ -21,12 +21,8 @@ export interface GameAdminItem {
 }
 
 export interface GameModule {
-    /** Game id, tag key and URL segment. */
     id: string;
-    /** Player routes, loaded on demand. */
     routes: LoadChildrenCallback;
-    /** Management routes for admins, loaded on demand. */
     adminRoutes?: LoadChildrenCallback;
-    /** Links of the management area shown in the sidebar. */
     adminItems?: readonly GameAdminItem[];
 }

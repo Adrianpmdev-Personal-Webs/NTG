@@ -12,8 +12,8 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '@core/services/auth';
-import { NotificationService } from '@core/services/notification';
+import { AuthSession } from '@core/auth/auth-session';
+import { NotificationCenter } from '@core/notifications/notification-center';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -21,64 +21,55 @@ import { NotificationService } from '@core/services/notification';
     selector: 'app-login',
     imports: [FormsModule],
     templateUrl: './login.html',
-    styleUrl: './login.scss'
+    styleUrl: './login.scss',
 })
 export class Login implements OnInit {
-
-    private readonly authService = inject(AuthService);
+    private readonly authSession = inject(AuthSession);
     private readonly router = inject(Router);
-    private readonly notificationService = inject(NotificationService);
+    private readonly notificationCenter = inject(NotificationCenter);
 
     private readonly matrixColumnCount = 20;
     private readonly matrixCharacterCount = 40;
     private readonly matrixMinSpeed = 6;
     private readonly matrixMaxSpeedOffset = 10;
     private readonly matrixMaxDelayOffset = 10;
-    private readonly katakanaStartCode = 0x30A0;
+    private readonly katakanaStartCode = 0x30a0;
     private readonly katakanaRange = 96;
 
-    email = '';
-    password = '';
+    protected email = '';
+    protected password = '';
 
-    readonly loading = signal(false);
-    readonly error = signal('');
+    protected readonly loading = signal(false);
+    protected readonly error = signal('');
 
-    /** True while the silent session-restore attempt is in progress. */
-    readonly checkingSession = signal(true);
+    protected readonly checkingSession = signal(true);
 
-    readonly matrixCols = Array.from({ length: this.matrixColumnCount }, (_, index) => ({
+    protected readonly matrixCols = Array.from({ length: this.matrixColumnCount }, (_, index) => ({
         id: index,
         x: (index / this.matrixColumnCount) * 100,
         speed: this.matrixMinSpeed + Math.random() * this.matrixMaxSpeedOffset,
         delay: -Math.random() * this.matrixMaxDelayOffset,
-        chars: this.generateMatrixCharacters()
+        chars: this.generateMatrixCharacters(),
     }));
 
     ngOnInit(): void {
-        // If there is already a valid access token in memory (e.g. the user
-        // navigated to /login manually), skip straight to the dashboard.
-        if (this.authService.isLoggedIn()) {
+        if (this.authSession.isLoggedIn()) {
             this.router.navigate(['/']);
             return;
         }
 
-        // Otherwise try to silently restore the session using the httpOnly
-        // refresh-token cookie. The form stays hidden while this is running
-        // so the user never sees a flash of the login form if they have
-        // a valid session.
-        this.authService.refreshSession().subscribe({
+        this.authSession.refreshSession().subscribe({
             next: () => {
-                this.notificationService.success('Sesión restaurada. Bienvenido');
+                this.notificationCenter.success('Sesión restaurada. Bienvenido');
                 this.router.navigate(['/']);
             },
             error: () => {
-                // Cookie missing or expired — show the login form normally.
                 this.checkingSession.set(false);
-            }
+            },
         });
     }
 
-    onLogin(): void {
+    protected signIn(): void {
         if (!this.email || !this.password) {
             this.error.set('Debes introducir las credenciales');
             return;
@@ -87,17 +78,19 @@ export class Login implements OnInit {
         this.loading.set(true);
         this.error.set('');
 
-        this.authService.login({
-            email: this.email,
-            password: this.password
-        }).subscribe({
-            next: () => this.handleLoginSuccess(),
-            error: error => this.handleLoginError(error)
-        });
+        this.authSession
+            .login({
+                email: this.email,
+                password: this.password,
+            })
+            .subscribe({
+                next: () => this.handleLoginSuccess(),
+                error: (error) => this.handleLoginError(error),
+            });
     }
 
     private handleLoginSuccess(): void {
-        this.notificationService.success('Acceso concedido. Bienvenido');
+        this.notificationCenter.success('Acceso concedido. Bienvenido');
         this.router.navigate(['/']);
     }
 
@@ -119,11 +112,13 @@ export class Login implements OnInit {
     }
 
     private hasApiErrorMessage(error: unknown): error is { error: { detail?: string; message?: string } } {
-        return typeof error === 'object'
-            && error !== null
-            && 'error' in error
-            && typeof (error as { error?: unknown }).error === 'object'
-            && (error as { error?: unknown }).error !== null;
+        return (
+            typeof error === 'object' &&
+            error !== null &&
+            'error' in error &&
+            typeof (error as { error?: unknown }).error === 'object' &&
+            (error as { error?: unknown }).error !== null
+        );
     }
 
     private generateMatrixCharacters(): string {

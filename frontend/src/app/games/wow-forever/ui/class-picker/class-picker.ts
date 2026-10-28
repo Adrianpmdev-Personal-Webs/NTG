@@ -14,15 +14,13 @@ import { hideBrokenIcon } from '../../wow-forever-config';
     selector: 'app-class-picker',
     templateUrl: './class-picker.html',
     styleUrl: './class-picker.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ClassPicker {
-
     readonly classes = input.required<readonly GameClass[]>();
-    /** Slug of the class shown, or null when none is selected yet. */
     readonly selected = input<string | null>(null);
 
     readonly pick = output<GameClass>();
 
-    readonly onIconError = hideBrokenIcon;
+    protected readonly hideBrokenIcon = hideBrokenIcon;
 }

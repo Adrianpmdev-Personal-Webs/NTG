@@ -11,11 +11,12 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Observable, catchError, of } from 'rxjs';
-import { ACCEPTED_IMAGE_TYPES, AssetService, checkImageFile } from '@core/services/asset';
-import { GameCatalogService } from '@core/services/game-catalog';
-import { NotificationService } from '@core/services/notification';
+import { ACCEPTED_IMAGE_TYPES, AssetApi, checkImageFile } from '@core/assets/asset-api';
+import { GameCatalog } from '@core/games/game-catalog';
+import { NotificationCenter } from '@core/notifications/notification-center';
 import { CatalogGame } from '@shared/models/game';
 import { resolveApiError } from '@shared/utils/api-error';
+import { ModalOverlay } from '@shared/directives/modal-overlay';
 
 type Dialog = { mode: 'create' } | { mode: 'edit'; game: CatalogGame } | { mode: 'delete'; game: CatalogGame } | null;
 
@@ -29,52 +30,55 @@ interface GameForm {
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-admin-games',
-    imports: [FormsModule],
+    imports: [ModalOverlay, FormsModule],
     templateUrl: './games.html',
-    styleUrl: './games.scss'
+    styleUrl: './games.scss',
 })
 export class Games {
+    private readonly catalog = inject(GameCatalog);
+    private readonly assetApi = inject(AssetApi);
+    private readonly notifications = inject(NotificationCenter);
 
-    private readonly catalog = inject(GameCatalogService);
-    private readonly assetService = inject(AssetService);
-    private readonly notifications = inject(NotificationService);
+    protected readonly accepted = ACCEPTED_IMAGE_TYPES;
+    protected readonly games = this.catalog.games;
+    protected readonly loading = signal(true);
+    protected readonly saving = signal(false);
+    protected readonly uploadingCover = signal<string | null>(null);
+    protected readonly dialog = signal<Dialog>(null);
 
-    readonly accepted = ACCEPTED_IMAGE_TYPES;
-    readonly games = this.catalog.games;
-    readonly loading = signal(true);
-    readonly saving = signal(false);
-    /** Key of the game whose cover is being uploaded. */
-    readonly uploadingCover = signal<string | null>(null);
-    readonly dialog = signal<Dialog>(null);
-
-    form: GameForm = this.emptyForm();
+    protected form: GameForm = this.emptyForm();
 
     constructor() {
-        this.catalog.load().pipe(catchError(error => {
-            this.notifications.error(resolveApiError(error, 'No se han podido cargar los juegos'));
-            return of([]);
-        })).subscribe(() => this.loading.set(false));
+        this.catalog
+            .load()
+            .pipe(
+                catchError((error) => {
+                    this.notifications.error(resolveApiError(error, 'No se han podido cargar los juegos'));
+                    return of([]);
+                }),
+            )
+            .subscribe(() => this.loading.set(false));
     }
 
-    openCreate(): void {
+    protected openCreate(): void {
         this.form = this.emptyForm();
         this.dialog.set({ mode: 'create' });
     }
 
-    openEdit(game: CatalogGame): void {
+    protected openEdit(game: CatalogGame): void {
         this.form = { key: game.id, name: game.name, upcoming: game.upcoming, sortOrder: game.sortOrder };
         this.dialog.set({ mode: 'edit', game });
     }
 
-    openDelete(game: CatalogGame): void {
+    protected openDelete(game: CatalogGame): void {
         this.dialog.set({ mode: 'delete', game });
     }
 
-    close(): void {
+    protected close(): void {
         this.dialog.set(null);
     }
 
-    save(): void {
+    protected save(): void {
         const dialog = this.dialog();
         const request = { name: this.form.name, upcoming: this.form.upcoming, sortOrder: Number(this.form.sortOrder) };
 
@@ -85,7 +89,7 @@ export class Games {
         }
     }
 
-    confirmDelete(): void {
+    protected confirmDelete(): void {
         const dialog = this.dialog();
 
         if (dialog?.mode === 'delete') {
@@ -93,7 +97,7 @@ export class Games {
         }
     }
 
-    uploadCover(game: CatalogGame, event: Event): void {
+    protected uploadCover(game: CatalogGame, event: Event): void {
         const input = event.target as HTMLInputElement;
         const file = input.files?.[0];
         input.value = '';
@@ -110,16 +114,16 @@ export class Games {
         }
 
         this.uploadingCover.set(game.id);
-        this.assetService.upload(`platform/games/${game.id}`, file).subscribe({
+        this.assetApi.upload(`platform/games/${game.id}`, file).subscribe({
             next: () => {
                 this.uploadingCover.set(null);
                 this.notifications.success(`Portada de ${game.name} guardada`);
                 this.catalog.refresh();
             },
-            error: error => {
+            error: (error) => {
                 this.uploadingCover.set(null);
                 this.notifications.error(resolveApiError(error, 'No se ha podido subir la portada'));
-            }
+            },
         });
     }
 
@@ -131,10 +135,10 @@ export class Games {
                 this.dialog.set(null);
                 this.notifications.success(message);
             },
-            error: error => {
+            error: (error) => {
                 this.saving.set(false);
                 this.notifications.error(resolveApiError(error, 'No se ha podido guardar'));
-            }
+            },
         });
     }
 

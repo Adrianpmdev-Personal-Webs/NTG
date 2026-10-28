@@ -7,13 +7,13 @@
  * @author @adrianpmdev
  */
 
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { UserService } from '@core/services/user';
+import { UserApi } from '@core/users/user-api';
 import { StatCard } from './dashboard-stats';
 import { User } from '@shared/models/user';
-import { AuthService } from '@core/services/auth';
-import { GameCatalogService } from '@core/services/game-catalog';
+import { AuthSession } from '@core/auth/auth-session';
+import { GameCatalog } from '@core/games/game-catalog';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -23,28 +23,28 @@ import { GameCatalogService } from '@core/services/game-catalog';
     styleUrl: './dashboard.scss',
 })
 export class Dashboard implements OnInit {
+    private readonly userApi = inject(UserApi);
+    private readonly destroyRef = inject(DestroyRef);
+    protected readonly authSession = inject(AuthSession);
 
-    private readonly userService = inject(UserService);
-    readonly authService = inject(AuthService)
+    protected readonly loading = signal(true);
+    protected readonly isAdmin = this.authSession.isAdmin();
 
-    loading = signal(true);
-    isAdmin = this.authService.isAdmin();
+    protected readonly stats = signal<StatCard[]>([]);
+    protected readonly recentUsers = signal<User[]>([]);
+    protected readonly totalUsers = signal(0);
+    protected readonly regularUsersCount = signal(0);
+    protected readonly adminsCount = signal(0);
+    protected readonly uptime = signal('00:00:00');
 
-    stats = signal<StatCard[]>([]);
-    recentUsers = signal<User[]>([]);
-    totalUsers = signal(0);
-    regularUsersCount = signal(0);
-    adminsCount = signal(0);
-    uptime = signal('00:00:00');
+    protected readonly availableGames = inject(GameCatalog).games;
 
-    availableGames = inject(GameCatalogService).games;
+    protected readonly circumference = 2 * Math.PI * 70;
 
-    readonly circumference = 2 * Math.PI * 70;
+    protected readonly usersArc = signal(0);
+    protected readonly adminsArc = signal(0);
 
-    usersArc = signal(0);
-    adminsArc = signal(0);
-
-    activityLogs = signal([
+    protected readonly activityLogs = signal([
         { id: 1, time: this.ts(), level: 'info', msg: 'Sistema iniciado correctamente' },
         { id: 2, time: this.ts(), level: 'success', msg: 'Conexión a base de datos establecida' },
         { id: 3, time: this.ts(), level: 'info', msg: 'Módulo de autenticación activo' },
@@ -53,7 +53,7 @@ export class Dashboard implements OnInit {
         { id: 6, time: this.ts(), level: 'success', msg: 'Admin panel operativo' },
     ]);
 
-    systemMetrics = signal([
+    protected readonly systemMetrics = signal([
         { label: 'CPU', value: 23, color: 'var(--neon-green)' },
         { label: 'MEMORIA', value: 61, color: 'var(--neon-cyan)' },
         { label: 'DISCO', value: 38, color: 'var(--neon-yellow)' },
@@ -61,7 +61,7 @@ export class Dashboard implements OnInit {
         { label: 'API CALLS', value: 45, color: 'var(--neon-green)' },
     ]);
 
-    private startTime = Date.now();
+    private readonly startTime = Date.now();
 
     ngOnInit(): void {
         this.startUptimeTimer();
@@ -76,22 +76,22 @@ export class Dashboard implements OnInit {
         this.loading.set(false);
     }
 
-    getBarWidth(value: number | string): string {
+    protected getBarWidth(value: number | string): string {
         const numericValue = typeof value === 'string' ? parseInt(value) : value;
         const max = 100;
 
         return Math.min((numericValue / max) * 100, 100) + '%';
     }
 
-    isAdminRole(role: string): boolean {
+    protected isAdminRole(role: string): boolean {
         return role.toLowerCase().replace('role_', '') === 'admin';
     }
 
     private loadData(): void {
-        this.userService.getAllUsers().subscribe({
+        this.userApi.getAllUsers().subscribe({
             next: (users: User[]) => {
-                const admins = users.filter(user => this.isAdminRole(user.role));
-                const regularUsers = users.filter(user => !this.isAdminRole(user.role));
+                const admins = users.filter((user) => this.isAdminRole(user.role));
+                const regularUsers = users.filter((user) => !this.isAdminRole(user.role));
                 const total = users.length;
 
                 this.totalUsers.set(total);
@@ -101,10 +101,8 @@ export class Dashboard implements OnInit {
                 const usersArc = total > 0 ? (regularUsers.length / total) * this.circumference : 0;
                 const adminsArc = total > 0 ? (admins.length / total) * this.circumference : 0;
 
-                setTimeout(() => {
-                    this.usersArc.set(usersArc);
-                    this.adminsArc.set(adminsArc);
-                }, 300);
+                this.usersArc.set(usersArc);
+                this.adminsArc.set(adminsArc);
 
                 this.stats.set([
                     { label: 'TOTAL USUARIOS', value: total, icon: '◎', color: 'var(--neon-green)' },
@@ -125,19 +123,25 @@ export class Dashboard implements OnInit {
                 ]);
 
                 this.loading.set(false);
-            }
+            },
         });
     }
 
     private startUptimeTimer(): void {
-        setInterval(() => {
+        const intervalId = setInterval(() => {
             const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
-            const hours = Math.floor(elapsed / 3600).toString().padStart(2, '0');
-            const minutes = Math.floor((elapsed % 3600) / 60).toString().padStart(2, '0');
+            const hours = Math.floor(elapsed / 3600)
+                .toString()
+                .padStart(2, '0');
+            const minutes = Math.floor((elapsed % 3600) / 60)
+                .toString()
+                .padStart(2, '0');
             const seconds = (elapsed % 60).toString().padStart(2, '0');
 
             this.uptime.set(`${hours}:${minutes}:${seconds}`);
         }, 1000);
+
+        this.destroyRef.onDestroy(() => clearInterval(intervalId));
     }
 
     private startLogStream(): void {
@@ -152,16 +156,15 @@ export class Dashboard implements OnInit {
 
         let index = 0;
 
-        setInterval(() => {
+        const intervalId = setInterval(() => {
             const message = messages[index % messages.length];
 
-            this.activityLogs.update(logs => [
-                { id: Date.now(), time: this.ts(), ...message },
-                ...logs.slice(0, 9)
-            ]);
+            this.activityLogs.update((logs) => [{ id: Date.now(), time: this.ts(), ...message }, ...logs.slice(0, 9)]);
 
             index++;
         }, 3500);
+
+        this.destroyRef.onDestroy(() => clearInterval(intervalId));
     }
 
     private ts(): string {

@@ -1,12 +1,3 @@
-/**
- * Talent calculator styles.
- *
- * Level controls and the three talent trees (a swipeable carousel on phones). The page frame, the class picker and the
- * tooltip card have their own components.
- *
- * @author @adrianpmdev
- */
-
 @use 'mixins' as *;
 @use '../../styles/wow-forever' as wow;
 
@@ -17,8 +8,6 @@
 .state {
     @include wow.state;
 }
-
-/* ─── CONTROLS ─── */
 
 .controls {
     @include wow.controls;
@@ -48,15 +37,11 @@
     text-align: center;
 }
 
-/* ─── TREES ─── */
-
 @include wow.talent-trees;
 
 .hint {
     @include wow.hint;
 }
-
-/* ─── RESPONSIVE ─── */
 
 @include tablet {
     .level-range {

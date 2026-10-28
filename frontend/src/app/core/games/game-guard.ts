@@ -12,23 +12,25 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { map, of, switchMap } from 'rxjs';
-import { AuthService } from '../services/auth';
-import { GameCatalogService } from '../services/game-catalog';
+import { AuthSession } from '../auth/auth-session';
+import { GameCatalog } from './game-catalog';
 
-export const gameGuard = (gameId: string): CanActivateFn => () => {
-    const authService = inject(AuthService);
-    const catalog = inject(GameCatalogService);
-    const router = inject(Router);
+export const gameGuard =
+    (gameId: string): CanActivateFn =>
+    () => {
+        const authSession = inject(AuthSession);
+        const catalog = inject(GameCatalog);
+        const router = inject(Router);
 
-    return authService.ensureSession().pipe(
-        switchMap(hasSession => {
-            if (!hasSession) {
-                return of(router.createUrlTree(['/login']));
-            }
+        return authSession.ensureSession().pipe(
+            switchMap((hasSession) => {
+                if (!hasSession) {
+                    return of(router.createUrlTree(['/login']));
+                }
 
-            return catalog.canAccess(gameId).pipe(
-                map(canAccess => canAccess ? true : router.createUrlTree(['/']))
-            );
-        })
-    );
-};
+                return catalog
+                    .canAccess(gameId)
+                    .pipe(map((canAccess) => (canAccess ? true : router.createUrlTree(['/']))));
+            }),
+        );
+    };

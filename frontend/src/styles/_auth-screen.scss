@@ -1,13 +1,3 @@
-/**
- * Auth screens shared styles.
- * Layout, Matrix background, box, header, form and footer used by both the login and the set-password pages.
- * Each page does `@use 'auth-screen';` and keeps only what is its own (messages, responsive tweaks, extras).
- *
- * @author @adrianpmdev
- */
-
-/* ─── LAYOUT ─── */
-
 .login-container {
     min-height: 100dvh;
     display: flex;
@@ -18,8 +8,6 @@
     overflow: hidden;
     padding: 32px 20px;
 }
-
-/* ─── MATRIX BACKGROUND ─── */
 
 .matrix-bg {
     position: fixed;
@@ -42,8 +30,6 @@
     animation: matrix-fall 8s linear infinite;
 }
 
-/* ─── BOX ─── */
-
 .login-box {
     position: relative;
     z-index: 1;
@@ -58,7 +44,7 @@
     backdrop-filter: blur(4px);
 
     &::before {
-        content: "";
+        content: '';
         position: absolute;
         top: 0;
         left: 0;
@@ -69,7 +55,7 @@
     }
 
     &::after {
-        content: "";
+        content: '';
         position: absolute;
         bottom: 0;
         left: 0;
@@ -78,8 +64,6 @@
         background: linear-gradient(90deg, transparent, var(--neon-green-dark), transparent);
     }
 }
-
-/* ─── HEADER ─── */
 
 .login-header {
     text-align: center;
@@ -108,8 +92,6 @@
     letter-spacing: 4px;
 }
 
-/* ─── TERMINAL PROMPT ─── */
-
 .terminal-prompt {
     background: rgba(0, 255, 65, 0.03);
     border: 1px solid rgba(0, 255, 65, 0.1);
@@ -124,8 +106,6 @@
 .prompt-text {
     color: var(--text-secondary);
 }
-
-/* ─── FORM ─── */
 
 .login-form {
     display: flex;
@@ -159,8 +139,6 @@
     flex-shrink: 0;
 }
 
-/* ─── BUTTON ─── */
-
 .login-btn {
     margin-top: 8px;
     padding: 14px;
@@ -177,8 +155,6 @@
         cursor: not-allowed;
     }
 }
-
-/* ─── FOOTER ─── */
 
 .login-footer {
     margin-top: 28px;

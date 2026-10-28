@@ -1,12 +1,3 @@
-/**
- * Talent tooltip styles.
- *
- * Dark card with a gold border, fixed to the screen next to the pointer. It never takes the pointer itself, so hovering
- * keeps working under it. Current rank text in light gold, next rank in green, missing requirements in red.
- *
- * @author @adrianpmdev
- */
-
 @use '../../styles/wow-forever' as wow;
 
 .tooltip {
@@ -57,7 +48,6 @@
     margin: 8px 0 0;
     color: wow.$text-strong;
     line-height: 1.4;
-    /* Some rank texts carry their own line breaks (one line per weapon, for example). */
     white-space: pre-line;
 }
 

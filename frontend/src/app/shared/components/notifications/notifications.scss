@@ -1,12 +1,3 @@
-/**
- * Notification styles.
- * Responsive fixed notification stack with cyberpunk visual states.
- *
- * @author @adrianpmdev
- */
-
-/* ─── NOTIFICATION LAYOUT ─── */
-
 .notif-container {
     position: fixed;
     top: 20px;
@@ -21,8 +12,6 @@
     overflow-y: auto;
     pointer-events: none;
 }
-
-/* ─── NOTIFICATION CARD ─── */
 
 .notif {
     display: flex;
@@ -100,8 +89,6 @@
     }
 }
 
-/* ─── NOTIFICATION CONTENT ─── */
-
 .notif-prefix {
     letter-spacing: 1px;
     flex-shrink: 0;
@@ -135,8 +122,6 @@
     }
 }
 
-/* ─── ANIMATIONS ─── */
-
 @keyframes notification-enter-clean {
     from {
         opacity: 0;
@@ -160,8 +145,6 @@
         transform: translateX(24px);
     }
 }
-
-/* ─── RESPONSIVE ─── */
 
 @media (max-width: 640px) {
     .notif-container {

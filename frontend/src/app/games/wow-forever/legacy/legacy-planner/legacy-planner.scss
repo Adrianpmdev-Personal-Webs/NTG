@@ -1,12 +1,3 @@
-/**
- * Legacy planner styles.
- *
- * Point counters, the three perk trees (a swipeable carousel on phones) and the challenge checklist in columns of
- * groups. The page frame and the tooltip card have their own components.
- *
- * @author @adrianpmdev
- */
-
 @use 'mixins' as *;
 @use '../../styles/wow-forever' as wow;
 
@@ -33,15 +24,11 @@
     @include wow.controls;
 }
 
-/* ─── TREES ─── */
-
 @include wow.talent-trees;
 
 .hint {
     @include wow.hint;
 }
-
-/* ─── CHALLENGES ─── */
 
 .challenges {
     display: flex;

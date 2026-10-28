@@ -11,7 +11,6 @@ interface ApiErrorBody {
     message?: string;
 }
 
-/** Message to show for a failed request: the server's `detail` or `message` when it sent one, otherwise `fallback`. */
 export const resolveApiError = (error: unknown, fallback: string): string => {
     const body = (error as { error?: ApiErrorBody | null } | null)?.error;
 

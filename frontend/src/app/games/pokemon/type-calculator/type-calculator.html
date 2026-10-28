@@ -1,6 +1,4 @@
 <div class="pokemon-page">
-
-    <!-- Header -->
     <div class="page-header">
         <div class="header-left">
             <div class="page-label">// MÓDULO POKÉMON</div>
@@ -27,7 +25,6 @@
         </div>
     </div>
 
-    <!-- Intro -->
     <div class="terminal-card calculator-intro">
         <div>
             <div class="terminal-label">{{ mode().prompt }}</div>
@@ -44,7 +41,6 @@
         </div>
     </div>
 
-    <!-- Type selector -->
     <div class="terminal-card type-selector-card">
         <div class="section-header">
             <span class="section-title">{{ mode().selectorTitle }}</span>
@@ -55,7 +51,9 @@
             @if (loading()) {
                 <span class="section-hint">CARGANDO TIPOS...</span>
             } @else if (failed()) {
-                <span class="section-hint">No se han podido cargar los tipos. Recarga la página para intentarlo de nuevo.</span>
+                <span class="section-hint"
+                    >No se han podido cargar los tipos. Recarga la página para intentarlo de nuevo.</span
+                >
             }
             @for (type of pokemonTypes(); track type) {
                 <button
@@ -72,7 +70,6 @@
         </div>
     </div>
 
-    <!-- Results -->
     <div class="results-grid">
         @for (group of resultGroups(); track group.category.id) {
             <div class="terminal-card result-card" [class]="group.category.id + '-card'">
@@ -98,5 +95,4 @@
             </div>
         }
     </div>
-
 </div>

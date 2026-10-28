@@ -34,16 +34,10 @@ export interface LockeRules {
     rules?: LockeRule[];
 }
 
-/** Pretty JSON of a rules document, or an empty text when there are none. */
 export function rulesToText(rules: LockeRules | null): string {
     return rules ? JSON.stringify(rules, null, 2) : '';
 }
 
-/**
- * Reads the rules typed in the editor.
- *
- * @returns the document, null for an empty text, or undefined when the text is not a valid document
- */
 export function parseRules(text: string): LockeRules | null | undefined {
     if (!text.trim()) {
         return null;
@@ -51,10 +45,13 @@ export function parseRules(text: string): LockeRules | null | undefined {
 
     try {
         const value: unknown = JSON.parse(text);
-        const valid = typeof value === 'object' && value !== null && !Array.isArray(value)
-            && (!('rules' in value) || Array.isArray((value as LockeRules).rules));
+        const valid =
+            typeof value === 'object' &&
+            value !== null &&
+            !Array.isArray(value) &&
+            (!('rules' in value) || Array.isArray((value as LockeRules).rules));
 
-        return valid ? value as LockeRules : undefined;
+        return valid ? (value as LockeRules) : undefined;
     } catch {
         return undefined;
     }

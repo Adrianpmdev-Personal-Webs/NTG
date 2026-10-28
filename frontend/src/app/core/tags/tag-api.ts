@@ -1,5 +1,5 @@
 /**
- * TagService
+ * TagApi
  *
  * Service that lists the tags an admin can assign to users.
  *
@@ -10,11 +10,10 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Tag } from '@shared/models/tag';
-import { API_BASE_URL } from '@core/config/api';
+import { API_BASE_URL } from '@core/api/api';
 
 @Injectable({ providedIn: 'root' })
-export class TagService {
-
+export class TagApi {
     private readonly http = inject(HttpClient);
     private readonly baseUrl = `${API_BASE_URL}/tags`;
 

@@ -1,8 +1,8 @@
-<div class="modal-overlay" (click)="cancel.emit()">
-    <div class="modal terminal-card" role="dialog" aria-modal="true" aria-labelledby="series-editor-title" (click)="$event.stopPropagation()">
+<div class="modal-overlay" appModalOverlay (dismiss)="dismiss.emit()">
+    <div class="modal terminal-card" role="dialog" aria-modal="true" aria-labelledby="series-editor-title">
         <div class="modal-header">
             <h2 class="modal-title" id="series-editor-title">RESULTADO DE LA SERIE</h2>
-            <button class="close-btn" type="button" aria-label="Cerrar" (click)="cancel.emit()">✕</button>
+            <button class="close-btn" type="button" aria-label="Cerrar" (click)="dismiss.emit()">✕</button>
         </div>
 
         <div class="modal-body">
@@ -16,11 +16,21 @@
                         <span class="field-label">PARTIDA {{ $index + 1 }}</span>
                         <div class="check-group">
                             <label class="check-option">
-                                <input type="radio" [name]="'winner-' + $index" [checked]="game.winnerSide === 1" (change)="setWinner($index, 1)" />
+                                <input
+                                    type="radio"
+                                    [name]="'winner-' + $index"
+                                    [checked]="game.winnerSide === 1"
+                                    (change)="setWinner($index, 1)"
+                                />
                                 Gana {{ name(1) }}
                             </label>
                             <label class="check-option">
-                                <input type="radio" [name]="'winner-' + $index" [checked]="game.winnerSide === 2" (change)="setWinner($index, 2)" />
+                                <input
+                                    type="radio"
+                                    [name]="'winner-' + $index"
+                                    [checked]="game.winnerSide === 2"
+                                    (change)="setWinner($index, 2)"
+                                />
                                 Gana {{ name(2) }}
                             </label>
                         </div>
@@ -37,10 +47,21 @@
 
             <div class="modal-actions">
                 @if (removable()) {
-                    <button class="btn-neon btn-neon-danger" type="button" (click)="remove.emit()" [disabled]="saving()">ELIMINAR SERIE</button>
+                    <button
+                        class="btn-neon btn-neon-danger"
+                        type="button"
+                        (click)="remove.emit()"
+                        [disabled]="saving()"
+                    >
+                        ELIMINAR SERIE
+                    </button>
                 }
-                <button class="btn-neon btn-neon-warning" type="button" (click)="clear()" [disabled]="saving()">VACIAR</button>
-                <button class="btn-neon btn-neon-danger" type="button" (click)="cancel.emit()" [disabled]="saving()">CANCELAR</button>
+                <button class="btn-neon btn-neon-warning" type="button" (click)="clear()" [disabled]="saving()">
+                    VACIAR
+                </button>
+                <button class="btn-neon btn-neon-danger" type="button" (click)="dismiss.emit()" [disabled]="saving()">
+                    CANCELAR
+                </button>
                 <button class="btn-neon" type="button" (click)="submit()" [disabled]="saving()">GUARDAR</button>
             </div>
         </div>

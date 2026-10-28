@@ -1,16 +1,5 @@
-/**
- * WoW page styles.
- *
- * Full-height metal frame page with a centred column of readable width, a header with the title between the two way-back
- * buttons and the credit line at the bottom.
- *
- * @author @adrianpmdev
- */
-
 @use 'mixins' as *;
 @use '../../styles/wow-forever' as wow;
-
-/* ─── HOST AND PAGE ─── */
 
 :host {
     display: block;
@@ -38,7 +27,6 @@ app-wow-frame {
     font-family: Georgia, 'Times New Roman', serif;
 }
 
-/* Everything keeps a readable width instead of stretching over the whole screen. */
 .page-header,
 .content,
 .credit {
@@ -52,8 +40,6 @@ app-wow-frame {
     flex-direction: column;
     gap: 14px;
 }
-
-/* ─── HEADER ─── */
 
 .page-header {
     display: flex;
@@ -72,16 +58,12 @@ app-wow-frame {
     text-transform: uppercase;
 }
 
-/* ─── CREDIT ─── */
-
 .credit {
     margin: 12px 0 0;
     color: wow.$dim;
     font-size: 0.75rem;
     text-align: center;
 }
-
-/* ─── RESPONSIVE ─── */
 
 @include tablet {
     .wow-page {

@@ -13,22 +13,22 @@ export const WOW_FOREVER_ROUTES: Routes = [
     {
         path: '',
         pathMatch: 'full',
-        loadComponent: () => import('./home/home').then(m => m.Home)
+        loadComponent: () => import('./home/home').then((m) => m.Home),
     },
     {
         path: 'talents',
-        loadComponent: () => import('./talents/talent-calculator/talent-calculator').then(m => m.TalentCalculator)
+        loadComponent: () => import('./talents/talent-calculator/talent-calculator').then((m) => m.TalentCalculator),
     },
     {
         path: 'spellbook',
-        loadComponent: () => import('./spellbook/spellbook-viewer/spellbook-viewer').then(m => m.SpellbookViewer)
+        loadComponent: () => import('./spellbook/spellbook-viewer/spellbook-viewer').then((m) => m.SpellbookViewer),
     },
     {
         path: 'legacy',
-        loadComponent: () => import('./legacy/legacy-planner/legacy-planner').then(m => m.LegacyPlanner)
+        loadComponent: () => import('./legacy/legacy-planner/legacy-planner').then((m) => m.LegacyPlanner),
     },
     {
         path: 'races',
-        loadComponent: () => import('./racials/racials-overview/racials-overview').then(m => m.RacialsOverview)
-    }
+        loadComponent: () => import('./racials/racials-overview/racials-overview').then((m) => m.RacialsOverview),
+    },
 ];

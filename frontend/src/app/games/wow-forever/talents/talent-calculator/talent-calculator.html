@@ -4,7 +4,11 @@
     } @else if (failed()) {
         <p class="state">No se han podido cargar los datos. Inténtalo de nuevo más tarde.</p>
     } @else {
-        <app-class-picker [classes]="classes()" [selected]="selectedClass()?.slug ?? null" (pick)="selectClass($event)" />
+        <app-class-picker
+            [classes]="classes()"
+            [selected]="selectedClass()?.slug ?? null"
+            (pick)="selectClass($event)"
+        />
 
         <section class="controls">
             <div class="level">
@@ -16,7 +20,8 @@
                     [min]="firstLevel()"
                     [max]="maxLevel()"
                     [value]="level()"
-                    (input)="changeLevel($any($event.target).value)" />
+                    (input)="changeLevel($any($event.target).value)"
+                />
                 <input
                     class="level-number"
                     type="number"
@@ -24,13 +29,20 @@
                     [min]="firstLevel()"
                     [max]="maxLevel()"
                     [value]="level()"
-                    (change)="changeLevel($any($event.target).value)" />
+                    (change)="changeLevel($any($event.target).value)"
+                />
             </div>
 
             <div class="points" aria-live="polite">
-                <span>Puntos: <strong>{{ pointsTotal() }}</strong></span>
-                <span>Gastados: <strong>{{ pointsSpent() }}</strong></span>
-                <span [class.over]="pointsLeft() === 0">Restantes: <strong>{{ pointsLeft() }}</strong></span>
+                <span
+                    >Puntos: <strong>{{ pointsTotal() }}</strong></span
+                >
+                <span
+                    >Gastados: <strong>{{ pointsSpent() }}</strong></span
+                >
+                <span [class.over]="pointsLeft() === 0"
+                    >Restantes: <strong>{{ pointsLeft() }}</strong></span
+                >
             </div>
 
             <div class="actions">
@@ -52,17 +64,18 @@
                         role="tab"
                         [class.active]="activeTree() === index"
                         [attr.aria-selected]="activeTree() === index"
-                        (click)="goToTree(index)">
+                        (click)="goToTree(index)"
+                    >
                         {{ tree.name }} <span class="tab-points">{{ treePoints()[index] }}</span>
                     </button>
                 }
             </div>
 
-            <div class="trees" #carousel (scroll)="onCarouselScroll()">
+            <div class="trees" #carousel (scroll)="trackCarouselPosition()">
                 @for (tree of trees(); track tree.id; let index = $index) {
                     <section class="tree">
                         <header class="tree-header">
-                            <img class="tree-icon" [src]="tree.icon" alt="" (error)="onIconError($event)" />
+                            <img class="tree-icon" [src]="tree.icon" alt="" (error)="hideBrokenIcon($event)" />
                             <span class="tree-name">{{ tree.name }}</span>
                             <span class="tree-points">{{ treePoints()[index] }}</span>
                         </header>
@@ -74,14 +87,21 @@
                                 [pointsLeft]="pointsLeft()"
                                 (add)="addPoint($event)"
                                 (remove)="removePoint($event)"
-                                (hover)="onHover($event)" />
+                                (hover)="setHoveredTalent($event)"
+                            />
                         </div>
                     </section>
                 }
             </div>
 
             @if (hovered(); as info) {
-                <app-talent-tooltip [talent]="info.talent" [tree]="info.tree" [ranks]="ranks()" [x]="info.x" [y]="info.y" />
+                <app-talent-tooltip
+                    [talent]="info.talent"
+                    [tree]="info.tree"
+                    [ranks]="ranks()"
+                    [x]="info.x"
+                    [y]="info.y"
+                />
             }
 
             <p class="hint">

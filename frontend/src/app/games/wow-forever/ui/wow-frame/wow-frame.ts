@@ -12,6 +12,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
     selector: 'app-wow-frame',
     templateUrl: './wow-frame.html',
     styleUrl: './wow-frame.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WowFrame {}

@@ -1,12 +1,5 @@
-/**
- * Standings table styles (terminal tokens, remapped by the Pokémon layout).
- *
- * @author @adrianpmdev
- */
-
 @use 'mixins' as *;
 
-/** Width of the position column, which the name column sticks next to on phones. */
 $position-width: 2.6rem;
 
 :host {
@@ -68,8 +61,6 @@ $position-width: 2.6rem;
         background: rgba(255, 255, 255, 0.05);
     }
 
-    // On phones the table scrolls sideways: the position and the name stay fixed on the left, so every number
-    // still says whose it is.
     @include mobile {
         .position,
         .name,
@@ -92,7 +83,6 @@ $position-width: 2.6rem;
             box-shadow: 6px 0 6px -6px rgba(0, 0, 0, 0.6);
         }
 
-        // The highlight of the own row is translucent: it goes over a solid card so nothing shows through.
         tr.mine .position,
         tr.mine .name {
             background: linear-gradient(rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.05)), var(--bg-card);

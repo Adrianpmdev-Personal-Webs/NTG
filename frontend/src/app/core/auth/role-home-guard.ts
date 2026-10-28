@@ -8,11 +8,11 @@
 
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthService } from '../services/auth';
+import { AuthSession } from './auth-session';
 
 export const roleHomeGuard: CanActivateFn = () => {
-    const authService = inject(AuthService);
+    const authSession = inject(AuthSession);
     const router = inject(Router);
 
-    return router.createUrlTree([authService.isAdmin() ? '/admin/dashboard' : '/welcome']);
+    return router.createUrlTree([authSession.isAdmin() ? '/admin/dashboard' : '/welcome']);
 };

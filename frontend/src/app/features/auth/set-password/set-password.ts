@@ -13,11 +13,11 @@
  * @author @adrianpmdev
  */
 
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService } from '@core/services/auth';
-import { NotificationService } from '@core/services/notification';
+import { AuthSession } from '@core/auth/auth-session';
+import { NotificationCenter } from '@core/notifications/notification-center';
 import { resolveApiError } from '@shared/utils/api-error';
 
 @Component({
@@ -26,21 +26,21 @@ import { resolveApiError } from '@shared/utils/api-error';
     selector: 'app-set-password',
     imports: [FormsModule],
     templateUrl: './set-password.html',
-    styleUrl: './set-password.scss'
+    styleUrl: './set-password.scss',
 })
 export class SetPassword implements OnInit {
-
-    private readonly authService = inject(AuthService);
+    private readonly authSession = inject(AuthSession);
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
-    private readonly notificationService = inject(NotificationService);
+    private readonly notificationCenter = inject(NotificationCenter);
+    private readonly destroyRef = inject(DestroyRef);
 
     private readonly matrixColumnCount = 20;
     private readonly matrixCharacterCount = 40;
     private readonly matrixMinSpeed = 6;
     private readonly matrixMaxSpeedOffset = 10;
     private readonly matrixMaxDelayOffset = 10;
-    private readonly katakanaStartCode = 0x30A0;
+    private readonly katakanaStartCode = 0x30a0;
     private readonly katakanaRange = 96;
 
     private readonly minPasswordLength = 8;
@@ -49,20 +49,20 @@ export class SetPassword implements OnInit {
 
     private token = '';
 
-    password = '';
-    confirmPassword = '';
+    protected password = '';
+    protected confirmPassword = '';
 
-    readonly loading = signal(false);
-    readonly error = signal('');
-    readonly success = signal(false);
-    readonly tokenMissing = signal(false);
+    protected readonly loading = signal(false);
+    protected readonly error = signal('');
+    protected readonly success = signal(false);
+    protected readonly tokenMissing = signal(false);
 
-    readonly matrixCols = Array.from({ length: this.matrixColumnCount }, (_, index) => ({
+    protected readonly matrixCols = Array.from({ length: this.matrixColumnCount }, (_, index) => ({
         id: index,
         x: (index / this.matrixColumnCount) * 100,
         speed: this.matrixMinSpeed + Math.random() * this.matrixMaxSpeedOffset,
         delay: -Math.random() * this.matrixMaxDelayOffset,
-        chars: this.generateMatrixCharacters()
+        chars: this.generateMatrixCharacters(),
     }));
 
     ngOnInit(): void {
@@ -76,11 +76,10 @@ export class SetPassword implements OnInit {
             return;
         }
 
-        // The token is a credential: keep it out of the address bar and the browser history.
         history.replaceState(null, '', window.location.pathname);
     }
 
-    onSubmit(): void {
+    protected savePassword(): void {
         const validationError = this.validateForm();
 
         if (validationError) {
@@ -91,9 +90,9 @@ export class SetPassword implements OnInit {
         this.loading.set(true);
         this.error.set('');
 
-        this.authService.setPassword(this.token, this.password).subscribe({
+        this.authSession.setPassword(this.token, this.password).subscribe({
             next: () => this.handleSuccess(),
-            error: (err: unknown) => this.handleError(err)
+            error: (err: unknown) => this.handleError(err),
         });
     }
 
@@ -124,9 +123,11 @@ export class SetPassword implements OnInit {
     private handleSuccess(): void {
         this.success.set(true);
         this.loading.set(false);
-        this.notificationService.success('Contraseña establecida. Bienvenido');
+        this.notificationCenter.success('Contraseña establecida. Bienvenido');
 
-        setTimeout(() => this.router.navigate(['/']), this.redirectDelayMs);
+        const timeoutId = setTimeout(() => this.router.navigate(['/']), this.redirectDelayMs);
+
+        this.destroyRef.onDestroy(() => clearTimeout(timeoutId));
     }
 
     private handleError(error: unknown): void {
@@ -134,7 +135,7 @@ export class SetPassword implements OnInit {
         this.loading.set(false);
     }
 
-    goToLogin(): void {
+    protected goToLogin(): void {
         this.router.navigate(['/login']);
     }
 

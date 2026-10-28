@@ -13,7 +13,13 @@
             </header>
 
             @if (player.teamImageUrl) {
-                <a class="team-picture" [href]="player.teamImageUrl" target="_blank" rel="noopener noreferrer" title="Ver a tamaño completo">
+                <a
+                    class="team-picture"
+                    [href]="player.teamImageUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Ver a tamaño completo"
+                >
                     <img [src]="player.teamImageUrl" [alt]="'Equipo de ' + player.name" loading="lazy" />
                 </a>
             } @else {
@@ -25,11 +31,20 @@
             @if (player.canEditTeam) {
                 <div class="team-actions">
                     <label class="upload" [class.disabled]="busy() === player.id">
-                        {{ busy() === player.id ? 'Subiendo…' : (player.hasTeamImage ? 'Cambiar equipo' : 'Subir equipo') }}
-                        <input type="file" [accept]="accepted" [disabled]="busy() === player.id" (change)="onFile(player, $event)" />
+                        {{
+                            busy() === player.id ? 'Subiendo…' : player.hasTeamImage ? 'Cambiar equipo' : 'Subir equipo'
+                        }}
+                        <input
+                            type="file"
+                            [accept]="accepted"
+                            [disabled]="busy() === player.id"
+                            (change)="uploadPicture(player, $event)"
+                        />
                     </label>
                     @if (player.hasTeamImage) {
-                        <button class="remove" type="button" [disabled]="busy() === player.id" (click)="remove(player)">Quitar</button>
+                        <button class="remove" type="button" [disabled]="busy() === player.id" (click)="remove(player)">
+                            Quitar
+                        </button>
                     }
                 </div>
             }

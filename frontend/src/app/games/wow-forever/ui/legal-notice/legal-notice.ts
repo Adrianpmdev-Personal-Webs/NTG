@@ -12,6 +12,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
     selector: 'app-legal-notice',
     templateUrl: './legal-notice.html',
     styleUrl: './legal-notice.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LegalNotice {}

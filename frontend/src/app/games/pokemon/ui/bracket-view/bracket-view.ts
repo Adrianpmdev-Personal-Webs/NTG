@@ -24,31 +24,30 @@ interface BracketSide {
     selector: 'app-pokemon-bracket-view',
     imports: [MatchCard],
     templateUrl: './bracket-view.html',
-    styleUrl: './bracket-view.scss'
+    styleUrl: './bracket-view.scss',
 })
 export class BracketView {
-
     readonly detail = input.required<TournamentDetail>();
     readonly editable = input(false);
 
     readonly edit = output<Match>();
 
-    readonly players = computed(() => playersById(this.detail()));
+    protected readonly players = computed(() => playersById(this.detail()));
 
-    readonly sides = computed<BracketSide[]>(() => {
-        const matches = this.detail().matches.filter(match => match.status !== 'void');
+    protected readonly sides = computed<BracketSide[]>(() => {
+        const matches = this.detail().matches.filter((match) => match.status !== 'void');
         const sides: BracketSide[] = [
             { stage: 'upper', title: 'Cuadro superior', rounds: [] },
             { stage: 'lower', title: 'Cuadro inferior', rounds: [] },
-            { stage: 'grand_final', title: 'Gran final', rounds: [] }
+            { stage: 'grand_final', title: 'Gran final', rounds: [] },
         ];
 
         for (const side of sides) {
             const rounds = roundsOf(matches, side.stage);
-            const last = Math.max(0, ...rounds.map(round => round.round));
-            side.rounds = rounds.map(round => ({ ...round, label: roundLabel(side.stage, round.round, last) }));
+            const last = Math.max(0, ...rounds.map((round) => round.round));
+            side.rounds = rounds.map((round) => ({ ...round, label: roundLabel(side.stage, round.round, last) }));
         }
 
-        return sides.filter(side => side.rounds.length > 0);
+        return sides.filter((side) => side.rounds.length > 0);
     });
 }

@@ -1,17 +1,6 @@
-/**
- * Header styles.
- * Top bar of the terminal layout with breadcrumb, system clock and mobile menu button.
- *
- * @author @adrianpmdev
- */
-
-/* ─── HOST ─── */
-
 :host {
     display: block;
 }
-
-/* ─── TOP BAR ─── */
 
 .top-bar {
     display: flex;
@@ -35,8 +24,6 @@
     min-width: 0;
 }
 
-/* ─── MOBILE MENU BUTTON ─── */
-
 .mobile-menu-btn {
     display: none;
     align-items: center;
@@ -57,8 +44,6 @@
         border-color: rgba(0, 255, 65, 0.45);
     }
 }
-
-/* ─── BREADCRUMB ─── */
 
 .breadcrumb {
     font-size: 0.8rem;
@@ -81,8 +66,6 @@
     white-space: nowrap;
 }
 
-/* ─── SYSTEM CLOCK ─── */
-
 .sys-time {
     font-size: 0.75rem;
     color: var(--text-dim);
@@ -90,8 +73,6 @@
     font-family: var(--font-mono);
     white-space: nowrap;
 }
-
-/* ─── RESPONSIVE ─── */
 
 @media (max-width: 900px) {
     .top-bar {

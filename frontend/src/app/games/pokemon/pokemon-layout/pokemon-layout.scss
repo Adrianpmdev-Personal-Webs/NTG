@@ -2,7 +2,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;700&display=swap');
 
 :host {
-    /* Pokemon theme tokens */
     --pk-bg: #141b3d;
     --pk-surface: #1d2757;
     --pk-surface-2: #263170;
@@ -17,10 +16,6 @@
     --pk-font-display: 'Fredoka', 'Trebuchet MS', sans-serif;
     --pk-font-body: 'Nunito', 'Segoe UI', sans-serif;
 
-    /*
-     * The type calculator and the shared tournament components (ui/) are written against the terminal tokens.
-     * Re-pointing those names here gives them the Pokemon palette, while the admin area shows them in green.
-     */
     --bg-black: var(--pk-bg);
     --bg-dark: var(--pk-bg);
     --bg-panel: var(--pk-surface);

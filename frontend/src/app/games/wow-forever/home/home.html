@@ -17,7 +17,8 @@
                         id="game-version"
                         aria-label="Facción"
                         [value]="faction()"
-                        (change)="onFactionChange($any($event.target).value)">
+                        (change)="selectFaction($any($event.target).value)"
+                    >
                         <option value="ALLIANCE">{{ factions()?.ALLIANCE ?? 'Alianza' }}</option>
                         <option value="HORDE">{{ factions()?.HORDE ?? 'Horda' }}</option>
                     </select>
@@ -27,9 +28,13 @@
                     <div class="resource-link-row">
                         @for (feature of features(); track feature.id) {
                             @if (feature.available) {
-                                <app-wow-button [link]="'/wow-forever/' + feature.id">{{ feature.label }}</app-wow-button>
+                                <app-wow-button [link]="'/wow-forever/' + feature.id">{{
+                                    feature.label
+                                }}</app-wow-button>
                             } @else {
-                                <app-wow-button [disabled]="true" title="Próximamente">{{ feature.label }}</app-wow-button>
+                                <app-wow-button [disabled]="true" title="Próximamente">{{
+                                    feature.label
+                                }}</app-wow-button>
                             }
                         }
                     </div>

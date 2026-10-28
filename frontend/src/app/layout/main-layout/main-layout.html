@@ -1,5 +1,4 @@
 <div class="layout">
-    <!-- Sidebar -->
     <aside class="sidebar" [class.collapsed]="sidebarCollapsed()">
         <div class="sidebar-header">
             @if (sidebarCollapsed()) {
@@ -22,9 +21,7 @@
                     </div>
                 </div>
 
-                <button class="collapse-btn" type="button" (click)="toggleSidebar()" title="Cerrar menú">
-                    ◀
-                </button>
+                <button class="collapse-btn" type="button" (click)="toggleSidebar()" title="Cerrar menú">◀</button>
             }
         </div>
 
@@ -38,7 +35,7 @@
         </div>
 
         <nav class="sidebar-nav">
-            @if (authService.isAdmin()) {
+            @if (authSession.isAdmin()) {
                 <a
                     routerLink="/admin/dashboard"
                     routerLinkActive="active"
@@ -113,13 +110,18 @@
                         [class.active]="isGameActive(game)"
                         [class.open]="isSubmenuOpen(game.id)"
                         [class.no-links]="!game.hasLinks"
-                        [title]="sidebarCollapsed() ? game.name : (game.hasLinks ? '' : 'Próximamente')"
+                        [title]="sidebarCollapsed() ? game.name : game.hasLinks ? '' : 'Próximamente'"
                         (click)="game.hasLinks && toggleSubmenu(game.id)"
                     >
                         <span class="nav-icon">◎</span>
 
                         @if (!sidebarCollapsed()) {
-                            <span class="nav-label">{{ game.name.toUpperCase() }}@if (game.upcoming) {<span class="upcoming-mark" title="Próximamente: solo visible para admins">*</span>}</span>
+                            <span class="nav-label"
+                                >{{ game.name.toUpperCase() }}
+                                @if (game.upcoming) {
+                                    <span class="upcoming-mark" title="Próximamente: solo visible para admins">*</span>
+                                }
+                            </span>
                             @if (game.hasLinks) {
                                 <span class="nav-caret">{{ isSubmenuOpen(game.id) ? '▾' : '▸' }}</span>
                             }
@@ -139,7 +141,7 @@
                                 </a>
                             }
 
-                            @if (authService.isAdmin()) {
+                            @if (authSession.isAdmin()) {
                                 @for (item of game.adminItems; track item.route) {
                                     <a
                                         [routerLink]="item.route"
@@ -164,7 +166,9 @@
                     @if (currentUser()?.avatarUrl) {
                         <img [src]="currentUser()?.avatarUrl" alt="Avatar" class="user-avatar" />
                     } @else {
-                        <span class="user-avatar user-avatar-initial" aria-hidden="true">{{ currentUser()?.username?.charAt(0)?.toUpperCase() }}</span>
+                        <span class="user-avatar user-avatar-initial" aria-hidden="true">{{
+                            currentUser()?.username?.charAt(0)?.toUpperCase()
+                        }}</span>
                     }
                     <div class="user-details">
                         <span class="user-name">{{ currentUser()?.username }}</span>
@@ -192,7 +196,6 @@
         <button class="sidebar-backdrop" type="button" aria-label="Cerrar menú" (click)="closeSidebar()"></button>
     }
 
-    <!-- Main content -->
     <main class="main-content">
         <app-header (menuToggle)="toggleSidebar()" />
 

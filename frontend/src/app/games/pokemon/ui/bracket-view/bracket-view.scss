@@ -1,10 +1,3 @@
-/**
- * Bracket styles (terminal tokens, remapped by the Pokémon layout). One column per round; on phones each swipe moves
- * a whole round.
- *
- * @author @adrianpmdev
- */
-
 @use 'mixins' as *;
 
 :host {
@@ -30,7 +23,6 @@
     gap: 18px;
     overflow-x: auto;
     padding-bottom: 8px;
-    // Swiping always stops at the start of a round, never halfway through one.
     scroll-snap-type: x mandatory;
     overscroll-behavior-x: contain;
 }
@@ -42,7 +34,6 @@
     flex: 0 0 auto;
     scroll-snap-align: start;
 
-    // On phones each round takes most of the width and the next one peeks in, which tells there is more to swipe.
     @include mobile {
         flex-basis: calc(100% - 48px);
     }

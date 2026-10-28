@@ -6,7 +6,11 @@
     <div class="news-paper">
         @for (item of news(); track item.id) {
             <div class="news-item">
-                <div class="news-thumb" [style.background-image]="item.image ? 'url(' + item.image + ')' : null" aria-hidden="true"></div>
+                <div
+                    class="news-thumb"
+                    [style.background-image]="item.image ? 'url(' + item.image + ')' : null"
+                    aria-hidden="true"
+                ></div>
                 <div class="news-copy">
                     @if (item.date) {
                         <span class="news-date">{{ item.date }}</span>

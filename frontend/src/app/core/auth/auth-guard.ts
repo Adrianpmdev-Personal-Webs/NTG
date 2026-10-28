@@ -10,13 +10,13 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { map } from 'rxjs';
-import { AuthService } from '../services/auth';
+import { AuthSession } from './auth-session';
 
 export const authGuard: CanActivateFn = () => {
-    const authService = inject(AuthService);
+    const authSession = inject(AuthSession);
     const router = inject(Router);
 
-    return authService.ensureSession().pipe(
-        map(hasSession => hasSession ? true : router.createUrlTree(['/login']))
-    );
+    return authSession
+        .ensureSession()
+        .pipe(map((hasSession) => (hasSession ? true : router.createUrlTree(['/login']))));
 };

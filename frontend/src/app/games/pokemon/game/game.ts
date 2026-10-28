@@ -17,25 +17,26 @@ import { Game, LockeSummary } from '../data/pokemon-models';
     selector: 'app-pokemon-game',
     imports: [RouterLink],
     templateUrl: './game.html',
-    styleUrl: './game.scss'
+    styleUrl: './game.scss',
 })
 export class GamePage {
-
     private readonly api = inject(PokemonApi);
 
-    readonly loading = signal(true);
-    readonly failed = signal(false);
-    readonly game = signal<Game | null>(null);
-    readonly lockes = signal<LockeSummary[]>([]);
+    protected readonly loading = signal(true);
+    protected readonly failed = signal(false);
+    protected readonly game = signal<Game | null>(null);
+    protected readonly lockes = signal<LockeSummary[]>([]);
 
     constructor() {
-        inject(ActivatedRoute).paramMap
-            .pipe(switchMap(params => {
-                const id = params.get('gameId') ?? '';
-                this.loading.set(true);
+        inject(ActivatedRoute)
+            .paramMap.pipe(
+                switchMap((params) => {
+                    const id = params.get('gameId') ?? '';
+                    this.loading.set(true);
 
-                return forkJoin({ game: this.api.getGame(id), lockes: this.api.getLockes(id) });
-            }))
+                    return forkJoin({ game: this.api.getGame(id), lockes: this.api.getLockes(id) });
+                }),
+            )
             .subscribe({
                 next: ({ game, lockes }) => {
                     this.game.set(game);
@@ -46,12 +47,11 @@ export class GamePage {
                 error: () => {
                     this.failed.set(true);
                     this.loading.set(false);
-                }
+                },
             });
     }
 
-    /** Games of a randomlocke in play order, as text. */
-    gameNames(locke: LockeSummary): string {
-        return locke.games.map(game => game.name).join(' → ');
+    protected gameNames(locke: LockeSummary): string {
+        return locke.games.map((game) => game.name).join(' → ');
     }
 }

@@ -12,7 +12,7 @@
         { "id": "dungeons", "label": "Dungeons y loot", "description": "Mazmorras, jefes y el botín de cada uno.", "available": false },
         { "id": "spellbook", "label": "Spellbook", "description": "Los hechizos de cada clase, rango a rango.", "available": true },
         { "id": "legacy", "label": "Legacy System", "description": "Perks y desafíos de la cuenta.", "available": true },
-        { "id": "races", "label": "Razas y racials", "description": "Habilidades raciales y combinaciones raza-clase.", "available": true }
+        { "id": "races", "label": "Razas y raciales", "description": "Habilidades raciales y combinaciones raza-clase.", "available": true }
     ],
 
     "news": [

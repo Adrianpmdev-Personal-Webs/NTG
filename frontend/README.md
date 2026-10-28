@@ -47,17 +47,17 @@ and game content.
 
 ## 🧭 Screens
 
-| Area | Screen | What it does |
-|---|---|---|
-| 🔑 Auth | **Login** | Sign in; restores the session automatically if one exists |
-| 🔑 Auth | **Set password** | Landing page of the email link: the user chooses a password and enters directly |
-| 🏠 Platform | **Welcome** | Player home: cards for the games they can open, and the ones coming soon |
-| 👑 Admin | **Dashboard** | Platform overview |
-| 👑 Admin | **Users** | Create users by email, assign tags, edit, resend the password email, delete |
-| 👑 Admin | **Games** | Game catalog: add a game (its tag is created too), order, cover, release it to players |
-| 👑 Admin | **Pictures** | Every picture the platform and the games expect: upload the original, the server compresses it |
-| 🎮 Games | **Game areas** | Each game has its own layout, theme, views and tools, and opens only with its tag |
-| 🎮 Games (admin) | **Management** | A game can add its own administration screens to the admin area |
+| Area             | Screen           | What it does                                                                                   |
+| ---------------- | ---------------- | ---------------------------------------------------------------------------------------------- |
+| 🔑 Auth          | **Login**        | Sign in; restores the session automatically if one exists                                      |
+| 🔑 Auth          | **Set password** | Landing page of the email link: the user chooses a password and enters directly                |
+| 🏠 Platform      | **Welcome**      | Player home: cards for the games they can open, and the ones coming soon                       |
+| 👑 Admin         | **Dashboard**    | Platform overview                                                                              |
+| 👑 Admin         | **Users**        | Create users by email, assign tags, edit, resend the password email, delete                    |
+| 👑 Admin         | **Games**        | Game catalog: add a game (its tag is created too), order, cover, release it to players         |
+| 👑 Admin         | **Pictures**     | Every picture the platform and the games expect: upload the original, the server compresses it |
+| 🎮 Games         | **Game areas**   | Each game has its own layout, theme, views and tools, and opens only with its tag              |
+| 🎮 Games (admin) | **Management**   | A game can add its own administration screens to the admin area                                |
 
 ---
 
@@ -68,14 +68,14 @@ and game content.
 The backend says which games each user can open (`GET /games`); the app uses that answer to build the sidebar and
 to guard the game routes. The backend enforces the same rules, the frontend only hides what a user cannot use.
 
-| Route | Who can enter | Layout |
-|---|---|---|
-| `/login`, `/set-password` | Public | Full-screen terminal |
-| `/` | Signed in | Redirects: admin → dashboard, player → welcome |
-| `/welcome` | Signed in | Terminal shell |
-| `/admin/dashboard`, `/admin/users`, `/admin/games`, `/admin/images` | Admin | Terminal shell |
-| `/admin/<game>/**` | Admin | Terminal shell (code lives in the game's folder) |
-| `/<game>/**` | Signed in **and** allowed by the catalog (game released and tag held, or admin) | The game's own layout |
+| Route                                                               | Who can enter                                                                   | Layout                                           |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------ |
+| `/login`, `/set-password`                                           | Public                                                                          | Full-screen terminal                             |
+| `/`                                                                 | Signed in                                                                       | Redirects: admin → dashboard, player → welcome   |
+| `/welcome`                                                          | Signed in                                                                       | Terminal shell                                   |
+| `/admin/dashboard`, `/admin/users`, `/admin/games`, `/admin/images` | Admin                                                                           | Terminal shell                                   |
+| `/admin/<game>/**`                                                  | Admin                                                                           | Terminal shell (code lives in the game's folder) |
+| `/<game>/**`                                                        | Signed in **and** allowed by the catalog (game released and tag held, or admin) | The game's own layout                            |
 
 ```mermaid
 flowchart LR
@@ -124,13 +124,14 @@ frontend/
         ├── app.config.ts       Zoneless change detection, router, HTTP client + interceptor
         ├── app.routes.ts       Platform routes + one route per game, built from the games list
         │
-        ├── core/               🧱 App-wide singletons
-        │   ├── config/         API base URL, GameModule contract
-        │   ├── services/       Auth, game catalog, users, tags, pictures, notifications
-        │   ├── interceptors/   Token handling and silent session renewal
-        │   └── guards/         auth · admin · role-home · game
+        ├── core/               🧱 App-wide singletons, grouped by area
+        │   ├── api/            API base URL
+        │   ├── auth/           AuthSession, auth interceptor, auth · admin · role-home guards
+        │   ├── games/          GameModule contract, GameCatalog, game guard
+        │   ├── users/ · tags/ · assets/   UserApi, TagApi, AssetApi (pictures)
+        │   └── notifications/  NotificationCenter
         │
-        ├── shared/             ♻️ Reusable pieces (models, notification toasts, API error helper)
+        ├── shared/             ♻️ Reusable pieces (models, notification toasts, modal behaviour, API error helper)
         ├── layout/             🖼️ Terminal shell: sidebar, header, footer
         ├── features/           📦 Platform pages: auth, welcome, admin (dashboard, users, games, pictures)
         │
@@ -147,7 +148,7 @@ frontend/
 
 1. Create `games/<game>/` with its layout, theme, views, models and API service.
 2. Export a `GameModule` from `<game>.game.ts` (id, routes, admin routes and menu) and list it in `games/games.ts`.
-3. Add the game in the admin **Games** screen (this creates its tag), upload its cover and untick *coming soon*
+3. Add the game in the admin **Games** screen (this creates its tag), upload its cover and untick _coming soon_
    when it is ready.
 
 The sidebar, the welcome page and the dashboard read the catalog from the backend, and the game's **id doubles as
@@ -183,9 +184,18 @@ the tag key** that unlocks it.
 - **Locality first:** a file used by one area stays inside it and only moves to `core` or `shared` when two areas
   need it.
 - **Naming:** hyphen-separated file names, one base name per component (`.ts`, `.html`, `.scss`), no type
-  suffixes, selector prefix `app-`.
+  suffixes, selector prefix `app-`. Services are named for what they do (`AuthSession`, `GameCatalog`, `UserApi`),
+  guards and interceptors keep their type with a hyphen (`auth-guard.ts`, `auth-interceptor.ts`) and event handlers
+  are named for their action (`signIn()`, `uploadPicture()`), never `onClick()`.
+- **Visibility:** members used only by a component's template are `protected`, members used only by the class are
+  `private`; inputs, outputs and anything other files use stay public.
+- **Modals:** every modal backdrop uses the `appModalOverlay` directive, which closes it with Escape or a click
+  outside, keeps focus inside the dialog, names it after its title and gives focus back when it closes.
 - **Path aliases:** `@core`, `@shared`, `@layout`, `@features`, `@games`.
-- Every file starts with a short English header comment.
+- Every `.ts` file starts with a short English header comment, and there are no other comments in the code,
+  styles or templates.
+- **Linting and formatting:** ESLint with the angular-eslint rules (including template accessibility) and Prettier
+  (120 columns, 4 spaces, single quotes) must pass before a change is merged.
 
 ---
 
@@ -197,6 +207,8 @@ the tag key** that unlocks it.
 npm install
 npm start          # development server on http://localhost:4200 (start the backend on :8080 first)
 npm run build      # production build
+npm run lint       # ESLint (angular-eslint, template accessibility)
+npm run format     # format the project with Prettier (format:check only checks it)
 ```
 
 - **One API address everywhere:** the app always calls the relative `/api/v1`. In development `ng serve` forwards

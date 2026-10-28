@@ -2,26 +2,28 @@
 
 # 🎮 NTG System 🎮
 
-**A private platform where a group of friends tracks, organizes and plays everything around the games we share.**
+### A private platform where a group of friends tracks, organizes and plays everything around the games we share
 
-![Angular](https://img.shields.io/badge/Angular-21-DD0031?logo=angular&logoColor=white&style=flat-square)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white&style=flat-square)
-![Java](https://img.shields.io/badge/Java-25-ED8B00?logo=openjdk&logoColor=white&style=flat-square)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0-6DB33F?logo=springboot&logoColor=white&style=flat-square)
-![Supabase](https://img.shields.io/badge/Supabase-Auth_+_PostgreSQL-3FCF8E?logo=supabase&logoColor=white&style=flat-square)
-![Docker](https://img.shields.io/badge/Docker-multi--stage-2496ED?logo=docker&logoColor=white&style=flat-square)
-![Vercel](https://img.shields.io/badge/Vercel-frontend-000000?logo=vercel&logoColor=white&style=flat-square)
-![Render](https://img.shields.io/badge/Render-backend-46E3B7?logo=render&logoColor=black&style=flat-square)
+![Angular](https://img.shields.io/badge/Angular-21-DD0031?style=for-the-badge&logo=angular&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![Java](https://img.shields.io/badge/Java-25-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-Auth_+_PostgreSQL-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-multi--stage-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-frontend-000000?style=for-the-badge&logo=vercel&logoColor=white)
+![Render](https://img.shields.io/badge/Render-backend-46E3B7?style=for-the-badge&logo=render&logoColor=black)
 
-[Overview](#-overview) · [Features](#-features) · [Architecture](#-architecture) · [Tech stack](#-tech-stack) · [Repository layout](#-repository-layout) · [Documentation](#-documentation)
+[![Author](https://img.shields.io/badge/Author-adrianpmdev-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/adrianpmdev)
+
+[Overview](#-overview) · [Features](#-features) · [Architecture](#-architecture) · [Tech stack](#-tech-stack) · [Repository layout](#-repository-layout) · [Documentation](#-documentation) · [License](#-license)
 
 </div>
 
-<br>
-
 ---
 
-# ✨ Overview
+<br>
+
+## ✨ Overview
 
 NTG System is a full-stack web application built for a closed group of friends. It centralizes the data and
 tools of the games we play together, and it is designed so that new games can be plugged in as independent
@@ -39,13 +41,14 @@ modules as they are developed.
   site well inside the free plans of Render, Vercel and Supabase.
 - 📱 **Every screen works on phones.** Layouts were checked screen by screen from 320 px to desktop.
 
-> This is a personal full-stack project. The site itself is private; this repository documents how it is
+> 🔒 **This is a personal full-stack project.** The site itself is private; this repository documents how it is
 > built.
+
+---
 
 <br>
 
----
-# 🚀 Features
+## 🚀 Features
 
 | 👑 Admin | 🎮 Player |
 |---|---|
@@ -63,10 +66,11 @@ modules as they are developed.
 | **Available games** | ✅ Live | Each game ships its own content, rules and tools behind its access tag |
 | **Upcoming games** | 🛠️ Planned | Listed as "coming soon" in the catalog; released from the admin area without a deploy |
 
+---
+
 <br>
 
----
-# 🏗️ Architecture
+## 🏗️ Architecture
 
 ```mermaid
 flowchart LR
@@ -105,10 +109,11 @@ sequenceDiagram
     App-->>Player: Signed in, with access to the tagged games only
 ```
 
+---
+
 <br>
 
----
-# 🧰 Tech stack
+## 🧰 Tech stack
 
 | Layer | Technology |
 |---|---|
@@ -118,10 +123,11 @@ sequenceDiagram
 | **Database & files** | PostgreSQL and Storage on Supabase |
 | **Build & deploy** | Maven multi-module, multi-stage Docker image, Render (API), Vercel (SPA) |
 
+---
+
 <br>
 
----
-# 📁 Repository layout
+## 📁 Repository layout
 
 ```text
 NTG/
@@ -134,10 +140,11 @@ NTG/
 └── docs/               Technical manual
 ```
 
+---
+
 <br>
 
----
-# 📚 Documentation
+## 📚 Documentation
 
 | | |
 |---|---|
@@ -145,9 +152,28 @@ NTG/
 | ⚙️ [**Backend**](./backend/README.md) | Modules, security model, account and session flows, API overview, data model, deployment |
 | 📘 **Technical manual** | `docs/NTG — Technical Manual.docx`: the full reference, including how each game works and how to add a new one |
 
+---
+
 <br>
 
----
-# 👤 Author
+## 📄 License
 
-[@adrianpmdev](https://github.com/adrianpmdev) · Junior Full Stack Developer 
+Proprietary source code: the repository is public for portfolio presentation and professional evaluation only. Third-party data, trademarks and game content keep their own licenses and rights. See [LICENSE](LICENSE) for details.
+
+---
+
+<br>
+
+## 👤 Author
+
+[@adrianpmdev](https://github.com/adrianpmdev) · Junior Full Stack Developer
+
+---
+
+<br>
+
+<div align="center">
+
+✨ Made in **2026** by [@adrianpmdev](https://github.com/adrianpmdev) ✨
+
+</div>

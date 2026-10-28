@@ -1,55 +1,49 @@
 <main class="launcher-page">
     <app-wow-frame>
         <div class="launcher-shell">
-            <app-launcher-header />
+            <div class="launcher-screen">
+                <app-launcher-header />
 
-            <section class="launcher-main">
-                <div class="artwork-layer" [style.background-image]="backgroundImage()" aria-hidden="true"></div>
-                <div class="artwork-vignette" aria-hidden="true"></div>
-                <div class="content-spacer"></div>
-                <app-news-panel />
-            </section>
+                <section class="launcher-main">
+                    <div class="artwork-layer" [style.background-image]="backgroundImage()" aria-hidden="true"></div>
+                    <div class="artwork-vignette" aria-hidden="true"></div>
+                    <div class="content-spacer"></div>
+                    <app-news-panel />
+                </section>
 
-            <section class="launcher-navigation">
-                <div class="launcher-version">
-                    <label for="game-version">Versión del juego</label>
-                    <select
-                        id="game-version"
-                        aria-label="Facción"
-                        [value]="faction()"
-                        (change)="selectFaction($any($event.target).value)"
-                    >
-                        <option value="ALLIANCE">{{ factions()?.ALLIANCE ?? 'Alianza' }}</option>
-                        <option value="HORDE">{{ factions()?.HORDE ?? 'Horda' }}</option>
-                    </select>
-                </div>
-
-                <nav class="utility-links" aria-label="Herramientas de WoW Forever">
-                    <div class="resource-link-row">
-                        @for (feature of features(); track feature.id) {
-                            @if (feature.available) {
-                                <app-wow-button [link]="'/wow-forever/' + feature.id">{{
-                                    feature.label
-                                }}</app-wow-button>
-                            } @else {
-                                <app-wow-button [disabled]="true" title="Próximamente">{{
-                                    feature.label
-                                }}</app-wow-button>
-                            }
-                        }
+                <section class="launcher-navigation">
+                    <div class="launcher-version">
+                        <span class="launcher-version__label">Versión del juego</span>
+                        <span class="launcher-version__value">{{ build() ?? '—' }}</span>
                     </div>
-                </nav>
 
-                <div class="play-area">
-                    <app-wow-button [large]="true" [disabled]="true">
-                        @if (build(); as version) {
-                            <span class="play-build">{{ version }}</span>
-                        } @else {
-                            JUGAR
-                        }
-                    </app-wow-button>
-                </div>
-            </section>
+                    <nav class="utility-links" aria-label="Herramientas de WoW Forever">
+                        <div class="resource-link-row">
+                            @for (feature of features(); track feature.id) {
+                                @if (feature.available) {
+                                    <app-wow-button [link]="'/wow-forever/' + feature.id" [block]="true">{{
+                                        feature.label
+                                    }}</app-wow-button>
+                                } @else {
+                                    <app-wow-button [disabled]="true" [block]="true" title="Próximamente">{{
+                                        feature.label
+                                    }}</app-wow-button>
+                                }
+                            }
+                        </div>
+                    </nav>
+
+                    <div class="play-area">
+                        <app-wow-button
+                            [large]="true"
+                            [label]="'Cambiar el fondo a ' + nextFactionName()"
+                            (click)="switchFaction()"
+                        >
+                            {{ nextFactionName().toLocaleUpperCase('es') }}
+                        </app-wow-button>
+                    </div>
+                </section>
+            </div>
 
             <app-legal-notice />
         </div>

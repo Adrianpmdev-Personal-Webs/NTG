@@ -1,7 +1,7 @@
 /**
  * LauncherHeader
  *
- * Metal header of the launcher screen: decorative top menu, logo and a link back to NTG.
+ * Metal header of the launcher screen: decorative top menu (desktop only), logo and a link back to NTG.
  *
  * @author @adrianpmdev
  */

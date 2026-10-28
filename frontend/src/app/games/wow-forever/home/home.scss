@@ -23,12 +23,19 @@
 .launcher-shell {
     height: 100%;
     min-height: 0;
-    display: grid;
-    grid-template-rows: 108px minmax(0, 1fr) 122px auto;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
     background: #080808;
     border: 1px solid #050505;
     box-shadow: inset 0 0 0 2px #252525;
+}
+
+.launcher-screen {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-rows: 108px minmax(0, 1fr) 122px;
 }
 
 .launcher-main {
@@ -57,6 +64,7 @@
     background-size: contain;
     background-repeat: no-repeat;
     filter: saturate(0.95) contrast(1.03) brightness(0.83);
+    transition: background-image 0.4s ease;
 }
 
 .artwork-vignette {
@@ -153,11 +161,11 @@ app-news-panel {
 .launcher-version {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 5px;
+    gap: 6px;
     align-content: center;
 }
 
-.launcher-version label {
+.launcher-version__label {
     color: #e0bd62;
     font:
         700 14px/1 Georgia,
@@ -168,24 +176,16 @@ app-news-panel {
         0 0 3px rgba(0, 0, 0, 0.75);
 }
 
-.launcher-version select {
-    width: 100%;
-    height: 26px;
-    box-sizing: border-box;
-    padding: 2px 27px 2px 7px;
-    color: #191919;
-    border: 1px solid #0a0a0a;
-    border-radius: 0;
-    outline: 1px solid rgba(197, 170, 100, 0.38);
+.launcher-version__value {
+    color: #f0d179;
     font:
-        700 12px/1 Arial,
+        700 22px/1 Arial,
         Helvetica,
         sans-serif;
-    background: linear-gradient(#f4f1e9, #d8d4c9);
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.95),
-        inset 0 -1px 0 rgba(0, 0, 0, 0.25),
-        0 2px 4px rgba(0, 0, 0, 0.56);
+    letter-spacing: 0.04em;
+    text-shadow:
+        1px 2px 0 #000,
+        0 0 7px rgba(0, 0, 0, 0.85);
 }
 
 .utility-links {
@@ -202,92 +202,110 @@ app-news-panel {
     gap: 8px;
 }
 
-.launcher-version select:focus-visible {
-    outline: 1px solid #d8b866;
-    outline-offset: 2px;
-}
-
 .play-area {
     display: flex;
     align-items: center;
     justify-content: flex-end;
 }
 
-.play-build {
-    font-size: 15px;
-    letter-spacing: 0.04em;
-}
-
 @include tablet {
     :host {
-        height: auto;
-        min-height: 100dvh;
-        overflow: visible;
+        overflow-x: hidden;
+        overflow-y: auto;
     }
 
     .launcher-page {
         height: auto;
-        min-height: 100dvh;
+        min-height: 100%;
     }
 
     .launcher-shell {
         height: auto;
-        min-height: 100dvh;
-        grid-template-rows: 96px minmax(440px, 1fr) auto auto;
+        overflow: visible;
+    }
+
+    .launcher-screen {
+        flex: none;
+        height: calc(100dvh - 16px);
+        grid-template-rows: auto minmax(0, 1fr) auto;
     }
 
     .launcher-main {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
+        padding: 12px 10px 14px;
     }
 
-    .artwork-layer {
-        right: 0;
-    }
-
-    .content-spacer {
+    .artwork-layer,
+    .artwork-vignette,
+    .content-spacer,
+    .play-area {
         display: none;
     }
 
     app-news-panel {
         grid-column: 1;
-        align-self: end;
-        width: min(100%, 680px);
-        height: min(560px, 70dvh);
-        margin-left: auto;
+        align-self: stretch;
+        width: 100%;
+        height: 100%;
     }
 
     .launcher-navigation {
-        grid-template-columns: 190px 1fr 190px;
-        gap: 14px;
-        padding-inline: 14px;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+        min-height: 0;
+        padding: 16px 14px 14px;
+    }
+
+    .launcher-version {
+        grid-template-columns: auto auto;
+        justify-content: center;
+        align-items: baseline;
+        gap: 10px;
+    }
+
+    .launcher-version__value {
+        font-size: 20px;
+    }
+
+    .utility-links {
+        justify-items: stretch;
+    }
+
+    .resource-link-row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
 
 @include mobile {
-    .launcher-navigation {
-        grid-template-columns: 1fr 1fr;
+    .resource-link-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .utility-links {
-        order: 3;
+    .resource-link-row > :last-child:nth-child(odd) {
         grid-column: 1 / -1;
-    }
-
-    .play-area {
-        justify-content: flex-end;
     }
 }
 
 @include small {
+    .launcher-main {
+        padding: 10px 6px 12px;
+    }
+
     .launcher-navigation {
-        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 14px 10px 12px;
     }
 
-    .utility-links {
-        grid-column: auto;
+    .launcher-version__label {
+        font-size: 12px;
     }
 
-    .play-area {
-        justify-content: center;
+    .launcher-version__value {
+        font-size: 17px;
+    }
+
+    .resource-link-row {
+        gap: 6px;
     }
 }

@@ -98,14 +98,41 @@
     gap: 6px;
 }
 
-@include mobile {
+@include tablet {
+    .launcher-header {
+        min-height: 72px;
+    }
+
+    .top-menu {
+        display: none;
+    }
+
+    .header-actions {
+        top: calc((100% - 9px) / 2);
+        transform: translateY(-50%);
+    }
+
     .logo-placeholder {
-        width: min(44vw, 620px);
+        width: min(50vw, 360px);
+    }
+}
+
+@include mobile {
+    .launcher-header {
+        min-height: 64px;
+    }
+
+    .logo-placeholder {
+        width: min(44vw, 260px);
     }
 }
 
 @include small {
-    .top-menu {
-        display: none;
+    .launcher-header {
+        min-height: 56px;
+    }
+
+    .logo-placeholder {
+        width: min(42vw, 200px);
     }
 }

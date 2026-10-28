@@ -208,26 +208,30 @@
     outline-offset: 2px;
 }
 
+@include tablet {
+    .news-paper {
+        overscroll-behavior: auto;
+    }
+}
+
 @include small {
-    .news-item {
+    .news-item,
+    .news-item--featured {
         grid-template-columns: 96px minmax(0, 1fr);
         gap: 9px;
         padding: 9px;
     }
 
-    .news-item--featured {
-        grid-template-columns: minmax(0, 1fr);
-    }
-
     .news-item--featured .news-thumb {
-        max-height: 180px;
+        max-height: none;
     }
 
-    .news-summary {
-        display: none;
+    .news-item--featured .news-item-title {
+        font-size: 12px;
     }
 
+    .news-summary,
     .news-item--featured .news-summary {
-        display: -webkit-box;
+        display: none;
     }
 }

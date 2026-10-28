@@ -126,13 +126,28 @@
         0 6px 12px rgba(0, 0, 0, 0.85);
 }
 
+@include tablet {
+    :host(.wow-button-host--block) {
+        display: block;
+    }
+
+    .wow-button--block {
+        width: 100%;
+        min-height: 44px;
+        padding: 6px 10px;
+        white-space: normal;
+        text-align: center;
+        line-height: 1.2;
+    }
+}
+
 .wow-button:focus-visible {
     outline: 1px solid #d8b866;
     outline-offset: 2px;
 }
 
 @include mobile {
-    .wow-button:not(.wow-button--large) {
+    .wow-button:not(.wow-button--large, .wow-button--block) {
         min-width: 84px;
         padding: 0 8px;
     }

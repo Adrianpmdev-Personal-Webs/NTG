@@ -1,8 +1,9 @@
 /**
  * Home
  *
- * Launcher-style home of WoW Forever: faction artwork, news and the tools of the area (tools, faction names and the
- * game build come from the backend index; the news panel loads its own news).
+ * Launcher-style home of WoW Forever: faction artwork, news, the game build and the tools of the area (tools, faction
+ * names and the build come from the backend index; the news panel loads its own news). The faction background and the
+ * large button that switches it only exist on desktop.
  *
  * @author @adrianpmdev
  */
@@ -35,9 +36,14 @@ export class Home {
     );
 
     protected readonly features = computed(() => this.index()?.features ?? []);
-    protected readonly factions = computed(() => this.index()?.factions ?? null);
     protected readonly build = computed(() => this.index()?.credit.build ?? null);
     protected readonly faction = signal<Faction>('ALLIANCE');
+
+    private readonly nextFaction = computed<Faction>(() => (this.faction() === 'ALLIANCE' ? 'HORDE' : 'ALLIANCE'));
+
+    protected readonly nextFactionName = computed(
+        () => this.index()?.factions[this.nextFaction()] ?? (this.nextFaction() === 'HORDE' ? 'Horda' : 'Alianza'),
+    );
 
     private readonly images = gameImages();
 
@@ -45,7 +51,7 @@ export class Home {
         cssUrl(this.images()[`backgrounds/${this.faction().toLowerCase()}`]),
     );
 
-    protected selectFaction(value: string): void {
-        this.faction.set(value === 'HORDE' ? 'HORDE' : 'ALLIANCE');
+    protected switchFaction(): void {
+        this.faction.set(this.nextFaction());
     }
 }

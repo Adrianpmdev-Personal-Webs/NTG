@@ -252,6 +252,7 @@ app-news-panel {
         grid-column: 1;
         align-self: end;
         width: min(100%, 680px);
+        height: min(560px, 70dvh);
         margin-left: auto;
     }
 

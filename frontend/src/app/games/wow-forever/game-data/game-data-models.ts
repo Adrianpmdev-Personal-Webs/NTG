@@ -2,13 +2,13 @@
  * GameDataModels
  *
  * Models shared by every WoW Forever tool, as the backend sends them: the classes, the credit line of the data, the
- * abilities written as name, text and icon, and the index of the area (tools, news, factions, talent point levels).
+ * abilities written as name, text and icon, and the index of the area (tools, factions, talent point levels).
  * Every `icon` is the full URL of the picture.
  *
  * @author @adrianpmdev
  */
 
-import { Faction, LauncherNewsItem } from '../wow-forever-models';
+import { Faction } from '../wow-forever-models';
 
 export interface GameClass {
     slug: string;
@@ -33,7 +33,6 @@ export interface GameIndex {
     credit: DataCredit;
     classes: GameClass[];
     features: WowFeature[];
-    news: LauncherNewsItem[];
     factions: Record<Faction, string>;
     talentPointLevels: number[];
 }

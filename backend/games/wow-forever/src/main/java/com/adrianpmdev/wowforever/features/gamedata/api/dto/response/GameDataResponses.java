@@ -54,11 +54,10 @@ public final class GameDataResponses {
      * @param credit            credit of the data
      * @param classes           playable classes, in file order
      * @param features          tools of the area
-     * @param news              launcher news
      * @param factions          name of each faction by id ({@code ALLIANCE}, {@code HORDE})
      * @param talentPointLevels levels that give a talent point, lowest first
      */
-    public record GameIndex(DataCredit credit, List<GameClass> classes, List<Feature> features, List<NewsItem> news,
+    public record GameIndex(DataCredit credit, List<GameClass> classes, List<Feature> features,
                             Map<String, String> factions, List<Integer> talentPointLevels) {
     }
 
@@ -71,17 +70,6 @@ public final class GameDataResponses {
      * @param available   false while it is not built yet
      */
     public record Feature(String id, String label, String description, boolean available) {
-    }
-
-    /**
-     * A news item of the launcher.
-     *
-     * @param id    id
-     * @param date  date as text, or null
-     * @param title title
-     * @param image picture URL, or null
-     */
-    public record NewsItem(int id, String date, String title, String image) {
     }
 
     /* ─── Talent trees (talents and Legacy perks) ─── */

@@ -15,11 +15,14 @@
         { "id": "races", "label": "Razas y raciales", "description": "Habilidades raciales y combinaciones raza-clase.", "available": true }
     ],
 
-    "news": [
-        { "id": 1, "date": "4 de mayo de 2023", "title": "Embers of Neltharion: ¡Monturas, mascotas y mucho más!" },
-        { "id": 2, "title": "Adéntrate en las Sendas Temporales Turbulentas con Wrath of the Lich King" },
-        { "id": 3, "title": "Notas del parche, eventos y novedades de la comunidad" }
-    ],
+    "news": {
+        "feedUrl": "https://www.wowhead.com/news/rss/forever",
+        "category": "Forever",
+        "limit": 15,
+        "refreshMinutes": 5,
+        "source": "Wowhead",
+        "sourceUrl": "https://www.wowhead.com/forever/news"
+    },
 
     "talents": {
         "firstPointLevel": 10,

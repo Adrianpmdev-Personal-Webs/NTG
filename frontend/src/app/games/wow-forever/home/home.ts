@@ -1,8 +1,8 @@
 /**
  * Home
  *
- * Launcher-style home of WoW Forever: faction artwork, news and the tools of the area (tools, news and faction names
- * come from the backend index).
+ * Launcher-style home of WoW Forever: faction artwork, news and the tools of the area (tools, faction names and the
+ * game build come from the backend index; the news panel loads its own news).
  *
  * @author @adrianpmdev
  */
@@ -16,8 +16,8 @@ import { Faction } from '../wow-forever-models';
 import { LegalNotice } from '../ui/legal-notice/legal-notice';
 import { WowButton } from '../ui/wow-button/wow-button';
 import { WowFrame } from '../ui/wow-frame/wow-frame';
+import { NewsPanel } from '../news/news-panel/news-panel';
 import { LauncherHeader } from './launcher-header/launcher-header';
-import { NewsPanel } from './news-panel/news-panel';
 
 @Component({
     selector: 'app-wow-forever-home',
@@ -35,7 +35,6 @@ export class Home {
     );
 
     protected readonly features = computed(() => this.index()?.features ?? []);
-    protected readonly news = computed(() => this.index()?.news ?? []);
     protected readonly factions = computed(() => this.index()?.factions ?? null);
     protected readonly build = computed(() => this.index()?.credit.build ?? null);
     protected readonly faction = signal<Faction>('ALLIANCE');

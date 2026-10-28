@@ -12,7 +12,7 @@ import java.util.Map;
  * @param fallbackIcon icon for anything the data gives no icon for
  * @param factions     name of each faction ({@code ALLIANCE}, {@code HORDE})
  * @param features     tools of the area shown on its home
- * @param news         news of the launcher panel
+ * @param news         where the launcher news come from and how often they are read again
  * @param talents      rules of the talent calculator
  * @param spellbook    texts of the spellbook
  * @param legacy       texts of the Legacy System
@@ -24,7 +24,7 @@ public record GameDataConfig(
         String fallbackIcon,
         Map<String, String> factions,
         List<Feature> features,
-        List<NewsItem> news,
+        News news,
         Talents talents,
         Spellbook spellbook,
         Legacy legacy
@@ -42,14 +42,17 @@ public record GameDataConfig(
     }
 
     /**
-     * A news item of the launcher.
+     * Where the launcher news come from.
      *
-     * @param id    id
-     * @param date  date as text, optional
-     * @param title title
-     * @param image picture URL, optional
+     * @param feedUrl        RSS feed read by the backend
+     * @param category       only items of this RSS category are shown
+     * @param limit          most recent items shown
+     * @param refreshMinutes how long a read feed is kept before it is read again (only when someone asks for it)
+     * @param source         name of the source, shown as its credit
+     * @param sourceUrl      page of the source the credit links to
      */
-    public record NewsItem(int id, String date, String title, String image) {
+    public record News(String feedUrl, String category, int limit, int refreshMinutes, String source,
+                       String sourceUrl) {
     }
 
     /**

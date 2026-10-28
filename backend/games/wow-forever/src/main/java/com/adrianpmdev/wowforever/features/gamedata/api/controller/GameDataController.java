@@ -35,7 +35,7 @@ public class GameDataController {
     private final GameDataService gameDataService;
     private final GameImagesService gameImagesService;
 
-    /** Credit, classes, tools and news of the home, faction names and the levels that give a talent point. */
+    /** Credit, classes, tools of the home, faction names and the levels that give a talent point. */
     @GetMapping
     public ResponseEntity<String> getIndex() {
         return json(gameDataService.getIndex());

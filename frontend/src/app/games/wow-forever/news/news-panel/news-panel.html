@@ -1,0 +1,65 @@
+<aside class="news-panel" aria-labelledby="news-panel-title">
+    <div class="news-titlebar">
+        <span class="news-gem" aria-hidden="true"></span>
+        <h2 id="news-panel-title">Noticias</h2>
+    </div>
+    <div class="news-paper">
+        @switch (state().status) {
+            @case ('loading') {
+                <p class="news-message" role="status">Cargando noticias…</p>
+            }
+            @case ('error') {
+                <p class="news-message" role="alert">No se han podido cargar las noticias.</p>
+            }
+            @default {
+                @if (items().length) {
+                    <ul class="news-list">
+                        @for (item of items(); track item.id; let first = $first) {
+                            <li>
+                                <a
+                                    class="news-item"
+                                    [class.news-item--featured]="first"
+                                    [href]="item.url"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <span class="news-thumb">
+                                        @if (item.image) {
+                                            <img
+                                                [src]="item.image"
+                                                alt=""
+                                                [attr.loading]="first ? 'eager' : 'lazy'"
+                                                decoding="async"
+                                                referrerpolicy="no-referrer"
+                                                (error)="hideBrokenIcon($event)"
+                                            />
+                                        }
+                                    </span>
+                                    <span class="news-copy">
+                                        <span class="news-date">
+                                            <time [attr.datetime]="item.publishedAt">{{ item.relative }}</time>
+                                            <span aria-hidden="true">·</span>
+                                            <span>{{ item.absolute }}</span>
+                                        </span>
+                                        <span class="news-item-title">{{ item.title }}</span>
+                                        @if (item.summary) {
+                                            <span class="news-summary">{{ item.summary }}</span>
+                                        }
+                                    </span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                } @else {
+                    <p class="news-message">No hay noticias por ahora.</p>
+                }
+            }
+        }
+    </div>
+    @if (feed(); as source) {
+        <p class="news-source">
+            Fuente:
+            <a [href]="source.sourceUrl" target="_blank" rel="noopener noreferrer">{{ source.source }}</a>
+        </p>
+    }
+</aside>

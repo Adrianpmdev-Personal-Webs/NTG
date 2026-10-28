@@ -3,7 +3,6 @@ package com.adrianpmdev.wowforever.features.gamedata.application.service;
 import com.adrianpmdev.wowforever.features.gamedata.api.dto.response.GameDataResponses.Feature;
 import com.adrianpmdev.wowforever.features.gamedata.api.dto.response.GameDataResponses.GameClass;
 import com.adrianpmdev.wowforever.features.gamedata.api.dto.response.GameDataResponses.GameIndex;
-import com.adrianpmdev.wowforever.features.gamedata.api.dto.response.GameDataResponses.NewsItem;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -58,8 +57,8 @@ public class GameDataService {
     }
 
     /**
-     * Credit (with the game build of the first class whose talents name one), classes with their icons, tools and news
-     * of the home, faction names and talent point levels.
+     * Credit (with the game build of the first class whose talents name one), classes with their icons, tools of the
+     * home, faction names and talent point levels.
      */
     public String getIndex() {
         return cached("index", () -> {
@@ -76,17 +75,29 @@ public class GameDataService {
             List<Feature> features = config.features().stream()
                     .map(feature -> new Feature(feature.id(), feature.label(), feature.description(), feature.available()))
                     .toList();
-            List<NewsItem> news = config.news().stream()
-                    .map(item -> new NewsItem(item.id(), item.date(), item.title(), item.image()))
-                    .toList();
             List<Integer> pointLevels = IntStream
                     .rangeClosed(config.talents().firstPointLevel(), config.talents().lastPointLevel())
                     .boxed()
                     .toList();
 
-            return new GameIndex(gameData.mapper().credit(gameData.root(), talentSources), classes, features, news,
+            return new GameIndex(gameData.mapper().credit(gameData.root(), talentSources), classes, features,
                     config.factions(), pointLevels);
         });
+    }
+
+    /**
+     * Where the launcher news come from, as config.json says.
+     *
+     * @return news settings
+     */
+    public GameDataConfig.News getNewsSettings() {
+        GameDataConfig.News news = data().config().news();
+
+        if (news == null || news.feedUrl() == null || news.limit() <= 0 || news.refreshMinutes() <= 0) {
+            throw unavailable(CONFIG_FILE + " has no valid \"news\" section", null);
+        }
+
+        return news;
     }
 
     /** Talent trees of one class. */

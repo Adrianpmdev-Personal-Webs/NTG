@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:media="http://search.yahoo.com/mrss/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+    <channel>
+        <title>Wowhead News</title>
+        <link>https://www.wowhead.com/news</link>
+        <item>
+            <title>New Class and Item Tuning on WoW: Forever - Hunter Changes</title>
+            <link>https://www.wowhead.com/news=383641/new-class-and-item-tuning-on-wow-forever-hunter-changes</link>
+            <description>With name reservations now live in WoW: Forever, there are some tuning changes for Hunters &amp;amp; an Alchemy potion.&lt;br&gt;&lt;br&gt;&lt;em&gt;&lt;b&gt;&lt;a href="https://www.wowhead.com/news=383641/new-class-and-item-tuning-on-wow-forever-hunter-changes"&gt;Continue reading »&lt;/a&gt;&lt;/b&gt;&lt;/em&gt;</description>
+            <category>Forever</category>
+            <pubDate>Wed, 28 Oct 2026 16:17:17 -0500</pubDate>
+            <guid isPermaLink="false">https://www.wowhead.com/news=383641</guid>
+            <media:content url="https://wow.zamimg.com/uploads/blog/images/55948-hunter-changes.jpg" medium="image" type="image/jpeg" height="489" width="1500"/>
+            <content:encoded><![CDATA[<p>The full article, never shown.</p>]]></content:encoded>
+        </item>
+        <item>
+            <title>This Week's WoW Recap</title>
+            <link>https://www.wowhead.com/news=383500/this-weeks-wow-recap</link>
+            <description>A recap of the retail game.</description>
+            <category>WoW</category>
+            <pubDate>Tue, 27 Oct 2026 12:00:00 -0500</pubDate>
+            <guid isPermaLink="false">https://www.wowhead.com/news=383500</guid>
+        </item>
+        <item>
+            <title>New Player&#8217;s Starter Guide for World of Warcraft: Forever</title>
+            <link>https://www.wowhead.com/news=383620/new-players-starter-guide</link>
+            <description>Everything a new player needs.</description>
+            <category>Forever</category>
+            <pubDate>Wed, 28 Oct 2026 12:05:34 -0500</pubDate>
+            <guid isPermaLink="false">https://www.wowhead.com/news=383620</guid>
+        </item>
+        <item>
+            <title>An item with an unsafe link</title>
+            <link>javascript:alert(1)</link>
+            <category>Forever</category>
+            <pubDate>Wed, 28 Oct 2026 10:00:00 -0500</pubDate>
+            <guid isPermaLink="false">https://www.wowhead.com/news=383600</guid>
+        </item>
+        <item>
+            <title>Planet Azeroth: Episode 1</title>
+            <link>https://www.wowhead.com/news=383630/planet-azeroth-episode-1</link>
+            <category>Forever</category>
+            <pubDate>Wed, 28 Oct 2026 11:38:15 -0500</pubDate>
+            <guid isPermaLink="false">https://www.wowhead.com/news=383630</guid>
+            <media:content url="https://wow.zamimg.com/uploads/blog/images/55941-planet-azeroth.jpg" medium="image" type="image/jpeg" height="720" width="1280"/>
+        </item>
+    </channel>
+</rss>

@@ -3,6 +3,7 @@ package com.adrianpmdev.platform.port;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * File storage (private buckets with signed URLs, public buckets with plain URLs). Implemented by core on top of
@@ -34,6 +35,15 @@ public interface ObjectStorage {
      * @param cacheMaxAge how long the object may be cached, or null for the storage default
      */
     void upload(String bucket, String objectName, byte[] content, String contentType, Duration cacheMaxAge);
+
+    /**
+     * Downloads an object, from a private bucket too.
+     *
+     * @param bucket     bucket name
+     * @param objectName object name inside the bucket
+     * @return the file bytes, or empty when the object (or the bucket) does not exist
+     */
+    Optional<byte[]> download(String bucket, String objectName);
 
     /**
      * Address of an object in a public bucket. It needs no request to the storage.

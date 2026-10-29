@@ -1,6 +1,6 @@
 package com.adrianpmdev.wowforever.features.gamedata.api.controller;
 
-import com.adrianpmdev.wowforever.features.gamedata.application.service.GameDataService;
+import com.adrianpmdev.wowforever.features.gamedata.application.service.GameDataFixtures;
 import com.adrianpmdev.wowforever.features.gamedata.application.service.GameImagesService;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class GameDataControllerTest {
 
     private final MockMvc mockMvc = MockMvcBuilders
-            .standaloneSetup(new GameDataController(new GameDataService(), mock(GameImagesService.class)))
+            .standaloneSetup(new GameDataController(GameDataFixtures.published(), mock(GameImagesService.class)))
             .build();
 
     @Test

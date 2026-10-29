@@ -1,0 +1,734 @@
+{
+    "attribution": "Game data read from the WoW Forever client through wago.tools",
+    "generated": "2026-10-29",
+    "build": "1.60.1.70685",
+    "classicBuild": "1.15.9.70576",
+    "talents": {
+        "Warrior": {
+            "icon": "classicon_warrior",
+            "source": "WoW Forever client, build 1.60.1.70685",
+            "trees": [
+                {
+                    "name": "Arms",
+                    "bg": 161,
+                    "icon": "ability_rogue_eviscerate",
+                    "talents": [
+                        {
+                            "name": "Improved Heroic Strike",
+                            "max": 3,
+                            "row": 1,
+                            "col": 1,
+                            "passive": true,
+                            "icon": "ability_rogue_ambush",
+                            "desc": [
+                                "Reduces the cost of your Heroic Strike ability by 1 Rage.",
+                                "Reduces the cost of your Heroic Strike ability by 2 Rage.",
+                                "Reduces the cost of your Heroic Strike ability by 3 Rage."
+                            ],
+                            "classic": {
+                                "status": "changed",
+                                "tree": "Arms",
+                                "row": 1,
+                                "col": 1,
+                                "max": 3,
+                                "text": "Reduces the cost of your Heroic Strike ability by 1 rage point."
+                            }
+                        },
+                        {
+                            "name": "Deflection",
+                            "max": 5,
+                            "row": 1,
+                            "col": 2,
+                            "passive": true,
+                            "icon": "ability_parry",
+                            "desc": [
+                                "Increases your Parry chance by 1%.",
+                                "Increases your Parry chance by 2%.",
+                                "Increases your Parry chance by 3%.",
+                                "Increases your Parry chance by 4%.",
+                                "Increases your Parry chance by 5%."
+                            ],
+                            "classic": {
+                                "status": "same",
+                                "tree": "Arms",
+                                "row": 1,
+                                "col": 2,
+                                "max": 5,
+                                "text": "Increases your Parry chance by 1%."
+                            }
+                        },
+                        {
+                            "name": "Improved Rend",
+                            "max": 3,
+                            "row": 1,
+                            "col": 3,
+                            "passive": true,
+                            "icon": "ability_gouge",
+                            "desc": [
+                                "Increases the Bleed damage done by your Rend ability by 12%.",
+                                "Increases the Bleed damage done by your Rend ability by 23%.",
+                                "Increases the Bleed damage done by your Rend ability by 35%."
+                            ],
+                            "classic": {
+                                "status": "changed",
+                                "tree": "Arms",
+                                "row": 1,
+                                "col": 3,
+                                "max": 3,
+                                "text": "Increases the bleed damage done by your Rend ability by 15%."
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Fury",
+                    "bg": 164,
+                    "icon": "ability_warrior_innerrage",
+                    "talents": [
+                        {
+                            "name": "Booming Voice",
+                            "max": 5,
+                            "row": 1,
+                            "col": 2,
+                            "passive": true,
+                            "icon": "spell_nature_purge",
+                            "desc": [
+                                "Increases the area of effect of your Shouts by 10% and reduces their Rage cost by 5%.",
+                                "Increases the area of effect of your Shouts by 20% and reduces their Rage cost by 10%.",
+                                "Increases the area of effect of your Shouts by 30% and reduces their Rage cost by 15%.",
+                                "Increases the area of effect of your Shouts by 40% and reduces their Rage cost by 20%.",
+                                "Increases the area of effect of your Shouts by 50% and reduces their Rage cost by 25%."
+                            ],
+                            "classic": {
+                                "status": "changed",
+                                "tree": "Fury",
+                                "row": 1,
+                                "col": 2,
+                                "max": 5,
+                                "text": "Increases the area of effect and duration of your Battle Shout and Demoralizing Shout by 10%."
+                            }
+                        },
+                        {
+                            "name": "Cruelty",
+                            "max": 5,
+                            "row": 1,
+                            "col": 3,
+                            "passive": true,
+                            "icon": "ability_rogue_eviscerate",
+                            "desc": [
+                                "Improves your chance to get a critical strike with melee attacks by 1%.",
+                                "Improves your chance to get a critical strike with melee attacks by 2%.",
+                                "Improves your chance to get a critical strike with melee attacks by 3%.",
+                                "Improves your chance to get a critical strike with melee attacks by 4%.",
+                                "Improves your chance to get a critical strike with melee attacks by 5%."
+                            ],
+                            "classic": {
+                                "status": "changed",
+                                "tree": "Fury",
+                                "row": 1,
+                                "col": 3,
+                                "max": 5,
+                                "text": "Increases your chance to get a critical strike with melee weapons by 1%."
+                            }
+                        },
+                        {
+                            "name": "Lingering Rage",
+                            "max": 5,
+                            "row": 2,
+                            "col": 2,
+                            "passive": true,
+                            "icon": "ability_warrior_secondwind",
+                            "desc": [
+                                "Increases the time before your Rage begins to decay after leaving combat by 2 sec.",
+                                "Increases the time before your Rage begins to decay after leaving combat by 4 sec.",
+                                "Increases the time before your Rage begins to decay after leaving combat by 6 sec.",
+                                "Increases the time before your Rage begins to decay after leaving combat by 8 sec.",
+                                "Increases the time before your Rage begins to decay after leaving combat by 10 sec."
+                            ],
+                            "classic": {
+                                "status": "new"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Protection",
+                    "bg": 163,
+                    "icon": "inv_shield_06",
+                    "talents": [
+                        {
+                            "name": "Improved Bloodrage",
+                            "max": 2,
+                            "row": 1,
+                            "col": 1,
+                            "passive": true,
+                            "icon": "ability_racial_bloodrage",
+                            "desc": [
+                                "Increases all the Rage generated by your Bloodrage ability by 25%.",
+                                "Increases all the Rage generated by your Bloodrage ability by 50%."
+                            ],
+                            "classic": {
+                                "status": "changed",
+                                "tree": "Protection",
+                                "row": 2,
+                                "col": 1,
+                                "max": 2,
+                                "text": "Increases the instant Rage generated by your Bloodrage ability by 2."
+                            }
+                        },
+                        {
+                            "name": "Shield Specialization",
+                            "max": 5,
+                            "row": 1,
+                            "col": 2,
+                            "passive": true,
+                            "icon": "inv_shield_06",
+                            "desc": [
+                                "Increases your chance to Block attacks with your shield by 1% and grants you a 20% chance to generate 5 Rage when you Block.",
+                                "Increases your chance to Block attacks with your shield by 2% and grants you a 40% chance to generate 5 Rage when you Block.",
+                                "Increases your chance to Block attacks with your shield by 3% and grants you a 60% chance to generate 5 Rage when you Block.",
+                                "Increases your chance to Block attacks with your shield by 4% and grants you a 80% chance to generate 5 Rage when you Block.",
+                                "Increases your chance to Block attacks with your shield by 5% and grants you a 100% chance to generate 5 Rage when you Block."
+                            ],
+                            "classic": {
+                                "status": "changed",
+                                "tree": "Protection",
+                                "row": 1,
+                                "col": 2,
+                                "max": 5,
+                                "text": "Increases your chance to block attacks with a shield by 1% and has a 20% chance to generate 1 rage when a block occurs."
+                            }
+                        },
+                        {
+                            "name": "Iron Will",
+                            "max": 5,
+                            "row": 1,
+                            "col": 3,
+                            "passive": true,
+                            "icon": "spell_magic_magearmor",
+                            "desc": [
+                                "Reduces the duration of Stun and Fear effects inflicted on you by 3%.",
+                                "Reduces the duration of Stun and Fear effects inflicted on you by 6%.",
+                                "Reduces the duration of Stun and Fear effects inflicted on you by 9%.",
+                                "Reduces the duration of Stun and Fear effects inflicted on you by 12%.",
+                                "Reduces the duration of Stun and Fear effects inflicted on you by 15%."
+                            ],
+                            "classic": {
+                                "status": "changed",
+                                "tree": "Protection",
+                                "row": 2,
+                                "col": 4,
+                                "max": 5,
+                                "text": "Increases your chance to resist Stun and Charm effects by an additional 3%."
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    },
+    "spellbooks": {
+        "Warrior": {
+            "general": [],
+            "tabs": [
+                {
+                    "name": "Arms",
+                    "spells": [
+                        [
+                            "Battle Stance",
+                            ""
+                        ],
+                        [
+                            "Charge",
+                            "Rank 1"
+                        ],
+                        [
+                            "Charge",
+                            "Rank 2"
+                        ]
+                    ]
+                },
+                {
+                    "name": "Fury",
+                    "spells": [
+                        [
+                            "Battle Shout",
+                            "Rank 1"
+                        ],
+                        [
+                            "Battle Shout",
+                            "Rank 2"
+                        ],
+                        [
+                            "Battle Shout",
+                            "Rank 3"
+                        ]
+                    ]
+                },
+                {
+                    "name": "Protection",
+                    "spells": [
+                        [
+                            "Bloodrage",
+                            ""
+                        ],
+                        [
+                            "Concussion Blow",
+                            ""
+                        ],
+                        [
+                            "Defensive Stance",
+                            ""
+                        ]
+                    ]
+                }
+            ],
+            "levels": {
+                "Battle Stance": [
+                    1
+                ],
+                "Charge": [
+                    4,
+                    26,
+                    46
+                ],
+                "Battle Shout": [
+                    1,
+                    12,
+                    22,
+                    32,
+                    42,
+                    52,
+                    60
+                ],
+                "Bloodrage": [
+                    10
+                ],
+                "Concussion Blow": [
+                    30
+                ],
+                "Defensive Stance": [
+                    10
+                ]
+            },
+            "talents": [
+                "Concussion Blow"
+            ],
+            "icons": {
+                "Battle Stance": "ability_warrior_offensivestance",
+                "Charge": "ability_warrior_charge",
+                "Battle Shout": "ability_warrior_battleshout",
+                "Bloodrage": "ability_racial_bloodrage",
+                "Concussion Blow": "ability_thunderbolt",
+                "Defensive Stance": "ability_warrior_defensivestance"
+            },
+            "gone": [
+                "Charge Rage Bonus Effect",
+                "Commanding Shout",
+                "Mace Stun Effect",
+                "Meathook",
+                "Revenge Stun",
+                "Valor of Azeroth"
+            ],
+            "build": "1.60.1.70685"
+        }
+    },
+    "spell_desc": {
+        "Warrior|Battle Stance|": {
+            "l": [
+                [
+                    "Instant",
+                    "1 sec cooldown"
+                ]
+            ],
+            "d": "A balanced combat stance.",
+            "lv": "Learned at level 1",
+            "id": 2457,
+            "sc": "Physical",
+            "cs": "same"
+        },
+        "Warrior|Charge|Rank 1": {
+            "l": [
+                [
+                    "",
+                    "8-25 yd range"
+                ],
+                [
+                    "Instant",
+                    "15 sec cooldown"
+                ],
+                [
+                    "Requires Battle Stance",
+                    ""
+                ]
+            ],
+            "d": "Charge an enemy, generate 9 Rage, and Stun it for 1 sec. Cannot be used in combat.",
+            "lv": "Learned at level 4",
+            "id": 100,
+            "sc": "Physical",
+            "cs": "changed",
+            "cd": "Charge an enemy, generate 9 rage, and stun it for 1 sec. Cannot be used in combat."
+        },
+        "Warrior|Charge|Rank 2": {
+            "l": [
+                [
+                    "",
+                    "8-25 yd range"
+                ],
+                [
+                    "Instant",
+                    "15 sec cooldown"
+                ],
+                [
+                    "Requires Battle Stance",
+                    ""
+                ]
+            ],
+            "d": "Charge an enemy, generate 12 Rage, and Stun it for 1 sec. Cannot be used in combat.",
+            "lv": "Learned at level 26",
+            "id": 6178,
+            "sc": "Physical",
+            "cs": "changed",
+            "cd": "Charge an enemy, generate 12 rage, and stun it for 1 sec. Cannot be used in combat."
+        },
+        "Warrior|Battle Shout|Rank 1": {
+            "l": [
+                [
+                    "10 Rage",
+                    ""
+                ],
+                [
+                    "Instant",
+                    ""
+                ]
+            ],
+            "d": "The warrior shouts, increasing the melee attack power of all party or raid members within 20 yards by 12. Lasts 3 min.",
+            "lv": "Learned at level 1",
+            "id": 6673,
+            "sc": "Physical",
+            "cs": "changed",
+            "cd": "The warrior shouts, increasing the melee attack power of all party members within 20 yards by 20. Lasts 2 min."
+        },
+        "Warrior|Battle Shout|Rank 2": {
+            "l": [
+                [
+                    "10 Rage",
+                    ""
+                ],
+                [
+                    "Instant",
+                    ""
+                ]
+            ],
+            "d": "The warrior shouts, increasing the melee attack power of all party or raid members within 20 yards by 23. Lasts 3 min.",
+            "lv": "Learned at level 12",
+            "id": 5242,
+            "sc": "Physical",
+            "cs": "changed",
+            "cd": "The warrior shouts, increasing the melee attack power of all party members within 20 yards by 39. Lasts 2 min."
+        },
+        "Warrior|Battle Shout|Rank 3": {
+            "l": [
+                [
+                    "10 Rage",
+                    ""
+                ],
+                [
+                    "Instant",
+                    ""
+                ]
+            ],
+            "d": "The warrior shouts, increasing the melee attack power of all party or raid members within 20 yards by 35. Lasts 3 min.",
+            "lv": "Learned at level 22",
+            "id": 6192,
+            "sc": "Physical",
+            "cs": "changed",
+            "cd": "The warrior shouts, increasing the melee attack power of all party members within 20 yards by 59. Lasts 2 min."
+        },
+        "Warrior|Bloodrage|": {
+            "l": [
+                [
+                    "20% of base health",
+                    ""
+                ],
+                [
+                    "Instant",
+                    "1 min cooldown"
+                ]
+            ],
+            "d": "Generates 10 rage at the cost of health, and then generates an additional 10 rage over 10 sec.",
+            "lv": "Learned at level 10",
+            "id": 2687,
+            "sc": "Physical",
+            "cs": "changed",
+            "cd": "Generates 10 rage at the cost of health, and then generates an additional 10 rage over 10 sec. The warrior is considered in combat for the duration."
+        },
+        "Warrior|Concussion Blow|": {
+            "l": [
+                [
+                    "10 Rage",
+                    "Melee Range"
+                ],
+                [
+                    "Instant",
+                    "45 sec cooldown"
+                ]
+            ],
+            "d": "Stuns the target for 5 sec.",
+            "lv": "Learned at level 30",
+            "id": 12809,
+            "sc": "Physical",
+            "cs": "changed",
+            "cd": "Stuns the opponent for 5 sec."
+        },
+        "Warrior|Defensive Stance|": {
+            "l": [
+                [
+                    "Instant",
+                    "1 sec cooldown"
+                ]
+            ],
+            "d": "A defensive combat stance. Decreases damage taken by 10% and damage caused by 10%. Increases all threat generated by 30%.",
+            "lv": "Learned at level 10",
+            "id": 71,
+            "sc": "Physical",
+            "cs": "changed",
+            "cd": "A defensive combat stance. Decreases damage taken by 10% and damage caused by 10%. Increases threat generated."
+        }
+    },
+    "racials": {
+        "Alliance": [
+            {
+                "race": "Human",
+                "icon": "race_human_male",
+                "classes": [
+                    "Warrior",
+                    "Paladin",
+                    "Hunter",
+                    "Rogue",
+                    "Priest",
+                    "Mage",
+                    "Warlock"
+                ],
+                "abilities": [
+                    [
+                        "Perception",
+                        "Instant, 3 min cooldown. Dramatically increases stealth detection for 20 sec.",
+                        "spell_nature_sleep"
+                    ],
+                    [
+                        "Ruthless",
+                        "Increases your critical strike chance with all spells and attacks by 2%.",
+                        "ability_rogue_eviscerate"
+                    ],
+                    [
+                        "The Human Spirit",
+                        "Spirit increased by 5%.",
+                        "inv_enchant_shardbrilliantsmall"
+                    ],
+                    [
+                        "Will to Survive",
+                        "Instant, 3 min cooldown. Instantly removes all Stun effects.",
+                        "spell_shadow_charm"
+                    ]
+                ]
+            }
+        ],
+        "Horde": [
+            {
+                "race": "Orc",
+                "icon": "race_orc_male",
+                "classes": [
+                    "Warrior",
+                    "Hunter",
+                    "Rogue",
+                    "Shaman",
+                    "Mage",
+                    "Warlock"
+                ],
+                "abilities": [
+                    [
+                        "Blood Fury",
+                        "Instant, 3 min cooldown. Increases Attack Power and Spell Power by 10% for 15 sec.",
+                        "racial_orc_berserkerstrength"
+                    ],
+                    [
+                        "Hardiness",
+                        "Duration of Stun effects on you reduced by 20%.",
+                        "inv_helmet_23"
+                    ],
+                    [
+                        "Savage",
+                        "Increases your critical strike chance with all spells and abilities by 1%.",
+                        "inv_axe_02"
+                    ],
+                    [
+                        "Shatter Curse",
+                        "Instant, 3 min cooldown. Instantly removes all Curses and Banes, and reduces all Magical damage taken by 5% for 8 sec.",
+                        "spell_nature_removecurse"
+                    ]
+                ]
+            }
+        ]
+    },
+    "class_racials": {},
+    "class_abilities": {},
+    "legacy": {
+        "points": 16,
+        "source": "WoW Forever client, build 1.60.1.70685",
+        "trees": [
+            {
+                "id": 1188,
+                "name": "Adventure",
+                "icon": "inv_misc_map_01",
+                "perks": [
+                    {
+                        "name": "High Alert",
+                        "max": 2,
+                        "row": 1,
+                        "col": 2,
+                        "icon": "spell_shadow_detectlesserinvisibility",
+                        "ranks": [
+                            "Increases your ability to detect nearby targets with Stealth as if your level were increased by 1. Ineffective in Battlegrounds.",
+                            "Increases your ability to detect nearby targets with Stealth as if your level were increased by 2. Ineffective in Battlegrounds."
+                        ],
+                        "gate": 5
+                    },
+                    {
+                        "name": "Well Rested",
+                        "max": 5,
+                        "row": 2,
+                        "col": 1,
+                        "icon": "spell_nature_sleep",
+                        "ranks": [
+                            "Your rested experience accumulates 4% faster and your rested experience cap is increased by 4%.",
+                            "Your rested experience accumulates 8% faster and your rested experience cap is increased by 8%.",
+                            "Your rested experience accumulates 12% faster and your rested experience cap is increased by 12%.",
+                            "Your rested experience accumulates 16% faster and your rested experience cap is increased by 16%.",
+                            "Your rested experience accumulates 20% faster and your rested experience cap is increased by 20%."
+                        ],
+                        "gate": 0
+                    },
+                    {
+                        "name": "Talented",
+                        "max": 5,
+                        "row": 2,
+                        "col": 2,
+                        "icon": "ability_marksmanship",
+                        "ranks": [
+                            "You gain talent points every level starting at level 9 instead of starting at level 10, but you still may not have more than 51 total talent points.",
+                            "You gain talent points every level starting at level 8 instead of starting at level 10, but you still may not have more than 51 total talent points.",
+                            "You gain talent points every level starting at level 7 instead of starting at level 10, but you still may not have more than 51 total talent points.",
+                            "You gain talent points every level starting at level 6 instead of starting at level 10, but you still may not have more than 51 total talent points.",
+                            "You gain talent points every level starting at level 5 instead of starting at level 10, but you still may not have more than 51 total talent points."
+                        ],
+                        "gate": 5,
+                        "req": "Well Rested"
+                    },
+                    {
+                        "name": "Unknown",
+                        "max": 1,
+                        "row": 2,
+                        "col": 3,
+                        "icon": "inv_misc_questionmark",
+                        "ranks": [
+                            "To be added in a future update."
+                        ],
+                        "gate": 0,
+                        "placeholder": true
+                    },
+                    {
+                        "name": "Unknown",
+                        "max": 1,
+                        "row": 2,
+                        "col": 4,
+                        "icon": "inv_misc_questionmark",
+                        "ranks": [
+                            "To be added in a future update."
+                        ],
+                        "gate": 0,
+                        "placeholder": true
+                    },
+                    {
+                        "name": "Thrill of Adventure",
+                        "max": 5,
+                        "row": 3,
+                        "col": 1,
+                        "icon": "ability_hunter_huntervswild",
+                        "ranks": [
+                            "You gain 1% of your maximum Health and Mana over 10 sec each time you deliver the killing blow to a non-trivial enemy. Ineffective in dungeons, raids, and battlegrounds.",
+                            "You gain 2% of your maximum Health and Mana over 10 sec each time you deliver the killing blow to a non-trivial enemy. Ineffective in dungeons, raids, and battlegrounds.",
+                            "You gain 3% of your maximum Health and Mana over 10 sec each time you deliver the killing blow to a non-trivial enemy. Ineffective in dungeons, raids, and battlegrounds.",
+                            "You gain 4% of your maximum Health and Mana over 10 sec each time you deliver the killing blow to a non-trivial enemy. Ineffective in dungeons, raids, and battlegrounds.",
+                            "You gain 5% of your maximum Health and Mana over 10 sec each time you deliver the killing blow to a non-trivial enemy. Ineffective in dungeons, raids, and battlegrounds."
+                        ],
+                        "gate": 0
+                    },
+                    {
+                        "name": "Field Guide",
+                        "max": 3,
+                        "row": 3,
+                        "col": 2,
+                        "icon": "inv_fishingchair",
+                        "ranks": [
+                            "Reduces your cooldown on adding Camp features by 8%",
+                            "Reduces your cooldown on adding Camp features by 17%",
+                            "Reduces your cooldown on adding Camp features by 25%"
+                        ],
+                        "gate": 5
+                    },
+                    {
+                        "name": "Frequent Flier",
+                        "max": 1,
+                        "row": 3,
+                        "col": 3,
+                        "icon": "achievement_guild_ridelikethewind",
+                        "ranks": [
+                            "You receive a 50% discount on all flight paths, and your flight path mount flies 20% faster."
+                        ],
+                        "gate": 10,
+                        "req": "Field Guide"
+                    },
+                    {
+                        "name": "Field Medicine",
+                        "max": 2,
+                        "row": 4,
+                        "col": 2,
+                        "icon": "inv_misc_bandage_05",
+                        "ranks": [
+                            "Reduces the duration of the Recently Bandaged effect by 5 sec when you use a bandage. Ineffective in dungeons, raids, and battlegrounds.",
+                            "Reduces the duration of the Recently Bandaged effect by 10 sec when you use a bandage. Ineffective in dungeons, raids, and battlegrounds."
+                        ],
+                        "gate": 5
+                    }
+                ]
+            }
+        ],
+        "challenges": [
+            {
+                "group": "Classes",
+                "name": "Novice Druid",
+                "desc": "Reach level 25 for the first time on a Druid.",
+                "points": 1
+            },
+            {
+                "group": "Classes",
+                "name": "Experienced Druid",
+                "desc": "Reach level 45 for the first time on a Druid.",
+                "points": 1
+            },
+            {
+                "group": "Tradeskills",
+                "name": "Journeyman Alchemist",
+                "desc": "Reach 150 skill in Alchemy for the first time.",
+                "points": 1
+            },
+            {
+                "group": "Tradeskills",
+                "name": "Expert Alchemist",
+                "desc": "Reach 225 skill in Alchemy for the first time.",
+                "points": 1
+            }
+        ]
+    }
+}

@@ -81,10 +81,11 @@
         "placeholderPerkName": "Próximamente",
         "challengeGroups": {
             "Classes": "Clases",
-            "Crafting": "Profesiones",
-            "Dungeons and raids": "Mazmorras y bandas",
-            "PvP": "JcJ",
-            "Other": "Otros"
+            "Tradeskills": "Profesiones",
+            "Dungeons": "Mazmorras",
+            "Raids": "Bandas",
+            "Player vs. Player": "JcJ",
+            "Adventure": "Aventura"
         }
     },
 
@@ -92,7 +93,7 @@
         "product": "wowf",
         "classicProduct": "wow_classic_era",
         "checkMinutes": 60,
-        "attribution": "Game data read from the WoW Forever client through wago.tools",
+        "attribution": "Datos del cliente de WoW Forever, vía wago.tools",
         "talentCurrencyId": 3820,
         "legacyCurrencyId": 4225,
         "legacyChallengeFlag": 268435456,

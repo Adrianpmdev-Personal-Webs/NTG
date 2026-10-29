@@ -16,8 +16,8 @@ import java.util.Map;
 
 /**
  * REST controller for the game data (talents, spellbooks, racials and the Legacy System), already turned into the models
- * every web client shows (see GameDataResponses). Read only: the data changes
- * with the data.json file, not from the app. One endpoint per screen, so each screen downloads only what it shows.
+ * every web client shows (see GameDataResponses). Read only: the data changes when a new game build comes out (see
+ * GameDataSyncService), not from the app. One endpoint per screen, so each screen downloads only what it shows.
  *
  * @author adrianpmdev
  */
@@ -27,7 +27,7 @@ import java.util.Map;
 public class GameDataController {
 
     /**
-     * The data only changes with a new deploy, and players must see it right after one: the browser keeps it but checks
+     * The data changes with each new game build, and players must see it right after: the browser keeps it but checks
      * its ETag on every request (a 304 with no body if unchanged).
      */
     private static final CacheControl CACHE = CacheControl.noCache().cachePrivate();

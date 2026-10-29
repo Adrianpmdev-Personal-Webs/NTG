@@ -18,52 +18,144 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 
 /**
- * Serves the game data of WoW Forever. Everything comes from two files: {@code wow-forever/data.json}, the export
- * published by talentsforever.com (or a copy of it kept by hand), and {@code wow-forever/config.json}, with the texts
- * and rules the export does not carry. Both are read once; each screen gets one response with only what it shows,
- * already turned into the API models by {@link GameDataMapper}, so web clients only display it.
+ * Serves the game data of WoW Forever. The data file is built from the game client by GameDataSyncService, which
+ * publishes every new one here; {@code wow-forever/config.json} holds the texts and rules the data does not carry.
+ * Each screen gets one response with only what it shows, already turned into the API models by
+ * {@link GameDataMapper}, so web clients only display it.
  * <p>
- * Responses are serialized once and kept in memory: the data only changes with a new deploy. A missing or broken file
- * only breaks these endpoints, not the whole backend, and it is read again on the next request.
+ * Responses are serialized once per published file and kept with it, so a new file replaces the data and its
+ * responses at once. Until the first file is published the game data endpoints answer 503; the news, which only need
+ * the configuration, keep working.
  *
  * @author adrianpmdev
  */
 @Service
 public class GameDataService {
 
-    private static final String DATA_FILE = "wow-forever/data.json";
     private static final String CONFIG_FILE = "wow-forever/config.json";
 
-    /** Sections every screen depends on. If one is missing the file is rejected instead of serving half the data. */
+    /** Sections every screen depends on. A file without one of them is refused instead of serving half the data. */
     private static final List<String> REQUIRED_SECTIONS = List.of(
             "talents", "spellbooks", "spell_desc", "racials", "class_racials", "class_abilities", "legacy");
 
     private final ObjectMapper objectMapper = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-    /** Serialized responses, built on first use. Keys are only added for classes that exist, so the map stays small. */
-    private final Map<String, String> responses = new ConcurrentHashMap<>();
-
+    private volatile GameDataConfig config;
     private volatile GameData data;
 
-    /** The files as read, the classes the data holds by slug (in file order) and the mapper built on the config. */
-    private record GameData(JsonNode root, Map<String, String> classNamesBySlug, GameDataConfig config,
-                            GameDataMapper mapper) {
+    /**
+     * A published file: the file as read, its classes by slug (in file order), the mapper built on the configuration
+     * and the responses already serialized from it (only keys of classes that exist are added, so it stays small).
+     */
+    private record GameData(JsonNode root, Map<String, String> classNamesBySlug, GameDataMapper mapper,
+                            Map<String, String> responses) {
     }
+
+    /* ─── Publishing ─── */
+
+    /**
+     * Checks a data file and, when it is complete, serves it from now on instead of the previous one.
+     *
+     * @param root the data file
+     * @throws IllegalArgumentException when the file lacks a section or a class has no talents, spellbook or races
+     */
+    public void publish(JsonNode root) {
+        validate(root);
+        Map<String, String> classNamesBySlug = new LinkedHashMap<>();
+
+        for (Map.Entry<String, JsonNode> entry : root.path("talents").properties()) {
+            classNamesBySlug.put(GameDataMapper.slugify(entry.getKey()), entry.getKey());
+        }
+
+        data = new GameData(root, Collections.unmodifiableMap(classNamesBySlug), new GameDataMapper(getConfig()),
+                new ConcurrentHashMap<>());
+    }
+
+    /**
+     * Checks that a data file has everything the screens need: every section, at least one class with talent
+     * trees and a spellbook, both factions in the races and at least one Legacy tree.
+     *
+     * @param root the data file
+     * @throws IllegalArgumentException naming what is missing
+     */
+    public static void validate(JsonNode root) {
+        for (String section : REQUIRED_SECTIONS) {
+            if (!root.path(section).isObject()) {
+                throw new IllegalArgumentException("The game data has no \"" + section + "\" section");
+            }
+        }
+
+        if (root.path("talents").isEmpty()) {
+            throw new IllegalArgumentException("The game data has no classes");
+        }
+
+        root.path("talents").properties().forEach(entry -> {
+            if (entry.getValue().path("trees").isEmpty()
+                    || entry.getValue().path("trees").path(0).path("talents").isEmpty()) {
+                throw new IllegalArgumentException("The class " + entry.getKey() + " has no talents");
+            }
+
+            if (root.path("spellbooks").path(entry.getKey()).path("tabs").isEmpty()) {
+                throw new IllegalArgumentException("The class " + entry.getKey() + " has no spellbook");
+            }
+        });
+
+        for (String faction : List.of("Alliance", "Horde")) {
+            if (root.path("racials").path(faction).isEmpty()) {
+                throw new IllegalArgumentException("The game data has no " + faction + " races");
+            }
+        }
+
+        if (root.path("legacy").path("trees").isEmpty()) {
+            throw new IllegalArgumentException("The game data has no Legacy trees");
+        }
+    }
+
+    /** The game build of the file being served, or empty while none is. */
+    public Optional<String> currentBuild() {
+        GameData current = data;
+
+        return current == null ? Optional.empty() : Optional.ofNullable(current.root().path("build").asText(null));
+    }
+
+    /**
+     * The texts and rules of the area, read once from config.json.
+     *
+     * @return the configuration
+     */
+    public GameDataConfig getConfig() {
+        GameDataConfig current = config;
+
+        if (current == null) {
+            synchronized (this) {
+                current = config;
+
+                if (current == null) {
+                    current = readConfig();
+                    config = current;
+                }
+            }
+        }
+
+        return current;
+    }
+
+    /* ─── Responses ─── */
 
     /**
      * Credit (with the game build of the first class whose talents name one), classes with their icons, tools of the
      * home, faction names and talent point levels.
      */
     public String getIndex() {
-        return cached("index", () -> {
-            GameData gameData = data();
-            GameDataConfig config = gameData.config();
+        return cached("index", gameData -> {
+            GameDataConfig gameConfig = getConfig();
             List<GameClass> classes = new ArrayList<>();
 
             gameData.classNamesBySlug().forEach((slug, name) -> classes.add(gameClass(gameData, slug, name)));
@@ -72,26 +164,26 @@ public class GameDataService {
                     .map(name -> gameData.root().path("talents").path(name).path("source").asText(null))
                     .toArray(String[]::new);
 
-            List<Feature> features = config.features().stream()
+            List<Feature> features = gameConfig.features().stream()
                     .map(feature -> new Feature(feature.id(), feature.label(), feature.description(), feature.available()))
                     .toList();
             List<Integer> pointLevels = IntStream
-                    .rangeClosed(config.talents().firstPointLevel(), config.talents().lastPointLevel())
+                    .rangeClosed(gameConfig.talents().firstPointLevel(), gameConfig.talents().lastPointLevel())
                     .boxed()
                     .toList();
 
             return new GameIndex(gameData.mapper().credit(gameData.root(), talentSources), classes, features,
-                    config.factions(), pointLevels);
+                    gameConfig.factions(), pointLevels);
         });
     }
 
     /**
-     * Where the launcher news come from, as config.json says.
+     * Where the launcher news come from, as config.json says. It does not need the game data.
      *
      * @return news settings
      */
     public GameDataConfig.News getNewsSettings() {
-        GameDataConfig.News news = data().config().news();
+        GameDataConfig.News news = getConfig().news();
 
         if (news == null || news.feedUrl() == null || news.limit() <= 0 || news.refreshMinutes() <= 0) {
             throw unavailable(CONFIG_FILE + " has no valid \"news\" section", null);
@@ -105,8 +197,8 @@ public class GameDataService {
         GameData gameData = data();
         String className = classNameOf(gameData, classSlug);
 
-        return cached("talents/" + classSlug, () -> gameData.mapper().classTalents(gameData.root(),
-                gameClass(gameData, classSlug, className), gameData.root().path("talents").path(className)));
+        return cached("talents/" + classSlug, current -> current.mapper().classTalents(current.root(),
+                gameClass(current, classSlug, className), current.root().path("talents").path(className)));
     }
 
     /** Spellbook of one class, with the tooltip of every spell rank and the class highlights. */
@@ -114,18 +206,18 @@ public class GameDataService {
         GameData gameData = data();
         String className = classNameOf(gameData, classSlug);
 
-        return cached("spellbook/" + classSlug, () -> gameData.mapper().classSpellbook(gameData.root(),
-                gameClass(gameData, classSlug, className), className));
+        return cached("spellbook/" + classSlug, current -> current.mapper().classSpellbook(current.root(),
+                gameClass(current, classSlug, className), className));
     }
 
     /** Every race of both factions with its racial abilities, plus the abilities of some classes that change with it. */
     public String getRacials() {
-        return cached("racials", () -> data().mapper().racials(data().root()));
+        return cached("racials", current -> current.mapper().racials(current.root()));
     }
 
     /** Legacy System: perk trees and challenges. */
     public String getLegacy() {
-        return cached("legacy", () -> data().mapper().legacy(data().root(), data().root().path("legacy")));
+        return cached("legacy", current -> current.mapper().legacy(current.root(), current.root().path("legacy")));
     }
 
     /**
@@ -150,17 +242,11 @@ public class GameDataService {
         return trees;
     }
 
-    /* ─── Responses ─── */
+    /** A response of the file being served, built and serialized the first time it is asked for. */
+    private String cached(String key, Function<GameData, Object> builder) {
+        GameData gameData = data();
 
-    private String cached(String key, Supplier<Object> builder) {
-        String json = responses.get(key);
-
-        if (json == null) {
-            json = serialize(builder.get());
-            responses.put(key, json);
-        }
-
-        return json;
+        return gameData.responses().computeIfAbsent(key, ignored -> serialize(builder.apply(gameData)));
     }
 
     private static GameClass gameClass(GameData gameData, String slug, String name) {
@@ -176,7 +262,7 @@ public class GameDataService {
         }
     }
 
-    /* ─── Files ─── */
+    /* ─── Data and configuration ─── */
 
     private String classNameOf(GameData gameData, String slug) {
         String name = gameData.classNamesBySlug().get(slug);
@@ -192,52 +278,18 @@ public class GameDataService {
         GameData current = data;
 
         if (current == null) {
-            synchronized (this) {
-                current = data;
-
-                if (current == null) {
-                    current = load();
-                    data = current;
-                }
-            }
+            throw unavailable("it is being read from the game client", null);
         }
 
         return current;
     }
 
-    private GameData load() {
-        JsonNode root;
-        GameDataConfig config;
-
-        try (InputStream input = new ClassPathResource(DATA_FILE).getInputStream()) {
-            root = objectMapper.readTree(input);
-        } catch (IOException exception) {
-            throw unavailable(DATA_FILE + " is missing or is not valid JSON", exception);
-        }
-
+    private GameDataConfig readConfig() {
         try (InputStream input = new ClassPathResource(CONFIG_FILE).getInputStream()) {
-            config = objectMapper.readValue(input, GameDataConfig.class);
+            return objectMapper.readValue(input, GameDataConfig.class);
         } catch (IOException exception) {
             throw unavailable(CONFIG_FILE + " is missing or is not valid", exception);
         }
-
-        for (String section : REQUIRED_SECTIONS) {
-            if (!root.path(section).isObject()) {
-                throw unavailable(DATA_FILE + " has no \"" + section + "\" section", null);
-            }
-        }
-
-        Map<String, String> classNamesBySlug = new LinkedHashMap<>();
-
-        for (Map.Entry<String, JsonNode> entry : root.path("talents").properties()) {
-            classNamesBySlug.put(GameDataMapper.slugify(entry.getKey()), entry.getKey());
-        }
-
-        if (classNamesBySlug.isEmpty()) {
-            throw unavailable(DATA_FILE + " has no classes in \"talents\"", null);
-        }
-
-        return new GameData(root, Collections.unmodifiableMap(classNamesBySlug), config, new GameDataMapper(config));
     }
 
     private static ResponseStatusException unavailable(String reason, Throwable cause) {

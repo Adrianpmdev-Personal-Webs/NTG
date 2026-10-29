@@ -3,13 +3,16 @@ package com.adrianpmdev.wowforever;
 import com.adrianpmdev.platform.module.GameModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
- * Declares the WoW Forever module to the platform: players with the tag read, admins write.
+ * Declares the WoW Forever module to the platform: players with the tag read, admins write. Scheduling is on for the
+ * hourly check of new game builds (GameDataSyncService).
  *
  * @author adrianpmdev
  */
 @Configuration
+@EnableScheduling
 public class WowForeverModule {
 
     /**

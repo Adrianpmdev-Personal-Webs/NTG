@@ -32,7 +32,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Turns the sections of the data file (the export of talentsforever.com, kept as it is) into the API models. This is
+ * Turns the sections of the data file (built from the game client by GameDataExporter) into the API models. This is
  * the only class that knows the format of the file: if it changes, only this class changes. Every field a hand-edited
  * file might leave out has a safe default, so a missing value shows as empty instead of breaking a screen.
  *
@@ -81,7 +81,7 @@ final class GameDataMapper {
         return new GameClass(slug, name, iconUrl(icon));
     }
 
-    /** Credit of the data, with the first game build (1.60.1.70425) found in the sources. */
+    /** Credit of the data, with the first game build (1.60.1.70685) found in the sources. */
     DataCredit credit(JsonNode root, String... sources) {
         String build = null;
 

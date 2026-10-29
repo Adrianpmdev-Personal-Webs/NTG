@@ -20,10 +20,12 @@ import java.util.Comparator;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
+import java.util.zip.GZIPInputStream;
 
 /**
  * Reads the game client data that wago.tools publishes: the builds of each product and, for one build, any client
- * table as CSV, in English. Nothing is cached here; the caller decides how often to ask.
+ * table as CSV, in English. Answers are asked for compressed when wago.tools can send them so (the list of builds
+ * drops from about 540 KB to 130 KB). Nothing is cached here; the caller decides how often to ask.
  *
  * @author adrianpmdev
  */
@@ -36,6 +38,7 @@ public class WagoClient {
     private static final Duration TABLE_TIMEOUT = Duration.ofSeconds(90);
     private static final String USER_AGENT = "NTG-System/1.0 (+https://github.com/adrianpmdev)";
     private static final Pattern VERSION = Pattern.compile("\\d+(\\.\\d+){3}");
+    private static final String GZIP = "gzip";
 
     /** Versions by number, part by part: 1.60.1.70658 before 1.60.1.70685. */
     private static final Comparator<String> BY_VERSION = Comparator.comparing(
@@ -92,6 +95,7 @@ public class WagoClient {
         HttpRequest request = HttpRequest.newBuilder(URI.create(BASE_URL + path))
                 .timeout(timeout)
                 .header("User-Agent", USER_AGENT)
+                .header("Accept-Encoding", GZIP)
                 .GET()
                 .build();
 
@@ -103,7 +107,10 @@ public class WagoClient {
                 throw new IOException("wago.tools answered " + response.statusCode() + " for " + path);
             }
 
-            return response.body();
+            boolean compressed = response.headers().firstValue("Content-Encoding")
+                    .filter(GZIP::equalsIgnoreCase).isPresent();
+
+            return compressed ? new GZIPInputStream(response.body()) : response.body();
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
             throw new IOException("The request to wago.tools was interrupted", exception);

@@ -10,6 +10,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
@@ -19,6 +20,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Thin HTTP client for Supabase Storage, used with the service role key (which bypasses the bucket
@@ -64,6 +66,28 @@ public class SupabaseStorageClient implements ObjectStorage {
         }
 
         exchange(objectUrl(bucket, objectName), HttpMethod.POST, new HttpEntity<>(content, headers), Void.class);
+    }
+
+    @Override
+    public Optional<byte[]> download(String bucket, String objectName) {
+        try {
+            byte[] body = restTemplate.exchange(objectUrl(bucket, objectName), HttpMethod.GET,
+                    new HttpEntity<>(serviceHeaders()), byte[].class).getBody();
+
+            return Optional.ofNullable(body);
+        } catch (HttpClientErrorException exception) {
+            // Storage answers 400 or 404 for a missing object or bucket.
+            if (exception.getStatusCode().value() == HttpStatus.NOT_FOUND.value()
+                    || exception.getStatusCode().value() == HttpStatus.BAD_REQUEST.value()) {
+                return Optional.empty();
+            }
+
+            log.warn("Supabase Storage GET {}/{} failed: {}", bucket, objectName, exception.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "El almacenamiento no está disponible");
+        } catch (RestClientException exception) {
+            log.warn("Supabase Storage GET {}/{} failed: {}", bucket, objectName, exception.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "El almacenamiento no está disponible");
+        }
     }
 
     @Override

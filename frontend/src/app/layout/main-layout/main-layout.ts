@@ -21,6 +21,7 @@ import { Header } from '../header/header';
 interface SidebarGame {
     id: string;
     name: string;
+    iconUrl: string | null;
     upcoming: boolean;
     route: string | null;
     adminRoute: string;
@@ -57,6 +58,7 @@ export class MainLayout {
                 return {
                     id: game.id,
                     name: game.name,
+                    iconUrl: game.iconUrl,
                     upcoming: game.upcoming,
                     route: module ? `/${game.id}` : null,
                     adminRoute: `/admin/${game.id}`,

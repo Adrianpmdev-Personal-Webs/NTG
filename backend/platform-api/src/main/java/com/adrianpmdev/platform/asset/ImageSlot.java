@@ -1,5 +1,7 @@
 package com.adrianpmdev.platform.asset;
 
+import com.adrianpmdev.platform.image.ImageSpec;
+
 import java.util.regex.Pattern;
 
 /**
@@ -9,10 +11,11 @@ import java.util.regex.Pattern;
  * @param key   unique key, lowercase segments separated by '/', for example {@code wow-forever/talents/warrior-arms}
  * @param group heading the admin screen groups the pictures by, for example {@code WoW Forever · Talentos}
  * @param label name of the picture for the admin
+ * @param spec  limits of the stored file for pictures shown small (icons), or null for the limits of any picture
  *
  * @author adrianpmdev
  */
-public record ImageSlot(String key, String group, String label) {
+public record ImageSlot(String key, String group, String label, ImageSpec spec) {
 
     /** Lowercase letters, digits, '-' and '_' in each segment, separated by '/'. */
     public static final Pattern KEY_PATTERN = Pattern.compile("^[a-z0-9][a-z0-9_-]*(/[a-z0-9][a-z0-9_-]*)*$");
@@ -27,5 +30,16 @@ public record ImageSlot(String key, String group, String label) {
         if (key == null || key.length() > KEY_MAX_LENGTH || !KEY_PATTERN.matcher(key).matches()) {
             throw new IllegalArgumentException("Invalid image key: " + key);
         }
+    }
+
+    /**
+     * A picture with the limits of any picture.
+     *
+     * @param key   unique key
+     * @param group heading of the admin screen
+     * @param label name of the picture for the admin
+     */
+    public ImageSlot(String key, String group, String label) {
+        this(key, group, label, null);
     }
 }

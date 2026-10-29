@@ -57,10 +57,6 @@
             overflow: visible;
         }
 
-        .logo-icon {
-            font-size: 1.35rem;
-        }
-
         .sidebar-status,
         .nav-item,
         .nav-parent {
@@ -152,9 +148,10 @@
 }
 
 .logo-icon {
-    font-size: 1.6rem;
-    color: var(--neon-green);
-    text-shadow: 0 0 12px var(--neon-green);
+    display: block;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
     flex-shrink: 0;
     animation: pulse-neon 3s infinite;
 }
@@ -273,8 +270,21 @@
 }
 
 .nav-icon {
+    width: 20px;
     font-size: 1rem;
+    text-align: center;
     flex-shrink: 0;
+}
+
+.nav-game-icon {
+    display: block;
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+.nav-parent.active .nav-game-icon {
+    filter: drop-shadow(0 0 4px rgba(0, 255, 65, 0.6));
 }
 
 .nav-label {
@@ -515,10 +525,6 @@
             .logo-area {
                 justify-content: flex-start;
                 width: auto;
-            }
-
-            .logo-icon {
-                font-size: 1.6rem;
             }
 
             .collapse-btn {

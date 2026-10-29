@@ -56,7 +56,7 @@ modules as they are developed.
 | Assign or remove **tags** to grant or revoke access to games | See only the games they have access to |
 | Resend the "choose your password" email | Open the content and tools of every game they can access |
 | Manage the **game catalog**: add games, order them, release them | Follow the activity of the games they take part in |
-| Upload **pictures** (covers, game artwork): the server compresses them | Upload their own team pictures where a game allows it |
+| Upload **pictures** (covers, game icons, game artwork): the server compresses them | Upload their own team pictures where a game allows it |
 | Manage the content of each game from the admin area | |
 
 ### 🧪 Game modules

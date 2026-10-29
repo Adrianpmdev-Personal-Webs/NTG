@@ -37,7 +37,8 @@ import java.util.stream.Collectors;
  *     <li><b>Which pictures:</b> only the keys some module declares through an {@link ImageSlotProvider}, so an
  *     upload can never land in an unexpected place.</li>
  *     <li><b>Files:</b> every upload goes through the {@link ImageCompressor} (at most {@value #MAX_SIDE} px and
- *     1.5 MB once compressed). The object name is {@code <key>.<ext>}, so replacing a picture overwrites it.</li>
+ *     1.5 MB once compressed, or the smaller limits its slot sets, as icons do). The object name is
+ *     {@code <key>.<ext>}, so replacing a picture overwrites it.</li>
  *     <li><b>URLs:</b> built here without calling Storage, with {@code ?v=<upload time>} so a new picture gets a new
  *     URL and browsers can cache each one for a year. They are kept in memory and reloaded after every change.</li>
  * </ul>
@@ -118,7 +119,7 @@ public class AssetService implements PublicAssets {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No hay ninguna imagen prevista con esa clave");
         }
 
-        CompressedImage image = imageCompressor.compress(readLimited(file), SPEC);
+        CompressedImage image = imageCompressor.compress(readLimited(file), slot.spec() == null ? SPEC : slot.spec());
         String objectName = key + "." + image.extension();
         storage.upload(BUCKET, objectName, image.bytes(), image.contentType(), BROWSER_CACHE);
 

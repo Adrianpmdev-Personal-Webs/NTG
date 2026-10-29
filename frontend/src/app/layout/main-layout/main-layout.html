@@ -9,11 +9,11 @@
                     aria-label="Abrir menú lateral"
                     (click)="toggleSidebar()"
                 >
-                    <span class="logo-icon">⬡</span>
+                    <img class="logo-icon" src="/favicon.png" alt="" />
                 </button>
             } @else {
                 <div class="logo-area">
-                    <span class="logo-icon">⬡</span>
+                    <img class="logo-icon" src="/favicon.png" alt="" />
 
                     <div class="logo-text">
                         <span class="logo-name neon-text">NTG</span>
@@ -113,7 +113,11 @@
                         [title]="sidebarCollapsed() ? game.name : game.hasLinks ? '' : 'Próximamente'"
                         (click)="game.hasLinks && toggleSubmenu(game.id)"
                     >
-                        <span class="nav-icon">◎</span>
+                        @if (game.iconUrl) {
+                            <img class="nav-icon nav-game-icon" [src]="game.iconUrl" alt="" />
+                        } @else {
+                            <span class="nav-icon">◎</span>
+                        }
 
                         @if (!sidebarCollapsed()) {
                             <span class="nav-label"

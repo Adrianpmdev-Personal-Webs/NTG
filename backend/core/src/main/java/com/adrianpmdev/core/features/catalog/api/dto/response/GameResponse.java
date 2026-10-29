@@ -6,6 +6,7 @@ package com.adrianpmdev.core.features.catalog.api.dto.response;
  * @param id         game id (tag key and URL segment)
  * @param name       display name
  * @param coverUrl   public URL of the cover, or null when none has been uploaded
+ * @param iconUrl    public URL of the icon shown in the menus, or null when none has been uploaded
  * @param upcoming   whether it is still coming soon
  * @param accessible whether the caller can open it (admins always; players with the tag once it is released)
  * @param sortOrder  position in the lists
@@ -16,6 +17,7 @@ public record GameResponse(
     String id,
     String name,
     String coverUrl,
+    String iconUrl,
     boolean upcoming,
     boolean accessible,
     int sortOrder

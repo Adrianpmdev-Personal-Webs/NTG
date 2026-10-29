@@ -1,7 +1,8 @@
 /**
  * Games
  *
- * Admin screen of the game catalog: name, order, whether a game is still coming soon and its cover. Releasing a game
+ * Admin screen of the game catalog: name, order, whether a game is still coming soon, its cover and the icon the menus
+ * show for it (a small square picture, ideally a PNG with transparency). Releasing a game
  * is unticking "coming soon" here: players with its tag can open it right away (the backend opens its API too).
  * The key is the id of the game and of its tag, and it cannot change.
  *
@@ -17,6 +18,31 @@ import { NotificationCenter } from '@core/notifications/notification-center';
 import { CatalogGame } from '@shared/models/game';
 import { resolveApiError } from '@shared/utils/api-error';
 import { ModalOverlay } from '@shared/directives/modal-overlay';
+
+interface GamePicture {
+    kind: 'cover' | 'icon';
+    keyPrefix: string;
+    button: string;
+    saved: string;
+    failed: string;
+}
+
+const PICTURES: readonly GamePicture[] = [
+    {
+        kind: 'cover',
+        keyPrefix: 'platform/games/',
+        button: 'PORTADA',
+        saved: 'Portada guardada',
+        failed: 'No se ha podido subir la portada',
+    },
+    {
+        kind: 'icon',
+        keyPrefix: 'platform/game-icons/',
+        button: 'ICONO',
+        saved: 'Icono guardado',
+        failed: 'No se ha podido subir el icono',
+    },
+];
 
 type Dialog = { mode: 'create' } | { mode: 'edit'; game: CatalogGame } | { mode: 'delete'; game: CatalogGame } | null;
 
@@ -40,10 +66,11 @@ export class Games {
     private readonly notifications = inject(NotificationCenter);
 
     protected readonly accepted = ACCEPTED_IMAGE_TYPES;
+    protected readonly pictures = PICTURES;
     protected readonly games = this.catalog.games;
     protected readonly loading = signal(true);
     protected readonly saving = signal(false);
-    protected readonly uploadingCover = signal<string | null>(null);
+    protected readonly uploading = signal<string | null>(null);
     protected readonly dialog = signal<Dialog>(null);
 
     protected form: GameForm = this.emptyForm();
@@ -97,7 +124,7 @@ export class Games {
         }
     }
 
-    protected uploadCover(game: CatalogGame, event: Event): void {
+    protected uploadPicture(game: CatalogGame, picture: GamePicture, event: Event): void {
         const input = event.target as HTMLInputElement;
         const file = input.files?.[0];
         input.value = '';
@@ -113,16 +140,16 @@ export class Games {
             return;
         }
 
-        this.uploadingCover.set(game.id);
-        this.assetApi.upload(`platform/games/${game.id}`, file).subscribe({
+        this.uploading.set(`${picture.kind}:${game.id}`);
+        this.assetApi.upload(picture.keyPrefix + game.id, file).subscribe({
             next: () => {
-                this.uploadingCover.set(null);
-                this.notifications.success(`Portada de ${game.name} guardada`);
+                this.uploading.set(null);
+                this.notifications.success(`${picture.saved}: ${game.name}`);
                 this.catalog.refresh();
             },
             error: (error) => {
-                this.uploadingCover.set(null);
-                this.notifications.error(resolveApiError(error, 'No se ha podido subir la portada'));
+                this.uploading.set(null);
+                this.notifications.error(resolveApiError(error, picture.failed));
             },
         });
     }

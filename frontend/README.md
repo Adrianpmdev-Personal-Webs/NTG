@@ -54,7 +54,7 @@ and game content.
 | 🏠 Platform      | **Welcome**      | Player home: cards for the games they can open, and the ones coming soon                       |
 | 👑 Admin         | **Dashboard**    | Platform overview                                                                              |
 | 👑 Admin         | **Users**        | Create users by email, assign tags, edit, resend the password email, delete                    |
-| 👑 Admin         | **Games**        | Game catalog: add a game (its tag is created too), order, cover, release it to players         |
+| 👑 Admin         | **Games**        | Game catalog: add a game (its tag is created too), order, cover, icon, release it to players   |
 | 👑 Admin         | **Pictures**     | Every picture the platform and the games expect: upload the original, the server compresses it |
 | 🎮 Games         | **Game areas**   | Each game has its own layout, theme, views and tools, and opens only with its tag              |
 | 🎮 Games (admin) | **Management**   | A game can add its own administration screens to the admin area                                |
@@ -114,7 +114,7 @@ The session combines a short-lived access token kept in memory with a long-lived
 
 ```text
 frontend/
-├── public/                     favicon.png
+├── public/                     favicon.png (Team NTG logo: browser tab and sidebar)
 ├── proxy.conf.json             ng serve: /api → localhost:8080 (like Vercel does in production)
 ├── vercel.json                 /api rewrite, SPA fallback, cache and security headers
 └── src/
@@ -148,7 +148,7 @@ frontend/
 
 1. Create `games/<game>/` with its layout, theme, views, models and API service.
 2. Export a `GameModule` from `<game>.game.ts` (id, routes, admin routes and menu) and list it in `games/games.ts`.
-3. Add the game in the admin **Games** screen (this creates its tag), upload its cover and untick _coming soon_
+3. Add the game in the admin **Games** screen (this creates its tag), upload its cover and its icon (shown in the sidebar) and untick _coming soon_
    when it is ready.
 
 The sidebar, the welcome page and the dashboard read the catalog from the backend, and the game's **id doubles as

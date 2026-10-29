@@ -21,6 +21,7 @@
                     <thead>
                         <tr>
                             <th>PORTADA</th>
+                            <th>ICONO</th>
                             <th>JUEGO</th>
                             <th>CLAVE / TAG</th>
                             <th>ESTADO</th>
@@ -40,6 +41,15 @@
                                         }
                                     </div>
                                 </td>
+                                <td data-label="ICONO">
+                                    <div class="icon-thumb">
+                                        @if (game.iconUrl) {
+                                            <img [src]="game.iconUrl" [alt]="'Icono de ' + game.name" loading="lazy" />
+                                        } @else {
+                                            <span>—</span>
+                                        }
+                                    </div>
+                                </td>
                                 <td data-label="JUEGO" class="strong">{{ game.name }}</td>
                                 <td data-label="CLAVE / TAG">{{ game.id }}</td>
                                 <td data-label="ESTADO">
@@ -50,19 +60,25 @@
                                 <td data-label="ORDEN">{{ game.sortOrder }}</td>
                                 <td>
                                     <div class="actions">
-                                        <label
-                                            class="action-btn btn-neon"
-                                            [class.disabled]="uploadingCover() === game.id"
-                                        >
-                                            {{ uploadingCover() === game.id ? 'SUBIENDO...' : '⬆ PORTADA' }}
-                                            <input
-                                                type="file"
-                                                hidden
-                                                [accept]="accepted"
-                                                [disabled]="uploadingCover() !== null"
-                                                (change)="uploadCover(game, $event)"
-                                            />
-                                        </label>
+                                        @for (picture of pictures; track picture.kind) {
+                                            <label
+                                                class="action-btn btn-neon"
+                                                [class.disabled]="uploading() === picture.kind + ':' + game.id"
+                                            >
+                                                {{
+                                                    uploading() === picture.kind + ':' + game.id
+                                                        ? 'SUBIENDO...'
+                                                        : '⬆ ' + picture.button
+                                                }}
+                                                <input
+                                                    type="file"
+                                                    hidden
+                                                    [accept]="accepted"
+                                                    [disabled]="uploading() !== null"
+                                                    (change)="uploadPicture(game, picture, $event)"
+                                                />
+                                            </label>
+                                        }
                                         <button class="action-btn btn-neon" type="button" (click)="openEdit(game)">
                                             ✎ EDITAR
                                         </button>

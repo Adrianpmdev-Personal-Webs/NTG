@@ -10,6 +10,7 @@ export interface CatalogGame {
     id: string;
     name: string;
     coverUrl: string | null;
+    iconUrl: string | null;
     upcoming: boolean;
     accessible: boolean;
     sortOrder: number;

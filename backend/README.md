@@ -198,7 +198,7 @@ security headers (see the [frontend documentation](../frontend/README.md)).
 
 ### 4. Pictures
 
-- An admin uploads the original picture for a slot that a module declared (a game cover, a talent tree…). The
+- An admin uploads the original picture for a slot that a module declared (a game cover, a game icon, a talent tree…). The
   server checks it, resizes it, re-encodes it as JPEG (PNG when it has transparency) and stores it in the public
   bucket. Its URL changes with every upload, so browsers can cache each version for a year.
 

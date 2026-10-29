@@ -1,0 +1,53 @@
+{
+  "posts": [
+    {
+      "id": 99,
+      "created_at": "2026-10-27T20:02:47.505Z",
+      "topic_id": 2393431,
+      "topic_title": "Name Reservation Issue for Oceanic Players",
+      "url": "/t/name-reservation-issue-for-oceanic-players/2393431/1",
+      "category_id": 347,
+      "post_number": 1,
+      "post_type": 1,
+      "username": "Kaivax",
+      "excerpt": "We are aware of an issue with name reservations for Oceanic players."
+    },
+    {
+      "id": 98,
+      "created_at": "2026-10-27T20:02:40.000Z",
+      "topic_id": 2393430,
+      "topic_title": "Name Reservation Issue for Oceanic Players",
+      "url": "/t/name-reservation-issue-for-oceanic-players/2393430/1",
+      "category_id": 349,
+      "post_number": 1,
+      "post_type": 1,
+      "username": "Kaivax",
+      "excerpt": "We are aware of an issue with name reservations for Oceanic players."
+    },
+    {
+      "id": 97,
+      "created_at": "2026-10-23T22:52:38.516Z",
+      "topic_id": 2390748,
+      "topic_title": "Class Tuning Incoming - October 27",
+      "url": "/t/class-tuning-incoming-october-27/2390748/1",
+      "category_id": 171,
+      "post_number": 1,
+      "post_type": 1,
+      "username": "Linxy",
+      "excerpt": "Class tuning is coming to Midnight."
+    },
+    {
+      "id": 96,
+      "created_at": "2026-10-23T17:00:00.000Z",
+      "topic_id": 2390465,
+      "topic_title": "Thank You For Testing the WoW Forever Beta",
+      "url": "/t/thank-you-for-testing-the-wow-forever-beta/2390465/1",
+      "category_id": 349,
+      "post_number": 1,
+      "post_type": 1,
+      "hidden": true,
+      "username": "Kaivax",
+      "excerpt": "Hidden by a moderator."
+    }
+  ]
+}

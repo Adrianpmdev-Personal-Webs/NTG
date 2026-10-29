@@ -192,6 +192,23 @@ public class GameDataService {
         return news;
     }
 
+    /**
+     * Where the blue posts of the launcher come from, as config.json says. It does not need the game data.
+     *
+     * @return blue post settings
+     */
+    public GameDataConfig.BluePosts getBluePostsSettings() {
+        GameDataConfig.BluePosts bluePosts = getConfig().bluePosts();
+
+        if (bluePosts == null || bluePosts.trackerUrl() == null || bluePosts.forumUrl() == null
+                || bluePosts.categories() == null || bluePosts.limit() <= 0 || bluePosts.maxPages() <= 0
+                || bluePosts.refreshMinutes() <= 0) {
+            throw unavailable(CONFIG_FILE + " has no valid \"bluePosts\" section", null);
+        }
+
+        return bluePosts;
+    }
+
     /** Talent trees of one class. */
     public String getTalents(String classSlug) {
         GameData gameData = data();

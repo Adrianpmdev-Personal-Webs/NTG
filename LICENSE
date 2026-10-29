@@ -16,6 +16,8 @@ The WoW Forever game data (talents, spellbooks, racials and the Legacy System) i
 
 The WoW Forever launcher news come from the public RSS feed of Wowhead (https://www.wowhead.com/news/rss/forever). The app only shows the title, the short summary, the date and the picture of each item, as the feed publishes them, with a link to the full article on Wowhead and a "Fuente: Wowhead" credit; it never copies the articles. The pictures are loaded straight from Wowhead's servers and are not stored. The race icons of the races screen are also loaded straight from Wowhead's icon servers (wow.zamimg.com), because Blizzard's icon host lacks some of them; they are game icons that belong to Blizzard Entertainment, Inc. Wowhead news, texts and pictures belong to Wowhead and their authors. This project is not affiliated with or endorsed by Wowhead.
 
+The WoW Forever launcher blue posts come from the public Blizzard tracker of the official World of Warcraft forums (https://us.forums.blizzard.com/en/wow/groups/blizzard-tracker/activity/posts). The app only shows the topic title, the author, the date and the short excerpt of each post, as the forums publish them, with a link to the full post on the forums and a "Fuente: Blizzard Forums" credit; it never copies the posts. Forum posts belong to Blizzard Entertainment, Inc.
+
 Pokémon names, images, sprites and related game content are trademarks of Nintendo, Game Freak and The Pokémon Company. Links to external services such as Pokémon Showdown point to their own content. This project is not affiliated with or endorsed by any of these companies.
 
 For permission requests, contact the copyright holder through the GitHub profile:

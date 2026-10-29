@@ -1,20 +1,44 @@
-<aside class="news-panel" aria-labelledby="news-panel-title">
-    <div class="news-titlebar">
+<aside class="news-panel" aria-label="Noticias y blue posts">
+    <div class="news-titlebar" role="tablist" aria-label="Fuentes de noticias">
         <span class="news-gem" aria-hidden="true"></span>
-        <h2 id="news-panel-title">Noticias</h2>
+        @for (tab of tabs; track tab.id; let index = $index) {
+            <button
+                #tabButton
+                type="button"
+                role="tab"
+                class="news-tab"
+                [id]="'news-tab-' + tab.id"
+                [class.news-tab--active]="activeTab() === tab.id"
+                [attr.aria-selected]="activeTab() === tab.id"
+                aria-controls="news-tabpanel"
+                [tabIndex]="activeTab() === tab.id ? 0 : -1"
+                (click)="selectTab(tab.id)"
+                (keydown)="moveTab($event, index)"
+            >
+                {{ tab.label }}
+            </button>
+        }
     </div>
-    <div class="news-paper">
-        @switch (state().status) {
+    <div
+        #paper
+        id="news-tabpanel"
+        class="news-paper"
+        role="tabpanel"
+        [attr.aria-labelledby]="'news-tab-' + activeTab()"
+    >
+        @switch (status()) {
             @case ('loading') {
-                <p class="news-message" role="status">Cargando noticias…</p>
+                <p class="news-message" role="status">{{ tab().loading }}</p>
             }
             @case ('error') {
-                <p class="news-message" role="alert">No se han podido cargar las noticias.</p>
+                <p class="news-message" role="alert">{{ tab().error }}</p>
             }
             @default {
-                @if (items().length) {
+                @if (isEmpty()) {
+                    <p class="news-message">{{ tab().empty }}</p>
+                } @else if (activeTab() === 'news') {
                     <ul class="news-list">
-                        @for (item of items(); track item.id; let first = $first) {
+                        @for (item of newsItems(); track item.id; let first = $first) {
                             <li>
                                 <a
                                     class="news-item"
@@ -51,15 +75,39 @@
                         }
                     </ul>
                 } @else {
-                    <p class="news-message">No hay noticias por ahora.</p>
+                    <ul class="news-list">
+                        @for (post of bluePosts(); track post.id) {
+                            <li>
+                                <a
+                                    class="news-item news-item--text"
+                                    [href]="post.url"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <span class="news-copy">
+                                        <span class="news-date">
+                                            <time [attr.datetime]="post.publishedAt">{{ post.relative }}</time>
+                                            <span aria-hidden="true">·</span>
+                                            <span>{{ post.absolute }}</span>
+                                        </span>
+                                        <span class="news-item-title">{{ post.heading }}</span>
+                                        <span class="blue-post-author">{{ post.author }}</span>
+                                        @if (post.summary) {
+                                            <span class="news-summary">{{ post.summary }}</span>
+                                        }
+                                    </span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
                 }
             }
         }
     </div>
-    @if (feed(); as source) {
+    @if (source(); as feed) {
         <p class="news-source">
             Fuente:
-            <a [href]="source.sourceUrl" target="_blank" rel="noopener noreferrer">{{ source.source }}</a>
+            <a [href]="feed.sourceUrl" target="_blank" rel="noopener noreferrer">{{ feed.source }}</a>
         </p>
     }
 </aside>

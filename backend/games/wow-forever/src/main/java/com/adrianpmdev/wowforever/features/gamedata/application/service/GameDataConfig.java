@@ -15,6 +15,7 @@ import java.util.Map;
  * @param factions     name of each faction ({@code ALLIANCE}, {@code HORDE})
  * @param features     tools of the area shown on its home
  * @param news         where the launcher news come from and how often they are read again
+ * @param bluePosts    where the blue posts of the launcher come from and how often they are read again
  * @param talents      rules of the talent calculator
  * @param spellbook    texts of the spellbook
  * @param legacy       texts of the Legacy System
@@ -29,6 +30,7 @@ public record GameDataConfig(
         Map<String, String> factions,
         List<Feature> features,
         News news,
+        BluePosts bluePosts,
         Talents talents,
         Spellbook spellbook,
         Legacy legacy,
@@ -58,6 +60,25 @@ public record GameDataConfig(
      */
     public record News(String feedUrl, String category, int limit, int refreshMinutes, String source,
                        String sourceUrl) {
+    }
+
+    /**
+     * Where the blue posts of the launcher come from: the Blizzard tracker of the official forums, which lists the
+     * posts of Blizzard employees in every forum of the game, newest first.
+     *
+     * @param trackerUrl     JSON list of the tracker, read page by page with {@code ?before_post_id=<post id>}
+     * @param forumUrl       base address of the forums; the link of a post is this plus its path
+     * @param categories     forum categories of WoW Forever; their posts are always kept
+     * @param titleKeyword   posts of other categories are kept when their topic title has this word (ignoring case),
+     *                       as the official news of WoW Forever are posted in the general news category
+     * @param limit          most recent posts shown
+     * @param maxPages       most tracker pages read to find them
+     * @param refreshMinutes how long a read is kept before the tracker is read again (only when someone asks for it)
+     * @param source         name of the source, shown as its credit
+     * @param sourceUrl      page of the source the credit links to
+     */
+    public record BluePosts(String trackerUrl, String forumUrl, List<Integer> categories, String titleKeyword,
+                            int limit, int maxPages, int refreshMinutes, String source, String sourceUrl) {
     }
 
     /**

@@ -43,6 +43,7 @@
     min-height: 0;
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(430px, 39%);
+    padding: 7px 0;
     overflow: hidden;
     background: #090909;
 }
@@ -85,6 +86,7 @@ app-news-panel {
     position: relative;
     z-index: 2;
     min-width: 0;
+    margin-right: -2px;
 }
 
 .launcher-navigation {
@@ -232,7 +234,6 @@ app-news-panel {
 
     .launcher-main {
         grid-template-columns: minmax(0, 1fr);
-        padding: 12px 10px 14px;
     }
 
     .artwork-layer,
@@ -245,8 +246,8 @@ app-news-panel {
     app-news-panel {
         grid-column: 1;
         align-self: stretch;
-        width: 100%;
         height: 100%;
+        margin-left: -2px;
     }
 
     .launcher-navigation {
@@ -288,10 +289,6 @@ app-news-panel {
 }
 
 @include small {
-    .launcher-main {
-        padding: 10px 6px 12px;
-    }
-
     .launcher-navigation {
         gap: 10px;
         padding: 14px 10px 12px;

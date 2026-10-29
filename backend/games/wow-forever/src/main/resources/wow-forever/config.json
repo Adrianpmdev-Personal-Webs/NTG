@@ -25,6 +25,18 @@
         "sourceUrl": "https://www.wowhead.com/forever/news"
     },
 
+    "bluePosts": {
+        "trackerUrl": "https://us.forums.blizzard.com/en/wow/groups/blizzard-tracker/posts.json",
+        "forumUrl": "https://us.forums.blizzard.com/en/wow",
+        "categories": [346, 347, 348, 349],
+        "titleKeyword": "Forever",
+        "limit": 20,
+        "maxPages": 5,
+        "refreshMinutes": 10,
+        "source": "Blizzard Forums",
+        "sourceUrl": "https://us.forums.blizzard.com/en/wow/groups/blizzard-tracker/activity/posts"
+    },
+
     "talents": {
         "firstPointLevel": 10,
         "lastPointLevel": 60,

@@ -1,0 +1,64 @@
+{
+  "posts": [
+    {
+      "id": 105,
+      "created_at": "2026-10-29T21:00:50.143Z",
+      "topic_id": 2396008,
+      "topic_title": "World of Warcraft: Forever Goes Live Globally November 4!",
+      "url": "/t/world-of-warcraft-forever-goes-live-globally-november-4/2396008/1",
+      "category_id": 171,
+      "post_number": 1,
+      "post_type": 1,
+      "username": "BlizzardEntertainment",
+      "excerpt": "<a href=\"https://bnetcmsus-a.akamaihd.net/cms/blog_header/p9/header.png\">[World of Warcraft: Forever Goes Live Globally November 4!]</a> Begin your first adventure in World of Warcraft: Forever, launching worldwide November 4 at 3:00 pm PST. Adventure to level 60 a&hellip;"
+    },
+    {
+      "id": 104,
+      "created_at": "2026-10-29T18:28:06.118Z",
+      "topic_id": 2383391,
+      "topic_title": "Midnight: Echoes of the Worldcore PTR Development Notes",
+      "url": "/t/midnight-echoes-of-the-worldcore-ptr-development-notes/2383391/5",
+      "category_id": 351,
+      "post_number": 5,
+      "post_type": 1,
+      "username": "Linxy",
+      "excerpt": "The PTR has been updated."
+    },
+    {
+      "id": 103,
+      "created_at": "2026-10-29T16:17:57.194Z",
+      "topic_id": 2395799,
+      "topic_title": "The WoW: Forever Podcast: Episode 6 - All About Tech",
+      "url": "/t/the-wow-forever-podcast-episode-6-all-about-tech/2395799/1",
+      "category_id": 347,
+      "post_number": 1,
+      "post_type": 1,
+      "username": "Kaivax",
+      "excerpt": "<a href=\"https://www.youtube.com/watch?v=video\" target=\"_blank\" class=\"video-thumbnail\" rel=\"noopener\">\n    [All About Tech | Episode 6 - The WoW: Forever Podcast]\n  </a>"
+    },
+    {
+      "id": 102,
+      "created_at": "2026-10-27T15:37:37.304Z",
+      "topic_id": 2360696,
+      "topic_title": "WoW Forever Beta Development Notes – Updated October 26",
+      "url": "/t/wow-forever-beta-development-notes-updated-october-26/2360696/8",
+      "category_id": 349,
+      "post_number": 8,
+      "post_type": 1,
+      "username": "Kaivax",
+      "excerpt": "We&rsquo;ve updated the previous post in this thread with some additions that were intended to be listed."
+    },
+    {
+      "id": 101,
+      "created_at": "2026-10-27T15:30:00.000Z",
+      "topic_id": 2360696,
+      "topic_title": "WoW Forever Beta Development Notes – Updated October 26",
+      "url": "/t/wow-forever-beta-development-notes-updated-october-26/2360696/7",
+      "category_id": 349,
+      "post_number": 7,
+      "post_type": 3,
+      "username": "Kaivax",
+      "excerpt": "pinned globally"
+    }
+  ]
+}

@@ -10,13 +10,19 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 
 /**
- * Downloads the news feed with the JDK HTTP client. It gives up after a few seconds and refuses feeds that are too
- * big, so a slow or broken source never holds the launcher for long.
+ * Downloads the news sources (the news feed, the Blizzard tracker) with the JDK HTTP client. It gives up after a few
+ * seconds and refuses answers that are too big, so a slow or broken source never holds the launcher for long.
  *
  * @author adrianpmdev
  */
 @Component
 public class NewsFeedClient {
+
+    /** What a news feed is asked as. */
+    public static final String RSS = "application/rss+xml, application/xml;q=0.9";
+
+    /** What a forum answer is asked as. */
+    public static final String JSON = "application/json";
 
     private static final Duration TIMEOUT = Duration.ofSeconds(3);
     private static final int MAX_BYTES = 2 * 1024 * 1024;
@@ -28,17 +34,18 @@ public class NewsFeedClient {
             .build();
 
     /**
-     * Reads the feed.
+     * Reads a source.
      *
-     * @param url feed address
-     * @return the feed as bytes
+     * @param url    source address
+     * @param accept formats asked for ({@link #RSS} or {@link #JSON})
+     * @return the answer as bytes
      * @throws IOException when the source cannot be reached, answers an error or sends too much
      */
-    public byte[] fetch(String url) throws IOException {
+    public byte[] fetch(String url, String accept) throws IOException {
         HttpRequest request = HttpRequest.newBuilder(URI.create(url))
                 .timeout(TIMEOUT)
                 .header("User-Agent", USER_AGENT)
-                .header("Accept", "application/rss+xml, application/xml;q=0.9")
+                .header("Accept", accept)
                 .GET()
                 .build();
 
@@ -46,17 +53,17 @@ public class NewsFeedClient {
             HttpResponse<byte[]> response = httpClient.send(request, HttpResponse.BodyHandlers.ofByteArray());
 
             if (response.statusCode() != 200) {
-                throw new IOException("The news feed answered " + response.statusCode());
+                throw new IOException("The news source answered " + response.statusCode());
             }
 
             if (response.body().length > MAX_BYTES) {
-                throw new IOException("The news feed is too big");
+                throw new IOException("The news source sent too much");
             }
 
             return response.body();
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
-            throw new IOException("The news feed request was interrupted", exception);
+            throw new IOException("The news source request was interrupted", exception);
         }
     }
 }

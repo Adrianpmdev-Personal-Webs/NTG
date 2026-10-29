@@ -32,9 +32,6 @@ final class NewsFeedParser {
 
     private static final Pattern ID_PATTERN = Pattern.compile("news=(\\d+)");
     private static final Pattern CONTINUE_LINK = Pattern.compile("(?is)<a\\b[^>]*>\\s*continue reading.*?</a>");
-    private static final Pattern TAG = Pattern.compile("<[^>]+>");
-    private static final Pattern NUMERIC_ENTITY = Pattern.compile("&#(x?)([0-9a-fA-F]+);");
-    private static final Pattern SPACES = Pattern.compile("\\s+");
 
     private NewsFeedParser() {
     }
@@ -102,7 +99,7 @@ final class NewsFeedParser {
     }
 
     private static NewsItem toItem(Element item) {
-        String title = clean(childText(item, "title"));
+        String title = HtmlText.text(childText(item, "title"));
         String url = webUrl(childText(item, "link"));
         String publishedAt = instant(childText(item, "pubDate"));
         Long id = id(childText(item, "guid"), url);
@@ -166,45 +163,7 @@ final class NewsFeedParser {
     }
 
     private static String summary(String description) {
-        if (description == null) {
-            return null;
-        }
-
-        String text = CONTINUE_LINK.matcher(description).replaceAll(" ");
-
-        return clean(TAG.matcher(text).replaceAll(" "));
-    }
-
-    private static String clean(String text) {
-        if (text == null) {
-            return null;
-        }
-
-        String decoded = decodeEntities(text);
-        String collapsed = SPACES.matcher(decoded).replaceAll(" ").trim();
-
-        return collapsed.isEmpty() ? null : collapsed;
-    }
-
-    private static String decodeEntities(String text) {
-        Matcher matcher = NUMERIC_ENTITY.matcher(text);
-        StringBuilder decoded = new StringBuilder();
-
-        while (matcher.find()) {
-            int codePoint = Integer.parseInt(matcher.group(2), matcher.group(1).isEmpty() ? 10 : 16);
-            String character = Character.isValidCodePoint(codePoint) ? Character.toString(codePoint) : "";
-            matcher.appendReplacement(decoded, Matcher.quoteReplacement(character));
-        }
-
-        matcher.appendTail(decoded);
-
-        return decoded.toString()
-                .replace("&nbsp;", " ")
-                .replace("&quot;", "\"")
-                .replace("&apos;", "'")
-                .replace("&lt;", "<")
-                .replace("&gt;", ">")
-                .replace("&amp;", "&");
+        return description == null ? null : HtmlText.plain(CONTINUE_LINK.matcher(description).replaceAll(" "));
     }
 
     private static String webUrl(String url) {

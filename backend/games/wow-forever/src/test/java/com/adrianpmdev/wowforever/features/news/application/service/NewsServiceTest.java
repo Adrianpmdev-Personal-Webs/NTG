@@ -76,7 +76,7 @@ class NewsServiceTest {
         private boolean failing;
 
         @Override
-        public byte[] fetch(String url) throws IOException {
+        public byte[] fetch(String url, String accept) throws IOException {
             reads++;
 
             if (failing) {

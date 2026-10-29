@@ -8,15 +8,10 @@
  */
 
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { tooltipPosition } from '../../ui/tooltip-position';
 import { hideBrokenIcon } from '../../wow-forever-config';
 import { Ranks, pointsTowardsGate, prerequisitesOf, rankText } from '../talents-logic';
 import { Talent, TalentTree } from '../talents-models';
-
-const OFFSET = 16;
-
-const MAX_WIDTH = 320;
-
-const EDGE = 16;
 
 const CLASSIC_LABELS: Readonly<Partial<Record<string, string>>> = {
     new: 'Nuevo en Forever',
@@ -82,25 +77,7 @@ export class TalentTooltip {
         return requirements;
     });
 
-    protected readonly position = computed<Record<string, string>>(() => {
-        const x = this.x();
-        const y = this.y();
-        const screenWidth = window.innerWidth;
-        const width = Math.min(MAX_WIDTH, screenWidth - 2 * EDGE);
-        const onLeft = x > screenWidth / 2;
-        const room = (onLeft ? x : screenWidth - x) - OFFSET - EDGE;
-
-        return {
-            ...(room < width
-                ? { left: `${(screenWidth - width) / 2}px` }
-                : onLeft
-                  ? { right: `${screenWidth - x + OFFSET}px` }
-                  : { left: `${x + OFFSET}px` }),
-            ...(y > window.innerHeight / 2
-                ? { bottom: `${window.innerHeight - y + OFFSET}px` }
-                : { top: `${y + OFFSET}px` }),
-        };
-    });
+    protected readonly position = computed(() => tooltipPosition(this.x(), this.y()));
 
     protected readonly hideBrokenIcon = hideBrokenIcon;
 }

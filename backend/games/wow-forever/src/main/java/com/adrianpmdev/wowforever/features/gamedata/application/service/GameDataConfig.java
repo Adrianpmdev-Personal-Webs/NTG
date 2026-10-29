@@ -9,6 +9,8 @@ import java.util.Map;
  * file, never the web client.
  *
  * @param iconBaseUrl  host of the game icons; an icon URL is {@code <iconBaseUrl>/<icon>.jpg}
+ * @param raceIconBaseUrl host of the race icons, which the game icon host lacks for some races (Night Elf, Undead and
+ *                     the Skyborne of WoW Forever); the same as {@code iconBaseUrl} when left out
  * @param fallbackIcon icon for anything the data gives no icon for
  * @param factions     name of each faction ({@code ALLIANCE}, {@code HORDE})
  * @param features     tools of the area shown on its home
@@ -22,6 +24,7 @@ import java.util.Map;
  */
 public record GameDataConfig(
         String iconBaseUrl,
+        String raceIconBaseUrl,
         String fallbackIcon,
         Map<String, String> factions,
         List<Feature> features,

@@ -33,8 +33,10 @@
 .challenges {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-top: 10px;
+    gap: 12px;
+    margin-top: 28px;
+    padding-top: 22px;
+    border-top: 1px solid wow.$line-strong;
 }
 
 .challenges-header {
@@ -43,8 +45,6 @@
     align-items: baseline;
     justify-content: space-between;
     gap: 6px 16px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid wow.$line-strong;
 }
 
 .section-title {
@@ -68,43 +68,101 @@
 }
 
 .groups {
-    columns: 2 320px;
-    column-gap: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .group {
     @include wow.panel;
-    break-inside: avoid;
-    margin-bottom: 12px;
 }
 
 .group-header {
-    display: flex;
+    display: grid;
+    grid-template-columns: 14px minmax(0, 1fr) minmax(60px, 160px) auto auto;
     align-items: center;
-    justify-content: space-between;
-    padding: 8px 12px;
-    border-bottom: 1px solid wow.$line;
+    gap: 12px;
+    padding: 10px 14px;
+    cursor: pointer;
+    list-style: none;
     background: linear-gradient(#26231b, #14130f);
+
+    &::-webkit-details-marker {
+        display: none;
+    }
+
+    &:hover {
+        background: linear-gradient(#2e2a20, #181611);
+    }
+
+    &:focus-visible {
+        outline: 1px solid wow.$gold;
+        outline-offset: -1px;
+    }
+}
+
+.group[open] > .group-header {
+    border-bottom: 1px solid wow.$line;
+}
+
+.group-chevron {
+    width: 7px;
+    height: 7px;
+    border-right: 2px solid wow.$gold;
+    border-bottom: 2px solid wow.$gold;
+    transform: rotate(-45deg);
+    transition: transform 0.15s ease;
+}
+
+.group[open] .group-chevron {
+    transform: rotate(45deg);
 }
 
 .group-name {
-    margin: 0;
     color: wow.$gold;
     font-size: 0.85rem;
-    font-weight: normal;
     letter-spacing: 2px;
     text-transform: uppercase;
 }
 
+.group-progress {
+    height: 6px;
+    overflow: hidden;
+    border: 1px solid wow.$icon-border;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.group-progress__bar {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, wow.$icon-border, wow.$bright);
+    transition: width 0.2s ease;
+}
+
 .group-count {
+    min-width: 44px;
     color: wow.$bright;
     font-size: 0.85rem;
+    text-align: right;
+}
+
+.group-points {
+    min-width: 64px;
+    color: wow.$muted;
+    font-size: 0.8rem;
+    text-align: right;
 }
 
 .challenge-list {
+    columns: 2;
+    column-gap: 12px;
     margin: 0;
-    padding: 4px 0;
+    padding: 6px 0;
     list-style: none;
+
+    li {
+        break-inside: avoid;
+    }
 }
 
 .challenge {
@@ -157,8 +215,30 @@
     text-align: center;
 }
 
-@include mobile {
-    .groups {
+@include tablet {
+    .challenge-list {
         columns: 1;
+    }
+}
+
+@include mobile {
+    .group-header {
+        grid-template-columns: 14px minmax(0, 1fr) auto auto;
+        gap: 10px;
+        padding: 10px 12px;
+    }
+
+    .group-progress {
+        display: none;
+    }
+}
+
+@include small {
+    .group-header {
+        grid-template-columns: 14px minmax(0, 1fr) auto;
+    }
+
+    .group-points {
+        display: none;
     }
 }

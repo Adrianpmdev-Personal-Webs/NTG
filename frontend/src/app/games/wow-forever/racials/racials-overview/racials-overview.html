@@ -1,4 +1,4 @@
-<app-wow-page heading="Razas y raciales" [credit]="credit()">
+<app-wow-page heading="Razas y raciales" [credit]="credit()" [compactNav]="true">
     @if (loading()) {
         <p class="state">Cargando…</p>
     } @else if (failed()) {
@@ -52,49 +52,89 @@
                             }
                         </div>
 
-                        <ul class="ability-list">
+                        <ul class="ability-list" [attr.aria-label]="'Raciales de ' + race.name">
                             @for (ability of race.abilities; track ability.name) {
-                                <li class="ability">
-                                    <img
-                                        class="ability-icon"
-                                        [src]="ability.icon"
-                                        alt=""
-                                        loading="lazy"
-                                        (error)="hideBrokenIcon($event)"
-                                    />
-                                    <span class="ability-text">
+                                <li>
+                                    <button
+                                        type="button"
+                                        class="ability"
+                                        (mouseenter)="showAbilityAtPointer($event, ability)"
+                                        (mousemove)="showAbilityAtPointer($event, ability)"
+                                        (mouseleave)="hideAbility()"
+                                        (focus)="showAbilityBelow($event, ability)"
+                                        (blur)="hideAbility()"
+                                    >
+                                        <img
+                                            class="ability-icon"
+                                            [src]="ability.icon"
+                                            alt=""
+                                            loading="lazy"
+                                            (error)="hideBrokenIcon($event)"
+                                        />
                                         <span class="ability-name">{{ ability.name }}</span>
-                                        <span class="ability-desc">{{ ability.text }}</span>
-                                    </span>
+                                        @if (ability.cooldown) {
+                                            <span class="ability-cooldown"
+                                                ><span class="visually-hidden">Reutilización: </span
+                                                >{{ ability.cooldown }}</span
+                                            >
+                                        }
+                                        @if (ability.text) {
+                                            <span class="visually-hidden">: {{ ability.text }}</span>
+                                        }
+                                    </button>
                                 </li>
                             }
                         </ul>
 
                         @for (group of race.classRacials; track group.className) {
-                            <div class="class-racials">
-                                <h3 class="class-racials-title">Solo {{ group.className }}</h3>
+                            <details class="class-racials">
+                                <summary class="class-racials-title">
+                                    <span class="class-racials-chevron" aria-hidden="true"></span>
+                                    Solo {{ group.className }}
+                                    <span class="class-racials-count">{{ group.abilities.length }}</span>
+                                </summary>
                                 <ul class="ability-list">
                                     @for (ability of group.abilities; track ability.name) {
-                                        <li class="ability">
-                                            <img
-                                                class="ability-icon"
-                                                [src]="ability.icon"
-                                                alt=""
-                                                loading="lazy"
-                                                (error)="hideBrokenIcon($event)"
-                                            />
-                                            <span class="ability-text">
+                                        <li>
+                                            <button
+                                                type="button"
+                                                class="ability"
+                                                (mouseenter)="showAbilityAtPointer($event, ability)"
+                                                (mousemove)="showAbilityAtPointer($event, ability)"
+                                                (mouseleave)="hideAbility()"
+                                                (focus)="showAbilityBelow($event, ability)"
+                                                (blur)="hideAbility()"
+                                            >
+                                                <img
+                                                    class="ability-icon"
+                                                    [src]="ability.icon"
+                                                    alt=""
+                                                    loading="lazy"
+                                                    (error)="hideBrokenIcon($event)"
+                                                />
                                                 <span class="ability-name">{{ ability.name }}</span>
-                                                <span class="ability-desc">{{ ability.text }}</span>
-                                            </span>
+                                                @if (ability.cooldown) {
+                                                    <span class="ability-cooldown"
+                                                        ><span class="visually-hidden">Reutilización: </span
+                                                        >{{ ability.cooldown }}</span
+                                                    >
+                                                }
+                                                @if (ability.text) {
+                                                    <span class="visually-hidden">: {{ ability.text }}</span>
+                                                }
+                                            </button>
                                         </li>
                                     }
                                 </ul>
-                            </div>
+                            </details>
                         }
                     </article>
                 }
             </div>
+
+            @if (hovered(); as info) {
+                <app-ability-tooltip [ability]="info.ability" [x]="info.x" [y]="info.y" />
+            }
 
             <section class="matrix-section">
                 <h2 class="section-title">Combinaciones raza-clase</h2>

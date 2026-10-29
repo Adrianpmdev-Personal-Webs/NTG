@@ -1,4 +1,4 @@
-<app-wow-page heading="Legacy System" [credit]="credit()">
+<app-wow-page heading="Legacy System" [credit]="credit()" [compactNav]="true">
     @if (loading()) {
         <p class="state">Cargando…</p>
     } @else if (failed()) {
@@ -85,9 +85,9 @@
             </p>
         }
 
-        <section class="challenges">
+        <section class="challenges" aria-labelledby="challenges-title">
             <header class="challenges-header">
-                <h2 class="section-title">Desafíos de la cuenta</h2>
+                <h2 id="challenges-title" class="section-title">Desafíos de la cuenta</h2>
                 <p class="progress">
                     Completados: <strong>{{ completedCount() }}/{{ challengeCount() }}</strong> · Puntos ganados:
                     <strong>{{ earnedPoints() }}</strong>
@@ -98,11 +98,16 @@
 
             <div class="groups">
                 @for (group of groups(); track group.name) {
-                    <section class="group">
-                        <header class="group-header">
-                            <h3 class="group-name">{{ group.name }}</h3>
+                    <details class="group">
+                        <summary class="group-header">
+                            <span class="group-chevron" aria-hidden="true"></span>
+                            <span class="group-name">{{ group.name }}</span>
+                            <span class="group-progress" aria-hidden="true">
+                                <span class="group-progress__bar" [style.width.%]="progressOf(group)"></span>
+                            </span>
                             <span class="group-count">{{ completedIn(group) }}/{{ group.challenges.length }}</span>
-                        </header>
+                            <span class="group-points">{{ pointsEarnedIn(group) }}/{{ group.points }} pts</span>
+                        </summary>
 
                         <ul class="challenge-list">
                             @for (challenge of group.challenges; track challenge.name) {
@@ -124,7 +129,7 @@
                                 </li>
                             }
                         </ul>
-                    </section>
+                    </details>
                 }
             </div>
         </section>

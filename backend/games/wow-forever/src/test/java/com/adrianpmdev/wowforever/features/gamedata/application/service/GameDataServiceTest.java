@@ -92,6 +92,10 @@ class GameDataServiceTest {
         JsonNode racials = read(service.getRacials());
 
         assertThat(racials.path("races").findValuesAsText("faction")).contains("ALLIANCE", "HORDE");
+        assertThat(racials.path("races").path(0).path("icon").asText())
+                .startsWith("https://wow.zamimg.com/images/wow/icons/large/").endsWith(".jpg");
+        assertThat(racials.path("races").path(0).path("abilities").path(0).path("icon").asText())
+                .startsWith(ICON_PREFIX);
     }
 
     @Test

@@ -2,8 +2,9 @@
  * LegacyPlanner
  *
  * Legacy System of WoW Forever: the three perk trees, where a character spends its Legacy points (same rules as the
- * talent trees, with tree-wide point gates), and the account challenges that earn the points. The perk build lives in
- * the URL so it can be shared; the ticked challenges are kept in this browser.
+ * talent trees, with tree-wide point gates), and the account challenges that earn the points, one folding section per
+ * group with its progress. The perk build lives in the URL so it can be shared; the ticked challenges are kept in this
+ * browser.
  *
  * @author @adrianpmdev
  */
@@ -195,11 +196,15 @@ export class LegacyPlanner implements OnInit {
         return group.challenges.filter((challenge) => this.isCompleted(challenge.name)).length;
     }
 
-    private pointsEarnedIn(group: ChallengeGroup): number {
+    protected pointsEarnedIn(group: ChallengeGroup): number {
         return group.challenges.reduce(
             (sum, challenge) => sum + (this.isCompleted(challenge.name) ? challenge.points : 0),
             0,
         );
+    }
+
+    protected progressOf(group: ChallengeGroup): number {
+        return group.challenges.length ? (this.completedIn(group) * 100) / group.challenges.length : 0;
     }
 
     private treeOf(talent: Talent): TalentTree | undefined {

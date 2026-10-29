@@ -1,0 +1,9 @@
+<div class="tooltip" role="tooltip" aria-hidden="true" [style]="position()">
+    <div class="tooltip-head">
+        <img class="tooltip-icon" [src]="ability().icon" alt="" (error)="hideBrokenIcon($event)" />
+        <div class="tooltip-name">{{ ability().name }}</div>
+    </div>
+    @if (ability().text) {
+        <p class="tooltip-text">{{ ability().text }}</p>
+    }
+</div>

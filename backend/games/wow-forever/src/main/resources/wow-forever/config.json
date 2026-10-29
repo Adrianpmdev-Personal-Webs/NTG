@@ -1,5 +1,6 @@
 {
     "iconBaseUrl": "https://render.worldofwarcraft.com/us/icons/56",
+    "raceIconBaseUrl": "https://wow.zamimg.com/images/wow/icons/large",
     "fallbackIcon": "inv_misc_questionmark",
 
     "factions": {

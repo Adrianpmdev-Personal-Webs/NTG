@@ -39,11 +39,12 @@ public final class GameDataResponses {
     /**
      * An ability written as name, text and icon.
      *
-     * @param name name
-     * @param text description
-     * @param icon icon URL
+     * @param name     name
+     * @param text     description
+     * @param icon     icon URL
+     * @param cooldown cooldown of an active ability ("2 min", "10 sec"), or null when it is passive or has none
      */
-    public record Ability(String name, String text, String icon) {
+    public record Ability(String name, String text, String icon, String cooldown) {
     }
 
     /* ─── Index ─── */

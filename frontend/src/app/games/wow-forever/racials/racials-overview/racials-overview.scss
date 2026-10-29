@@ -19,7 +19,8 @@
 
 .races {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-auto-rows: 1fr;
     gap: 12px;
 }
 
@@ -27,7 +28,7 @@
     @include wow.panel;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
     padding: 12px;
     border-left: 3px solid wow.$alliance;
 
@@ -40,12 +41,21 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid wow.$line;
 }
 
 .race-icon {
     @include wow.icon(40px);
     flex: 0 0 auto;
     border-radius: 3px;
+}
+
+.race-title {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
 }
 
 .race-name {
@@ -74,7 +84,7 @@
 .ability-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -82,8 +92,27 @@
 
 .ability {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 10px;
+    width: 100%;
+    padding: 4px 6px;
+    border: 1px solid transparent;
+    color: wow.$text;
+    font: inherit;
+    font-size: 0.9rem;
+    text-align: left;
+    cursor: help;
+    background: none;
+
+    &:hover {
+        border-color: wow.$line;
+        background: rgba(216, 184, 102, 0.06);
+    }
+
+    &:focus-visible {
+        outline: 1px solid wow.$gold;
+        outline-offset: -1px;
+    }
 }
 
 .ability-icon {
@@ -91,38 +120,76 @@
     flex: 0 0 auto;
 }
 
-.ability-text {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
 .ability-name {
-    color: wow.$text;
-    font-size: 0.9rem;
+    min-width: 0;
 }
 
-.ability-desc {
+.ability-cooldown {
+    flex: 0 0 auto;
+    margin-left: auto;
+    padding: 1px 6px;
+    border: 1px solid wow.$icon-border;
     color: wow.$muted;
-    font-size: 0.8rem;
-    line-height: 1.4;
+    font-size: 0.75rem;
+    white-space: nowrap;
 }
 
 .class-racials {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding-top: 8px;
+    position: relative;
+    margin-top: auto;
     border-top: 1px solid wow.$line;
 }
 
 .class-racials-title {
-    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 2px 2px;
     color: wow.$gold;
     font-size: 0.75rem;
-    font-weight: normal;
     letter-spacing: 1px;
     text-transform: uppercase;
+    cursor: pointer;
+    list-style: none;
+
+    &::-webkit-details-marker {
+        display: none;
+    }
+
+    &:focus-visible {
+        outline: 1px solid wow.$gold;
+        outline-offset: 2px;
+    }
+}
+
+.class-racials-chevron {
+    width: 6px;
+    height: 6px;
+    border-right: 2px solid wow.$gold;
+    border-bottom: 2px solid wow.$gold;
+    transform: rotate(-45deg);
+    transition: transform 0.15s ease;
+}
+
+.class-racials[open] .class-racials-chevron {
+    transform: rotate(45deg);
+}
+
+.class-racials-count {
+    margin-left: auto;
+    color: wow.$muted;
+}
+
+.class-racials .ability-list {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: -6px;
+    left: -6px;
+    z-index: 10;
+    padding: 6px;
+    border: 1px solid wow.$icon-border;
+    background: rgba(8, 8, 12, 0.97);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.75);
 }
 
 .matrix-section {

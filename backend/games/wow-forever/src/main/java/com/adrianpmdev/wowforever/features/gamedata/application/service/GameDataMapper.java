@@ -44,6 +44,7 @@ final class GameDataMapper {
     private static final int TALENT_ID_FACTOR = 100;
 
     private static final Pattern BUILD_PATTERN = Pattern.compile("\\d+\\.\\d+\\.\\d+\\.\\d+");
+    private static final Pattern COOLDOWN_PART = Pattern.compile("(\\d[\\d,.]* (?:sec|min|hour|hrs)) cooldown");
     private static final Pattern RANK_PATTERN = Pattern.compile("(\\d+)");
     private static final Pattern LEVEL_PATTERN = Pattern.compile("level (\\d+)", Pattern.CASE_INSENSITIVE);
     private static final Set<String> CLASSIC_STATUSES = Set.of("same", "moved", "changed", "new");
@@ -72,9 +73,21 @@ final class GameDataMapper {
 
     /** Full URL of a game icon, or of the question mark when the file gives none. */
     String iconUrl(String icon) {
+        return iconUrl(config.iconBaseUrl(), icon);
+    }
+
+    private String raceIconUrl(String icon) {
+        String host = config.raceIconBaseUrl() == null || config.raceIconBaseUrl().isBlank()
+                ? config.iconBaseUrl()
+                : config.raceIconBaseUrl();
+
+        return iconUrl(host, icon);
+    }
+
+    private String iconUrl(String host, String icon) {
         String name = icon == null || icon.isBlank() ? config.fallbackIcon() : icon;
 
-        return config.iconBaseUrl() + "/" + name + ".jpg";
+        return host + "/" + name + ".jpg";
     }
 
     GameClass gameClass(String slug, String name, String icon) {
@@ -98,7 +111,28 @@ final class GameDataMapper {
     }
 
     private Ability ability(JsonNode node) {
-        return new Ability(node.path(0).asText(""), node.path(1).asText(""), iconUrl(node.path(2).asText("")));
+        String text = node.path(1).asText("");
+
+        return new Ability(node.path(0).asText(""), text, iconUrl(node.path(2).asText("")), cooldownOf(text));
+    }
+
+    /**
+     * The cooldown of an ability text, as the export writes it: the tooltip parts of an active spell, joined by commas,
+     * then a full stop and the description ("Instant, 2 min cooldown. Increases..."). A passive one starts with its
+     * description, so it has no part that is only a cooldown.
+     */
+    static String cooldownOf(String text) {
+        int end = text.indexOf(". ");
+
+        for (String part : (end < 0 ? text : text.substring(0, end)).split(", ")) {
+            Matcher matcher = COOLDOWN_PART.matcher(part.trim());
+
+            if (matcher.matches()) {
+                return matcher.group(1);
+            }
+        }
+
+        return null;
     }
 
     private List<Ability> abilities(JsonNode array) {
@@ -366,7 +400,7 @@ final class GameDataMapper {
                     }
                 }
 
-                races.add(new Race(slugify(raceName), raceName, factionId, iconUrl(race.path("icon").asText("")),
+                races.add(new Race(slugify(raceName), raceName, factionId, raceIconUrl(race.path("icon").asText("")),
                         strings(race.path("classes")), abilities(race.path("abilities")), byClass));
             }
         }

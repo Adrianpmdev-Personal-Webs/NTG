@@ -41,6 +41,7 @@ export interface Ability {
     name: string;
     text: string;
     icon: string;
+    cooldown: string | null;
 }
 
 export type ClassicStatus = 'same' | 'moved' | 'changed' | 'new';

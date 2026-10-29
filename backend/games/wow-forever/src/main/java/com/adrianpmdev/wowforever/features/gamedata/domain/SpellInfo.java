@@ -69,16 +69,20 @@ public record SpellInfo(
     /**
      * One effect of a spell.
      *
-     * @param index          position, starting at 0 ({@code $s1} is index 0)
-     * @param basePoints     base value
-     * @param pointsPerLevel value gained per level above the spell level
-     * @param variance       spread of the value: 0.2 means from 10% below to 10% above
-     * @param periodMs       time between two ticks of a periodic effect, in milliseconds
-     * @param amplitude      value multiplier ({@code $e})
-     * @param chainTargets   targets it jumps to ({@code $x})
-     * @param radiusYards    radius in yards ({@code $a})
+     * @param index             position, starting at 0 ({@code $s1} is index 0)
+     * @param basePoints        base value
+     * @param pointsPerLevel    value gained per level above the spell level
+     * @param variance          spread of the value: 0.2 means from 10% below to 10% above the base value
+     * @param periodMs          time between two ticks of a periodic effect, in milliseconds
+     * @param amplitude         value multiplier ({@code $e})
+     * @param chainTargets      targets it jumps to ({@code $x})
+     * @param radiusYards       radius in yards ({@code $a})
+     * @param pointsPerResource value added per combo point or point of the resource spent ({@code $b})
+     * @param chainAmplitude    share of the value each jump keeps ({@code $f})
+     * @param miscValue         second value of the effect, such as the mana a resurrection gives ({@code $q})
      */
     public record Effect(int index, double basePoints, double pointsPerLevel, double variance, int periodMs,
-                         double amplitude, int chainTargets, double radiusYards) {
+                         double amplitude, int chainTargets, double radiusYards, double pointsPerResource,
+                         double chainAmplitude, int miscValue) {
     }
 }

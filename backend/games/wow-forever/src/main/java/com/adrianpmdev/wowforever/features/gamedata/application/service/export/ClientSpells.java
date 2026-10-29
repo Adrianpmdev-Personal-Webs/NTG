@@ -7,8 +7,8 @@ import com.adrianpmdev.wowforever.features.gamedata.domain.TooltipFormat;
 import com.adrianpmdev.wowforever.features.gamedata.infrastructure.wago.Db2Table.Row;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -16,29 +16,34 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 /**
- * The spells of the game client: names, icons, tooltip texts already resolved for a character of the top level, and
- * the line a tooltip shows above the text (cost, range, cast time, cooldown and requirements).
+ * The spells of the game client: names, icons, texts already resolved for a character of the top level, what their
+ * tooltips show above the text (see SpellTooltips) and the spellbook details (school, spell power coefficient and the
+ * level each one is learned at).
  *
  * @author adrianpmdev
  */
 final class ClientSpells implements SpellLookup {
 
-    /** The spell is passive: it shows no cost line. */
-    private static final int PASSIVE_ATTRIBUTE = 0x40;
     /** The spell is a hidden helper: the game never lists it. */
     private static final int HIDDEN_ATTRIBUTE = 0x80;
-    /** The spell is channeled (two attributes of the client mean it). */
-    private static final int CHANNELED_ATTRIBUTES = 0x4 | 0x40;
-    /** The spell can be cast outside the forms it lists: they are not a requirement. */
-    private static final int FORMS_OPTIONAL_ATTRIBUTE = 0x80000;
-    private static final String COMBO_POINTS = "COMBO_POINTS";
-    /** The range of the spell is melee range. */
-    private static final int MELEE_RANGE_FLAG = 0x1;
-    private static final int ARMOR_ITEM_CLASS = 4;
-    private static final int WEAPON_ITEM_CLASS = 2;
+    private static final int DAMAGE_EFFECT = 2;
+    private static final int LEECH_EFFECT = 9;
+    private static final int HEAL_EFFECT = 10;
+    private static final int AURA_EFFECT = 6;
+    private static final int LEARN_SPELL_EFFECT = 36;
+    private static final int LEARN_PET_SPELL_EFFECT = 57;
+    private static final int PERIODIC_DAMAGE_AURA = 3;
+    private static final int PERIODIC_HEAL_AURA = 8;
+    private static final int PERIODIC_TRIGGER_AURA = 23;
+    private static final int PERIODIC_LEECH_AURA = 53;
+    private static final String PER_TICK = "per tick";
     private static final String SEPARATOR = " | ";
+    /** Names of the magic schools, by bit of the school mask. */
+    private static final List<String> SCHOOLS = List.of("Physical", "Holy", "Fire", "Nature", "Frost", "Shadow",
+            "Arcane");
 
     private final ClientTables tables;
+    private final SpellTooltips tooltips;
     private final SpellTextResolver resolver;
     private final Map<Integer, Optional<SpellInfo>> spells = new HashMap<>();
     private Indexes indexes;
@@ -47,12 +52,9 @@ final class ClientSpells implements SpellLookup {
     /** The rows of every spell table by spell id (or by their own id for the shared lists). */
     private record Indexes(Map<Integer, Row> names, Map<Integer, Row> texts, Map<Integer, List<Row>> effects,
                            Map<Integer, Row> misc, Map<Integer, Row> levels, Map<Integer, Row> auraOptions,
-                           Map<Integer, Row> targetRestrictions,
-                           Map<Integer, Row> cooldowns, Map<Integer, List<Row>> powers, Map<Integer, Row> durations,
-                           Map<Integer, Row> radii, Map<Integer, Row> ranges, Map<Integer, Row> castTimes,
-                           Map<Integer, Row> variableLinks, Map<Integer, Row> variables,
-                           Map<Integer, Row> shapeshifts, Map<Integer, Row> forms, Map<Integer, Row> equippedItems,
-                           Map<Integer, Row> classOptions, Map<Integer, Row> powerTypes) {
+                           Map<Integer, Row> targetRestrictions, Map<Integer, Row> durations, Map<Integer, Row> radii,
+                           Map<Integer, Row> ranges, Map<Integer, Row> variableLinks, Map<Integer, Row> variables,
+                           Map<Integer, Row> classOptions) {
     }
 
     /**
@@ -63,8 +65,11 @@ final class ClientSpells implements SpellLookup {
      */
     ClientSpells(ClientTables tables, int playerLevel) {
         this.tables = tables;
+        this.tooltips = new SpellTooltips(tables);
         this.resolver = new SpellTextResolver(this, playerLevel);
     }
+
+    /* ─── Lookup ─── */
 
     @Override
     public Optional<SpellInfo> spell(int id) {
@@ -78,6 +83,18 @@ final class ClientSpells implements SpellLookup {
         return spell;
     }
 
+    @Override
+    public List<String> tooltipLine(int id) {
+        return tooltip(id).parts();
+    }
+
+    @Override
+    public Optional<String> cost(int id) {
+        return tooltips.firstCost(id);
+    }
+
+    /* ─── Names and icons ─── */
+
     /** Name of a spell, or an empty text. */
     String name(int id) {
         Row row = indexes().names().get(id);
@@ -85,7 +102,7 @@ final class ClientSpells implements SpellLookup {
         return row == null ? "" : row.text("Name_lang");
     }
 
-    /** Rank label of a spell ("Rank 3"), or an empty text. */
+    /** Rank label of a spell ("Rank 3", "Passive"), or an empty text. */
     String rankLabel(int id) {
         Row row = indexes().texts().get(id);
 
@@ -96,7 +113,7 @@ final class ClientSpells implements SpellLookup {
     boolean passive(int id) {
         Row misc = indexes().misc().get(id);
 
-        return misc != null && (misc.integer("Attributes_0") & PASSIVE_ATTRIBUTE) != 0;
+        return misc != null && (misc.integer("Attributes_0") & SpellTooltips.PASSIVE_ATTRIBUTE) != 0;
     }
 
     /** Whether the spell is a hidden helper the game never lists. */
@@ -134,6 +151,8 @@ final class ClientSpells implements SpellLookup {
 
         return row == null ? 0 : row.integer("SpellClassSet");
     }
+
+    /* ─── Texts ─── */
 
     /**
      * The description of a spell as the game shows it.
@@ -173,53 +192,137 @@ final class ClientSpells implements SpellLookup {
     }
 
     /**
-     * The line above the text of an active spell: "15 Rage | Melee Range | Instant | 20 sec cooldown | Requires
-     * Battle Stance". Passive spells have none.
-     *
-     * @param id spell id
-     * @return the line, or null when the spell is passive or unknown
-     */
-    /**
-     * The tooltip line and the description in one text, as an ability list shows it: "Instant, 3 min cooldown.
+     * The tooltip parts and the description in one text, as an ability list shows it: "Instant, 3 min cooldown.
      * Instantly removes all Stun effects." A passive spell has only its description.
      *
      * @param id spell id
      * @return the text, or an empty text for an unknown spell
      */
     String abilityText(int id) {
-        List<String> line = tooltipLine(id);
+        List<String> parts = tooltipLine(id);
         String description = description(id);
 
-        return line.isEmpty() ? description : String.join(", ", line) + ". " + description;
+        return parts.isEmpty() ? description : String.join(", ", parts) + ". " + description;
     }
 
+    /* ─── Tooltip ─── */
+
+    /** What the tooltip of a spell shows above the text. */
+    SpellTooltip tooltip(int id) {
+        return tooltips.of(id);
+    }
+
+    /**
+     * The tooltip parts of an active spell in one line: "15 Rage | Melee Range | Instant | 20 sec cooldown | Requires
+     * Battle Stance".
+     *
+     * @param id spell id
+     * @return the line, or null when the spell is passive or unknown
+     */
     String costLine(int id) {
         List<String> parts = tooltipLine(id);
 
         return parts.isEmpty() ? null : String.join(SEPARATOR, parts);
     }
 
-    @Override
-    public List<String> tooltipLine(int id) {
-        Row misc = indexes().misc().get(id);
+    /* ─── Spellbook details ─── */
 
-        if (misc == null || passive(id)) {
-            return List.of();
+    /** The magic school of a spell ("Fire", "Holy/Shadow"), or null. */
+    String school(int id) {
+        Row misc = indexes().misc().get(id);
+        int mask = misc == null ? 0 : misc.integer("SchoolMask");
+        StringJoiner names = new StringJoiner("/");
+
+        for (int bit = 0; bit < SCHOOLS.size(); bit++) {
+            if ((mask & (1 << bit)) != 0) {
+                names.add(SCHOOLS.get(bit));
+            }
         }
 
-        List<String> parts = new ArrayList<>(powerCosts(id));
-        parts.addAll(range(misc.integer("RangeIndex")));
-        parts.add((misc.integer("Attributes_1") & CHANNELED_ATTRIBUTES) != 0 ? "Channeled"
-                : castTime(misc.integer("CastingTimeIndex")));
-        cooldown(id).ifPresent(parts::add);
-        requirements(id, misc).ifPresent(parts::add);
-
-        return List.copyOf(parts);
+        return names.length() == 0 ? null : names.toString();
     }
 
-    @Override
-    public Optional<String> cost(int id) {
-        return powerCosts(id).stream().findFirst();
+    /**
+     * How much of the spell power the spell adds, by kind of effect: "85.7% of spell power (direct)", "28.6% of spell
+     * power (heal), 9.5% of spell power (per tick)".
+     *
+     * @param id spell id
+     * @return the text, or null when no effect grows with spell power
+     */
+    String coefficient(int id) {
+        Map<String, List<String>> percentsByKind = new LinkedHashMap<>();
+        addCoefficients(id, null, true, percentsByKind);
+        StringJoiner text = new StringJoiner(", ");
+        percentsByKind.forEach((kind, percents) ->
+                text.add(String.join(" and ", percents) + " of spell power (" + kind + ")"));
+
+        return text.length() == 0 ? null : text.toString();
+    }
+
+    /**
+     * Adds the coefficients of the damage and healing effects of a spell, and of the spells its other effects trigger
+     * (one level down: Arcane Missiles deals its damage through a triggered spell).
+     */
+    private void addCoefficients(int id, String forcedKind, boolean followTriggers,
+                                 Map<String, List<String>> percentsByKind) {
+        for (Row effect : indexes().effects().getOrDefault(id, List.of())) {
+            String kind = effectKind(effect);
+            double coefficient = effect.decimal("EffectBonusCoefficient");
+            int triggered = effect.integer("EffectTriggerSpell");
+
+            if (kind != null && coefficient > 0) {
+                percentsByKind.computeIfAbsent(forcedKind == null ? kind : forcedKind, key -> new ArrayList<>())
+                        .add(TooltipFormat.number(Math.round(coefficient * 1000) / 10.0) + "%");
+            } else if (kind == null && followTriggers && triggered > 0) {
+                addCoefficients(triggered, effect.integer("EffectAura") == PERIODIC_TRIGGER_AURA ? PER_TICK : null,
+                        false, percentsByKind);
+            }
+        }
+    }
+
+    /** "direct", "heal" or "per tick" for an effect that deals damage or heals, otherwise null. */
+    private static String effectKind(Row effect) {
+        int aura = effect.integer("EffectAura");
+
+        return switch (effect.integer("Effect")) {
+            case DAMAGE_EFFECT, LEECH_EFFECT -> "direct";
+            case HEAL_EFFECT -> "heal";
+            case AURA_EFFECT -> aura == PERIODIC_DAMAGE_AURA || aura == PERIODIC_HEAL_AURA
+                    || aura == PERIODIC_LEECH_AURA ? PER_TICK : null;
+            default -> null;
+        };
+    }
+
+    /**
+     * The spell a spellbook entry teaches, when the entry is only a "learn" spell (a hunter's pet abilities are
+     * learned through one): its tooltip is the one the player reads. Otherwise the spell itself.
+     *
+     * @param id spell id
+     * @return the spell to show
+     */
+    int taughtSpell(int id) {
+        for (Row effect : indexes().effects().getOrDefault(id, List.of())) {
+            int type = effect.integer("Effect");
+
+            if ((type == LEARN_SPELL_EFFECT || type == LEARN_PET_SPELL_EFFECT)
+                    && effect.integer("EffectTriggerSpell") > 0) {
+                return effect.integer("EffectTriggerSpell");
+            }
+        }
+
+        return id;
+    }
+
+    /** The level a spell is learned at (1 when the client gives none). */
+    int learnLevel(int id) {
+        Row levels = indexes().levels().get(id);
+        int level = levels == null ? 0 : levels.integer("BaseLevel");
+
+        if (level <= 0 && levels != null) {
+            level = levels.integer("SpellLevel");
+        }
+
+        return Math.max(1, level);
     }
 
     /* ─── Building a spell ─── */
@@ -244,16 +347,18 @@ final class ClientSpells implements SpellLookup {
         Row duration = misc == null ? null : index.durations().get(misc.integer("DurationIndex"));
         Row range = misc == null ? null : index.ranges().get(misc.integer("RangeIndex"));
         int spellLevel = levels == null ? 0 : levels.integer("SpellLevel");
-
         List<SpellInfo.Effect> effects = new ArrayList<>();
 
         for (Row effect : effectRows) {
-            effects.add(new SpellInfo.Effect(effect.integer("EffectIndex"), effect.decimal("EffectBasePointsF"),
-                    effect.decimal("EffectRealPointsPerLevel"), effect.decimal("Variance"),
+            double[] value = baseAndVariance(effect);
+            effects.add(new SpellInfo.Effect(effect.integer("EffectIndex"), value[0],
+                    effect.decimal("EffectRealPointsPerLevel"), value[1],
                     effect.integer("EffectAuraPeriod"), effect.decimal("EffectAmplitude"),
                     effect.integer("EffectChainTargets"),
                     Math.max(radius(effect.integer("EffectRadiusIndex_0")),
-                            radius(effect.integer("EffectRadiusIndex_1")))));
+                            radius(effect.integer("EffectRadiusIndex_1"))),
+                    effect.decimal("EffectPointsPerResource"), effect.decimal("EffectChainAmplitude"),
+                    effect.integer("EffectMiscValue_0")));
         }
 
         return new SpellInfo(id, name == null ? "" : name.text("Name_lang"),
@@ -272,154 +377,35 @@ final class ClientSpells implements SpellLookup {
                 List.copyOf(effects));
     }
 
+    /**
+     * The base value and variance of an effect. Older clients (Classic Era) give a base and the sides of a die
+     * instead: the value goes from base + 1 to base + sides, which is the same as its middle with a spread.
+     */
+    private static double[] baseAndVariance(Row effect) {
+        double base = effect.decimal("EffectBasePointsF");
+        int oldBase = effect.integer("EffectBasePoints");
+        int dieSides = effect.integer("EffectDieSides");
+
+        if (base != 0 || (oldBase == 0 && dieSides == 0)) {
+            return new double[]{base, effect.decimal("Variance")};
+        }
+
+        if (dieSides <= 1) {
+            return new double[]{oldBase + dieSides, 0};
+        }
+
+        double min = oldBase + 1;
+        double max = oldBase + dieSides;
+        double middle = (min + max) / 2;
+
+        return new double[]{middle, middle == 0 ? 0 : (max - min) / Math.abs(middle)};
+    }
+
     private double radius(int radiusIndex) {
         Row radius = indexes().radii().get(radiusIndex);
 
         return radius == null ? 0 : radius.decimal("Radius");
     }
-
-    /* ─── Cost line ─── */
-
-    private List<String> powerCosts(int id) {
-        List<String> costs = new ArrayList<>();
-        List<Row> powers = new ArrayList<>(indexes().powers().getOrDefault(id, List.of()));
-        powers.sort(Comparator.comparingInt(row -> row.integer("OrderIndex")));
-
-        for (Row power : powers) {
-            Row type = indexes().powerTypes().get(power.integer("PowerType"));
-            int modifier = type == null ? 1 : Math.max(1, type.integer("DisplayModifier"));
-            String tag = type == null ? "" : type.text("NameGlobalStringTag");
-            String powerName = capitalized(tag);
-            String cost = TooltipFormat.number((double) power.integer("ManaCost") / modifier);
-
-            if (power.integer("ManaCost") > 0 && COMBO_POINTS.equals(tag)) {
-                costs.add(cost + " to " + type.integer("MaxBasePower") + " " + powerName);
-            } else if (power.integer("ManaCost") > 0) {
-                costs.add(cost + " " + powerName);
-            } else if (power.decimal("PowerCostPct") > 0) {
-                costs.add(TooltipFormat.number(power.decimal("PowerCostPct")) + "% of base "
-                        + powerName.toLowerCase(Locale.ROOT));
-            }
-        }
-
-        return costs;
-    }
-
-    private List<String> range(int rangeIndex) {
-        Row range = indexes().ranges().get(rangeIndex);
-
-        if (range == null) {
-            return List.of();
-        }
-
-        String enemy = yards(range.decimal("RangeMin_0"), range.decimal("RangeMax_0"));
-        String friendly = yards(range.decimal("RangeMin_1"), range.decimal("RangeMax_1"));
-
-        if ((range.integer("Flags") & MELEE_RANGE_FLAG) != 0) {
-            return List.of("Melee Range");
-        }
-
-        if (enemy.isEmpty() && friendly.isEmpty()) {
-            return List.of();
-        }
-
-        if (enemy.equals(friendly) || friendly.isEmpty()) {
-            return List.of(enemy + " yd range");
-        }
-
-        return List.of("Enemy: " + enemy + " yd range", "Friendly: " + friendly + " yd range");
-    }
-
-    /** A range in yards, "8-45" when it has a minimum, or an empty text when it has none. */
-    private static String yards(double min, double max) {
-        if (max <= 0) {
-            return "";
-        }
-
-        return (min > 0 ? TooltipFormat.number(min) + "-" : "") + TooltipFormat.number(max);
-    }
-
-    private String castTime(int castTimeIndex) {
-        Row castTime = indexes().castTimes().get(castTimeIndex);
-        int milliseconds = castTime == null ? 0 : castTime.integer("Base");
-
-        return milliseconds <= 0 ? "Instant" : TooltipFormat.number(milliseconds / 1000.0) + " sec cast";
-    }
-
-    private Optional<String> cooldown(int id) {
-        Row cooldown = indexes().cooldowns().get(id);
-        int milliseconds = cooldown == null ? 0
-                : Math.max(cooldown.integer("RecoveryTime"), cooldown.integer("CategoryRecoveryTime"));
-
-        return milliseconds <= 0 ? Optional.empty()
-                : Optional.of(TooltipFormat.duration(milliseconds / 1000.0) + " cooldown");
-    }
-
-    /**
-     * What the spell needs: the forms or stances it can only be cast in, a shield, or the one kind of weapon it needs
-     * (a spell that takes any weapon of a kind, such as any melee weapon, shows no requirement).
-     */
-    private Optional<String> requirements(int id, Row misc) {
-        List<String> required = new ArrayList<>();
-        Row shapeshift = indexes().shapeshifts().get(id);
-
-        if (shapeshift != null && (misc.integer("Attributes_2") & FORMS_OPTIONAL_ATTRIBUTE) == 0) {
-            long mask = shapeshift.longValue("ShapeshiftMask_0");
-
-            for (int bit = 0; bit < Integer.SIZE; bit++) {
-                Row form = (mask & (1L << bit)) == 0 ? null : indexes().forms().get(bit + 1);
-
-                if (form != null) {
-                    required.add(form.text("Name_lang"));
-                }
-            }
-        }
-
-        Row items = indexes().equippedItems().get(id);
-
-        if (items != null) {
-            int itemClass = items.integer("EquippedItemClass");
-
-            List<String> names = itemNames(itemClass, items.longValue("EquippedItemSubclass"));
-
-            if (itemClass == ARMOR_ITEM_CLASS || (itemClass == WEAPON_ITEM_CLASS && names.size() == 1)) {
-                required.addAll(names);
-            }
-        }
-
-        return required.isEmpty() ? Optional.empty() : Optional.of("Requires " + String.join(", ", required));
-    }
-
-    private List<String> itemNames(int itemClass, long subclassMask) {
-        List<String> names = new ArrayList<>();
-
-        for (Row subclass : tables.get(ClientTable.ITEM_SUB_CLASS).rows()) {
-            int bit = subclass.integer("SubClassID");
-
-            if (subclass.integer("ClassID") == itemClass && bit >= 0 && bit < Long.SIZE
-                    && (subclassMask & (1L << bit)) != 0) {
-                String verbose = subclass.text("VerboseName_lang");
-                names.add(verbose.isEmpty() ? subclass.text("DisplayName_lang") : verbose);
-            }
-        }
-
-        return names;
-    }
-
-    /** A client tag as words: COMBO_POINTS reads Combo Points. */
-    private static String capitalized(String tag) {
-        StringJoiner words = new StringJoiner(" ");
-
-        for (String word : tag.toLowerCase(Locale.ROOT).split("_")) {
-            if (!word.isEmpty()) {
-                words.add(Character.toUpperCase(word.charAt(0)) + word.substring(1));
-            }
-        }
-
-        return words.toString();
-    }
-
-    /* ─── Indexes ─── */
 
     private Indexes indexes() {
         if (indexes == null) {
@@ -431,19 +417,12 @@ final class ClientSpells implements SpellLookup {
                     tables.get(ClientTable.SPELL_LEVELS).indexBy("SpellID"),
                     tables.get(ClientTable.SPELL_AURA_OPTIONS).indexBy("SpellID"),
                     tables.get(ClientTable.SPELL_TARGET_RESTRICTIONS).indexBy("SpellID"),
-                    tables.get(ClientTable.SPELL_COOLDOWNS).indexBy("SpellID"),
-                    tables.get(ClientTable.SPELL_POWER).groupBy("SpellID"),
                     tables.get(ClientTable.SPELL_DURATION).indexBy("ID"),
                     tables.get(ClientTable.SPELL_RADIUS).indexBy("ID"),
                     tables.get(ClientTable.SPELL_RANGE).indexBy("ID"),
-                    tables.get(ClientTable.SPELL_CAST_TIMES).indexBy("ID"),
                     tables.get(ClientTable.SPELL_X_DESCRIPTION_VARIABLES).indexBy("SpellID"),
                     tables.get(ClientTable.SPELL_DESCRIPTION_VARIABLES).indexBy("ID"),
-                    tables.get(ClientTable.SPELL_SHAPESHIFT).indexBy("SpellID"),
-                    tables.get(ClientTable.SPELL_SHAPESHIFT_FORM).indexBy("ID"),
-                    tables.get(ClientTable.SPELL_EQUIPPED_ITEMS).indexBy("SpellID"),
-                    tables.get(ClientTable.SPELL_CLASS_OPTIONS).indexBy("SpellID"),
-                    tables.get(ClientTable.POWER_TYPE).indexBy("PowerTypeEnum"));
+                    tables.get(ClientTable.SPELL_CLASS_OPTIONS).indexBy("SpellID"));
         }
 
         return indexes;

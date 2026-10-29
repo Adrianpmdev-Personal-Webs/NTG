@@ -32,7 +32,7 @@ class TooltipFormatTest {
         assertThat(TooltipFormat.duration(15)).isEqualTo("15 sec");
         assertThat(TooltipFormat.duration(90)).isEqualTo("1.5 min");
         assertThat(TooltipFormat.duration(75)).isEqualTo("75 sec");
-        assertThat(TooltipFormat.duration(3600)).isEqualTo("1 hr");
+        assertThat(TooltipFormat.duration(3600)).isEqualTo("1 hour");
         assertThat(TooltipFormat.duration(7200)).isEqualTo("2 hrs");
         assertThat(TooltipFormat.duration(-1)).isEqualTo("until cancelled");
     }

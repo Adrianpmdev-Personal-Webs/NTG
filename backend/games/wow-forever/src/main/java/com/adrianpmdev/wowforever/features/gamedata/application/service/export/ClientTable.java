@@ -9,7 +9,8 @@ import java.util.stream.Stream;
 
 /**
  * The tables of the game client the export reads, with the only columns and rows it uses. Spell tables keep only the
- * rows of the normal difficulty (0); the file list keeps only icons.
+ * rows of the normal difficulty (0); the file list keeps only icons. Columns marked {@code ?} exist in only one of the
+ * two clients read (WoW Forever and, for the comparison, Classic Era).
  *
  * @author adrianpmdev
  */
@@ -17,9 +18,10 @@ enum ClientTable {
 
     SPELL_NAME("SpellName", "ID", "Name_lang"),
     SPELL("Spell", "ID", "NameSubtext_lang", "Description_lang", "AuraDescription_lang"),
-    SPELL_EFFECT(true, "SpellEffect", "SpellID", "EffectIndex", "EffectBasePointsF", "EffectRealPointsPerLevel",
-            "Variance", "EffectAuraPeriod", "EffectAmplitude", "EffectChainTargets", "EffectRadiusIndex_0",
-            "EffectRadiusIndex_1"),
+    SPELL_EFFECT(true, "SpellEffect", "SpellID", "EffectIndex", "Effect", "EffectAura", "EffectBasePointsF",
+            "EffectRealPointsPerLevel", "Variance", "EffectAuraPeriod", "EffectAmplitude", "EffectChainTargets",
+            "EffectRadiusIndex_0", "EffectRadiusIndex_1", "EffectBonusCoefficient", "EffectPointsPerResource",
+            "EffectChainAmplitude", "EffectTriggerSpell", "EffectMiscValue_0", "?EffectBasePoints", "?EffectDieSides"),
     SPELL_MISC(true, "SpellMisc", "SpellID", "Attributes_0", "Attributes_1", "Attributes_2", "DurationIndex",
             "RangeIndex", "CastingTimeIndex", "SchoolMask", "SpellIconFileDataID"),
     SPELL_LEVELS(true, "SpellLevels", "SpellID", "BaseLevel", "SpellLevel", "MaxLevel"),
@@ -27,7 +29,7 @@ enum ClientTable {
             "ProcCategoryRecovery"),
     SPELL_TARGET_RESTRICTIONS(true, "SpellTargetRestrictions", "SpellID", "MaxTargets"),
     SPELL_COOLDOWNS(true, "SpellCooldowns", "SpellID", "RecoveryTime", "CategoryRecoveryTime"),
-    SPELL_POWER("SpellPower", "SpellID", "OrderIndex", "ManaCost", "PowerCostPct", "PowerType"),
+    SPELL_POWER("SpellPower", "SpellID", "OrderIndex", "ManaCost", "ManaPerSecond", "PowerCostPct", "PowerType"),
     SPELL_DURATION("SpellDuration", "ID", "Duration"),
     SPELL_RADIUS("SpellRadius", "ID", "Radius"),
     SPELL_RANGE("SpellRange", "ID", "Flags", "RangeMin_0", "RangeMin_1", "RangeMax_0", "RangeMax_1"),
@@ -38,6 +40,13 @@ enum ClientTable {
     SPELL_SHAPESHIFT_FORM("SpellShapeshiftForm", "ID", "Name_lang"),
     SPELL_EQUIPPED_ITEMS("SpellEquippedItems", "SpellID", "EquippedItemClass", "EquippedItemSubclass"),
     SPELL_CLASS_OPTIONS("SpellClassOptions", "SpellID", "SpellClassSet"),
+    SPELL_REAGENTS("SpellReagents", "SpellID", "Reagent_0", "Reagent_1", "Reagent_2", "Reagent_3",
+            "Reagent_4", "Reagent_5", "Reagent_6", "Reagent_7", "ReagentCount_0", "ReagentCount_1",
+            "ReagentCount_2", "ReagentCount_3", "ReagentCount_4", "ReagentCount_5", "ReagentCount_6", "ReagentCount_7"),
+    SPELL_TOTEMS("SpellTotems", "SpellID", "RequiredTotemCategoryID_0", "RequiredTotemCategoryID_1", "Totem_0",
+            "Totem_1"),
+    TOTEM_CATEGORY("TotemCategory", "ID", "Name_lang"),
+    ITEM_NAMES("ItemSparse", "ID", "Display_lang"),
     ITEM_SUB_CLASS("ItemSubClass", "ClassID", "SubClassID", "DisplayName_lang", "VerboseName_lang"),
     POWER_TYPE("PowerType", "PowerTypeEnum", "NameGlobalStringTag", "DisplayModifier", "MaxBasePower"),
     ICON_FILES("ManifestInterfaceData", "ID", "FilePath", "FileName") {
@@ -65,8 +74,10 @@ enum ClientTable {
     CHR_RACES("ChrRaces", "ID", "Name_lang", "ClientFileString", "Alliance", "PlayableRaceBit"),
     CHAR_BASE_INFO("CharBaseInfo", "RaceID", "ClassID"),
     SKILL_LINE("SkillLine", "ID", "DisplayName_lang", "CategoryID"),
-    SKILL_LINE_ABILITY("SkillLineAbility", "SkillLine", "Spell", "RaceMasks_0", "RaceMasks_1", "ClassMask",
-            "SupercedesSpell"),
+    SKILL_LINE_ABILITY("SkillLineAbility", "SkillLine", "Spell", "?RaceMasks_0", "?RaceMasks_1", "ClassMask",
+            "AcquireMethod"),
+    CLASSIC_TALENT("Talent", "TabID", "TierID", "ColumnIndex", "SpellRank_0", "SpellRank_1", "SpellRank_2",
+            "SpellRank_3", "SpellRank_4", "SpellRank_5", "SpellRank_6", "SpellRank_7", "SpellRank_8"),
     ACHIEVEMENT("Achievement", "ID", "Title_lang", "Description_lang", "Category", "Flags", "Ui_order"),
     ACHIEVEMENT_CATEGORY("Achievement_Category", "ID", "Name_lang", "Parent", "Ui_order");
 

@@ -36,6 +36,10 @@ public final class SpellTextResolver {
     private static final Set<String> LEVEL_VALUES = Set.of("pl", "PL");
     private static final Pattern PLURAL = Pattern.compile("[lLgG]([^:;$\\[\\]]*):([^;$\\[\\]]*);");
     private static final Pattern UNMET_REQUIREMENT = Pattern.compile("(?is)\\|cffff2020.*\\|r");
+    /** Runs of spaces inside a line (the game writes two after each sentence). */
+    private static final Pattern SPACES = Pattern.compile(" {2,}");
+    /** A spell, aura or passive named as {@code $p123} inside a condition. */
+    private static final Pattern CONDITION_REFERENCE = Pattern.compile("\\$(?=[a-zA-Z]\\d)");
     /** Colours, textures and links of the game's text markup. */
     private static final Pattern MARKUP = Pattern.compile(
             "\\|c[0-9a-f]{8}|\\|r|\\|T[^|]*\\|t|\\|H[^|]*\\|h|\\|h", Pattern.CASE_INSENSITIVE);
@@ -92,7 +96,9 @@ public final class SpellTextResolver {
 
         String resolved = new Parser(text, spell, points, depth).readText((char) 0);
 
-        return MARKUP.matcher(resolved).replaceAll("").replace("\r\n", "\n").trim();
+        String clean = MARKUP.matcher(resolved).replaceAll("").replace("\r\n", "\n");
+
+        return SPACES.matcher(clean).replaceAll(" ").trim();
     }
 
     /** A value read from a token: its number (used in formulas) and how the text shows it. */
@@ -278,9 +284,11 @@ public final class SpellTextResolver {
             SpellInfo.Effect effect = target.effect(effectIndex);
 
             return switch (letter) {
-                case 's', 'S', 'm', 'w', 'W' -> effect == null ? null : points(target, effect, targetPoints);
-                case 'M' -> effect == null ? null
-                        : Value.whole(base(target, effect, targetPoints) * (1 + effect.variance() / 2));
+                case 's', 'S', 'w', 'W' -> effect == null ? null : points(target, effect, targetPoints);
+                case 'm' -> effect == null ? null : bound(target, effect, targetPoints, -1);
+                case 'M' -> effect == null ? null : bound(target, effect, targetPoints, 1);
+                case 'b', 'B' -> effect == null ? null : Value.of(effect.pointsPerResource());
+                case 'f', 'F' -> effect == null ? null : Value.of(effect.chainAmplitude());
                 case 'o', 'O' -> effect == null ? null : total(target, effect, targetPoints);
                 case 't', 'T' -> effect == null ? null : Value.of(effect.periodMs() / 1000.0);
                 case 'a', 'A' -> Value.of(radius(target, effect));
@@ -295,7 +303,8 @@ public final class SpellTextResolver {
                 case 'r', 'R' -> Value.of(target.rangeYards());
                 case 'c' -> new Value(0, lookup.cost(target.id()).orElse("0"));
                 case 'i', 'I' -> Value.of(target.maxTargets());
-                case 'b', 'B', 'q', 'v', 'V' -> Value.of(0);
+                case 'q' -> effect == null ? null : Value.of(effect.miscValue());
+                case 'v', 'V' -> Value.of(0);
                 default -> null;
             };
         }
@@ -304,7 +313,10 @@ public final class SpellTextResolver {
             return new Value(seconds, TooltipFormat.duration(seconds));
         }
 
-        /** The value of an effect: the rank's value when the rank sets it, otherwise the base value grown by level. */
+        /**
+         * The value of an effect: the rank's value when the rank sets it, otherwise the base value grown by level up to
+         * the spell's last level, without its decimals (the game keeps whole points).
+         */
         private double base(SpellInfo target, SpellInfo.Effect effect, Map<Integer, Double> targetPoints) {
             Double set = targetPoints.get(effect.index());
 
@@ -312,26 +324,49 @@ public final class SpellTextResolver {
                 return set;
             }
 
+            if (effect.pointsPerLevel() == 0) {
+                return effect.basePoints();
+            }
+
             int topLevel = target.maxLevel() > 0 ? Math.min(playerLevel, target.maxLevel()) : playerLevel;
 
-            return effect.basePoints() + effect.pointsPerLevel() * Math.max(0, topLevel - target.spellLevel());
+            return (long) (effect.basePoints()
+                    + effect.pointsPerLevel() * Math.max(0, topLevel - target.spellLevel()));
+        }
+
+        /** Half the spread of a value: its base value (not grown by level) times the variance, halved. */
+        private double halfSpread(SpellInfo.Effect effect, Map<Integer, Double> targetPoints) {
+            Double set = targetPoints.get(effect.index());
+
+            return Math.abs(set != null ? set : effect.basePoints()) * effect.variance() / 2;
         }
 
         /**
-         * How a value shows: "421 to 439" when it has a spread (the whole numbers inside it), a whole number when it
-         * grows by level, otherwise as the client gives it (0.5 stays 0.5).
+         * How a value shows: "421 to 439" when it has a spread (rounded to whole numbers), a whole number when it grows
+         * by level, otherwise as the client gives it (0.5 stays 0.5).
          */
         private Value points(SpellInfo target, SpellInfo.Effect effect, Map<Integer, Double> targetPoints) {
             double base = base(target, effect, targetPoints);
 
             if (effect.variance() > 0) {
-                double spread = Math.abs(base) * effect.variance() / 2;
+                double half = halfSpread(effect, targetPoints);
 
-                return new Value(base, TooltipFormat.whole(Math.ceil(Math.abs(base) - spread)) + " to "
-                        + TooltipFormat.whole(Math.floor(Math.abs(base) + spread)));
+                return new Value(base, TooltipFormat.whole(Math.abs(base) - half) + " to "
+                        + TooltipFormat.whole(Math.abs(base) + half));
             }
 
             return effect.pointsPerLevel() != 0 ? Value.whole(base) : Value.of(base);
+        }
+
+        /**
+         * {@code $m} and {@code $M}: the lowest or highest value of an effect with a spread (formulas use them for
+         * damage ranges), or its value when it has none.
+         */
+        private Value bound(SpellInfo target, SpellInfo.Effect effect, Map<Integer, Double> targetPoints, int side) {
+            double base = base(target, effect, targetPoints);
+            double bound = base + Math.signum(base) * side * halfSpread(effect, targetPoints);
+
+            return effect.variance() > 0 || effect.pointsPerLevel() != 0 ? Value.whole(bound) : Value.of(bound);
         }
 
         /** {@code $o}: the value of every tick of a periodic effect added up over the duration. */
@@ -517,7 +552,7 @@ public final class SpellTextResolver {
             while (true) {
                 skipSpaces();
 
-                if (consume("*")) {
+                if (consume("*") || consume("$*")) {
                     value *= unary();
                 } else if (consume("/")) {
                     double divisor = unary();
@@ -701,7 +736,8 @@ public final class SpellTextResolver {
                 throw new IllegalStateException("Choice without branches");
             }
 
-            Parser parser = new Parser(text.substring(position, end), spell, points, depth);
+            String condition = CONDITION_REFERENCE.matcher(text.substring(position, end)).replaceAll("");
+            Parser parser = new Parser(condition, spell, points, depth);
             boolean holds = truth(parser.expression());
             position = end;
 

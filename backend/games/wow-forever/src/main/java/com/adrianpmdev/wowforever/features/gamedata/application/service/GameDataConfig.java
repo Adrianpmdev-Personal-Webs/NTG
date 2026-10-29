@@ -72,10 +72,13 @@ public record GameDataConfig(
      * Texts of the spellbook.
      *
      * @param generalTabName   name of the tab with the spells every character has
+     * @param extraTabs        tabs of a class besides its talent trees, by class name: the client skill lines each
+     *                         tab holds, by tab name (in the order they are shown)
      * @param learnedFromQuest where a rank taught by a class quest is learned
      * @param learnedFrom      where a rank is learned, by the trainer code of the data
      */
-    public record Spellbook(String generalTabName, String learnedFromQuest, Map<String, String> learnedFrom) {
+    public record Spellbook(String generalTabName, Map<String, Map<String, List<String>>> extraTabs,
+                            String learnedFromQuest, Map<String, String> learnedFrom) {
     }
 
     /**
@@ -91,6 +94,8 @@ public record GameDataConfig(
      * Where the game data comes from: the tables of the game client that wago.tools publishes for every build.
      *
      * @param product                  wago.tools product code of the game
+     * @param classicProduct           wago.tools product code of Classic Era, which talents and spells are compared
+     *                                 with
      * @param checkMinutes             how often wago.tools is asked whether there is a new build
      * @param attribution              credit line of the data
      * @param talentCurrencyId         client currency spent in the talent trees
@@ -100,7 +105,8 @@ public record GameDataConfig(
      * @param legacyTrees              name and icon of each Legacy tree by client tree id (the client names none), in
      *                                 the order they are shown
      */
-    public record Client(String product, int checkMinutes, String attribution, int talentCurrencyId,
+    public record Client(String product, String classicProduct, int checkMinutes, String attribution,
+                         int talentCurrencyId,
                          int legacyCurrencyId, long legacyChallengeFlag, int legacyPointsPerChallenge,
                          Map<String, LegacyTree> legacyTrees) {
     }

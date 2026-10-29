@@ -42,6 +42,14 @@ class Db2TableTest {
     }
 
     @Test
+    void optionalColumnsMayBeMissing() throws IOException {
+        Db2Table table = Db2Table.read("SpellName", new StringReader(CSV), List.of("ID", "?Missing"));
+
+        assertThat(table.rows().getFirst().text("Missing")).isEmpty();
+        assertThat(table.rows().getFirst().integer("Missing")).isZero();
+    }
+
+    @Test
     void refusesAnExportWithoutAColumn() {
         assertThatThrownBy(() -> Db2Table.read("SpellName", new StringReader(CSV), List.of("ID", "Missing")))
                 .isInstanceOf(IOException.class)

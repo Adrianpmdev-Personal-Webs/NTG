@@ -23,7 +23,7 @@ class SpellTextResolverTest {
     }
 
     private static SpellInfo.Effect effect(int index, double basePoints) {
-        return new SpellInfo.Effect(index, basePoints, 0, 0, 0, 1, 0, 0);
+        return new SpellInfo.Effect(index, basePoints, 0, 0, 0, 1, 0, 0, 0, 1, 0);
     }
 
     private static SpellTextResolver resolver(SpellInfo... spells) {
@@ -54,7 +54,8 @@ class SpellTextResolverTest {
 
     @Test
     void valuesWithASpreadShowTheirRange() {
-        SpellInfo spell = spell(1, "Causes $s1 damage.", 0, new SpellInfo.Effect(0, 430, 0, 0.0434782, 0, 1, 0, 0));
+        SpellInfo spell = spell(1, "Causes $s1 damage.", 0,
+                new SpellInfo.Effect(0, 430, 0, 0.0434782, 0, 1, 0, 0, 0, 1, 0));
 
         assertThat(resolver(spell).description(spell)).isEqualTo("Causes 421 to 439 damage.");
     }
@@ -62,9 +63,17 @@ class SpellTextResolverTest {
     @Test
     void valuesGrowWithLevelUpToTheSpellLimit() {
         SpellInfo spell = new SpellInfo(1, "Nova", "Heals for $s1.", "", "", 0, 20, 26, 0, 0, 0, 0, 0, 0,
-                List.of(new SpellInfo.Effect(0, 27, 0.2, 0, 0, 1, 0, 0)));
+                List.of(new SpellInfo.Effect(0, 27, 0.2, 0, 0, 1, 0, 0, 0, 1, 0)));
 
         assertThat(resolver(spell).description(spell)).isEqualTo("Heals for 28.");
+    }
+
+    @Test
+    void comboPointFormulasUseTheRangeAndThePointsPerCombo() {
+        SpellInfo spell = spell(1, "1 point: ${$m1+$b1}-${$M1+$b1} damage", 0,
+                new SpellInfo.Effect(0, 3, 0, 1.3333333, 0, 1, 0, 0, 5, 1, 0));
+
+        assertThat(resolver(spell).description(spell)).isEqualTo("1 point: 6-10 damage");
     }
 
     @Test
@@ -85,9 +94,10 @@ class SpellTextResolverTest {
 
     @Test
     void choicesTakeTheBranchOfACharacterWithoutTheSpell() {
-        SpellInfo spell = spell(1, "Heals$?s12345[ and shields][]. $?!s99[Always.][Never.]", 0, effect(0, 1));
+        SpellInfo spell = spell(1, "Heals$?s12345[ and shields][].  $?!s99[Always.][Never.] $?$p7[x][${$m1*2}]", 0,
+                effect(0, 4));
 
-        assertThat(resolver(spell).description(spell)).isEqualTo("Heals. Always.");
+        assertThat(resolver(spell).description(spell)).isEqualTo("Heals. Always. 8");
     }
 
     @Test

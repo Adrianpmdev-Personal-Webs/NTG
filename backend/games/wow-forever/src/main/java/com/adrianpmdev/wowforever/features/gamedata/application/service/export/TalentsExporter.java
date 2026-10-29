@@ -98,7 +98,7 @@ final class TalentsExporter {
 
     private ArrayNode trees(int classId, TraitTrees.Tree tree) {
         List<Row> tabs = tables.get(ClientTable.TALENT_TAB).rows().stream()
-                .filter(tab -> tab.integer("ClassMask") == 1 << (classId - 1))
+                .filter(tab -> tab.integer("ClassMask") == ClassSkillLines.classBit(classId))
                 .sorted(Comparator.comparingInt(tab -> tab.integer("OrderIndex")))
                 .toList();
         Map<TraitTrees.Node, TreeGrid.Position> positions = new LinkedHashMap<>();

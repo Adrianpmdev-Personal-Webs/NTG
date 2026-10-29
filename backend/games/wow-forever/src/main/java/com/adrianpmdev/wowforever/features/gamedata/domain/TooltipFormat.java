@@ -47,7 +47,7 @@ public final class TooltipFormat {
     }
 
     /**
-     * A duration in the largest unit that writes it with at most one decimal: "15 sec", "1.5 min", "2 min", "1 hr",
+     * A duration in the largest unit that writes it with at most one decimal: "15 sec", "1.5 min", "2 min", "1 hour",
      * "2 hrs", and "until cancelled" for a negative one.
      */
     public static String duration(double seconds) {
@@ -58,7 +58,7 @@ public final class TooltipFormat {
         if (seconds >= SECONDS_PER_HOUR && oneDecimal(seconds / SECONDS_PER_HOUR)) {
             double hours = seconds / SECONDS_PER_HOUR;
 
-            return number(hours) + (hours == 1 ? " hr" : " hrs");
+            return number(hours) + (hours == 1 ? " hour" : " hrs");
         }
 
         if (seconds >= SECONDS_PER_MINUTE && oneDecimal(seconds / SECONDS_PER_MINUTE)) {

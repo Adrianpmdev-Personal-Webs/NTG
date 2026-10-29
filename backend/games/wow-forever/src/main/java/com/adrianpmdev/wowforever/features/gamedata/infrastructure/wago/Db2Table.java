@@ -13,11 +13,15 @@ import java.util.function.Predicate;
 
 /**
  * One table of the game client (a DB2 file) as wago.tools exports it, keeping only the columns its reader asked for:
- * the client tables are large, and most of their columns are never used.
+ * the client tables are large, and most of their columns are never used. A column asked for as {@code ?Name} is
+ * optional (one game version has it and another does not): when the export lacks it, it reads as empty.
  *
  * @author adrianpmdev
  */
 public final class Db2Table {
+
+    /** Marks a column that an export may lack. */
+    public static final String OPTIONAL = "?";
 
     private final String name;
     private final Map<String, Integer> columns;
@@ -54,7 +58,8 @@ public final class Db2Table {
      */
     public static Db2Table read(String name, Reader csv, Collection<String> columns, Predicate<Row> keep)
             throws IOException {
-        List<String> wanted = List.copyOf(columns);
+        List<String> wanted = columns.stream().map(Db2Table::columnName).toList();
+        List<Boolean> optional = columns.stream().map(column -> column.startsWith(OPTIONAL)).toList();
         int[][] positions = new int[1][];
         List<Row> rows = new ArrayList<>();
         Map<String, Integer> indexes = new LinkedHashMap<>();
@@ -86,12 +91,16 @@ public final class Db2Table {
         }
 
         for (int index = 0; index < wanted.size(); index++) {
-            if (positions[0][index] < 0) {
+            if (positions[0][index] < 0 && !optional.get(index)) {
                 throw new IOException("The table " + name + " has no column " + wanted.get(index));
             }
         }
 
         return table;
+    }
+
+    private static String columnName(String column) {
+        return column.startsWith(OPTIONAL) ? column.substring(OPTIONAL.length()) : column;
     }
 
     private static int[] positionsOf(String[] header, List<String> wanted) {

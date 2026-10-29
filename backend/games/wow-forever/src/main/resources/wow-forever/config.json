@@ -61,6 +61,13 @@
 
     "spellbook": {
         "generalTabName": "General",
+        "extraTabs": {
+            "Hunter": { "Pets": ["Beast Training"] },
+            "Rogue": { "Poisons": ["Poisons"] },
+            "Warlock": {
+                "Demons": ["Pet - Imp", "Pet - Voidwalker", "Pet - Succubus", "Pet - Felhunter", "Pet - Felguard"]
+            }
+        },
         "learnedFromQuest": "Lo enseña una misión de clase",
         "learnedFrom": {
             "1": "Lo enseña el entrenador de portales",
@@ -83,6 +90,7 @@
 
     "client": {
         "product": "wowf",
+        "classicProduct": "wow_classic_era",
         "checkMinutes": 60,
         "attribution": "Game data read from the WoW Forever client through wago.tools",
         "talentCurrencyId": 3820,

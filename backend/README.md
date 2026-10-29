@@ -92,7 +92,7 @@ backend/
 │
 ├── games/
 │   ├── pokemon/                    🎮 Pokémon (+ sql/pokemon.sql)
-│   └── wow-forever/                🎮 WoW Forever (no tables: data.json + config.json)
+│   └── wow-forever/                🎮 WoW Forever (no tables; data from the game client + sql/wow-forever.sql)
 │
 └── app/                            🧷 Application.java, application.yml, ntg.jar
 ```
@@ -233,8 +233,10 @@ plus **one schema per game** that needs tables. Each module keeps its DDL next t
 
 - Each user shares its id with its Supabase Auth account and is linked to its tags through a join table.
 - A game owns the tables of its own schema and never exposes its entities: the API only returns DTOs.
-- Data that only changes with a release (the WoW Forever game data, the Pokémon type chart) lives in JSON files
-  inside the module, not in the database.
+- Data that only changes with a release (the Pokémon type chart, the WoW Forever texts and rules) lives in JSON
+  files inside the module, not in the database.
+- The WoW Forever game data is built by the backend from the game client (through wago.tools) every time a new
+  build comes out, checked every hour; the last good copy is kept in a private Storage bucket.
 - Pictures are files in Supabase Storage; the database keeps only their object names.
 
 ---

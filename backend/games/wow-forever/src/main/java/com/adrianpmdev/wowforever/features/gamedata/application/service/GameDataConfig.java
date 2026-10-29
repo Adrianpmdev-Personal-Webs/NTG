@@ -16,6 +16,7 @@ import java.util.Map;
  * @param talents      rules of the talent calculator
  * @param spellbook    texts of the spellbook
  * @param legacy       texts of the Legacy System
+ * @param client       where the game data is read from in the game client, and what the client does not name
  *
  * @author adrianpmdev
  */
@@ -27,7 +28,8 @@ public record GameDataConfig(
         News news,
         Talents talents,
         Spellbook spellbook,
-        Legacy legacy
+        Legacy legacy,
+        Client client
 ) {
 
     /**
@@ -83,5 +85,32 @@ public record GameDataConfig(
      * @param challengeGroups     Spanish name of each challenge group (a group not listed keeps the data's name)
      */
     public record Legacy(String placeholderPerkName, Map<String, String> challengeGroups) {
+    }
+
+    /**
+     * Where the game data comes from: the tables of the game client that wago.tools publishes for every build.
+     *
+     * @param product                  wago.tools product code of the game
+     * @param checkMinutes             how often wago.tools is asked whether there is a new build
+     * @param attribution              credit line of the data
+     * @param talentCurrencyId         client currency spent in the talent trees
+     * @param legacyCurrencyId         client currency spent in the Legacy System perk trees
+     * @param legacyChallengeFlag      achievement flag that marks a Legacy System challenge
+     * @param legacyPointsPerChallenge Legacy points a challenge gives
+     * @param legacyTrees              name and icon of each Legacy tree by client tree id (the client names none), in
+     *                                 the order they are shown
+     */
+    public record Client(String product, int checkMinutes, String attribution, int talentCurrencyId,
+                         int legacyCurrencyId, long legacyChallengeFlag, int legacyPointsPerChallenge,
+                         Map<String, LegacyTree> legacyTrees) {
+    }
+
+    /**
+     * A Legacy System tree as the game shows it.
+     *
+     * @param name name
+     * @param icon icon, as the icon host names it
+     */
+    public record LegacyTree(String name, String icon) {
     }
 }

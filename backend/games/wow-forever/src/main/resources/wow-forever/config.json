@@ -79,5 +79,20 @@
             "PvP": "JcJ",
             "Other": "Otros"
         }
+    },
+
+    "client": {
+        "product": "wowf",
+        "checkMinutes": 60,
+        "attribution": "Game data read from the WoW Forever client through wago.tools",
+        "talentCurrencyId": 3820,
+        "legacyCurrencyId": 4225,
+        "legacyChallengeFlag": 268435456,
+        "legacyPointsPerChallenge": 1,
+        "legacyTrees": {
+            "1188": { "name": "Adventure", "icon": "inv_misc_map_01" },
+            "1189": { "name": "Resourcefulness", "icon": "inv_misc_coin_01" },
+            "1187": { "name": "Professions", "icon": "trade_engineering" }
+        }
     }
 }

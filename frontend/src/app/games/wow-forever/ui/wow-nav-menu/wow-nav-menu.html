@@ -1,0 +1,18 @@
+<button
+    #toggleButton
+    class="menu-toggle"
+    type="button"
+    [attr.aria-controls]="panelId"
+    [attr.aria-expanded]="open()"
+    [attr.aria-label]="open() ? 'Cerrar el menú' : 'Abrir el menú'"
+    (click)="toggle()"
+>
+    <span class="menu-toggle__bars" [class.menu-toggle__bars--open]="open()" aria-hidden="true"></span>
+</button>
+@if (open()) {
+    <nav #panel class="menu-panel" [id]="panelId" aria-label="Navegación">
+        @for (item of links(); track item.link) {
+            <app-wow-button [link]="item.link" [block]="true" (click)="close()">{{ item.label }}</app-wow-button>
+        }
+    </nav>
+}

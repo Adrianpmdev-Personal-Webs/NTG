@@ -78,9 +78,9 @@
 .logo-placeholder {
     position: absolute;
     left: 50%;
-    top: 50%;
+    top: calc((100% - 9px) / 2);
     width: min(48vw, 620px);
-    height: calc(100% - 8px);
+    height: calc(100% - 17px);
     transform: translate(-50%, -50%);
     background:
         radial-gradient(ellipse at center, rgba(211, 166, 47, 0.18), transparent 57%),

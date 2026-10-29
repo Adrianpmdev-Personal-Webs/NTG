@@ -1,5 +1,9 @@
 @use '../../styles/wow-forever' as wow;
 
+:host {
+    display: contents;
+}
+
 .tooltip {
     position: fixed;
     z-index: 1000;

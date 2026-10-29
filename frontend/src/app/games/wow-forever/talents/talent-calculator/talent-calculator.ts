@@ -1,8 +1,9 @@
 /**
  * TalentCalculator
  *
- * Talent calculator of WoW Forever: pick a class, set the level and spend points in its three trees. The talents of a
- * class are downloaded when it is picked. The build lives in the URL so it can be shared.
+ * Talent calculator of WoW Forever: pick a class, set the level and spend points in its three trees, seeing the level
+ * the spent points need. The talents of a class are downloaded when it is picked. The build lives in the URL so it can
+ * be shared.
  *
  * @author @adrianpmdev
  */
@@ -82,7 +83,7 @@ export class TalentCalculator implements OnInit {
     protected readonly pointsSpent = computed(() => totalPoints(this.trees(), this.ranks()));
     protected readonly pointsLeft = computed(() => this.pointsTotal() - this.pointsSpent());
     protected readonly treePoints = computed(() => this.trees().map((tree) => pointsInTree(tree, this.ranks())));
-    private readonly minLevel = computed(() => minLevelFor(this.levels(), this.pointsSpent()));
+    protected readonly minLevel = computed(() => minLevelFor(this.levels(), this.pointsSpent()));
 
     protected readonly hovered = computed(() => {
         const hover = this.hover();

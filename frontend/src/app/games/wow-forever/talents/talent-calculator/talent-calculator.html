@@ -1,4 +1,4 @@
-<app-wow-page title="Calculadora de talentos" [credit]="credit()">
+<app-wow-page heading="Calculadora de talentos" [credit]="credit()" [compactNav]="true">
     @if (loading()) {
         <p class="state">Cargando…</p>
     } @else if (failed()) {
@@ -42,6 +42,9 @@
                 >
                 <span [class.over]="pointsLeft() === 0"
                     >Restantes: <strong>{{ pointsLeft() }}</strong></span
+                >
+                <span class="points-level"
+                    >Nivel necesario: <strong>{{ minLevel() }}</strong></span
                 >
             </div>
 

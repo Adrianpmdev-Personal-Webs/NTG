@@ -47,6 +47,23 @@
     .level-range {
         width: 140px;
     }
+
+    .controls .points {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .points-level {
+        flex-basis: 100%;
+        text-align: center;
+    }
+}
+
+@include small {
+    .controls .points {
+        gap: 6px 10px;
+        font-size: 0.82rem;
+    }
 }
 
 @include mobile {

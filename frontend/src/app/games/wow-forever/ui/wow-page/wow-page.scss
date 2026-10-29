@@ -48,6 +48,10 @@ app-wow-frame {
     gap: 12px;
 }
 
+.page-menu {
+    display: none;
+}
+
 .title {
     margin: 0;
     color: wow.$gold;
@@ -69,6 +73,20 @@ app-wow-frame {
     .wow-page {
         padding: 12px 12px 20px;
     }
+
+    .page-header--compact {
+        display: grid;
+        grid-template-columns: 42px minmax(0, 1fr) 42px;
+        align-items: center;
+    }
+
+    .page-header--compact .page-menu {
+        display: block;
+    }
+
+    .page-header--compact .page-back {
+        display: none;
+    }
 }
 
 @include mobile {
@@ -81,6 +99,10 @@ app-wow-frame {
         flex: 0 0 100%;
         font-size: 1.05rem;
         letter-spacing: 2px;
+    }
+
+    .page-header--compact .title {
+        order: 0;
     }
 }
 

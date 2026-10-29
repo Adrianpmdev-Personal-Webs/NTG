@@ -167,9 +167,10 @@ public final class GameDataResponses {
      * A tab of the spellbook.
      *
      * @param name   name
+     * @param icon   icon URL: the icon of the talent tree of the same name, or the one config.json gives the tab
      * @param spells spells
      */
-    public record SpellbookTab(String name, List<Spell> spells) {
+    public record SpellbookTab(String name, String icon, List<Spell> spells) {
     }
 
     /**

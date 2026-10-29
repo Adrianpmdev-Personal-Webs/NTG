@@ -77,11 +77,13 @@ public record GameDataConfig(
      * @param generalTabName   name of the tab with the spells every character has
      * @param extraTabs        tabs of a class besides its talent trees, by class name: the client skill lines each
      *                         tab holds, by tab name (in the order they are shown)
+     * @param tabIcons         icon of the tabs that are not a talent tree (General and the extra tabs), by tab name;
+     *                         a talent tree tab shows the icon of its tree
      * @param learnedFromQuest where a rank taught by a class quest is learned
      * @param learnedFrom      where a rank is learned, by the trainer code of the data
      */
     public record Spellbook(String generalTabName, Map<String, Map<String, List<String>>> extraTabs,
-                            String learnedFromQuest, Map<String, String> learnedFrom) {
+                            Map<String, String> tabIcons, String learnedFromQuest, Map<String, String> learnedFrom) {
     }
 
     /**

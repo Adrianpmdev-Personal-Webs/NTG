@@ -80,6 +80,18 @@ class GameDataServiceTest {
     }
 
     @Test
+    void spellbookTabsShowTheIconOfTheirTalentTree() throws Exception {
+        JsonNode spellbook = read(service.getSpellbook("warrior"));
+        JsonNode talents = read(service.getTalents("warrior"));
+
+        for (int index = 0; index < 3; index++) {
+            assertThat(spellbook.path("tabs").path(index).path("icon").asText())
+                    .isEqualTo(talents.path("trees").path(index).path("icon").asText())
+                    .startsWith(ICON_PREFIX);
+        }
+    }
+
+    @Test
     void legacyGroupsAreInSpanish() throws Exception {
         JsonNode legacy = read(service.getLegacy());
 

@@ -1,9 +1,11 @@
 /**
  * SpellbookViewer
  *
- * Spellbook of each WoW Forever class: the spells of every tab with the tooltip of each rank, the level it is learned
- * at and how it compares with Classic. Spells can be filtered by name and by the highest level to show. The spellbook
- * of a class is downloaded when it is picked; the class lives in the URL so the page can be shared.
+ * Spellbook of each WoW Forever class, laid out like the game's: an open book with six spells on each page, a tab with
+ * the icon of each talent tree at its side and pages to turn. Each slot shows the highest rank learned by the chosen
+ * level, or one slot per rank with "Mostrar todos los rangos", and the tooltip of that rank from the pointer (or below
+ * on focus). Spells can be filtered by name. The spellbook of a class is downloaded when it is picked; the class lives
+ * in the URL so the page can be shared.
  *
  * @author @adrianpmdev
  */
@@ -13,37 +15,42 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { NotificationCenter } from '@core/notifications/notification-center';
 import { GameDataApi } from '../../game-data/game-data-api';
-import { ClassicStatus, DataCredit, GameClass } from '../../game-data/game-data-models';
+import { DataCredit, GameClass } from '../../game-data/game-data-models';
 import { ClassPicker } from '../../ui/class-picker/class-picker';
 import { WowPage } from '../../ui/wow-page/wow-page';
 import { creditLine, hideBrokenIcon } from '../../wow-forever-config';
+import { SpellTooltip } from '../spell-tooltip/spell-tooltip';
 import { ClassSpellbook, Spell, SpellRank } from '../spellbook-models';
 
-interface SpellView {
+interface BookSlot {
+    key: string;
     spell: Spell;
-    ranks: SpellRank[];
-    selected: number;
     rank: SpellRank;
+}
+
+interface SlotHover {
+    slot: BookSlot;
+    x: number;
+    y: number;
 }
 
 const MIN_LEVEL = 1;
 const MAX_LEVEL = 60;
+const SLOTS_PER_PAGE = 6;
+const SLOTS_PER_SPREAD = SLOTS_PER_PAGE * 2;
 
-const CLASSIC_BADGES: Readonly<Partial<Record<ClassicStatus, string>>> = {
-    new: 'Nuevo',
-    changed: 'Cambiado',
-};
+const normalize = (text: string): string => text.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 
-const normalize = (text: string): string =>
-    text
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toLowerCase()
-        .trim();
+const firstLevel = (spell: Spell): number => spell.ranks.find((rank) => rank.level !== null)?.level ?? 0;
+
+const padded = (slots: readonly BookSlot[]): (BookSlot | null)[] => [
+    ...slots,
+    ...Array<null>(SLOTS_PER_PAGE - slots.length).fill(null),
+];
 
 @Component({
     selector: 'app-spellbook-viewer',
-    imports: [ClassPicker, WowPage],
+    imports: [ClassPicker, SpellTooltip, WowPage],
     templateUrl: './spellbook-viewer.html',
     styleUrl: './spellbook-viewer.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -69,37 +76,47 @@ export class SpellbookViewer implements OnInit {
     protected readonly activeTab = signal(0);
     protected readonly query = signal('');
     protected readonly levelLimit = signal(MAX_LEVEL);
-    private readonly pickedRanks = signal<Readonly<Record<string, number>>>({});
+    protected readonly allRanks = signal(false);
+    private readonly page = signal(0);
+    protected readonly hovered = signal<SlotHover | null>(null);
 
     protected readonly tabs = computed(() => this.spellbook()?.tabs ?? []);
 
-    protected readonly views = computed<SpellView[]>(() => {
+    private readonly slots = computed<BookSlot[]>(() => {
         const tab = this.tabs()[this.activeTab()];
         const query = normalize(this.query());
         const limit = this.levelLimit();
-        const picked = this.pickedRanks();
+        const allRanks = this.allRanks();
 
         if (!tab) {
             return [];
         }
 
-        return tab.spells.flatMap((spell) => {
-            if (query && !normalize(spell.name).includes(query)) {
-                return [];
-            }
+        return [...tab.spells]
+            .filter((spell) => !query || normalize(spell.name).includes(query))
+            .sort((a, b) => firstLevel(a) - firstLevel(b))
+            .flatMap((spell) => {
+                const learned = spell.ranks
+                    .map((rank, index) => ({ rank, key: `${spell.name}#${index}` }))
+                    .filter(({ rank }) => rank.level === null || rank.level <= limit);
+                const shown = allRanks ? learned : learned.slice(-1);
 
-            const ranks = spell.ranks.filter((rank) => rank.level === null || rank.level <= limit);
-
-            if (ranks.length === 0) {
-                return [];
-            }
-
-            const chosen = picked[spell.name];
-            const selected = chosen !== undefined && chosen < ranks.length ? chosen : ranks.length - 1;
-
-            return [{ spell, ranks, selected, rank: ranks[selected] }];
-        });
+                return shown.map(({ rank, key }) => ({ key, spell, rank }));
+            });
     });
+
+    protected readonly pageCount = computed(() => Math.max(1, Math.ceil(this.slots().length / SLOTS_PER_SPREAD)));
+
+    protected readonly currentPage = computed(() => Math.min(this.page(), this.pageCount() - 1));
+
+    protected readonly pages = computed<(BookSlot | null)[][]>(() => {
+        const start = this.currentPage() * SLOTS_PER_SPREAD;
+        const spread = this.slots().slice(start, start + SLOTS_PER_SPREAD);
+
+        return [padded(spread.slice(0, SLOTS_PER_PAGE)), padded(spread.slice(SLOTS_PER_PAGE))];
+    });
+
+    protected readonly empty = computed(() => this.slots().length === 0);
 
     protected readonly credit = computed(() => creditLine(this.spellbook()?.credit ?? this.indexCredit()));
 
@@ -136,7 +153,7 @@ export class SpellbookViewer implements OnInit {
         this.selectedClass.set(gameClass);
         this.spellbook.set(null);
         this.activeTab.set(0);
-        this.pickedRanks.set({});
+        this.turnTo(0);
 
         this.classLoad?.unsubscribe();
         this.loadingBook.set(true);
@@ -156,10 +173,12 @@ export class SpellbookViewer implements OnInit {
 
     protected selectTab(index: number): void {
         this.activeTab.set(index);
+        this.turnTo(0);
     }
 
     protected changeQuery(value: string): void {
         this.query.set(value);
+        this.turnTo(0);
     }
 
     protected changeLevel(value: number | string): void {
@@ -167,18 +186,39 @@ export class SpellbookViewer implements OnInit {
 
         if (Number.isFinite(parsed)) {
             this.levelLimit.set(Math.min(MAX_LEVEL, Math.max(MIN_LEVEL, Math.round(parsed))));
+            this.turnTo(0);
         }
     }
 
-    protected pickRank(spell: Spell, index: number): void {
-        this.pickedRanks.update((picked) => ({ ...picked, [spell.name]: index }));
+    protected toggleAllRanks(checked: boolean): void {
+        this.allRanks.set(checked);
+        this.turnTo(0);
     }
 
-    protected rankButton(rank: SpellRank, index: number): string {
-        return /\d+/.exec(rank.label)?.[0] ?? String(index + 1);
+    protected previousPage(): void {
+        this.turnTo(this.currentPage() - 1);
     }
 
-    protected classicBadge(rank: SpellRank): string | null {
-        return rank.classic ? (CLASSIC_BADGES[rank.classic] ?? null) : null;
+    protected nextPage(): void {
+        this.turnTo(this.currentPage() + 1);
+    }
+
+    protected showSlotAtPointer(event: MouseEvent, slot: BookSlot): void {
+        this.hovered.set({ slot, x: event.clientX, y: event.clientY });
+    }
+
+    protected showSlotBelow(event: FocusEvent, slot: BookSlot): void {
+        const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+
+        this.hovered.set({ slot, x: rect.left + rect.width / 2, y: rect.bottom });
+    }
+
+    protected hideSlot(): void {
+        this.hovered.set(null);
+    }
+
+    private turnTo(page: number): void {
+        this.page.set(Math.max(0, page));
+        this.hovered.set(null);
     }
 }

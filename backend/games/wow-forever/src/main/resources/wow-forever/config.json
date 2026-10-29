@@ -69,6 +69,12 @@
                 "Demons": ["Pet - Imp", "Pet - Voidwalker", "Pet - Succubus", "Pet - Felhunter", "Pet - Felguard"]
             }
         },
+        "tabIcons": {
+            "General": "inv_misc_book_09",
+            "Pets": "ability_hunter_beasttraining",
+            "Poisons": "trade_brewpoison",
+            "Demons": "spell_shadow_summonimp"
+        },
         "learnedFromQuest": "Lo enseña una misión de clase",
         "learnedFrom": {
             "1": "Lo enseña el entrenador de portales",

@@ -294,19 +294,45 @@ final class GameDataMapper {
         String textPrefix = className + SPELL_KEY_SEPARATOR;
 
         Set<String> fromTalent = new HashSet<>(strings(book.path("talents")));
+        Map<String, String> treeIcons = new HashMap<>();
+        root.path("talents").path(className).path("trees")
+                .forEach(tree -> treeIcons.put(tree.path("name").asText(""), tree.path("icon").asText("")));
+
         List<SpellbookTab> tabs = new ArrayList<>();
-        tabs.add(new SpellbookTab(config.spellbook().generalTabName(),
-                spells(book.path("general"), book, texts, textPrefix, fromTalent)));
+        String generalName = config.spellbook().generalTabName();
+        tabs.add(spellbookTab(generalName, spells(book.path("general"), book, texts, textPrefix, fromTalent),
+                treeIcons));
 
         for (JsonNode tab : book.path("tabs")) {
-            tabs.add(new SpellbookTab(tab.path("name").asText(""),
-                    spells(tab.path("spells"), book, texts, textPrefix, fromTalent)));
+            tabs.add(spellbookTab(tab.path("name").asText(""),
+                    spells(tab.path("spells"), book, texts, textPrefix, fromTalent), treeIcons));
         }
 
         tabs.removeIf(tab -> tab.spells().isEmpty());
 
         return new ClassSpellbook(gameClass, tabs, abilities(root.path("class_abilities").path(className)),
                 strings(book.path("gone")), credit(root, book.path("build").asText(null)));
+    }
+
+    /**
+     * A tab with its icon, as the game shows it at the side of the book: a talent tree tab takes the icon of the tree of
+     * the same name, any other the one config.json gives it, and a tab with neither the icon of its first spell.
+     */
+    private SpellbookTab spellbookTab(String name, List<Spell> spells, Map<String, String> treeIcons) {
+        String treeIcon = treeIcons.get(name);
+        Map<String, String> tabIcons = config.spellbook().tabIcons();
+        String configIcon = tabIcons == null ? null : tabIcons.get(name);
+        String icon;
+
+        if (treeIcon != null && !treeIcon.isBlank()) {
+            icon = iconUrl(treeIcon);
+        } else if (configIcon != null && !configIcon.isBlank()) {
+            icon = iconUrl(configIcon);
+        } else {
+            icon = spells.isEmpty() ? iconUrl(null) : spells.getFirst().icon();
+        }
+
+        return new SpellbookTab(name, icon, spells);
     }
 
     /** One spell per name, its ranks in order, in the order the book first lists each name. */

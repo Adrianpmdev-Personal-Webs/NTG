@@ -36,21 +36,6 @@
                 </details>
             }
 
-            <div class="tabs" role="tablist">
-                @for (tab of tabs(); track tab.name; let index = $index) {
-                    <button
-                        type="button"
-                        class="tab"
-                        role="tab"
-                        [class.active]="activeTab() === index"
-                        [attr.aria-selected]="activeTab() === index"
-                        (click)="selectTab(index)"
-                    >
-                        {{ tab.name }}
-                    </button>
-                }
-            </div>
-
             <section class="filters">
                 <input
                     class="search"
@@ -74,101 +59,117 @@
                     />
                     <span class="level-value">{{ levelLimit() }}</span>
                 </div>
+
+                <label class="all-ranks">
+                    <input
+                        type="checkbox"
+                        [checked]="allRanks()"
+                        (change)="toggleAllRanks($any($event.target).checked)"
+                    />
+                    Mostrar todos los rangos
+                </label>
             </section>
 
-            @if (views().length === 0) {
-                <p class="state">No hay hechizos que coincidan.</p>
-            } @else {
-                <div class="spells">
-                    @for (view of views(); track view.spell.name) {
-                        <article class="spell">
-                            <header class="spell-header">
-                                <img
-                                    class="spell-icon"
-                                    [src]="view.spell.icon"
-                                    alt=""
-                                    loading="lazy"
-                                    (error)="hideBrokenIcon($event)"
-                                />
-                                <div class="spell-title">
-                                    <h2 class="spell-name">{{ view.spell.name }}</h2>
-                                    <div class="spell-meta">
-                                        @if (view.rank.label) {
-                                            <span>{{ view.rank.label }}</span>
+            <section class="book" [attr.aria-label]="'Spellbook de ' + book.gameClass.name">
+                <div class="book-body">
+                    <header class="book-header">
+                        <img
+                            class="book-portrait"
+                            [src]="book.gameClass.icon"
+                            alt=""
+                            (error)="hideBrokenIcon($event)"
+                        />
+                        <h2 class="book-title">{{ tabs()[activeTab()]?.name }}</h2>
+                    </header>
+
+                    <div class="book-pages">
+                        @for (page of pages(); track $index) {
+                            <ul class="page">
+                                @for (slot of page; track $index) {
+                                    <li class="slot-cell">
+                                        @if (slot) {
+                                            <button
+                                                type="button"
+                                                class="slot"
+                                                (mouseenter)="showSlotAtPointer($event, slot)"
+                                                (mousemove)="showSlotAtPointer($event, slot)"
+                                                (mouseleave)="hideSlot()"
+                                                (focus)="showSlotBelow($event, slot)"
+                                                (blur)="hideSlot()"
+                                            >
+                                                <span class="slot-frame">
+                                                    <img
+                                                        class="slot-icon"
+                                                        [src]="slot.spell.icon"
+                                                        alt=""
+                                                        loading="lazy"
+                                                        (error)="hideBrokenIcon($event)"
+                                                    />
+                                                </span>
+                                                <span class="slot-text">
+                                                    <span class="slot-name">{{ slot.spell.name }}</span>
+                                                    @if (slot.rank.label) {
+                                                        <span class="slot-rank">{{ slot.rank.label }}</span>
+                                                    }
+                                                </span>
+                                                @if (slot.rank.description) {
+                                                    <span class="visually-hidden">: {{ slot.rank.description }}</span>
+                                                }
+                                            </button>
+                                        } @else {
+                                            <span class="slot slot--empty" aria-hidden="true">
+                                                <span class="slot-frame"></span>
+                                            </span>
                                         }
-                                        @if (view.rank.level !== null) {
-                                            <span>Nivel {{ view.rank.level }}</span>
-                                        }
-                                    </div>
-                                </div>
-                                <div class="badges">
-                                    @if (view.spell.fromTalent) {
-                                        <span class="badge">Talento</span>
-                                    }
-                                    @if (classicBadge(view.rank); as badge) {
-                                        <span class="badge">{{ badge }}</span>
-                                    }
-                                </div>
-                            </header>
+                                    </li>
+                                }
+                            </ul>
+                        }
 
-                            @if (view.ranks.length > 1) {
-                                <div class="ranks" role="group" [attr.aria-label]="'Rangos de ' + view.spell.name">
-                                    @for (rank of view.ranks; track $index; let index = $index) {
-                                        <button
-                                            type="button"
-                                            class="rank-btn"
-                                            [class.active]="view.selected === index"
-                                            [attr.aria-pressed]="view.selected === index"
-                                            [title]="rank.level !== null ? 'Nivel ' + rank.level : rank.label"
-                                            (click)="pickRank(view.spell, index)"
-                                        >
-                                            {{ rankButton(rank, index) }}
-                                        </button>
-                                    }
-                                </div>
-                            }
+                        @if (empty()) {
+                            <p class="book-empty">No hay hechizos que coincidan.</p>
+                        }
+                    </div>
 
-                            @if (view.rank.lines.length > 0) {
-                                <div class="lines">
-                                    @for (line of view.rank.lines; track $index) {
-                                        <div class="line">
-                                            <span>{{ line.left }}</span>
-                                            <span>{{ line.right }}</span>
-                                        </div>
-                                    }
-                                </div>
-                            }
+                    <footer class="book-footer">
+                        <button
+                            type="button"
+                            class="page-arrow page-arrow--previous"
+                            aria-label="Página anterior"
+                            [disabled]="currentPage() === 0"
+                            (click)="previousPage()"
+                        ></button>
+                        <span class="page-label" aria-live="polite">Página {{ currentPage() + 1 }}</span>
+                        <button
+                            type="button"
+                            class="page-arrow page-arrow--next"
+                            aria-label="Página siguiente"
+                            [disabled]="currentPage() >= pageCount() - 1"
+                            (click)="nextPage()"
+                        ></button>
+                    </footer>
+                </div>
 
-                            @if (view.rank.description) {
-                                <p class="description">{{ view.rank.description }}</p>
-                            }
-
-                            @if (view.rank.school || view.rank.coefficient) {
-                                <p class="details">
-                                    @if (view.rank.school) {
-                                        <span>{{ view.rank.school }}</span>
-                                    }
-                                    @if (view.rank.coefficient) {
-                                        <span>{{ view.rank.coefficient }}</span>
-                                    }
-                                </p>
-                            }
-
-                            @if (view.rank.learnedFrom) {
-                                <p class="learned">{{ view.rank.learnedFrom }}</p>
-                            }
-                            @if (view.rank.note) {
-                                <p class="note">{{ view.rank.note }}</p>
-                            }
-                            @if (view.rank.classicDescription) {
-                                <details class="classic">
-                                    <summary>Texto en Classic</summary>
-                                    <p>{{ view.rank.classicDescription }}</p>
-                                </details>
-                            }
-                        </article>
+                <div class="book-tabs" role="tablist" aria-label="Pestañas del spellbook">
+                    @for (tab of tabs(); track tab.name; let index = $index) {
+                        <button
+                            type="button"
+                            class="book-tab"
+                            role="tab"
+                            [class.active]="activeTab() === index"
+                            [attr.aria-selected]="activeTab() === index"
+                            [attr.aria-label]="tab.name"
+                            [attr.data-label]="tab.name"
+                            (click)="selectTab(index)"
+                        >
+                            <img class="book-tab-icon" [src]="tab.icon" alt="" (error)="hideBrokenIcon($event)" />
+                        </button>
                     }
                 </div>
+            </section>
+
+            @if (hovered(); as info) {
+                <app-spell-tooltip [spell]="info.slot.spell" [rank]="info.slot.rank" [x]="info.x" [y]="info.y" />
             }
 
             @if (book.removed.length > 0) {

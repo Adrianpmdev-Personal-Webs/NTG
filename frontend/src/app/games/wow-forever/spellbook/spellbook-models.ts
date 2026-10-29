@@ -35,6 +35,7 @@ export interface Spell {
 
 export interface SpellbookTab {
     name: string;
+    icon: string;
     spells: Spell[];
 }
 

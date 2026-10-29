@@ -1,0 +1,54 @@
+<div class="tooltip" role="tooltip" aria-hidden="true" [style]="position()">
+    <div class="tooltip-head">
+        <img class="tooltip-icon" [src]="spell().icon" alt="" (error)="hideBrokenIcon($event)" />
+        <div class="tooltip-title">
+            <span class="tooltip-name">{{ spell().name }}</span>
+            @if (rank().label) {
+                <span class="tooltip-rank">{{ rank().label }}</span>
+            }
+        </div>
+    </div>
+
+    @for (line of rank().lines; track $index) {
+        <div class="tooltip-line">
+            <span>{{ line.left }}</span>
+            <span>{{ line.right }}</span>
+        </div>
+    }
+
+    @if (rank().description) {
+        <p class="tooltip-text">{{ rank().description }}</p>
+    }
+
+    @if (rank().level !== null) {
+        <p class="tooltip-extra">Nivel {{ rank().level }}</p>
+    }
+    @if (rank().school || rank().coefficient) {
+        <p class="tooltip-extra">
+            @if (rank().school) {
+                <span>{{ rank().school }}</span>
+            }
+            @if (rank().school && rank().coefficient) {
+                <span aria-hidden="true"> · </span>
+            }
+            @if (rank().coefficient) {
+                <span>{{ rank().coefficient }}</span>
+            }
+        </p>
+    }
+    @if (rank().learnedFrom) {
+        <p class="tooltip-extra">{{ rank().learnedFrom }}</p>
+    }
+    @if (rank().note) {
+        <p class="tooltip-note">{{ rank().note }}</p>
+    }
+    @if (spell().fromTalent) {
+        <p class="tooltip-talent">Lo da un talento</p>
+    }
+    @if (classicLabel(); as label) {
+        <p class="tooltip-classic">{{ label }}</p>
+    }
+    @if (rank().classicDescription) {
+        <p class="tooltip-classic-text"><span>En Classic:</span> {{ rank().classicDescription }}</p>
+    }
+</div>

@@ -15,6 +15,10 @@ import java.util.function.Predicate;
  * One table of the game client (a DB2 file) as wago.tools exports it, keeping only the columns its reader asked for:
  * the client tables are large, and most of their columns are never used. A column asked for as {@code ?Name} is
  * optional (one game version has it and another does not): when the export lacks it, it reads as empty.
+ * <p>
+ * Most cells are short numbers that repeat thousands of times ({@code 0}, {@code 1}, a school or an index), so each
+ * table keeps one copy of every short value: on the largest tables that is ten times less memory, which the export
+ * needs to fit in the free server.
  *
  * @author adrianpmdev
  */
@@ -22,6 +26,9 @@ public final class Db2Table {
 
     /** Marks a column that an export may lack. */
     public static final String OPTIONAL = "?";
+
+    /** Values up to this length are shared within a table. */
+    private static final int SHARED_LENGTH = 16;
 
     private final String name;
     private final Map<String, Integer> columns;
@@ -63,6 +70,7 @@ public final class Db2Table {
         int[][] positions = new int[1][];
         List<Row> rows = new ArrayList<>();
         Map<String, Integer> indexes = new LinkedHashMap<>();
+        Map<String, String> shared = new HashMap<>();
         Db2Table table = new Db2Table(name, Collections.unmodifiableMap(indexes), Collections.unmodifiableList(rows));
 
         CsvReader.read(csv, fields -> {
@@ -82,6 +90,12 @@ public final class Db2Table {
             Row row = table.new Row(values);
 
             if (keep.test(row)) {
+                for (int index = 0; index < values.length; index++) {
+                    if (values[index].length() <= SHARED_LENGTH) {
+                        values[index] = shared.computeIfAbsent(values[index], value -> value);
+                    }
+                }
+
                 rows.add(row);
             }
         });

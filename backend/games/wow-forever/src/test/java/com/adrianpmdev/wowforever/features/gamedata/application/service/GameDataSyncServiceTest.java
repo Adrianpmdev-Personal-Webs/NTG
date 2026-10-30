@@ -25,7 +25,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * When the game data is restored, rebuilt or kept as it is.
+ * When the game data is restored, rebuilt or kept as it is, and how a build whose read stopped the backend is kept
+ * from stopping it again on every restart.
  *
  * @author adrianpmdev
  */
@@ -65,6 +66,55 @@ class GameDataSyncServiceTest {
 
         assertThat(gameDataService.currentBuild()).contains(KEPT_BUILD);
         verify(store, never()).save(any());
+        verify(store).startRead(new GameDataStore.Attempt("9.9.9.9", NOW));
+        verify(store).endRead();
+    }
+
+    @Test
+    void aBuildThatStoppedTheBackendIsNotReadAgainForADay() throws IOException {
+        when(store.load()).thenReturn(Optional.of(GameDataFixtures.testData()));
+        when(wagoClient.latestBuild(anyString())).thenReturn(Optional.of("9.9.9.9"));
+        when(store.unfinishedRead())
+                .thenReturn(Optional.of(new GameDataStore.Attempt("9.9.9.9", NOW.minus(Duration.ofHours(2)))));
+
+        sync.refresh();
+        sync.refresh();
+
+        assertThat(gameDataService.currentBuild()).contains(KEPT_BUILD);
+        verify(wagoClient, never()).tablesOf(anyString());
+        verify(store, never()).startRead(any());
+        verify(store, times(1)).unfinishedRead();
+    }
+
+    @Test
+    void aBuildThatStoppedTheBackendIsReadAgainAfterADay() throws IOException {
+        when(store.load()).thenReturn(Optional.of(GameDataFixtures.testData()));
+        when(wagoClient.latestBuild(anyString())).thenReturn(Optional.of("9.9.9.9"));
+        when(store.unfinishedRead())
+                .thenReturn(Optional.of(new GameDataStore.Attempt("9.9.9.9", NOW.minus(Duration.ofHours(25)))));
+        when(wagoClient.tablesOf(anyString())).thenReturn((name, columns, keep) -> {
+            throw new IOException("wago.tools answered 500");
+        });
+
+        assertThatThrownBy(sync::refresh).isInstanceOf(RuntimeException.class);
+
+        verify(store).startRead(new GameDataStore.Attempt("9.9.9.9", NOW));
+        verify(store).endRead();
+    }
+
+    @Test
+    void anUnfinishedReadOfAnOlderBuildDoesNotStopANewOne() throws IOException {
+        when(store.load()).thenReturn(Optional.of(GameDataFixtures.testData()));
+        when(wagoClient.latestBuild(anyString())).thenReturn(Optional.of("9.9.9.10"));
+        when(store.unfinishedRead())
+                .thenReturn(Optional.of(new GameDataStore.Attempt("9.9.9.9", NOW.minus(Duration.ofHours(1)))));
+        when(wagoClient.tablesOf(anyString())).thenReturn((name, columns, keep) -> {
+            throw new IOException("wago.tools answered 500");
+        });
+
+        assertThatThrownBy(sync::refresh).isInstanceOf(RuntimeException.class);
+
+        verify(store).startRead(new GameDataStore.Attempt("9.9.9.10", NOW));
     }
 
     @Test

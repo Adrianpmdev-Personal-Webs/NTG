@@ -15,6 +15,10 @@ import java.util.List;
  * Every text is in English, as the client writes it, for a character of the top level with no gear. The client has no
  * notes on what changed for each class, so {@code class_abilities} is empty. When the tables of Classic Era are
  * given, talents and spells are compared with Classic (see ClassicComparison).
+ * <p>
+ * The tables of the two clients are never held at once: the whole file is built from the WoW Forever tables first,
+ * and only then, with those tables already free, are the Classic tables read for the comparison. That halves the
+ * memory the export needs, which matters on the free server.
  *
  * @author adrianpmdev
  */
@@ -43,6 +47,19 @@ public final class GameDataExporter {
      * @throws java.io.UncheckedIOException when a table cannot be read
      */
     public ObjectNode export(Build build, Build classic, LocalDate date) {
+        ObjectNode data = exportForever(build, classic == null ? null : classic.version(), date);
+
+        if (classic != null) {
+            new ClassicComparison(new ClientTables(classic.tables()), config.talents().lastPointLevel(),
+                    config.spellbook().extraTabs()).annotate((ObjectNode) data.get("talents"),
+                    (ObjectNode) data.get("spellbooks"), (ObjectNode) data.get("spell_desc"));
+        }
+
+        return data;
+    }
+
+    /** The file from the WoW Forever tables alone; they are free once it returns. */
+    private ObjectNode exportForever(Build build, String classicVersion, LocalDate date) {
         GameDataConfig.Client settings = config.client();
         int playerLevel = config.talents().lastPointLevel();
         ClientTables tables = new ClientTables(build.tables());
@@ -54,16 +71,11 @@ public final class GameDataExporter {
         SpellbookExporter.Sections spellbooks = new SpellbookExporter(tables, spells, config.spellbook().extraTabs(),
                 config.talents()).export(talents, build.version());
 
-        if (classic != null) {
-            new ClassicComparison(new ClientTables(classic.tables()), playerLevel, config.spellbook().extraTabs())
-                    .annotate(talents, spellbooks.spellbooks(), spellbooks.spellDescriptions());
-        }
-
         ObjectNode data = JSON.objectNode();
         data.put("attribution", settings.attribution());
         data.put("generated", date.toString());
         data.put("build", build.version());
-        data.put("classicBuild", classic == null ? null : classic.version());
+        data.put("classicBuild", classicVersion);
         data.set("talents", talents);
         data.set("spellbooks", spellbooks.spellbooks());
         data.set("spell_desc", spellbooks.spellDescriptions());

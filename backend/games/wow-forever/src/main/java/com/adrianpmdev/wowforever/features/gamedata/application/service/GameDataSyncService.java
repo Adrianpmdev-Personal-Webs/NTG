@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -25,6 +26,11 @@ import java.util.Optional;
  * When the backend starts it first serves the copy kept in Storage, so players do not wait for a build. While no data
  * is served (no copy and wago.tools unreachable) it tries again every few minutes. A failed check, a broken table or
  * an incomplete file never replaces the data being served.
+ * <p>
+ * Reading a build is what needs the most memory. If a read ever stops the backend (out of memory), the restart would
+ * try the same build again and fall into a loop, so every read leaves a mark in Storage that is removed when it ends:
+ * a mark found after a restart means that build stopped the backend, and it is not read again for
+ * {@value #HOURS_AFTER_A_CRASH} hours (the kept copy keeps being served).
  *
  * @author adrianpmdev
  */
@@ -35,11 +41,17 @@ public class GameDataSyncService {
     /** How soon to try again while no data is served. */
     private static final Duration RETRY = Duration.ofMinutes(5);
 
+    /** How long a build whose read stopped the backend waits before it is read again. */
+    private static final int HOURS_AFTER_A_CRASH = 24;
+
     private final GameDataService gameDataService;
     private final WagoClient wagoClient;
     private final GameDataStore store;
     private final TaskScheduler scheduler;
     private final Clock clock;
+
+    /** The read a previous run of the backend never ended; null until first asked, then fixed for this run. */
+    private Optional<GameDataStore.Attempt> crashedRead;
 
     /**
      * Builds the service on the system clock.
@@ -97,18 +109,67 @@ public class GameDataSyncService {
         GameDataConfig.Client settings = gameDataService.getConfig().client();
         Optional<String> newest = wagoClient.latestBuild(settings.product());
 
-        if (newest.isEmpty() || newest.equals(gameDataService.currentBuild())) {
+        if (newest.isEmpty() || newest.equals(gameDataService.currentBuild()) || stoppedTheBackend(newest.get())) {
             return;
         }
 
         log.info("Reading WoW Forever build {} from the game client", newest.get());
         long start = clock.millis();
-        ObjectNode data = new GameDataExporter(gameDataService.getConfig()).export(
-                new GameDataExporter.Build(newest.get(), wagoClient.tablesOf(newest.get())),
-                classicBuild(settings.classicProduct()), LocalDate.now(clock));
-        gameDataService.publish(data);
-        log.info("WoW Forever build {} is served (read in {} ms)", newest.get(), clock.millis() - start);
-        keep(data);
+        markRead(new GameDataStore.Attempt(newest.get(), clock.instant()));
+
+        try {
+            ObjectNode data = new GameDataExporter(gameDataService.getConfig()).export(
+                    new GameDataExporter.Build(newest.get(), wagoClient.tablesOf(newest.get())),
+                    classicBuild(settings.classicProduct()), LocalDate.now(clock));
+            gameDataService.publish(data);
+            log.info("WoW Forever build {} is served (read in {} ms)", newest.get(), clock.millis() - start);
+            keep(data);
+        } finally {
+            unmarkRead();
+        }
+    }
+
+    /** Whether a previous run of the backend stopped while reading this build, less than a day ago. */
+    private boolean stoppedTheBackend(String build) {
+        if (crashedRead == null) {
+            try {
+                crashedRead = store.unfinishedRead();
+            } catch (RuntimeException exception) {
+                log.warn("The mark of an unfinished read could not be checked: {}", exception.getMessage());
+                crashedRead = Optional.empty();
+            }
+        }
+
+        if (crashedRead.isEmpty() || !crashedRead.get().build().equals(build)) {
+            return false;
+        }
+
+        Instant retryAt = crashedRead.get().startedAt().plus(Duration.ofHours(HOURS_AFTER_A_CRASH));
+
+        if (!clock.instant().isBefore(retryAt)) {
+            return false;
+        }
+
+        log.error("WoW Forever build {} stopped the backend while it was being read at {}: it is not read again "
+                + "until {}", build, crashedRead.get().startedAt(), retryAt);
+
+        return true;
+    }
+
+    private void markRead(GameDataStore.Attempt attempt) {
+        try {
+            store.startRead(attempt);
+        } catch (RuntimeException exception) {
+            log.warn("The read of build {} could not be marked: {}", attempt.build(), exception.getMessage());
+        }
+    }
+
+    private void unmarkRead() {
+        try {
+            store.endRead();
+        } catch (RuntimeException exception) {
+            log.warn("The mark of the read could not be removed: {}", exception.getMessage());
+        }
     }
 
     /** Serves the copy kept in Storage, if there is a good one. */

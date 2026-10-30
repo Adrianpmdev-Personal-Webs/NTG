@@ -40,7 +40,12 @@ USER app
 EXPOSE 8080
 
 # Comando de inicio. Ajustes para los 512 MB del plan gratuito de Render:
-#  - MaxRAMPercentage=70: el heap usa como mucho el 70 % de la memoria; el resto queda para la JVM y el sistema
+#  - MaxRAMPercentage=55: el heap usa como mucho unos 280 MB. Fuera del heap la JVM ocupa unos 175 MB fijos (clases,
+#    código compilado, símbolos), medidos con la aplicación completa, así que el peor caso queda por debajo de 512 MB.
+#    Los datos vivos de la aplicación son unos 50 MB; el resto del heap es para los picos (leer una build de WoW, una
+#    imagen)
 #  - UseSerialGC: el recolector más ligero, el adecuado con 1 CPU y poca memoria
+#  - ShrinkHeapInSteps desactivado y Min/MaxHeapFreeRatio 20/40: tras una recolección completa el heap que sobra se
+#    devuelve al sistema de una vez, en vez de quedarse reservado tras un pico
 #  - ExitOnOutOfMemoryError: si se queda sin memoria se cierra y Render lo arranca de nuevo, en vez de quedarse colgado
-ENTRYPOINT ["java", "-XX:MaxRAMPercentage=70", "-XX:+UseSerialGC", "-XX:+ExitOnOutOfMemoryError", "-jar", "ntg.jar"]
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=55", "-XX:+UseSerialGC", "-XX:-ShrinkHeapInSteps", "-XX:MinHeapFreeRatio=20", "-XX:MaxHeapFreeRatio=40", "-XX:+ExitOnOutOfMemoryError", "-jar", "ntg.jar"]

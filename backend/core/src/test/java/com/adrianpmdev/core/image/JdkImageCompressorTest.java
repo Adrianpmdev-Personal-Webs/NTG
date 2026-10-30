@@ -21,7 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Picture compression: formats, resizing, transparency, size limit and rejected files.
+ * Picture compression: formats, resizing, reading large pictures already reduced, transparency, size limit and
+ * rejected files.
  *
  * @author adrianpmdev
  */
@@ -51,6 +52,31 @@ class JdkImageCompressorTest {
 
         assertThat(result.width()).isEqualTo(400);
         assertThat(result.height()).isEqualTo(300);
+    }
+
+    @Test
+    void veryLargePictureIsReadAlreadyReducedAndStoredAtItsSize() throws IOException {
+        byte[] jpeg = encode(picture(5000, 2500, false), "jpg");
+
+        CompressedImage result = compressor.compress(jpeg, new ImageSpec(1000, 1024 * 1024));
+
+        assertThat(result.width()).isEqualTo(1000);
+        assertThat(result.height()).isEqualTo(500);
+    }
+
+    @Test
+    void picturesAreDecodedBetweenOnceAndTwiceTheirStoredSize() {
+        assertThat(JdkImageCompressor.subsampling(3000, 1600)).isEqualTo(1);
+        assertThat(JdkImageCompressor.subsampling(400, 1600)).isEqualTo(1);
+
+        for (int longest : new int[]{3201, 4000, 6324, 7746, 20_000}) {
+            for (int maxSide : new int[]{128, 1600, 1920}) {
+                int decoded = (int) Math.ceil((double) longest / JdkImageCompressor.subsampling(longest, maxSide));
+
+                assertThat(decoded).as("%d px stored at %d", longest, maxSide)
+                        .isBetween(Math.min(longest, maxSide), JdkImageCompressor.DECODE_FACTOR * maxSide);
+            }
+        }
     }
 
     @Test

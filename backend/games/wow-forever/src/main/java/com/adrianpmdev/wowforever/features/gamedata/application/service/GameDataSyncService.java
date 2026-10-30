@@ -31,6 +31,11 @@ import java.util.Optional;
  * try the same build again and fall into a loop, so every read leaves a mark in Storage that is removed when it ends:
  * a mark found after a restart means that build stopped the backend, and it is not read again for
  * {@value #HOURS_AFTER_A_CRASH} hours (the kept copy keeps being served).
+ * <p>
+ * A read leaves well over a hundred megabytes of garbage behind, and the serial collector only gives memory back to
+ * the system after a full collection, which a quiet backend may not run for days. So every read ends with one (a
+ * pause well under a second, once per new build): with the heap settings of the Dockerfile the backend returns to its
+ * usual memory instead of keeping the peak reserved.
  *
  * @author adrianpmdev
  */
@@ -126,6 +131,7 @@ public class GameDataSyncService {
             keep(data);
         } finally {
             unmarkRead();
+            System.gc();
         }
     }
 

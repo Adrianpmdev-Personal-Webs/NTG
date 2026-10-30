@@ -255,7 +255,7 @@ The site runs on the free plans of Render, Vercel and Supabase, so the backend a
 | **ETag on static JSON** | A browser that already has the data gets `304` with no body |
 | **Daily `select 1`** | The keep-alive call touches the database once a day, so Supabase never pauses the project |
 | **Small connection pool** | At most 5 connections to the Supabase pooler |
-| **JVM tuned for 512 MB** | Limited heap, light garbage collector, restart on out-of-memory |
+| **JVM tuned for 512 MB** | Heap capped so the whole process fits, light garbage collector, memory given back after peaks, restart on out-of-memory |
 
 ---
 

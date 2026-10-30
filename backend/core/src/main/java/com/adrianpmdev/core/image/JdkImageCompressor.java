@@ -9,6 +9,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
@@ -31,15 +32,21 @@ import java.util.concurrent.TimeUnit;
  * on any machine. Input: JPEG or PNG. Output: JPEG, or PNG when the picture has transparent pixels.
  * <p>
  * Memory is the limit on the free server, so pictures are checked before they are decoded (no more than
- * {@value #MAX_PIXELS} pixels) and only one picture is processed at a time.
+ * {@value #MAX_PIXELS} pixels) and only one picture is processed at a time. A large picture is never decoded at its
+ * full size: the reader skips pixels so that it comes out at most {@value #DECODE_FACTOR} times the size it is stored
+ * at, and the usual smooth scaling does the rest. A 40-megapixel photo then takes about 40 MB to process instead of
+ * about 200 MB, which alone could stop the backend, and the stored picture looks the same.
  *
  * @author adrianpmdev
  */
 @Component
 public class JdkImageCompressor implements ImageCompressor {
 
-    /** Largest picture decoded (40 megapixels, about 160 MB in memory while it is processed). */
+    /** Largest picture accepted (40 megapixels), to bound the time spent reading it. */
     static final long MAX_PIXELS = 40_000_000L;
+
+    /** A picture is decoded at most this many times the longest side it is stored at. */
+    static final int DECODE_FACTOR = 2;
 
     private static final float[] JPEG_QUALITIES = {0.82f, 0.72f, 0.62f};
     private static final double SHRINK_STEP = 0.8;
@@ -80,7 +87,7 @@ public class JdkImageCompressor implements ImageCompressor {
         acquire();
 
         try {
-            BufferedImage image = withAlphaChannel(scaleToFit(decode(source), spec.maxSide()));
+            BufferedImage image = withAlphaChannel(scaleToFit(decode(source, spec.maxSide()), spec.maxSide()));
             boolean transparent = hasTransparentPixels(image);
 
             return transparent ? encodePng(image, spec) : encodeJpeg(toRgb(image), spec);
@@ -91,7 +98,7 @@ public class JdkImageCompressor implements ImageCompressor {
 
     /* ─── Decoding ─── */
 
-    private static BufferedImage decode(byte[] source) {
+    private static BufferedImage decode(byte[] source, int maxSide) {
         try (ImageInputStream input = ImageIO.createImageInputStream(new ByteArrayInputStream(source))) {
             Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
 
@@ -103,14 +110,19 @@ public class JdkImageCompressor implements ImageCompressor {
 
             try {
                 reader.setInput(input, true, true);
-                long pixels = (long) reader.getWidth(0) * reader.getHeight(0);
+                int width = reader.getWidth(0);
+                int height = reader.getHeight(0);
 
-                if (pixels > MAX_PIXELS) {
+                if ((long) width * height > MAX_PIXELS) {
                     throw new ResponseStatusException(HttpStatus.CONTENT_TOO_LARGE,
                             "La imagen tiene demasiados píxeles (máximo 40 megapíxeles)");
                 }
 
-                return reader.read(0);
+                ImageReadParam params = reader.getDefaultReadParam();
+                int step = subsampling(Math.max(width, height), maxSide);
+                params.setSourceSubsampling(step, step, 0, 0);
+
+                return reader.read(0, params);
             } finally {
                 reader.dispose();
             }
@@ -121,6 +133,14 @@ public class JdkImageCompressor implements ImageCompressor {
 
             throw unreadable();
         }
+    }
+
+    /**
+     * How many pixels the reader moves at a time so the picture comes out between {@code maxSide} and
+     * {@value #DECODE_FACTOR} times {@code maxSide} on its longest side (1 keeps every pixel).
+     */
+    static int subsampling(int longest, int maxSide) {
+        return Math.max(1, (int) Math.ceil((double) longest / ((long) DECODE_FACTOR * maxSide)));
     }
 
     private static ResponseStatusException unreadable() {

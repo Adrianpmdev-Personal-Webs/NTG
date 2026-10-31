@@ -20,4 +20,11 @@
     --font-mono: 'Share Tech Mono', 'Courier New', monospace;
     --font-display: 'Orbitron', monospace;
     --font-retro: 'VT323', monospace;
+    --music-control-space: 0px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    :root {
+        --music-control-space: 52px;
+    }
 }

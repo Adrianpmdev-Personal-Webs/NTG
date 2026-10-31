@@ -1,19 +1,20 @@
 /**
  * App
  *
- * Root component. Hosts the router outlet and the global notifications.
+ * Root component. Hosts the router outlet, the global notifications and the background music control.
  *
  * @author @adrianpmdev
  */
 
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { MusicControl } from '@shared/components/music-control/music-control';
 import { Notifications } from '@shared/components/notifications/notifications';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-root',
-    imports: [RouterOutlet, Notifications],
+    imports: [RouterOutlet, Notifications, MusicControl],
     templateUrl: './app.html',
     styleUrl: './app.scss',
 })

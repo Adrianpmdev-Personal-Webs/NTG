@@ -66,6 +66,10 @@
     white-space: nowrap;
 }
 
+.top-bar-right {
+    margin-right: var(--music-control-space);
+}
+
 .sys-time {
     font-size: 0.75rem;
     color: var(--text-dim);

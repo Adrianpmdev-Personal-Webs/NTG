@@ -1,0 +1,32 @@
+@if (player.visible()) {
+    <div class="music-control" [class.muted]="player.muted()">
+        <input
+            class="volume"
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            aria-label="Volumen de la música"
+            [value]="player.volume()"
+            (input)="onVolume($event)"
+        />
+
+        <button
+            class="toggle"
+            type="button"
+            [attr.aria-label]="player.muted() ? 'Activar la música' : 'Silenciar la música'"
+            [attr.aria-pressed]="player.muted()"
+            [title]="player.muted() ? 'Activar la música' : 'Silenciar la música'"
+            (click)="player.toggleMute()"
+        >
+            <svg viewBox="1 0 24 24" aria-hidden="true">
+                <path class="speaker" d="M4 9h4l5-4v14l-5-4H4z" />
+                @if (player.muted()) {
+                    <path class="wave" d="M17 9l5 6M22 9l-5 6" />
+                } @else {
+                    <path class="wave" d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" />
+                }
+            </svg>
+        </button>
+    </div>
+}

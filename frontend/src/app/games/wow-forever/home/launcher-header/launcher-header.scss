@@ -90,7 +90,7 @@
 
 .header-actions {
     position: absolute;
-    right: 8px;
+    right: calc(8px + var(--music-control-space));
     top: 8px;
     z-index: 25;
     display: flex;

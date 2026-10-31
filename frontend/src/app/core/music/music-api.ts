@@ -1,7 +1,8 @@
 /**
  * MusicApi
  *
- * HTTP service for the background music: the playlists the current user can hear.
+ * HTTP service for the background music: the playlists the current user can hear and, for admins, adding, renaming,
+ * ordering and deleting songs. Songs arrive here already compressed (see the admin music screen).
  *
  * @author @adrianpmdev
  */
@@ -10,7 +11,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '@core/api/api';
-import { MusicArea } from '@shared/models/music';
+import { MusicArea, MusicTrack } from '@shared/models/music';
 
 @Injectable({ providedIn: 'root' })
 export class MusicApi {
@@ -19,5 +20,26 @@ export class MusicApi {
 
     getAreas(): Observable<MusicArea[]> {
         return this.http.get<MusicArea[]>(this.baseUrl);
+    }
+
+    upload(area: string, song: Blob, title: string, durationSeconds: number): Observable<MusicTrack> {
+        const body = new FormData();
+        body.append('file', song, 'song.m4a');
+        body.append('title', title);
+        body.append('durationSeconds', String(durationSeconds));
+
+        return this.http.post<MusicTrack>(`${this.baseUrl}/areas/${area}/tracks`, body);
+    }
+
+    reorder(area: string, ids: string[]): Observable<void> {
+        return this.http.put<void>(`${this.baseUrl}/areas/${area}/order`, { ids });
+    }
+
+    rename(id: string, title: string): Observable<MusicTrack> {
+        return this.http.put<MusicTrack>(`${this.baseUrl}/tracks/${id}`, { title });
+    }
+
+    delete(id: string): Observable<void> {
+        return this.http.delete<void>(`${this.baseUrl}/tracks/${id}`);
     }
 }

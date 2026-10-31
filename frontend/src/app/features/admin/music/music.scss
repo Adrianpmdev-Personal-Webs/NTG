@@ -1,0 +1,102 @@
+@use 'mixins' as *;
+
+.unused {
+    border-color: var(--neon-orange);
+}
+
+.area-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    label.action-btn {
+        cursor: pointer;
+
+        &.disabled {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+    }
+}
+
+.music-progress {
+    margin: 0 0 12px;
+    overflow: hidden;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    color: var(--neon-cyan);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.track-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.track {
+    display: grid;
+    grid-template-columns: 28px minmax(0, 1fr) auto 260px auto;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+
+    @include tablet {
+        grid-template-columns: 28px minmax(0, 1fr) auto;
+
+        .track-audio {
+            grid-column: 1 / -1;
+            width: 100%;
+        }
+
+        .track-actions {
+            grid-column: 1 / -1;
+            justify-content: flex-end;
+        }
+    }
+}
+
+.track-number {
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    text-align: right;
+}
+
+.track-title {
+    min-width: 0;
+    padding: 6px 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+
+    &:hover,
+    &:focus {
+        border-color: var(--border-color);
+        outline: none;
+    }
+}
+
+.track-meta {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.track-audio {
+    width: 260px;
+    height: 32px;
+}
+
+.track-actions {
+    display: flex;
+    gap: 6px;
+}

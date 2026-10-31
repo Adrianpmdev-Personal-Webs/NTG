@@ -1,7 +1,7 @@
 /**
  * ADMIN_ROUTES
  *
- * General admin routes: dashboard, users, the game catalog and the public pictures. The management of each game
+ * General admin routes: dashboard, users, the game catalog, the public pictures and the background music. The management of each game
  * lives in its own module.
  *
  * @author @adrianpmdev
@@ -30,5 +30,9 @@ export const ADMIN_ROUTES: Routes = [
     {
         path: 'images',
         loadComponent: () => import('./images/images').then((m) => m.Images),
+    },
+    {
+        path: 'music',
+        loadComponent: () => import('./music/music').then((m) => m.Music),
     },
 ];

@@ -1,0 +1,131 @@
+<div class="admin-page">
+    <div class="admin-section-head">
+        <div>
+            <h1 class="admin-page-title">MÚSICA</h1>
+            <p class="admin-page-subtitle">
+                Añade canciones en cualquier formato (MP3, WAV, FLAC, OGG, M4A...): el navegador las comprime antes de
+                subirlas. Hasta 10 minutos por canción. Suenan en este orden y vuelven a empezar; un área sin canciones
+                no suena.
+            </p>
+        </div>
+    </div>
+
+    @if (loading()) {
+        <div class="terminal-card admin-section">
+            <p class="admin-page-state">CARGANDO...</p>
+        </div>
+    } @else {
+        @for (area of areas(); track area.area) {
+            <section class="terminal-card admin-section" [class.unused]="!area.declared">
+                <div class="admin-section-head">
+                    <h2 class="admin-section-title">{{ area.name.toUpperCase() }}</h2>
+                    <div class="area-actions">
+                        <span class="admin-hint">{{ area.tracks.length }} CANCIONES</span>
+                        @if (area.declared) {
+                            <label class="btn-neon action-btn" [class.disabled]="busy()">
+                                ⬆ AÑADIR
+                                <input
+                                    type="file"
+                                    accept="audio/*"
+                                    multiple
+                                    hidden
+                                    [disabled]="busy()"
+                                    (change)="add(area, $event)"
+                                />
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                @let current = progress();
+                @if (current && current.area === area.area) {
+                    <p class="music-progress">{{ current.text }}</p>
+                }
+
+                @if (area.tracks.length > 0) {
+                    <ol class="track-list">
+                        @for (track of area.tracks; track track.id; let index = $index, last = $last) {
+                            <li class="track">
+                                <span class="track-number">{{ index + 1 }}</span>
+                                <input
+                                    class="track-title"
+                                    type="text"
+                                    maxlength="100"
+                                    aria-label="Título de la canción"
+                                    [value]="track.title"
+                                    [disabled]="busy()"
+                                    (change)="rename(track, $event)"
+                                />
+                                <span class="track-meta">
+                                    {{ duration(track.durationSeconds) }} · {{ size(track.sizeBytes) }}
+                                </span>
+                                <audio class="track-audio" controls preload="none" [src]="track.url"></audio>
+                                <div class="track-actions">
+                                    <button
+                                        class="btn-neon action-btn"
+                                        type="button"
+                                        aria-label="Subir en la lista"
+                                        [disabled]="busy() || index === 0"
+                                        (click)="move(area, index, -1)"
+                                    >
+                                        ↑
+                                    </button>
+                                    <button
+                                        class="btn-neon action-btn"
+                                        type="button"
+                                        aria-label="Bajar en la lista"
+                                        [disabled]="busy() || last"
+                                        (click)="move(area, index, 1)"
+                                    >
+                                        ↓
+                                    </button>
+                                    <button
+                                        class="btn-neon btn-neon-danger action-btn"
+                                        type="button"
+                                        [attr.aria-label]="'Eliminar ' + track.title"
+                                        [disabled]="busy()"
+                                        (click)="askDelete(track)"
+                                    >
+                                        ✕
+                                    </button>
+                                </div>
+                            </li>
+                        }
+                    </ol>
+                } @else {
+                    <p class="admin-page-state">SIN CANCIONES: ESTA ÁREA NO SUENA</p>
+                }
+            </section>
+        }
+    }
+</div>
+
+@let target = confirmDelete();
+@if (target) {
+    <div class="modal-overlay" appModalOverlay (dismiss)="closeDelete()">
+        <div class="modal modal-sm terminal-card" role="dialog" aria-modal="true">
+            <div class="modal-header">
+                <h2 class="modal-title danger-title">ELIMINAR CANCIÓN</h2>
+                <button class="close-btn" type="button" aria-label="Cerrar" (click)="closeDelete()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="delete-warning">
+                    <span class="warning-icon">⚠</span>
+                    <div>
+                        <p class="warning-title">
+                            ¿Eliminar <span class="highlight">{{ target.title }}</span
+                            >?
+                        </p>
+                        <p class="warning-desc">Se borra el archivo y deja de sonar en su área.</p>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-neon" type="button" (click)="closeDelete()">CANCELAR</button>
+                    <button class="btn-neon btn-neon-danger" type="button" [disabled]="busy()" (click)="delete()">
+                        CONFIRMAR ELIMINACIÓN
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

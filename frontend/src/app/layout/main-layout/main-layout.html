@@ -87,6 +87,19 @@
                         <span class="nav-label">IMÁGENES</span>
                     }
                 </a>
+
+                <a
+                    routerLink="/admin/music"
+                    routerLinkActive="active"
+                    class="nav-item"
+                    [title]="sidebarCollapsed() ? 'Música' : ''"
+                    (click)="handleMenuItemNavigation()"
+                >
+                    <span class="nav-icon">♫</span>
+                    @if (!sidebarCollapsed()) {
+                        <span class="nav-label">MÚSICA</span>
+                    }
+                </a>
             } @else {
                 <a
                     routerLink="/welcome"

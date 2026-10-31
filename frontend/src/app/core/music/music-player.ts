@@ -7,7 +7,8 @@
  * admin screens, including the management of a game) plays the general one. An area without songs plays nothing.
  * A single song repeats; several play in order and start again after the last one. Moving between screens of the same
  * area never restarts the music; changing area fades it out and starts the new playlist.
- * Muting pauses the song. Mute and volume are remembered by this browser. Browsers refuse to play sound before the
+ * Muting or setting the volume to 0 pauses the song, so nothing keeps playing silently. The default volume is about 2%
+ * of the real one. Mute and volume are remembered by this browser. Browsers refuse to play sound before the
  * user interacts with the page, so after a reload the music starts on the first click or key.
  *
  * @author @adrianpmdev
@@ -24,7 +25,7 @@ const PLATFORM_AREA = 'platform';
 const DESKTOP_QUERY = '(hover: hover) and (pointer: fine)';
 const MUTED_KEY = 'ntg.music.muted';
 const VOLUME_KEY = 'ntg.music.volume';
-const DEFAULT_VOLUME = 0.4;
+const DEFAULT_VOLUME = 0.27;
 const FADE_MS = 600;
 const FADE_STEPS = 12;
 
@@ -82,8 +83,16 @@ export class MusicPlayer {
         this.volume.set(volume);
         writeStored(VOLUME_KEY, String(volume));
 
-        if (this.audio && !this.fadeTimer) {
-            this.audio.volume = loudness(volume);
+        if (!this.audio || this.fadeTimer) {
+            return;
+        }
+
+        this.audio.volume = loudness(volume);
+
+        if (volume === 0) {
+            this.audio.pause();
+        } else if (this.audio.paused) {
+            this.play();
         }
     }
 
@@ -167,7 +176,7 @@ export class MusicPlayer {
     }
 
     private play(): void {
-        if (!this.audio?.src || this.muted() || this.playlist.length === 0) {
+        if (!this.audio?.src || this.muted() || this.volume() === 0 || this.playlist.length === 0) {
             return;
         }
 
@@ -270,7 +279,7 @@ export class MusicPlayer {
 }
 
 function loudness(volume: number): number {
-    return volume * volume;
+    return volume * volume * volume;
 }
 
 function readVolume(): number {

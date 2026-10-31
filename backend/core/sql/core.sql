@@ -6,7 +6,8 @@
 -- of games, the public pictures uploaded by admins, the background music of each area and their public
 -- Storage buckets.
 --
--- How to use: run it in the Supabase SQL editor of an empty project. Order of the files:
+-- How to use: run it in the Supabase SQL editor; it can be run again on an existing project, it only adds
+-- what is missing and never deletes data. Order of the files:
 -- core.sql, then pokemon.sql (the game schemas do not depend on core). WoW Forever has no tables: its data
 -- lives in files of its backend module.
 -- =====================================================================================================
@@ -16,7 +17,7 @@ create schema if not exists core;
 -- ─── user ────────────────────────────────────────────────────────────────────────────────────────
 -- Quoted because user is a reserved word. role is 'usuario' or 'admin'.
 
-create table core."user" (
+create table if not exists core."user" (
     id         uuid      not null,
     username   text      not null unique check (length(username) <= 50),
     avatar_url text      check (length(avatar_url) <= 500),
@@ -29,7 +30,7 @@ create table core."user" (
 -- ─── tag ─────────────────────────────────────────────────────────────────────────────────────────
 -- The key of a game's tag is the game id (pokemon, wow-forever...) and becomes the authority TAG_<KEY>.
 
-create table core.tag (
+create table if not exists core.tag (
     key         varchar     not null check (key ~ '^[a-z0-9][a-z0-9_-]{1,29}$'),
     name        varchar     not null,
     description varchar,
@@ -39,7 +40,7 @@ create table core.tag (
 
 -- ─── user_tag ────────────────────────────────────────────────────────────────────────────────────
 
-create table core.user_tag (
+create table if not exists core.user_tag (
     user_id     uuid        not null,
     tag_key     varchar     not null,
     assigned_at timestamptz not null default now(),

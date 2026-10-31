@@ -25,17 +25,20 @@
 ## ✨ Overview
 
 The frontend is an **Angular 21** SPA that talks to the [NTG backend](../backend/README.md). It shows each user
-only the games they have access to, and gives admins the tools to manage users, access, the game catalog, pictures
-and game content.
+only the games they have access to, and gives admins the tools to manage users, access, the game catalog, pictures,
+background music and game content.
 
 - ⚡ **Modern Angular only:** standalone components, **zoneless** change detection, **signals**, lazy-loaded routes
   and `OnPush` on every component, with strict TypeScript and strict templates.
-- 🪶 **Lean by choice:** no UI library and no state library. The only runtime dependencies are Angular and RxJS.
+- 🪶 **Lean by choice:** no UI library and no state library. The runtime dependencies are Angular and RxJS, plus
+  Mediabunny, which is downloaded only when an admin compresses a song.
 - 🧠 **The backend owns the data.** The game catalog, texts, rules and picture URLs come from the API; the web
   client only shows them and handles the interaction. Each response is requested once per session.
 - 🧩 **One folder per game** under `src/app/games/`. A game never imports another game.
 - 🔐 **Stays signed in** with silent session renewal, and never stores the access token on disk.
 - 📱 **Works on every screen size:** each screen was checked from 320 px phones to desktop.
+- 🎵 **Background music per area** on computers: the general web and each game play their own playlist, with one
+  floating control to mute it or change the volume.
 - 🎨 **Two visual worlds:** a terminal look for the platform, and a custom identity for each game.
 
 > 🌍 **The interface is written in Spanish** (the audience is a Spanish-speaking group). Code and documentation are in
@@ -47,17 +50,19 @@ and game content.
 
 ## 🧭 Screens
 
-| Area             | Screen           | What it does                                                                                   |
-| ---------------- | ---------------- | ---------------------------------------------------------------------------------------------- |
-| 🔑 Auth          | **Login**        | Sign in; restores the session automatically if one exists                                      |
-| 🔑 Auth          | **Set password** | Landing page of the email link: the user chooses a password and enters directly                |
-| 🏠 Platform      | **Welcome**      | Player home: cards for the games they can open, and the ones coming soon                       |
-| 👑 Admin         | **Dashboard**    | Platform overview                                                                              |
-| 👑 Admin         | **Users**        | Create users by email, assign tags, edit, resend the password email, delete                    |
-| 👑 Admin         | **Games**        | Game catalog: add a game (its tag is created too), order, cover, icon, release it to players   |
-| 👑 Admin         | **Pictures**     | Every picture the platform and the games expect: upload the original, the server compresses it |
-| 🎮 Games         | **Game areas**   | Each game has its own layout, theme, views and tools, and opens only with its tag              |
-| 🎮 Games (admin) | **Management**   | A game can add its own administration screens to the admin area                                |
+| Area             | Screen            | What it does                                                                                                |
+| ---------------- | ----------------- | ----------------------------------------------------------------------------------------------------------- |
+| 🔑 Auth          | **Login**         | Sign in; restores the session automatically if one exists                                                   |
+| 🔑 Auth          | **Set password**  | Landing page of the email link: the user chooses a password and enters directly                             |
+| 🏠 Platform      | **Welcome**       | Player home: cards for the games they can open, and the ones coming soon                                    |
+| 👑 Admin         | **Dashboard**     | Platform overview                                                                                           |
+| 👑 Admin         | **Users**         | Create users by email, assign tags, edit, resend the password email, delete                                 |
+| 👑 Admin         | **Games**         | Game catalog: add a game (its tag is created too), order, cover, icon, release it to players                |
+| 👑 Admin         | **Pictures**      | Every picture the platform and the games expect: upload the original, the server compresses it              |
+| 👑 Admin         | **Music**         | One playlist per area: add songs in any format (the browser compresses them), listen, rename, order, delete |
+| 🎵 Everywhere    | **Music control** | Floating button in the top right corner (computers only): mute, and a volume slider on hover                |
+| 🎮 Games         | **Game areas**    | Each game has its own layout, theme, views and tools, and opens only with its tag                           |
+| 🎮 Games (admin) | **Management**    | A game can add its own administration screens to the admin area                                             |
 
 ---
 
@@ -68,14 +73,14 @@ and game content.
 The backend says which games each user can open (`GET /games`); the app uses that answer to build the sidebar and
 to guard the game routes. The backend enforces the same rules, the frontend only hides what a user cannot use.
 
-| Route                                                               | Who can enter                                                                   | Layout                                           |
-| ------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------ |
-| `/login`, `/set-password`                                           | Public                                                                          | Full-screen terminal                             |
-| `/`                                                                 | Signed in                                                                       | Redirects: admin → dashboard, player → welcome   |
-| `/welcome`                                                          | Signed in                                                                       | Terminal shell                                   |
-| `/admin/dashboard`, `/admin/users`, `/admin/games`, `/admin/images` | Admin                                                                           | Terminal shell                                   |
-| `/admin/<game>/**`                                                  | Admin                                                                           | Terminal shell (code lives in the game's folder) |
-| `/<game>/**`                                                        | Signed in **and** allowed by the catalog (game released and tag held, or admin) | The game's own layout                            |
+| Route                                                                               | Who can enter                                                                   | Layout                                           |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------ |
+| `/login`, `/set-password`                                                           | Public                                                                          | Full-screen terminal                             |
+| `/`                                                                                 | Signed in                                                                       | Redirects: admin → dashboard, player → welcome   |
+| `/welcome`                                                                          | Signed in                                                                       | Terminal shell                                   |
+| `/admin/dashboard`, `/admin/users`, `/admin/games`, `/admin/images`, `/admin/music` | Admin                                                                           | Terminal shell                                   |
+| `/admin/<game>/**`                                                                  | Admin                                                                           | Terminal shell (code lives in the game's folder) |
+| `/<game>/**`                                                                        | Signed in **and** allowed by the catalog (game released and tag held, or admin) | The game's own layout                            |
 
 ```mermaid
 flowchart LR
@@ -129,11 +134,12 @@ frontend/
         │   ├── auth/           AuthSession, auth interceptor, auth · admin · role-home guards
         │   ├── games/          GameModule contract, GameCatalog, game guard
         │   ├── users/ · tags/ · assets/   UserApi, TagApi, AssetApi (pictures)
+        │   ├── music/          MusicApi, MusicPlayer (the one background player)
         │   └── notifications/  NotificationCenter
         │
-        ├── shared/             ♻️ Reusable pieces (models, notification toasts, modal behaviour, API error helper)
+        ├── shared/             ♻️ Reusable pieces (models, notification toasts, music control, modal behaviour, API error helper)
         ├── layout/             🖼️ Terminal shell: sidebar, header, footer
-        ├── features/           📦 Platform pages: auth, welcome, admin (dashboard, users, games, pictures)
+        ├── features/           📦 Platform pages: auth, welcome, admin (dashboard, users, games, pictures, music)
         │
         └── games/              🎮 One folder per game
             ├── games.ts        The games built into this client
@@ -170,6 +176,12 @@ the tag key** that unlocks it.
 - **Responsive patterns:** shared breakpoints (900 / 640 / 420 px); admin tables become one card per row on
   phones; wide tables keep their first columns fixed while scrolling; brackets move a whole round per swipe;
   tooltips stay on screen on touch devices.
+- **Background music:** one player for the whole app. The first segment of the URL picks the playlist (a game id
+  plays that game's, anything else, admin screens included, the general one) and an area without songs plays
+  nothing. One song repeats; several play in order and start again. It only runs where the main input is a mouse or
+  a trackpad (phones and tablets never ask for the playlists), starts at about 2% of the real volume, pauses when
+  muted or at volume 0 and remembers both in the browser. Headers keep room for the control on computers
+  (`--music-control-space`).
 - Design tokens are CSS custom properties, and global feedback (success, error, warning) goes through a single
   notification service.
 
@@ -216,7 +228,8 @@ npm run format     # format the project with Prettier (format:check only checks 
   files are needed.
 - **Hosting:** deployed on **Vercel** from `main`. `vercel.json` rewrites `/api/*` to the backend, falls back to
   `index.html` for client-side routes, caches the hashed JS and CSS for a year and sends the security headers
-  (Content Security Policy, HSTS, `nosniff`, frame protection, referrer and permissions policies).
+  (Content Security Policy, HSTS, `nosniff`, frame protection, referrer and permissions policies). The policy lets
+  audio come only from the site and from Supabase Storage, where the songs live.
 - **Why the rewrite:** the browser only talks to the site's own domain, so the session cookie is **first-party**
   (it also works in browsers that block third-party cookies) and the backend address is never exposed to the app.
 

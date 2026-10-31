@@ -57,6 +57,7 @@ modules as they are developed.
 | Resend the "choose your password" email | Open the content and tools of every game they can access |
 | Manage the **game catalog**: add games, order them, release them | Follow the activity of the games they take part in |
 | Upload **pictures** (covers, game icons, game artwork): the server compresses them | Upload their own team pictures where a game allows it |
+| Add **background music** to the web and to each game: the browser compresses the songs | Hear the music of each area on a computer, mute it or change its volume |
 | Manage the content of each game from the admin area | |
 
 ### 🧪 Game modules
@@ -87,9 +88,9 @@ flowchart LR
 - **Supabase Auth** is the identity provider (credentials, email delivery, password setup). The backend adds
   the application rules on top: roles, tags and game access.
 - **PostgreSQL** (Supabase) stores the application data in one schema for the platform, `core` (users, tags,
-  game catalog, pictures), plus one schema for each game that needs tables.
-- **Supabase Storage** keeps the pictures. Only the backend writes; public pictures are downloaded straight from
-  Supabase, and private ones through short-lived signed links.
+  game catalog, pictures, music), plus one schema for each game that needs tables.
+- **Supabase Storage** keeps the pictures and the songs. Only the backend writes; public files are downloaded
+  straight from Supabase, and private ones through short-lived signed links.
 - **The backend is the single source of data.** The web client only shows what the API sends, so another client
   could be built on the same API.
 
@@ -117,7 +118,7 @@ sequenceDiagram
 
 | Layer | Technology |
 |---|---|
-| **Frontend** | Angular 21 (standalone, zoneless, signals), TypeScript 5.9, RxJS, SCSS design tokens |
+| **Frontend** | Angular 21 (standalone, zoneless, signals), TypeScript 5.9, RxJS, SCSS design tokens, Mediabunny (song compression) |
 | **Backend** | Java 25, Spring Boot 4, Spring Security, Spring Data JPA, Bean Validation, springdoc OpenAPI, Caffeine, Bucket4j |
 | **Identity** | Supabase Auth (JWT access tokens, rotating refresh tokens) |
 | **Database & files** | PostgreSQL and Storage on Supabase |

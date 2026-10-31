@@ -32,7 +32,7 @@ a game, and a game never depends on the platform**. Both only share a small modu
 | Module | Role |
 |---|---|
 | 📜 **`platform-api`** | Contracts shared by everyone: who is calling, file storage, picture compression, public pictures, how a game declares itself (`GameModule`) and helpers for cacheable JSON. No Spring Security, no Supabase. |
-| 🚀 **`core`** | The platform: identity (users, tags), the game catalog, public pictures, security, the Supabase integration, logging and error handling. It implements the contracts of `platform-api`. |
+| 🚀 **`core`** | The platform: identity (users, tags), the game catalog, public pictures, background music, security, the Supabase integration, logging and error handling. It implements the contracts of `platform-api`. |
 | 🎮 **`games/*`** | One module per game, with its own domain and REST endpoints. It depends **only on `platform-api`** and contains **no security code**: it declares its API path and tag, and `core` builds the access rules from that. |
 | 🧷 **`app`** | Boots `core` and every game together and builds the runnable `ntg.jar`. Adding a game to the application is adding one dependency here. |
 
@@ -88,7 +88,7 @@ backend/
 │       ├── integration/supabase/   🔌 Supabase Auth and Storage clients
 │       ├── web/                    Health endpoint and global error handling
 │       ├── logging/                Request id and access log
-│       └── features/               auth · users · tags · catalog · assets
+│       └── features/               auth · users · tags · catalog · assets · music
 │
 ├── games/
 │   ├── pokemon/                    🎮 Pokémon (+ sql/pokemon.sql)
@@ -141,6 +141,7 @@ that are not signed in receive `401` and requests without permission receive `40
 | **Sessions** | Short-lived access token kept in memory by the client, plus a long-lived **refresh token in an HttpOnly cookie** (scoped to the auth path, `Secure` and `SameSite` configurable). The refresh token **rotates** on every use and logout revokes it on Supabase. |
 | **Accounts** | **No public sign-up.** Only admins create users, and users choose their own password from a one-time email link. An admin cannot delete their own account. |
 | **Passwords** | Policy enforced on the way in (length, at least a letter and a number). A failed login gives a generic message that does not say whether the email exists. |
+| **Uploaded songs** | Compressed by the admin's browser to AAC (M4A); the server only accepts an MP4 file of at most 4 MB and 10 minutes, checked by its bytes, and never decodes audio. At most 50 songs per area. |
 | **Uploaded pictures** | Validated by their bytes, never by name. The server resizes and re-encodes every picture (which also drops metadata such as GPS), guards against huge images and processes one at a time. Private pictures (Pokémon teams) live in a bucket closed to clients and are shown through short-lived signed URLs. |
 | **Database** | Row level security is enabled on every table, so the Supabase Data API can read nothing; the backend connects as the owner. |
 | **Errors** | Standard problem-detail responses. Server errors return a generic message plus a **request id**, never stack traces, SQL or class names. |
@@ -161,6 +162,8 @@ security headers (see the [frontend documentation](../frontend/README.md)).
 | Profile | `PUT /users/me` | Any signed-in user (own profile only) |
 | Catalog | `GET /games` | Any signed-in user (each sees the games they can) |
 | Catalog | `POST` · `PUT` · `DELETE /games/**` | **Admin** |
+| Music | `GET /music` | Any signed-in user (the general playlist and the games they hold the tag for) |
+| Music | `/music/**` | **Admin** |
 | Users, tags, pictures | `/users/**`, `/tags/**`, `/assets/**` | **Admin** |
 | Games | `GET /<game>/**` | Users with the game's **tag**, and admins |
 | Games | Other methods on `/<game>/**` | **Admin**, except the routes the game opens to players |
@@ -202,6 +205,16 @@ security headers (see the [frontend documentation](../frontend/README.md)).
   server checks it, resizes it, re-encodes it as JPEG (PNG when it has transparency) and stores it in the public
   bucket. Its URL changes with every upload, so browsers can cache each version for a year.
 
+### 5. Music
+
+- There is one playlist for the general web (`platform`) and one per game module, so a new game module gets its own
+  playlist with no change in `core`. Games only listed in the catalog have none until their module exists.
+- The admin's browser turns each song into AAC in an M4A file (96, 64 or 48 kbps by length, so up to 10 minutes fit
+  in 4 MB) and uploads only that file. The server checks it and stores it in the public bucket `public-music` as
+  `<area>/<id>.m4a`; the name never changes, so browsers keep each song for a year.
+- `GET /music` gives each user the playlists they can hear. The files are public by URL, but only signed-in users get
+  the URLs and nobody can list the bucket.
+
 ---
 
 <br>
@@ -217,6 +230,7 @@ All routes live under `/api/v1`.
 | **Tags** | `tags` |
 | **Catalog** | `games` (the games each user can see, and their management) |
 | **Pictures** | `assets` (expected pictures, upload, delete) |
+| **Music** | `music` (playlists), `music/areas/{area}/tracks`, `music/areas/{area}/order`, `music/tracks/{id}` |
 | **Game modules** | One group of resources per game, under `/api/v1/<game>/...` |
 
 Interactive documentation is available through Swagger UI where an environment enables it (admin only).
@@ -227,7 +241,7 @@ Interactive documentation is available through Swagger UI where an environment e
 
 ## 🗄️ Data model
 
-PostgreSQL on Supabase, organised in schemas: **`core`** for the platform (users, tags, game catalog, pictures)
+PostgreSQL on Supabase, organised in schemas: **`core`** for the platform (users, tags, game catalog, pictures, music)
 plus **one schema per game** that needs tables. Each module keeps its DDL next to its code
 (`core/sql/core.sql`, `games/<game>/sql/`), and every file can be run again safely.
 
@@ -237,7 +251,7 @@ plus **one schema per game** that needs tables. Each module keeps its DDL next t
   files inside the module, not in the database.
 - The WoW Forever game data is built by the backend from the game client (through wago.tools) every time a new
   build comes out, checked every hour; the last good copy is kept in a private Storage bucket.
-- Pictures are files in Supabase Storage; the database keeps only their object names.
+- Pictures and songs are files in Supabase Storage; the database keeps only their object names.
 
 ---
 
@@ -250,7 +264,8 @@ The site runs on the free plans of Render, Vercel and Supabase, so the backend a
 | Technique | Effect |
 |---|---|
 | **Role and tags cache** (Caffeine, 60 s) | At most one query per user per minute instead of one per request |
-| **Catalog and picture URLs in memory** | Reloaded only after an admin changes them |
+| **Catalog, picture URLs and playlists in memory** | Reloaded only after an admin changes them |
+| **Songs compressed in the browser** | The server never decodes audio, so music costs no server memory; each song is downloaded once per browser |
 | **Gzip** | JSON is compressed (the WoW data drops from about 1.8 MB to about 200 KB) |
 | **ETag on static JSON** | A browser that already has the data gets `304` with no body |
 | **Daily `select 1`** | The keep-alive call touches the database once a day, so Supabase never pauses the project |

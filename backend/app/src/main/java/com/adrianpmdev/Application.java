@@ -19,7 +19,7 @@ public class Application {
      * Starts the Spring Boot application.
      *
      * @param args application startup arguments
-     */ 
+     */
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
     }

@@ -91,53 +91,54 @@
 
 .camp {
     display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.camp-item {
-    display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     width: 100%;
-    padding: 4px 6px;
-    border: 1px solid transparent;
-    color: wow.$muted;
+    padding: 7px 9px;
+    border: 1px solid rgba(107, 208, 107, 0.4);
+    color: wow.$green;
     font: inherit;
     font-size: 0.85rem;
+    line-height: 1.35;
     text-align: left;
     cursor: help;
-    background: none;
+    background: rgba(107, 208, 107, 0.08);
 
     &:hover {
-        border-color: wow.$line;
-        background: rgba(216, 184, 102, 0.06);
+        border-color: rgba(107, 208, 107, 0.7);
+        background: rgba(107, 208, 107, 0.14);
     }
 
     &:focus-visible {
-        outline: 1px solid wow.$gold;
-        outline-offset: -1px;
+        outline: 1px solid wow.$green;
+        outline-offset: 1px;
     }
 }
 
 .camp-icon {
-    @include wow.icon(26px);
+    @include wow.icon(32px);
     flex: 0 0 auto;
     border-radius: 2px;
 }
 
+.camp-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.camp-title {
+    color: rgba(107, 208, 107, 0.75);
+    font-size: 0.8rem;
+}
+
 .camp-name {
-    color: wow.$text-strong;
+    color: wow.$green;
 }
 
 .camp-effect {
-    margin: 0;
-    padding: 5px 8px;
-    border: 1px solid rgba(107, 208, 107, 0.4);
     color: wow.$green;
-    font-size: 0.85rem;
-    line-height: 1.35;
-    background: rgba(107, 208, 107, 0.08);
 }
 
 .pairs-with {

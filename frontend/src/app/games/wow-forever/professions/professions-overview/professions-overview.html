@@ -32,31 +32,31 @@
                             </header>
 
                             @if (profession.camp; as camp) {
-                                <div class="camp">
-                                    <button
-                                        type="button"
-                                        class="camp-item"
-                                        (mouseenter)="showCampAtPointer($event, camp)"
-                                        (mousemove)="showCampAtPointer($event, camp)"
-                                        (mouseleave)="hideCamp()"
-                                        (focus)="showCampBelow($event, camp)"
-                                        (blur)="hideCamp()"
-                                    >
-                                        <img
-                                            class="camp-icon"
-                                            [src]="camp.icon"
-                                            alt=""
-                                            loading="lazy"
-                                            (error)="hideBrokenIcon($event)"
-                                        />
-                                        <span class="camp-text">
+                                <button
+                                    type="button"
+                                    class="camp"
+                                    (mouseenter)="showCampAtPointer($event, camp)"
+                                    (mousemove)="showCampAtPointer($event, camp)"
+                                    (mouseleave)="hideCamp()"
+                                    (focus)="showCampBelow($event, camp)"
+                                    (blur)="hideCamp()"
+                                >
+                                    <img
+                                        class="camp-icon"
+                                        [src]="camp.icon"
+                                        alt=""
+                                        loading="lazy"
+                                        (error)="hideBrokenIcon($event)"
+                                    />
+                                    <span class="camp-text">
+                                        <span class="camp-title">
                                             <strong class="camp-name">{{ camp.name }}</strong>
                                             at camp from skill {{ camp.skill }}
                                         </span>
-                                        <span class="visually-hidden">: {{ camp.description }}</span>
-                                    </button>
-                                    <p class="camp-effect">{{ camp.effect }}</p>
-                                </div>
+                                        <span class="camp-effect">{{ camp.effect }}</span>
+                                    </span>
+                                    <span class="visually-hidden">: {{ camp.description }}</span>
+                                </button>
                             }
 
                             @if (profession.pairsWith) {

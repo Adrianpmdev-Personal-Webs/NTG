@@ -6,6 +6,7 @@ import com.adrianpmdev.wowforever.features.gamedata.infrastructure.wago.WagoClie
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.TaskScheduler;
@@ -21,7 +22,14 @@ import java.util.Optional;
 /**
  * Keeps the game data up to date with the game: it asks wago.tools for the newest WoW Forever build every
  * {@code checkMinutes} of config.json and, when there is a new one, builds the data file from that build's client
- * tables (compared with the newest Classic Era build), checks it, serves it and keeps a copy in Storage.
+ * tables (compared with the newest Classic Era build), checks it, serves it and keeps a copy in Storage. The build
+ * being served is also read again, once, when its file was written by another version of the export (its fingerprint
+ * does not match, see GameDataExporter.fingerprint): any change to the export shows up on the next start, while the
+ * old file keeps being served.
+ * <p>
+ * Only the deployed backend keeps copies and marks in Storage. A backend run on a developer machine
+ * ({@code wow-forever.sync.keep-copy=false}) reads the kept copy and may read a build again in its own memory, but
+ * never writes to Storage, so trying unfinished code can never leave a wrong copy for the deployed one.
  * <p>
  * When the backend starts it first serves the copy kept in Storage, so players do not wait for a build. While no data
  * is served (no copy and wago.tools unreachable) it tries again every few minutes. A failed check, a broken table or
@@ -54,6 +62,10 @@ public class GameDataSyncService {
     private final GameDataStore store;
     private final TaskScheduler scheduler;
     private final Clock clock;
+    private final boolean keepCopy;
+
+    /** Fingerprint of this version of the export; null until first needed. */
+    private String exporter;
 
     /** The read a previous run of the backend never ended; null until first asked, then fixed for this run. */
     private Optional<GameDataStore.Attempt> crashedRead;
@@ -65,20 +77,24 @@ public class GameDataSyncService {
      * @param wagoClient      reads the builds and tables of the game clients
      * @param store           keeps the last good data file
      * @param scheduler       runs the checks
+     * @param keepCopy        whether this backend writes the copy and the marks in Storage (false on a developer
+     *                        machine)
      */
     @Autowired
     public GameDataSyncService(GameDataService gameDataService, WagoClient wagoClient, GameDataStore store,
-                               TaskScheduler scheduler) {
-        this(gameDataService, wagoClient, store, scheduler, Clock.systemUTC());
+                               TaskScheduler scheduler,
+                               @Value("${wow-forever.sync.keep-copy:true}") boolean keepCopy) {
+        this(gameDataService, wagoClient, store, scheduler, Clock.systemUTC(), keepCopy);
     }
 
     GameDataSyncService(GameDataService gameDataService, WagoClient wagoClient, GameDataStore store,
-                        TaskScheduler scheduler, Clock clock) {
+                        TaskScheduler scheduler, Clock clock, boolean keepCopy) {
         this.gameDataService = gameDataService;
         this.wagoClient = wagoClient;
         this.store = store;
         this.scheduler = scheduler;
         this.clock = clock;
+        this.keepCopy = keepCopy;
     }
 
     /** Starts the checks once the application is up. */
@@ -114,11 +130,16 @@ public class GameDataSyncService {
         GameDataConfig.Client settings = gameDataService.getConfig().client();
         Optional<String> newest = wagoClient.latestBuild(settings.product());
 
-        if (newest.isEmpty() || newest.equals(gameDataService.currentBuild()) || stoppedTheBackend(newest.get())) {
+        boolean upToDate = newest.equals(gameDataService.currentBuild())
+                && exporter().equals(gameDataService.currentExporter());
+
+        if (newest.isEmpty() || upToDate || stoppedTheBackend(newest.get())) {
             return;
         }
 
-        log.info("Reading WoW Forever build {} from the game client", newest.get());
+        log.info("Reading WoW Forever build {} from the game client{}", newest.get(),
+                newest.equals(gameDataService.currentBuild()) ? " again: it was kept by another version of the export"
+                        : "");
         long start = clock.millis();
         markRead(new GameDataStore.Attempt(newest.get(), clock.instant()));
 
@@ -133,6 +154,15 @@ public class GameDataSyncService {
             unmarkRead();
             System.gc();
         }
+    }
+
+    private String exporter() {
+        if (exporter == null) {
+            exporter = GameDataExporter.fingerprint(gameDataService.getConfig());
+            log.info("WoW Forever export fingerprint {}", exporter);
+        }
+
+        return exporter;
     }
 
     /** Whether a previous run of the backend stopped while reading this build, less than a day ago. */
@@ -163,6 +193,10 @@ public class GameDataSyncService {
     }
 
     private void markRead(GameDataStore.Attempt attempt) {
+        if (!keepCopy) {
+            return;
+        }
+
         try {
             store.startRead(attempt);
         } catch (RuntimeException exception) {
@@ -171,6 +205,10 @@ public class GameDataSyncService {
     }
 
     private void unmarkRead() {
+        if (!keepCopy) {
+            return;
+        }
+
         try {
             store.endRead();
         } catch (RuntimeException exception) {
@@ -205,6 +243,11 @@ public class GameDataSyncService {
     }
 
     private void keep(ObjectNode data) {
+        if (!keepCopy) {
+            log.info("The WoW Forever game data is not kept in Storage (wow-forever.sync.keep-copy=false)");
+            return;
+        }
+
         try {
             store.save(data);
         } catch (RuntimeException exception) {

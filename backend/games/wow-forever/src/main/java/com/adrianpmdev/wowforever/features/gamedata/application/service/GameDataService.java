@@ -80,7 +80,9 @@ public class GameDataService {
 
     /**
      * Checks that a data file has everything the screens need: every section, at least one class with talent
-     * trees and a spellbook, both factions in the races and at least one Legacy tree.
+     * trees and a spellbook, both factions in the races, at least one Legacy tree and, in files that carry the
+     * fingerprint of their export, the professions. An older file is still served (its professions screen answers 503)
+     * until its build is read again, which happens on the next check because its fingerprint does not match.
      *
      * @param root the data file
      * @throws IllegalArgumentException naming what is missing
@@ -116,6 +118,10 @@ public class GameDataService {
         if (root.path("legacy").path("trees").isEmpty()) {
             throw new IllegalArgumentException("The game data has no Legacy trees");
         }
+
+        if (root.hasNonNull("exporter") && root.path("professions").isEmpty()) {
+            throw new IllegalArgumentException("The game data has no professions");
+        }
     }
 
     /** The game build of the file being served, or empty while none is. */
@@ -123,6 +129,16 @@ public class GameDataService {
         GameData current = data;
 
         return current == null ? Optional.empty() : Optional.ofNullable(current.root().path("build").asText(null));
+    }
+
+    /**
+     * The fingerprint of the export that wrote the file being served (see GameDataExporter.fingerprint), or an empty
+     * text when none is served or the file is older than fingerprints.
+     */
+    public String currentExporter() {
+        GameData current = data;
+
+        return current == null ? "" : current.root().path("exporter").asText("");
     }
 
     /**
@@ -235,6 +251,15 @@ public class GameDataService {
     /** Legacy System: perk trees and challenges. */
     public String getLegacy() {
         return cached("legacy", current -> current.mapper().legacy(current.root(), current.root().path("legacy")));
+    }
+
+    /** The professions by group, with their camp feature and the profession each one goes with. */
+    public String getProfessions() {
+        if (data().root().path("professions").isMissingNode()) {
+            throw unavailable("the professions are being read from the game client", null);
+        }
+
+        return cached("professions", current -> current.mapper().professions(current.root()));
     }
 
     /**

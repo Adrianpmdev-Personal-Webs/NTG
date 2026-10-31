@@ -1,8 +1,8 @@
 /**
  * GameDataApi
  *
- * HTTP service for the game data of WoW Forever (talents, spellbooks, racials, the Legacy System and the URLs of the
- * pictures). The backend sends every screen its data already in the models of the app (texts in Spanish, full icon
+ * HTTP service for the game data of WoW Forever (talents, spellbooks, racials, the Legacy System, professions and the
+ * URLs of the pictures). The backend sends every screen its data already in the models of the app (texts in Spanish, full icon
  * URLs), so this service only downloads it: one request per screen (and per class), kept for the rest of the session,
  * so going back to a screen or a class does not download it again.
  *
@@ -14,6 +14,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, shareReplay, throwError } from 'rxjs';
 import { API_BASE_URL } from '@core/api/api';
 import { LegacyData } from '../legacy/legacy-models';
+import { ProfessionsData } from '../professions/professions-models';
 import { RacialsData } from '../racials/racials-models';
 import { ClassSpellbook } from '../spellbook/spellbook-models';
 import { ClassTalents } from '../talents/talents-models';
@@ -43,6 +44,10 @@ export class GameDataApi {
 
     getLegacy(): Observable<LegacyData> {
         return this.cached<LegacyData>('/legacy');
+    }
+
+    getProfessions(): Observable<ProfessionsData> {
+        return this.cached<ProfessionsData>('/professions');
     }
 
     getImages(): Observable<Readonly<Record<string, string>>> {

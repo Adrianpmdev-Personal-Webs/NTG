@@ -1,0 +1,165 @@
+@use 'mixins' as *;
+@use '../../styles/wow-forever' as wow;
+
+:host {
+    display: block;
+}
+
+.state {
+    @include wow.state;
+}
+
+.section-title {
+    @include wow.section-title;
+}
+
+.group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    & + & {
+        margin-top: 24px;
+    }
+}
+
+.group-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid wow.$line;
+}
+
+.group-icon {
+    @include wow.icon(28px);
+    border-radius: 3px;
+}
+
+.group-note {
+    margin: 0;
+    color: wow.$muted;
+    font-size: 0.8rem;
+}
+
+.professions {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+}
+
+.profession {
+    @include wow.panel;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+}
+
+.profession-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.profession-icon {
+    @include wow.icon(40px);
+    flex: 0 0 auto;
+    border-radius: 3px;
+}
+
+.profession-title {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.profession-name {
+    margin: 0;
+    color: wow.$bright;
+    font-size: 1.05rem;
+}
+
+.profession-description {
+    margin: 0;
+    color: wow.$text;
+    font-size: 0.85rem;
+    line-height: 1.35;
+}
+
+.camp {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.camp-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 4px 6px;
+    border: 1px solid transparent;
+    color: wow.$muted;
+    font: inherit;
+    font-size: 0.85rem;
+    text-align: left;
+    cursor: help;
+    background: none;
+
+    &:hover {
+        border-color: wow.$line;
+        background: rgba(216, 184, 102, 0.06);
+    }
+
+    &:focus-visible {
+        outline: 1px solid wow.$gold;
+        outline-offset: -1px;
+    }
+}
+
+.camp-icon {
+    @include wow.icon(26px);
+    flex: 0 0 auto;
+    border-radius: 2px;
+}
+
+.camp-name {
+    color: wow.$text-strong;
+}
+
+.camp-effect {
+    margin: 0;
+    padding: 5px 8px;
+    border: 1px solid rgba(107, 208, 107, 0.4);
+    color: wow.$green;
+    font-size: 0.85rem;
+    line-height: 1.35;
+    background: rgba(107, 208, 107, 0.08);
+}
+
+.pairs-with {
+    margin: auto 0 0;
+    padding-top: 8px;
+    border-top: 1px solid wow.$line;
+    color: wow.$muted;
+    font-size: 0.8rem;
+    font-style: italic;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+@include small {
+    .professions {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

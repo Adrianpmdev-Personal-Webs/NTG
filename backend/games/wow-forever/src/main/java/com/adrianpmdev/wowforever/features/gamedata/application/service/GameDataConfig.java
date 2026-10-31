@@ -9,8 +9,9 @@ import java.util.Map;
  * file, never the web client.
  *
  * @param iconBaseUrl  host of the game icons; an icon URL is {@code <iconBaseUrl>/<icon>.jpg}
- * @param raceIconBaseUrl host of the race icons, which the game icon host lacks for some races (Night Elf, Undead and
- *                     the Skyborne of WoW Forever); the same as {@code iconBaseUrl} when left out
+ * @param raceIconBaseUrl host of the race icons and the camp item icons, which the game icon host lacks for some
+ *                     races (Night Elf, Undead and the Skyborne of WoW Forever) and for new WoW Forever items such as
+ *                     the campfire; the same as {@code iconBaseUrl} when left out
  * @param fallbackIcon icon for anything the data gives no icon for
  * @param factions     name of each faction ({@code ALLIANCE}, {@code HORDE})
  * @param features     tools of the area shown on its home
@@ -19,6 +20,7 @@ import java.util.Map;
  * @param talents      rules of the talent calculator
  * @param spellbook    texts of the spellbook
  * @param legacy       texts of the Legacy System
+ * @param professions  how the professions are grouped and described, and their camp feature
  * @param client       where the game data is read from in the game client, and what the client does not name
  *
  * @author adrianpmdev
@@ -34,8 +36,54 @@ public record GameDataConfig(
         Talents talents,
         Spellbook spellbook,
         Legacy legacy,
+        Professions professions,
         Client client
 ) {
+
+    /**
+     * The professions screen. The client names each profession and its camp features, but it does not say which
+     * professions craft and which gather, what each one is for or which one it goes with: that is written here.
+     *
+     * @param groups groups shown on the screen, in order
+     * @param list   professions, in the order they are shown inside their group
+     */
+    public record Professions(List<ProfessionGroup> groups, List<Profession> list) {
+    }
+
+    /**
+     * A group of professions.
+     *
+     * @param id   id, which each profession names
+     * @param name heading
+     * @param note one line under the heading, or null
+     * @param icon icon of the heading, as the icon host names it
+     */
+    public record ProfessionGroup(String id, String name, String note, String icon) {
+    }
+
+    /**
+     * A profession.
+     *
+     * @param skillLine   its skill line in the game client (the one its recipes belong to)
+     * @param group       id of its group
+     * @param camp        its first camp feature
+     * @param description what it makes or gathers, in one line
+     * @param pairsWith   the profession it usually goes with, in one line, or null
+     */
+    public record Profession(int skillLine, String group, Camp camp, String description, String pairsWith) {
+    }
+
+    /**
+     * The first camp feature of a profession. The client has no mark that tells camp items apart from other items,
+     * and the buffs they give have values but no text, so both are named here.
+     *
+     * @param item   the camp item
+     * @param spell  spell whose values the effect uses (the buff the item gives), or null for the spell of the item
+     * @param effect what it gives in a few words, with the values of that spell written as the game writes them
+     *               ({@code $s1} is its first effect), for example {@code $s1 Mana every 5 sec}
+     */
+    public record Camp(int item, Integer spell, String effect) {
+    }
 
     /**
      * A tool of the area.

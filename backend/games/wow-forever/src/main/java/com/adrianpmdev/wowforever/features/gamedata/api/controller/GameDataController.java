@@ -15,9 +15,10 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 /**
- * REST controller for the game data (talents, spellbooks, racials and the Legacy System), already turned into the models
- * every web client shows (see GameDataResponses). Read only: the data changes when a new game build comes out (see
- * GameDataSyncService), not from the app. One endpoint per screen, so each screen downloads only what it shows.
+ * REST controller for the game data (talents, spellbooks, racials, the Legacy System and professions), already turned
+ * into the models every web client shows (see GameDataResponses). Read only: the data changes when a new game build
+ * comes out (see GameDataSyncService), not from the app. One endpoint per screen, so each screen downloads only what it
+ * shows.
  *
  * @author adrianpmdev
  */
@@ -63,6 +64,12 @@ public class GameDataController {
     @GetMapping("/legacy")
     public ResponseEntity<String> getLegacy() {
         return json(gameDataService.getLegacy());
+    }
+
+    /** The professions by group, with their camp feature and the profession each one goes with. */
+    @GetMapping("/professions")
+    public ResponseEntity<String> getProfessions() {
+        return json(gameDataService.getProfessions());
     }
 
     /**

@@ -31,4 +31,9 @@ export const WOW_FOREVER_ROUTES: Routes = [
         path: 'races',
         loadComponent: () => import('./racials/racials-overview/racials-overview').then((m) => m.RacialsOverview),
     },
+    {
+        path: 'professions',
+        loadComponent: () =>
+            import('./professions/professions-overview/professions-overview').then((m) => m.ProfessionsOverview),
+    },
 ];

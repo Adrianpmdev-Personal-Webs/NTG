@@ -255,4 +255,51 @@ public final class GameDataResponses {
      */
     public record RacialsData(List<Race> races, DataCredit credit) {
     }
+
+    /**
+     * The first camp feature a profession unlocks.
+     *
+     * @param name        name of its item
+     * @param icon        icon URL of its item
+     * @param skill       profession skill it needs
+     * @param effect      what it gives, in a few words
+     * @param description what it does, as the game describes the item (in English)
+     */
+    public record CampFeature(String name, String icon, int skill, String effect, String description) {
+    }
+
+    /**
+     * A profession.
+     *
+     * @param slug        id in URLs
+     * @param name        name, as the game writes it
+     * @param icon        icon URL
+     * @param description what it makes or gathers, in one line
+     * @param pairsWith   the profession it usually goes with, in one line, or null
+     * @param camp        its first camp feature, or null
+     */
+    public record Profession(String slug, String name, String icon, String description, String pairsWith,
+                             CampFeature camp) {
+    }
+
+    /**
+     * A group of professions.
+     *
+     * @param id          id
+     * @param name        heading
+     * @param note        one line under the heading, or null
+     * @param icon        icon URL of the heading
+     * @param professions its professions, in order
+     */
+    public record ProfessionGroup(String id, String name, String note, String icon, List<Profession> professions) {
+    }
+
+    /**
+     * Every profession by group.
+     *
+     * @param groups groups, in order
+     * @param credit credit of the data
+     */
+    public record ProfessionsData(List<ProfessionGroup> groups, DataCredit credit) {
+    }
 }

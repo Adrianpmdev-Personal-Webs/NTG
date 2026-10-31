@@ -1,4 +1,5 @@
 {
+    "exporter": "written-by-the-tests",
     "attribution": "Game data read from the WoW Forever client through wago.tools",
     "generated": "2026-10-29",
     "build": "1.60.1.70685",
@@ -730,5 +731,43 @@
                 "points": 1
             }
         ]
+    },
+    "professions": {
+        "171": {
+            "name": "Alchemy",
+            "icon": "trade_alchemy",
+            "camp": {
+                "item": 279956,
+                "name": "Mana Well",
+                "icon": "spell_arcane_manatap",
+                "skill": 20,
+                "values": ["29"],
+                "description": "Constructs a mana well that allows you and others sitting nearby to regenerate 29 Mana every 5 sec, mutually exclusive with Blessing of Wisdom."
+            }
+        },
+        "185": {
+            "name": "Cooking",
+            "icon": "inv_misc_food_15",
+            "camp": {
+                "item": 279981,
+                "name": "Basic Campfire Kit",
+                "icon": "inv_misc_food_15",
+                "skill": 1,
+                "values": ["3", "0"],
+                "description": "Builds a basic campfire that allows cooking and the placement of up to 3 additional camp features."
+            }
+        },
+        "197": {
+            "name": "Tailoring",
+            "icon": "trade_tailoring",
+            "camp": {
+                "item": 279973,
+                "name": "Faction Banner",
+                "icon": "inv_bannerpvp_02",
+                "skill": 20,
+                "values": ["32"],
+                "description": "Unrolls a banner that allows you and other members of the Alliance sitting nearby to gain 32 increased Spirit, mutually exclusive with Divine Spirit."
+            }
+        }
     }
 }

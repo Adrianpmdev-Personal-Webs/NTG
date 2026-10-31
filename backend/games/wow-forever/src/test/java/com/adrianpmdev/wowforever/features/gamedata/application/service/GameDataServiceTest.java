@@ -144,6 +144,48 @@ class GameDataServiceTest {
         assertThat(service.currentBuild()).contains(GameDataFixtures.testData().path("build").asText());
     }
 
+    @Test
+    void professionsComeInTheGroupsOfTheConfigWithItsTextsAndTheCampOfTheFile() throws Exception {
+        JsonNode groups = read(service.getProfessions()).path("groups");
+
+        assertThat(groups).extracting(group -> group.path("id").asText())
+                .containsExactly("crafting", "gathering", "secondary");
+        assertThat(groups.path(0).path("professions")).extracting(profession -> profession.path("name").asText())
+                .containsExactly("Alchemy", "Tailoring");
+        assertThat(groups.path(1).path("professions")).isEmpty();
+
+        JsonNode alchemy = groups.path(0).path("professions").path(0);
+        assertThat(alchemy.path("slug").asText()).isEqualTo("alchemy");
+        assertThat(alchemy.path("icon").asText()).isEqualTo(ICON_PREFIX + "trade_alchemy.jpg");
+        assertThat(alchemy.path("description").asText()).isEqualTo("Potions, elixirs, flasks and transmutes");
+        assertThat(alchemy.path("pairsWith").asText()).isEqualTo("Goes with Herbalism, its herbs.");
+        assertThat(alchemy.path("camp").path("name").asText()).isEqualTo("Mana Well");
+        assertThat(alchemy.path("camp").path("icon").asText())
+                .isEqualTo("https://wow.zamimg.com/images/wow/icons/large/spell_arcane_manatap.jpg");
+        assertThat(alchemy.path("camp").path("skill").asInt()).isEqualTo(20);
+        assertThat(alchemy.path("camp").path("effect").asText()).isEqualTo("29 Mana every 5 sec");
+        assertThat(alchemy.path("camp").path("description").asText()).startsWith("Constructs a mana well");
+        assertThat(groups.path(0).path("icon").asText()).isEqualTo(ICON_PREFIX + "trade_blacksmithing.jpg");
+        assertThat(groups.path(2).path("professions").path(0).path("pairsWith").isNull()).isTrue();
+    }
+
+    @Test
+    void aFileWrittenBeforeProfessionsIsServedWithoutThem() {
+        ObjectNode older = GameDataFixtures.testData();
+        older.remove("exporter");
+        older.remove("professions");
+        service.publish(older);
+
+        assertThat(service.currentExporter()).isEmpty();
+        assertThatThrownBy(service::getProfessions).isInstanceOfSatisfying(ResponseStatusException.class,
+                exception -> assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE));
+
+        ObjectNode noProfessions = GameDataFixtures.testData();
+        noProfessions.remove("professions");
+        assertThatThrownBy(() -> service.publish(noProfessions)).isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("professions");
+    }
+
     private static JsonNode read(String json) throws Exception {
         return OBJECT_MAPPER.readTree(json);
     }

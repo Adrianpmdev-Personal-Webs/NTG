@@ -1,6 +1,7 @@
 package com.adrianpmdev.wowforever.features.gamedata.application.service;
 
 import com.adrianpmdev.wowforever.features.gamedata.api.dto.response.GameDataResponses.Ability;
+import com.adrianpmdev.wowforever.features.gamedata.api.dto.response.GameDataResponses.CampFeature;
 import com.adrianpmdev.wowforever.features.gamedata.api.dto.response.GameDataResponses.ChallengeGroup;
 import com.adrianpmdev.wowforever.features.gamedata.api.dto.response.GameDataResponses.ClassRacials;
 import com.adrianpmdev.wowforever.features.gamedata.api.dto.response.GameDataResponses.ClassSpellbook;
@@ -9,6 +10,9 @@ import com.adrianpmdev.wowforever.features.gamedata.api.dto.response.GameDataRes
 import com.adrianpmdev.wowforever.features.gamedata.api.dto.response.GameDataResponses.GameClass;
 import com.adrianpmdev.wowforever.features.gamedata.api.dto.response.GameDataResponses.LegacyChallenge;
 import com.adrianpmdev.wowforever.features.gamedata.api.dto.response.GameDataResponses.LegacyData;
+import com.adrianpmdev.wowforever.features.gamedata.api.dto.response.GameDataResponses.Profession;
+import com.adrianpmdev.wowforever.features.gamedata.api.dto.response.GameDataResponses.ProfessionGroup;
+import com.adrianpmdev.wowforever.features.gamedata.api.dto.response.GameDataResponses.ProfessionsData;
 import com.adrianpmdev.wowforever.features.gamedata.api.dto.response.GameDataResponses.Race;
 import com.adrianpmdev.wowforever.features.gamedata.api.dto.response.GameDataResponses.RacialsData;
 import com.adrianpmdev.wowforever.features.gamedata.api.dto.response.GameDataResponses.Spell;
@@ -44,6 +48,7 @@ final class GameDataMapper {
     private static final int TALENT_ID_FACTOR = 100;
 
     private static final Pattern BUILD_PATTERN = Pattern.compile("\\d+\\.\\d+\\.\\d+\\.\\d+");
+    private static final Pattern VALUE_PATTERN = Pattern.compile("\\$s(\\d+)");
     private static final Pattern COOLDOWN_PART = Pattern.compile("(\\d[\\d,.]* (?:sec|min|hour|hrs)) cooldown");
     private static final Pattern RANK_PATTERN = Pattern.compile("(\\d+)");
     private static final Pattern LEVEL_PATTERN = Pattern.compile("level (\\d+)", Pattern.CASE_INSENSITIVE);
@@ -432,5 +437,58 @@ final class GameDataMapper {
         }
 
         return new RacialsData(races, credit(root));
+    }
+
+    /* ─── Professions ─── */
+
+    /**
+     * The professions of config.json by group, with the name, icon and camp feature the file gives them. The buff of
+     * the camp feature is the short text of config.json filled with the values of the file ({@code $s1} is the first),
+     * so that text can change with a deploy alone. A profession the file lacks is left out.
+     */
+    ProfessionsData professions(JsonNode root) {
+        GameDataConfig.Professions professions = config.professions();
+        JsonNode section = root.path("professions");
+        List<ProfessionGroup> groups = new ArrayList<>();
+
+        for (GameDataConfig.ProfessionGroup group : professions.groups()) {
+            List<Profession> inGroup = new ArrayList<>();
+
+            for (GameDataConfig.Profession profession : professions.list()) {
+                JsonNode written = section.path(String.valueOf(profession.skillLine()));
+
+                if (group.id().equals(profession.group()) && written.isObject()) {
+                    JsonNode feature = written.path("camp");
+                    CampFeature camp = feature.isObject() && profession.camp() != null
+                            ? new CampFeature(feature.path("name").asText(""), raceIconUrl(feature.path("icon").asText("")),
+                                    feature.path("skill").asInt(), withValues(profession.camp().effect(),
+                                    feature.path("values")), feature.path("description").asText(""))
+                            : null;
+                    String name = written.path("name").asText("");
+                    inGroup.add(new Profession(slugify(name), name, iconUrl(written.path("icon").asText("")),
+                            profession.description(), profession.pairsWith(), camp));
+                }
+            }
+
+            groups.add(new ProfessionGroup(group.id(), group.name(), group.note(), iconUrl(group.icon()), inGroup));
+        }
+
+        return new ProfessionsData(groups, credit(root, root.path("build").asText(null)));
+    }
+
+    /** A text with every {@code $sN} replaced by the N-th value (a missing value is left as written). */
+    private static String withValues(String text, JsonNode values) {
+        Matcher matcher = VALUE_PATTERN.matcher(text == null ? "" : text);
+        StringBuilder filled = new StringBuilder();
+
+        while (matcher.find()) {
+            JsonNode value = values.path(Integer.parseInt(matcher.group(1)) - 1);
+            matcher.appendReplacement(filled, Matcher.quoteReplacement(value.isMissingNode()
+                    ? matcher.group() : value.asText()));
+        }
+
+        matcher.appendTail(filled);
+
+        return filled.toString();
     }
 }

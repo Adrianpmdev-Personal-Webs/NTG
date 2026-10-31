@@ -13,7 +13,8 @@
         { "id": "dungeons", "label": "Dungeons y loot", "description": "Mazmorras, jefes y el botín de cada uno.", "available": false },
         { "id": "spellbook", "label": "Spellbook", "description": "Los hechizos de cada clase, rango a rango.", "available": true },
         { "id": "legacy", "label": "Legacy System", "description": "Perks y desafíos de la cuenta.", "available": true },
-        { "id": "races", "label": "Razas y raciales", "description": "Habilidades raciales y combinaciones raza-clase.", "available": true }
+        { "id": "races", "label": "Razas y raciales", "description": "Habilidades raciales y combinaciones raza-clase.", "available": true },
+        { "id": "professions", "label": "Professions", "description": "The twelve professions, their camp and what each one goes with.", "available": true }
     ],
 
     "news": {
@@ -106,6 +107,28 @@
             "Player vs. Player": "JcJ",
             "Adventure": "Aventura"
         }
+    },
+
+    "professions": {
+        "groups": [
+            { "id": "crafting", "name": "Crafting professions", "note": "Pick two primary professions", "icon": "trade_blacksmithing" },
+            { "id": "gathering", "name": "Gathering professions", "note": null, "icon": "trade_herbalism" },
+            { "id": "secondary", "name": "Secondary professions", "note": "Every character can learn all three", "icon": "inv_misc_food_15" }
+        ],
+        "list": [
+            { "skillLine": 171, "group": "crafting", "camp": { "item": 279956, "spell": 1230587, "effect": "$s1 Mana every 5 sec" }, "description": "Potions, elixirs, flasks and transmutes", "pairsWith": "Goes with Herbalism, its herbs." },
+            { "skillLine": 164, "group": "crafting", "camp": { "item": 279944, "spell": 1230172, "effect": "$s1 Strength" }, "description": "Weapons, mail and plate, stones and shield spikes", "pairsWith": "Goes with Mining, its ore and bars." },
+            { "skillLine": 333, "group": "crafting", "camp": { "item": 279976, "spell": 1230653, "effect": "$s1 Armor, $s2 to all stats and $s3 to all resistances" }, "description": "Enchants for every gear slot, wands and oils", "pairsWith": "Goes with Tailoring, for gear to disenchant." },
+            { "skillLine": 202, "group": "crafting", "camp": { "item": 279950, "spell": null, "effect": "Sells reagents" }, "description": "Bombs, trinkets, goggles, guns and scopes", "pairsWith": "Goes with Mining, its ore and bars." },
+            { "skillLine": 165, "group": "crafting", "camp": { "item": 279978, "spell": null, "effect": "Rested experience up to $s3% of a level" }, "description": "Leather and mail armor, cloaks, armor kits and bags", "pairsWith": "Goes with Skinning, its leather." },
+            { "skillLine": 197, "group": "crafting", "camp": { "item": 279973, "spell": 1229718, "effect": "$s1 Spirit, for your own faction only" }, "description": "Cloth armor, cloaks, bags and shirts", "pairsWith": "Goes with Enchanting, to disenchant what you sew." },
+            { "skillLine": 182, "group": "gathering", "camp": { "item": 279962, "spell": 1229513, "effect": "$s1 Intellect" }, "description": "Herbs, from the plants of every zone", "pairsWith": "Goes with Alchemy, which uses every herb." },
+            { "skillLine": 186, "group": "gathering", "camp": { "item": 279960, "spell": 1230164, "effect": "$s1 melee Attack Power" }, "description": "Ore, stone and gems, smelted into bars", "pairsWith": "Goes with Blacksmithing, or Engineering." },
+            { "skillLine": 393, "group": "gathering", "camp": { "item": 279979, "spell": 1229519, "effect": "$s1% critical strike chance" }, "description": "Leather, hides and scales from beasts", "pairsWith": "Goes with Leatherworking, which uses every hide." },
+            { "skillLine": 185, "group": "secondary", "camp": { "item": 279981, "spell": null, "effect": "A campfire for cooking, with room for $s1 camp objects" }, "description": "Food, sorted by the buff it gives", "pairsWith": null },
+            { "skillLine": 129, "group": "secondary", "camp": { "item": 279968, "spell": 1230124, "effect": "$s1 Stamina" }, "description": "Bandages, anti-venoms and potions", "pairsWith": null },
+            { "skillLine": 356, "group": "secondary", "camp": { "item": 279967, "spell": 1230098, "effect": "$s1% to all stats" }, "description": "Fish for Cooking, and gear for anglers", "pairsWith": null }
+        ]
     },
 
     "client": {

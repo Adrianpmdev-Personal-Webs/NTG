@@ -1,7 +1,9 @@
 package com.adrianpmdev.wowforever.features.gamedata.application.service;
 
+import com.adrianpmdev.wowforever.features.gamedata.application.service.export.GameDataExporter;
 import com.adrianpmdev.wowforever.features.gamedata.infrastructure.storage.GameDataStore;
 import com.adrianpmdev.wowforever.features.gamedata.infrastructure.wago.WagoClient;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.scheduling.TaskScheduler;
@@ -40,17 +42,53 @@ class GameDataSyncServiceTest {
     private final GameDataStore store = mock(GameDataStore.class);
     private final TaskScheduler scheduler = mock(TaskScheduler.class);
     private final GameDataSyncService sync = new GameDataSyncService(gameDataService, wagoClient, store, scheduler,
-            Clock.fixed(NOW, ZoneOffset.UTC));
+            Clock.fixed(NOW, ZoneOffset.UTC), true);
 
     @Test
     void servesTheKeptCopyAndSkipsABuildItAlreadyHas() throws IOException {
-        when(store.load()).thenReturn(Optional.of(GameDataFixtures.testData()));
+        ObjectNode kept = GameDataFixtures.testData();
+        kept.put("exporter", GameDataExporter.fingerprint(gameDataService.getConfig()));
+        when(store.load()).thenReturn(Optional.of(kept));
         when(wagoClient.latestBuild("wowf")).thenReturn(Optional.of(KEPT_BUILD));
 
         sync.refresh();
 
         assertThat(gameDataService.currentBuild()).contains(KEPT_BUILD);
         verify(wagoClient, never()).tablesOf(anyString());
+        verify(store, never()).save(any());
+    }
+
+    @Test
+    void aKeptCopyWrittenByAnotherVersionOfTheExportIsServedAndItsBuildReadAgain() throws IOException {
+        ObjectNode older = GameDataFixtures.testData();
+        older.put("exporter", "another-version");
+        when(store.load()).thenReturn(Optional.of(older));
+        when(wagoClient.latestBuild(anyString())).thenReturn(Optional.of(KEPT_BUILD));
+        when(wagoClient.tablesOf(anyString())).thenReturn((name, columns, keep) -> {
+            throw new IOException("wago.tools answered 500");
+        });
+
+        assertThatThrownBy(sync::refresh).isInstanceOf(RuntimeException.class);
+
+        assertThat(gameDataService.currentBuild()).contains(KEPT_BUILD);
+        verify(store).startRead(new GameDataStore.Attempt(KEPT_BUILD, NOW));
+    }
+
+    @Test
+    void aDeveloperMachineReadsTheKeptCopyButNeverWritesToStorage() throws IOException {
+        GameDataSyncService local = new GameDataSyncService(gameDataService, wagoClient, store, scheduler,
+                Clock.fixed(NOW, ZoneOffset.UTC), false);
+        when(store.load()).thenReturn(Optional.of(GameDataFixtures.testData()));
+        when(wagoClient.latestBuild(anyString())).thenReturn(Optional.of(KEPT_BUILD));
+        when(wagoClient.tablesOf(anyString())).thenReturn((name, columns, keep) -> {
+            throw new IOException("wago.tools answered 500");
+        });
+
+        assertThatThrownBy(local::refresh).isInstanceOf(RuntimeException.class);
+
+        assertThat(gameDataService.currentBuild()).contains(KEPT_BUILD);
+        verify(store, never()).startRead(any());
+        verify(store, never()).endRead();
         verify(store, never()).save(any());
     }
 

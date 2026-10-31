@@ -4,17 +4,32 @@ import com.adrianpmdev.wowforever.features.gamedata.application.service.GameData
 import com.adrianpmdev.wowforever.features.gamedata.infrastructure.wago.Db2Source;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HexFormat;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Builds the game data file from the tables of one build of the game client, with the same structure the backend
  * has always read (sections {@code talents}, {@code spellbooks}, {@code spell_desc}, {@code racials},
- * {@code class_racials}, {@code class_abilities} and {@code legacy}), so the rest of the backend does not change.
- * Every text is in English, as the client writes it, for a character of the top level with no gear. The client has no
- * notes on what changed for each class, so {@code class_abilities} is empty. When the tables of Classic Era are
- * given, talents and spells are compared with Classic (see ClassicComparison).
+ * {@code class_racials}, {@code class_abilities} and {@code legacy}), so the rest of the backend does not change, plus
+ * {@code professions}. Every text is in English, as the client writes it, for a character of the top level with no
+ * gear. The client has no notes on what changed for each class, so {@code class_abilities} is empty. When the tables
+ * of Classic Era are given, talents and spells are compared with Classic (see ClassicComparison).
+ * <p>
+ * The file carries the {@link #fingerprint fingerprint} of the code and settings that wrote it ({@code exporter}). A
+ * kept file with another fingerprint was written by an older (or newer) version of this export, so its build is read
+ * again: any change to the export shows up on the next start, with nothing to remember.
  * <p>
  * The tables of the two clients are never held at once: the whole file is built from the WoW Forever tables first,
  * and only then, with those tables already free, are the Classic tables read for the comparison. That halves the
@@ -23,6 +38,12 @@ import java.util.List;
  * @author adrianpmdev
  */
 public final class GameDataExporter {
+
+    /** Code that decides what the data file holds: a change in any of these packages changes the fingerprint. */
+    private static final List<String> EXPORT_CODE = List.of(
+            "com/adrianpmdev/wowforever/features/gamedata/application/service/export/",
+            "com/adrianpmdev/wowforever/features/gamedata/domain/",
+            "com/adrianpmdev/wowforever/features/gamedata/infrastructure/wago/");
 
     private static final JsonNodeFactory JSON = JsonNodeFactory.instance;
 
@@ -35,6 +56,67 @@ public final class GameDataExporter {
      */
     public GameDataExporter(GameDataConfig config) {
         this.config = config;
+    }
+
+    /**
+     * A short fingerprint of what decides the content of the data file: the compiled code of the export (the classes
+     * of the export, the game text resolver and the wago reader) and the settings of config.json it uses. The texts of
+     * config.json are not in the file (they are added when it is served), so changing them needs no new read; changing
+     * the professions settings, the client section or any of that code gives another fingerprint.
+     *
+     * @param config the settings of the area
+     * @return 16 hex characters
+     */
+    public static String fingerprint(GameDataConfig config) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            PathMatchingResourcePatternResolver resolver =
+                    new PathMatchingResourcePatternResolver(GameDataExporter.class.getClassLoader());
+
+            for (String codePackage : EXPORT_CODE) {
+                Resource[] classes = resolver.getResources("classpath*:" + codePackage + "**/*.class");
+
+                if (classes.length == 0) {
+                    throw new IllegalStateException("The code of the export is not on the classpath: " + codePackage);
+                }
+
+                Arrays.sort(classes, Comparator.comparing(resource -> pathIn(resource, codePackage)));
+
+                for (Resource compiled : classes) {
+                    digest.update(pathIn(compiled, codePackage).getBytes(StandardCharsets.UTF_8));
+
+                    try (InputStream input = compiled.getInputStream()) {
+                        digest.update(input.readAllBytes());
+                    }
+                }
+            }
+
+            digest.update(settingsOf(config).getBytes(StandardCharsets.UTF_8));
+
+            return HexFormat.of().formatHex(digest.digest(), 0, 8);
+        } catch (IOException | NoSuchAlgorithmException exception) {
+            throw new IllegalStateException("The fingerprint of the export cannot be computed", exception);
+        }
+    }
+
+    private static String pathIn(Resource resource, String codePackage) {
+        try {
+            String url = resource.getURL().toString();
+
+            return url.substring(url.lastIndexOf(codePackage));
+        } catch (IOException exception) {
+            return String.valueOf(resource.getFilename());
+        }
+    }
+
+    /** The settings of config.json the export reads, as text. */
+    private static String settingsOf(GameDataConfig config) {
+        String professions = config.professions().list().stream()
+                .map(profession -> profession.skillLine() + ":" + (profession.camp() == null ? ""
+                        : profession.camp().item() + "/" + profession.camp().spell()))
+                .collect(Collectors.joining(";"));
+
+        return config.client() + "|" + config.talents() + "|" + config.spellbook() + "|" + professions;
     }
 
     /**
@@ -72,6 +154,7 @@ public final class GameDataExporter {
                 config.talents()).export(talents, build.version());
 
         ObjectNode data = JSON.objectNode();
+        data.put("exporter", fingerprint(config));
         data.put("attribution", settings.attribution());
         data.put("generated", date.toString());
         data.put("build", build.version());
@@ -83,6 +166,7 @@ public final class GameDataExporter {
         data.set("class_racials", racials.classRacials());
         data.set("class_abilities", JSON.objectNode());
         data.set("legacy", new LegacyExporter(tables, spells, settings).export(trees, sourceLine));
+        data.set("professions", new ProfessionsExporter(tables, spells).export(config.professions().list()));
 
         return data;
     }

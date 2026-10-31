@@ -123,6 +123,10 @@ public class SecurityConfig {
                     auth.requestMatchers("/api/v1/games", "/api/v1/games/**").hasRole(ADMIN_ROLE);
                     auth.requestMatchers("/api/v1/assets", "/api/v1/assets/**").hasRole(ADMIN_ROLE);
 
+                    // Music: every signed-in user reads the playlists they can hear; changes are ADMIN.
+                    auth.requestMatchers(HttpMethod.GET, "/api/v1/music").authenticated();
+                    auth.requestMatchers("/api/v1/music", "/api/v1/music/**").hasRole(ADMIN_ROLE);
+
                     // Games: the writes each game opens to players, then read with the game tag and write as ADMIN.
                     for (GameModule game : gameModules) {
                         String tagAuthority = Authorities.tag(game.tag());

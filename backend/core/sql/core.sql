@@ -3,7 +3,8 @@
 --
 -- Users of the platform, the tags that unlock each game and the join table between them. Every user
 -- shares its id with its Supabase Auth account; passwords live only in Supabase Auth. Also the catalog
--- of games, the public pictures uploaded by admins and their public Storage bucket.
+-- of games, the public pictures uploaded by admins, the background music of each area and their public
+-- Storage buckets.
 --
 -- How to use: run it in the Supabase SQL editor of an empty project. Order of the files:
 -- core.sql, then pokemon.sql (the game schemas do not depend on core). WoW Forever has no tables: its data
@@ -85,6 +86,25 @@ create table if not exists core.asset (
     constraint asset_pkey primary key (key)
 );
 
+-- ─── music_track ─────────────────────────────────────────────────────────────────────────────────
+-- Background music uploaded by admins from the web, one playlist per area: 'platform' (the general
+-- web) or the id of a game module. The admin's browser compresses every song to AAC (M4A) and the
+-- backend stores it in the public bucket public-music as <area>/<id>.m4a. position is the playing order.
+
+create table if not exists core.music_track (
+    id               uuid         not null default gen_random_uuid(),
+    area             varchar(50)  not null check (area ~ '^[a-z0-9][a-z0-9_-]*$'),
+    title            varchar(100) not null,
+    object_name      varchar(200) not null,
+    size_bytes       integer      not null,
+    duration_seconds integer      not null,
+    position         integer      not null,
+    created_at       timestamptz  not null default now(),
+    constraint music_track_pkey primary key (id)
+);
+
+create index if not exists music_track_area_position_idx on core.music_track (area, position);
+
 -- ─── Row level security ──────────────────────────────────────────────────────────────────────────
 -- The backend connects as the table owner, which bypasses RLS. Enabling it without policies closes
 -- the tables to the Supabase Data API (anon and authenticated roles).
@@ -94,6 +114,7 @@ alter table core.tag      enable row level security;
 alter table core.user_tag enable row level security;
 alter table core.game     enable row level security;
 alter table core.asset    enable row level security;
+alter table core.music_track enable row level security;
 
 -- ─── Storage: public pictures ────────────────────────────────────────────────────────────────────
 -- Public bucket public-assets: anybody can download a picture through its public URL (they are not
@@ -122,3 +143,31 @@ create policy "public-assets: no client writes"
     to anon, authenticated
     using (bucket_id <> 'public-assets')
     with check (bucket_id <> 'public-assets');
+
+-- ─── Storage: public music ───────────────────────────────────────────────────────────────────────
+-- Public bucket public-music, the same rules as public-assets: anybody can download a song through its
+-- public URL (only signed-in users get the URLs, from GET /api/v1/music), only the backend writes, and a
+-- RESTRICTIVE policy denies the anon and authenticated roles any operation (upload, replace, delete,
+-- list). The bucket refuses files over 4 MB and anything but audio/mp4.
+-- Object names: <area>/<uuid>.m4a, for example wow-forever/0b6f...e1.m4a
+--
+-- If the policy fails with "must be owner of table objects", create both from the Storage dashboard:
+-- public bucket public-music (4 MB, audio/mp4) and a restrictive policy on objects for all operations,
+-- roles anon and authenticated, expression bucket_id <> 'public-music'.
+
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('public-music', 'public-music', true, 4194304, array['audio/mp4'])
+on conflict (id) do update
+    set public             = true,
+        file_size_limit    = excluded.file_size_limit,
+        allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists "public-music: no client writes" on storage.objects;
+
+create policy "public-music: no client writes"
+    on storage.objects
+    as restrictive
+    for all
+    to anon, authenticated
+    using (bucket_id <> 'public-music')
+    with check (bucket_id <> 'public-music');

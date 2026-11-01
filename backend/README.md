@@ -31,7 +31,7 @@ a game, and a game never depends on the platform**. Both only share a small modu
 
 | Module | Role |
 |---|---|
-| 📜 **`platform-api`** | Contracts shared by everyone: who is calling, file storage, picture compression, public pictures, how a game declares itself (`GameModule`) and helpers for cacheable JSON. No Spring Security, no Supabase. |
+| 📜 **`platform-api`** | Contracts shared by everyone: who is calling, file storage, picture compression, public pictures, how a game declares itself (`GameModule`), what it shows in the admin dashboard and helpers for cacheable JSON. No Spring Security, no Supabase. |
 | 🚀 **`core`** | The platform: identity (users, tags), the game catalog, public pictures, background music, security, the Supabase integration, logging and error handling. It implements the contracts of `platform-api`. |
 | 🎮 **`games/*`** | One module per game, with its own domain and REST endpoints. It depends **only on `platform-api`** and contains **no security code**: it declares its API path and tag, and `core` builds the access rules from that. |
 | 🧷 **`app`** | Boots `core` and every game together and builds the runnable `ntg.jar`. Adding a game to the application is adding one dependency here. |
@@ -70,6 +70,7 @@ backend/
 │       ├── module/                 GameModule: API path, tag and player writes of a game
 │       ├── image/                  ImageCompressor, ImageSpec, CompressedImage
 │       ├── asset/                  ImageSlot, ImageSlotProvider, PublicAssets
+│       ├── status/                 ModuleStatus, ModuleStatusProvider (a block of the admin dashboard)
 │       ├── error/                  ApiErrors (404, 409, 400, 403)
 │       └── web/                    JsonResponses (JSON with ETag and cache rules)
 │
@@ -87,8 +88,8 @@ backend/
 │       ├── image/                  Picture compression (JDK only)
 │       ├── integration/supabase/   🔌 Supabase Auth and Storage clients
 │       ├── web/                    Health endpoint and global error handling
-│       ├── logging/                Request id and access log
-│       └── features/               auth · users · tags · catalog · assets · music
+│       ├── logging/                Request id, access log, traffic counters, recent warnings and errors
+│       └── features/               auth · users · tags · catalog · assets · music · dashboard
 │
 ├── games/
 │   ├── pokemon/                    🎮 Pokémon (+ sql/pokemon.sql)
@@ -164,6 +165,7 @@ security headers (see the [frontend documentation](../frontend/README.md)).
 | Catalog | `POST` · `PUT` · `DELETE /games/**` | **Admin** |
 | Music | `GET /music` | Any signed-in user (the general playlist and the games they hold the tag for) |
 | Music | `/music/**` | **Admin** |
+| Dashboard | `GET /dashboard` | **Admin** |
 | Users, tags, pictures | `/users/**`, `/tags/**`, `/assets/**` | **Admin** |
 | Games | `GET /<game>/**` | Users with the game's **tag**, and admins |
 | Games | Other methods on `/<game>/**` | **Admin**, except the routes the game opens to players |
@@ -215,6 +217,20 @@ security headers (see the [frontend documentation](../frontend/README.md)).
 - `GET /music` gives each user the playlists they can hear. The files are public by URL, but only signed-in users get
   the URLs and nobody can list the bucket.
 
+### 6. Admin dashboard
+
+- `GET /dashboard` gathers everything in one call, made only when an admin opens or refreshes the screen. A source
+  that fails leaves its values empty and never hides the others.
+- **Server:** the memory of the whole process (`/proc`, against the 512 MB of the plan), CPU, uptime and the deployed
+  commit. **Space:** the database and the files per bucket, with two small queries, against the plan limits
+  (`app.dashboard.*`).
+- **Modules:** each one may declare a `ModuleStatusProvider`. WoW Forever tells its served build, the newest one on
+  wago.tools and how the last check went.
+- **Accounts:** the last activity is the latest of `core.user.last_seen_at` (written at most once an hour per user)
+  and the last sign in of Supabase Auth. The column is plain SQL, outside the `User` entity, so a database that still
+  lacks it only loses this value.
+- **Traffic and logs:** counters and the last 50 warnings and errors, in memory, since the last start.
+
 ---
 
 <br>
@@ -230,6 +246,7 @@ All routes live under `/api/v1`.
 | **Tags** | `tags` |
 | **Catalog** | `games` (the games each user can see, and their management) |
 | **Pictures** | `assets` (expected pictures, upload, delete) |
+| **Dashboard** | `dashboard` (state of the system, admins) |
 | **Music** | `music` (playlists), `music/areas/{area}/tracks`, `music/areas/{area}/order`, `music/tracks/{id}` |
 | **Game modules** | One group of resources per game, under `/api/v1/<game>/...` |
 
@@ -265,6 +282,8 @@ The site runs on the free plans of Render, Vercel and Supabase, so the backend a
 |---|---|
 | **Role and tags cache** (Caffeine, 60 s) | At most one query per user per minute instead of one per request |
 | **Catalog, picture URLs and playlists in memory** | Reloaded only after an admin changes them |
+| **Dashboard read on demand** | One call when an admin opens or refreshes it, never on its own; traffic and logs are small counters and a fixed buffer in memory |
+| **Last activity once an hour** | At most one write per user per hour, however many requests they make |
 | **Songs compressed in the browser** | The server never decodes audio, so music costs no server memory; each song is downloaded once per browser |
 | **Gzip** | JSON is compressed (the WoW data drops from about 1.8 MB to about 200 KB) |
 | **ETag on static JSON** | A browser that already has the data gets `304` with no body |
@@ -344,7 +363,6 @@ From an IDE, run `com.adrianpmdev.Application` in the `app` module.
 
 ## 🗺️ Ideas for next steps
 
-- Real data for the admin dashboard.
 - A screen for users to edit their own profile (the endpoint already exists).
 - More automated tests for the account flows.
 - More game modules following the same structure.

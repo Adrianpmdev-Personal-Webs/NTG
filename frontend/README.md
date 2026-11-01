@@ -55,7 +55,7 @@ background music and game content.
 | 🔑 Auth          | **Login**         | Sign in; restores the session automatically if one exists                                            |
 | 🔑 Auth          | **Set password**  | Landing page of the email link: the user chooses a password and enters directly                      |
 | 🏠 Platform      | **Welcome**       | Inicio: cards for the games they can open, and the ones coming soon                                  |
-| 👑 Admin         | **Dashboard**     | Platform overview                                                                                    |
+| 👑 Admin         | **Dashboard**     | Real state: memory, CPU, space, modules, traffic, recent errors and accounts, read on demand         |
 | 👑 Admin         | **Users**         | Create users by email, assign tags, edit, resend the password email, delete                          |
 | 👑 Admin         | **Games**         | Game catalog: add a game (its tag is created too), order, cover, icon, release it to players         |
 | 👑 Admin         | **Pictures**      | Every picture the platform and the games expect: upload the original, the server compresses it       |
@@ -140,7 +140,7 @@ frontend/
         │   ├── music/          MusicApi, MusicPlayer (the one background player)
         │   └── notifications/  NotificationCenter
         │
-        ├── shared/             ♻️ Reusable pieces (models, notification toasts, music control, nav icons, modal behaviour, API error helper)
+        ├── shared/             ♻️ Reusable pieces (models, notification toasts, music control, icons, modal behaviour, API error helper)
         ├── layout/             🖼️ Terminal shell: sidebar, header, footer
         ├── features/           📦 Platform pages: auth, welcome, admin (dashboard, users, games, pictures, music)
         │
@@ -242,7 +242,6 @@ npm run format     # format the project with Prettier (format:check only checks 
 
 ## 🗺️ Ideas for next steps
 
-- Real data for the admin dashboard.
 - A screen for users to edit their own profile.
 - Automated tests for guards, interceptor and key screens.
 - More game modules following the same structure.

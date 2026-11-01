@@ -35,7 +35,7 @@
     flex: 1;
     min-height: 0;
     display: grid;
-    grid-template-rows: 108px minmax(0, 1fr) 122px;
+    grid-template-rows: 108px minmax(0, 1fr) minmax(122px, auto);
 }
 
 .launcher-main {

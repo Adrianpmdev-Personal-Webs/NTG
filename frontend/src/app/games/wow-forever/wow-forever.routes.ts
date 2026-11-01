@@ -41,4 +41,10 @@ export const WOW_FOREVER_ROUTES: Routes = [
         loadComponent: () =>
             import('./professions/professions-overview/professions-overview').then((m) => m.ProfessionsOverview),
     },
+    {
+        path: 'characters',
+        data: { visitLabel: 'Personajes' },
+        loadComponent: () =>
+            import('./characters/characters-directory/characters-directory').then((m) => m.CharactersDirectory),
+    },
 ];

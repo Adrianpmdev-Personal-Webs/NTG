@@ -1,0 +1,323 @@
+<app-wow-page heading="Personajes" [credit]="credit()" [compactNav]="true">
+    @if (loading()) {
+        <p class="state">Cargando…</p>
+    } @else if (failed()) {
+        <p class="state">No se han podido cargar los datos. Inténtalo de nuevo más tarde.</p>
+    } @else {
+        <section class="controls">
+            <div class="tabs" role="group" aria-label="Forma de ver los personajes">
+                <button type="button" class="tab" [class.active]="view() === 'players'" (click)="view.set('players')">
+                    Por jugador
+                </button>
+                <button
+                    type="button"
+                    class="tab"
+                    [class.active]="view() === 'professions'"
+                    (click)="view.set('professions')"
+                >
+                    Por profesión
+                </button>
+            </div>
+
+            <div class="filters">
+                <label class="field">
+                    <span>Jugador</span>
+                    <select #playerSelect [value]="playerFilter()" (change)="playerFilter.set(playerSelect.value)">
+                        <option value="">Todos</option>
+                        @for (player of players(); track player.id) {
+                            <option [value]="player.id">{{ player.name }}</option>
+                        }
+                    </select>
+                </label>
+                <label class="field">
+                    <span>Clase</span>
+                    <select #classSelect [value]="classFilter()" (change)="classFilter.set(classSelect.value)">
+                        <option value="">Todas</option>
+                        @for (gameClass of classes(); track gameClass.slug) {
+                            <option [value]="gameClass.slug">{{ gameClass.name }}</option>
+                        }
+                    </select>
+                </label>
+                <label class="field">
+                    <span>Profesión</span>
+                    <select
+                        #professionSelect
+                        [value]="professionFilter()"
+                        (change)="professionFilter.set(professionSelect.value)"
+                    >
+                        <option value="">Todas</option>
+                        @for (profession of allProfessions(); track profession.slug) {
+                            <option [value]="profession.slug">{{ profession.name }}</option>
+                        }
+                    </select>
+                </label>
+            </div>
+
+            <app-wow-button (click)="openNew()">Nuevo personaje</app-wow-button>
+        </section>
+
+        @if (formOpen()) {
+            <form class="character-form" [formGroup]="form" (ngSubmit)="save()">
+                <h2 class="section-title">
+                    {{ editing() ? 'Editar ' + editing()?.name : 'Nuevo personaje' }}
+                </h2>
+
+                <div class="form-grid">
+                    @if (isAdmin()) {
+                        <label class="field">
+                            <span>Jugador</span>
+                            <select formControlName="ownerId">
+                                <option value="">
+                                    {{ editing() ? 'Sin cambiar (' + ownerName(editing()!) + ')' : 'Mi cuenta' }}
+                                </option>
+                                @for (owner of owners(); track owner.id) {
+                                    <option [value]="owner.id">{{ owner.username }}</option>
+                                }
+                            </select>
+                        </label>
+                    }
+
+                    <label class="field">
+                        <span>Nombre</span>
+                        <input type="text" formControlName="name" maxlength="12" placeholder="Solo letras, de 2 a 12" />
+                    </label>
+
+                    <label class="field">
+                        <span>Clase</span>
+                        <select formControlName="classSlug">
+                            <option value="">Elige una clase</option>
+                            @for (gameClass of classes(); track gameClass.slug) {
+                                <option [value]="gameClass.slug">{{ gameClass.name }}</option>
+                            }
+                        </select>
+                    </label>
+
+                    <label class="field">
+                        <span>Raza</span>
+                        <select formControlName="raceSlug">
+                            <option value="">
+                                {{ formValue().classSlug ? 'Elige una raza' : 'Elige antes la clase' }}
+                            </option>
+                            @for (race of racesOfClass(); track race.slug) {
+                                <option [value]="race.slug">{{ race.name }}</option>
+                            }
+                        </select>
+                    </label>
+
+                    <label class="field">
+                        <span>Nivel</span>
+                        <input type="number" formControlName="level" min="1" [max]="maxLevel()" />
+                    </label>
+                </div>
+
+                <h3 class="form-subtitle">Profesiones principales <span class="note">hasta dos</span></h3>
+                <div class="form-grid">
+                    <div class="profession-field">
+                        <label class="field">
+                            <span>Primera</span>
+                            <select formControlName="primaryOne">
+                                <option value="">Ninguna</option>
+                                @for (group of primaryGroups(); track group.id) {
+                                    <optgroup [label]="group.name">
+                                        @for (profession of group.professions; track profession.slug) {
+                                            <option [value]="profession.slug">{{ profession.name }}</option>
+                                        }
+                                    </optgroup>
+                                }
+                            </select>
+                        </label>
+                        @if (formValue().primaryOne) {
+                            <label class="field skill">
+                                <span>Nivel</span>
+                                <input
+                                    type="number"
+                                    formControlName="primaryOneSkill"
+                                    min="1"
+                                    [max]="maxSkill"
+                                    placeholder="1-300"
+                                />
+                            </label>
+                        }
+                    </div>
+
+                    <div class="profession-field">
+                        <label class="field">
+                            <span>Segunda</span>
+                            <select formControlName="primaryTwo">
+                                <option value="">Ninguna</option>
+                                @for (group of primaryGroups(); track group.id) {
+                                    <optgroup [label]="group.name">
+                                        @for (profession of group.professions; track profession.slug) {
+                                            @if (profession.slug !== formValue().primaryOne) {
+                                                <option [value]="profession.slug">{{ profession.name }}</option>
+                                            }
+                                        }
+                                    </optgroup>
+                                }
+                            </select>
+                        </label>
+                        @if (formValue().primaryTwo) {
+                            <label class="field skill">
+                                <span>Nivel</span>
+                                <input
+                                    type="number"
+                                    formControlName="primaryTwoSkill"
+                                    min="1"
+                                    [max]="maxSkill"
+                                    placeholder="1-300"
+                                />
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                <h3 class="form-subtitle">Profesiones secundarias</h3>
+                <div class="form-grid" formArrayName="secondaries">
+                    @for (control of form.controls.secondaries.controls; track control; let index = $index) {
+                        <div class="profession-field secondary" [formGroupName]="index">
+                            <label class="check">
+                                <input type="checkbox" formControlName="known" />
+                                <span>{{ professionName(control.controls.slug.value) }}</span>
+                            </label>
+                            @if (formValue().secondaries[index]?.known) {
+                                <label class="field skill">
+                                    <span>Nivel</span>
+                                    <input
+                                        type="number"
+                                        formControlName="skill"
+                                        min="1"
+                                        [max]="maxSkill"
+                                        placeholder="1-300"
+                                    />
+                                </label>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <label class="field notes">
+                    <span>Notas</span>
+                    <input type="text" formControlName="notes" maxlength="200" />
+                </label>
+
+                <div class="form-actions">
+                    <button type="submit" class="action primary" [disabled]="form.invalid || saving()">Guardar</button>
+                    <button type="button" class="action" (click)="closeForm()">Cancelar</button>
+                </div>
+            </form>
+        }
+
+        <ng-template #card let-character>
+            <article class="character">
+                <header class="character-header">
+                    <img
+                        class="class-icon"
+                        [src]="classIcon(character.classSlug)"
+                        alt=""
+                        loading="lazy"
+                        (error)="hideBrokenIcon($event)"
+                    />
+                    <div class="character-title">
+                        <h3 class="character-name">{{ character.name }}</h3>
+                        <p class="character-meta">
+                            Nivel {{ character.level }} · {{ raceName(character.raceSlug) }}
+                            {{ className(character.classSlug) }}
+                        </p>
+                    </div>
+                </header>
+
+                @if (character.professions.length > 0) {
+                    <ul class="professions">
+                        @for (known of character.professions; track known.slug) {
+                            <li class="profession">
+                                <img
+                                    class="profession-icon"
+                                    [src]="professionIcon(known.slug)"
+                                    alt=""
+                                    loading="lazy"
+                                    (error)="hideBrokenIcon($event)"
+                                />
+                                {{ professionName(known.slug) }}
+                                @if (known.skill) {
+                                    <strong>{{ known.skill }}</strong>
+                                }
+                            </li>
+                        }
+                    </ul>
+                } @else {
+                    <p class="empty">Sin profesiones.</p>
+                }
+
+                @if (character.notes) {
+                    <p class="notes-text">{{ character.notes }}</p>
+                }
+
+                @if (character.canEdit) {
+                    <div class="character-actions">
+                        @if (pendingDelete() === character.id) {
+                            <span class="question">¿Borrar a {{ character.name }}?</span>
+                            <button type="button" class="action" [disabled]="saving()" (click)="remove(character)">
+                                Sí
+                            </button>
+                            <button type="button" class="action" (click)="pendingDelete.set(null)">No</button>
+                        } @else {
+                            <button type="button" class="action" (click)="openEdit(character)">Editar</button>
+                            <button type="button" class="action" (click)="pendingDelete.set(character.id)">
+                                Borrar
+                            </button>
+                        }
+                    </div>
+                }
+            </article>
+        </ng-template>
+
+        @if (characters().length === 0) {
+            <p class="state">Todavía no hay personajes. ¡Añade el primero!</p>
+        } @else if (view() === 'players') {
+            @for (player of byPlayer(); track player.id) {
+                <section class="block">
+                    <h2 class="section-title">
+                        {{ player.name }} <span class="note">{{ player.characters.length }} / {{ limit() }}</span>
+                    </h2>
+                    <div class="characters">
+                        @for (character of player.characters; track character.id) {
+                            <ng-container
+                                [ngTemplateOutlet]="card"
+                                [ngTemplateOutletContext]="{ $implicit: character }"
+                            />
+                        }
+                    </div>
+                </section>
+            } @empty {
+                <p class="state">Ningún personaje con esos filtros.</p>
+            }
+        } @else {
+            @for (row of byProfession(); track row.profession.slug) {
+                <section class="block">
+                    <h2 class="section-title profession-title">
+                        <img class="class-icon" [src]="row.profession.icon" alt="" (error)="hideBrokenIcon($event)" />
+                        {{ row.profession.name }} <span class="note">{{ row.holders.length }}</span>
+                    </h2>
+                    <ul class="holders">
+                        @for (holder of row.holders; track holder.character.id) {
+                            <li class="holder">
+                                <img
+                                    class="profession-icon"
+                                    [src]="classIcon(holder.character.classSlug)"
+                                    alt=""
+                                    loading="lazy"
+                                    (error)="hideBrokenIcon($event)"
+                                />
+                                <span class="holder-name">{{ holder.character.name }}</span>
+                                <span class="holder-owner">{{ ownerName(holder.character) }}</span>
+                                <strong class="holder-skill">{{ holder.skill ?? '—' }}</strong>
+                            </li>
+                        }
+                    </ul>
+                </section>
+            } @empty {
+                <p class="state">Ningún personaje con esos filtros.</p>
+            }
+        }
+    }
+</app-wow-page>

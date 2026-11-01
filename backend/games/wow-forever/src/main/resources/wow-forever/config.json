@@ -14,7 +14,8 @@
         { "id": "spellbook", "label": "Spellbook", "description": "Los hechizos de cada clase, rango a rango.", "available": true },
         { "id": "legacy", "label": "Legacy System", "description": "Perks y desafíos de la cuenta.", "available": true },
         { "id": "races", "label": "Razas y raciales", "description": "Habilidades raciales y combinaciones raza-clase.", "available": true },
-        { "id": "professions", "label": "Professions", "description": "The twelve professions, their camp and what each one goes with.", "available": true }
+        { "id": "professions", "label": "Professions", "description": "The twelve professions, their camp and what each one goes with.", "available": true },
+        { "id": "characters", "label": "Personajes", "description": "Los personajes del grupo y sus profesiones.", "available": true }
     ],
 
     "news": {

@@ -1,12 +1,17 @@
 package com.adrianpmdev.wowforever;
 
 import com.adrianpmdev.platform.module.GameModule;
+import com.adrianpmdev.platform.module.GameModule.PlayerWrite;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import java.util.List;
+
 /**
- * Declares the WoW Forever module to the platform: players with the tag read, admins write. Scheduling is on for the
+ * Declares the WoW Forever module to the platform: players with the tag read, admins write. The only writes open to
+ * players are the characters, and the module then accepts only their owner (or an admin). Scheduling is on for the
  * hourly check of new game builds (GameDataSyncService).
  *
  * @author adrianpmdev
@@ -15,6 +20,11 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class WowForeverModule {
 
+    /** Key of the tag that grants access to the game. */
+    public static final String TAG = "wow-forever";
+
+    private static final String CHARACTERS = "/characters";
+
     /**
      * Declaration of the module.
      *
@@ -22,6 +32,10 @@ public class WowForeverModule {
      */
     @Bean
     GameModule wowForeverGameModule() {
-        return GameModule.of("wow-forever", "/api/v1/wow-forever");
+        return new GameModule(TAG, "/api/v1/wow-forever", List.of(
+                new PlayerWrite(HttpMethod.POST, CHARACTERS),
+                new PlayerWrite(HttpMethod.PUT, CHARACTERS + "/*"),
+                new PlayerWrite(HttpMethod.DELETE, CHARACTERS + "/*")
+        ));
     }
 }

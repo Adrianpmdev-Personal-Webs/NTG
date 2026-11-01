@@ -13,7 +13,7 @@ import java.util.List;
  * @param avatarUrl avatar, or null
  * @param role      role of the account
  * @param createdAt when the account was created
- * @param games     the games the caller can open, in the order of the catalog
+ * @param games     the games the caller can open: the ones with data first, each group in the order of the catalog
  *
  * @author adrianpmdev
  */
@@ -28,13 +28,14 @@ public record ProfileResponse(
     /**
      * A game on the profile.
      *
-     * @param id      key of the game
-     * @param name    name of the game
-     * @param iconUrl icon of the game, or null
-     * @param stats   figures of the player; empty when the game has nothing about them
-     * @param entries things of the player; empty when the game has nothing about them
+     * @param id       key of the game
+     * @param name     name of the game
+     * @param iconUrl  icon of the game, or null
+     * @param coverUrl cover of the game, or null
+     * @param summary  short texts for the overview; empty when the game has nothing about the caller
+     * @param sections what its tab shows; empty when the game has nothing about the caller
      */
-    public record ProfileGame(String id, String name, String iconUrl, List<ProfileBlock.Stat> stats,
-                              List<ProfileBlock.Entry> entries) {
+    public record ProfileGame(String id, String name, String iconUrl, String coverUrl, List<String> summary,
+                              List<ProfileBlock.Section> sections) {
     }
 }

@@ -23,8 +23,9 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 /**
- * What WoW Forever shows on the profile of a player: their characters with their level, race, class and professions.
- * While the game data cannot be read, the characters still show, with the slugs instead of the names.
+ * What WoW Forever shows on the profile of a player: one card per character with its race, class and icon, and bars for
+ * its level and professions. While the game data cannot be read, the characters still show, with the slugs instead of
+ * the names.
  *
  * @author adrianpmdev
  */
@@ -33,10 +34,13 @@ import java.util.function.Supplier;
 public class CharacterProfileBlock implements ProfileBlockProvider {
 
     private static final ObjectMapper JSON = new ObjectMapper();
-    private static final String SEPARATOR = " · ";
+    private static final int MAX_SKILL = 300;
 
     private final GameCharacterRepository characterRepository;
     private final GameDataService gameDataService;
+
+    private record Item(String name, String icon) {
+    }
 
     @Override
     public String gameKey() {
@@ -52,62 +56,63 @@ public class CharacterProfileBlock implements ProfileBlockProvider {
             return Optional.empty();
         }
 
-        Map<String, String> classes = names(gameDataService::getIndex, "classes");
-        Map<String, String> races = names(gameDataService::getRacials, "races");
-        Map<String, String> professions = professionNames();
+        Map<String, Item> classes = items(read(gameDataService::getIndex).path("classes"));
+        Map<String, Item> races = items(read(gameDataService::getRacials).path("races"));
+        Map<String, Item> professions = professionItems();
+        int maxLevel = gameDataService.getConfig().talents().lastPointLevel();
 
-        List<ProfileBlock.Entry> entries = characters.stream()
-                .map(character -> new ProfileBlock.Entry(character.getName(),
-                        detailOf(character, classes, races, professions)))
+        List<ProfileBlock.Card> cards = characters.stream()
+                .map(character -> cardOf(character, classes, races, professions, maxLevel))
                 .toList();
+        int highestLevel = characters.stream().mapToInt(GameCharacter::getLevel).max().orElse(0);
+        String count = characters.size() == 1 ? "1 personaje" : characters.size() + " personajes";
 
-        return Optional.of(new ProfileBlock(
-                List.of(new ProfileBlock.Stat("Personajes", "" + characters.size())), entries));
+        return Optional.of(new ProfileBlock(List.of(count, "Nivel máximo " + highestLevel),
+                List.of(new ProfileBlock.Section("Personajes", List.of(), List.of(), cards))));
     }
 
-    private static String detailOf(GameCharacter character, Map<String, String> classes, Map<String, String> races,
-                                   Map<String, String> professions) {
-        StringBuilder detail = new StringBuilder("Nivel ").append(character.getLevel()).append(SEPARATOR)
-                .append(races.getOrDefault(character.getRaceSlug(), character.getRaceSlug())).append(' ')
-                .append(classes.getOrDefault(character.getClassSlug(), character.getClassSlug()));
-        List<String> known = new ArrayList<>();
+    private static ProfileBlock.Card cardOf(GameCharacter character, Map<String, Item> classes, Map<String, Item> races,
+                                            Map<String, Item> professions, int maxLevel) {
+        Item gameClass = itemOf(classes, character.getClassSlug());
+        List<ProfileBlock.Bar> bars = new ArrayList<>();
 
-        for (JsonNode profession : character.getProfessions()) {
-            String slug = profession.path("slug").asText();
-            JsonNode skill = profession.path("skill");
+        bars.add(new ProfileBlock.Bar("Nivel", (int) character.getLevel(), maxLevel, null));
 
-            known.add(professions.getOrDefault(slug, slug) + (skill.isNumber() ? " " + skill.asInt() : ""));
+        for (JsonNode known : character.getProfessions()) {
+            Item profession = itemOf(professions, known.path("slug").asText());
+            JsonNode skill = known.path("skill");
+
+            bars.add(new ProfileBlock.Bar(profession.name(), skill.isNumber() ? skill.asInt() : null, MAX_SKILL,
+                    profession.icon()));
         }
 
-        if (!known.isEmpty()) {
-            detail.append(SEPARATOR).append(String.join(", ", known));
-        }
-
-        return detail.toString();
+        return new ProfileBlock.Card(character.getName(),
+                itemOf(races, character.getRaceSlug()).name() + " " + gameClass.name(), gameClass.icon(), bars);
     }
 
-    private Map<String, String> professionNames() {
-        Map<String, String> names = new HashMap<>();
+    private static Item itemOf(Map<String, Item> items, String slug) {
+        return items.getOrDefault(slug, new Item(slug, null));
+    }
+
+    private Map<String, Item> professionItems() {
+        Map<String, Item> items = new HashMap<>();
 
         for (JsonNode group : read(gameDataService::getProfessions).path("groups")) {
-            collect(group.path("professions"), names);
+            items.putAll(items(group.path("professions")));
         }
 
-        return names;
+        return items;
     }
 
-    private static Map<String, String> names(Supplier<String> source, String field) {
-        Map<String, String> names = new HashMap<>();
+    private static Map<String, Item> items(JsonNode list) {
+        Map<String, Item> items = new HashMap<>();
 
-        collect(read(source).path(field), names);
-
-        return names;
-    }
-
-    private static void collect(JsonNode list, Map<String, String> names) {
         for (JsonNode item : list) {
-            names.put(item.path("slug").asText(), item.path("name").asText());
+            items.put(item.path("slug").asText(), new Item(item.path("name").asText(),
+                    item.path("icon").asText(null)));
         }
+
+        return items;
     }
 
     private static JsonNode read(Supplier<String> source) {

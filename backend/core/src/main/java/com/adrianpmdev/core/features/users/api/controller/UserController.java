@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * REST controller for user operations. Everything is ADMIN-only except {@code PUT /me}
- * (see {@code SecurityConfig}). Users are addressed by id, never by email.
+ * REST controller for user operations. Everything is ADMIN-only except {@code PUT /me} and what
+ * {@code OwnAccountController} serves (see {@code SecurityConfig}). Users are addressed by id, never by email.
  *
  * @author adrianpmdev
  */

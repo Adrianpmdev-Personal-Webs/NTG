@@ -31,8 +31,8 @@ import static org.mockito.Mockito.when;
 class ProfileServiceTest {
 
     private static final UUID CALLER = UUID.randomUUID();
-    private static final ProfileBlock BLOCK = new ProfileBlock(List.of(new ProfileBlock.Stat("Puntos", "12")),
-            List.of(new ProfileBlock.Entry("Thrall", "Nivel 60")));
+    private static final ProfileBlock BLOCK = new ProfileBlock(List.of("12 puntos"), List.of(new ProfileBlock.Section(
+            "Histórico", List.of(new ProfileBlock.Stat("Puntos", "12")), List.of(), List.of())));
 
     private final UserService users = mock(UserService.class);
     private final GameCatalogService catalog = mock(GameCatalogService.class);
@@ -77,19 +77,19 @@ class ProfileServiceTest {
 
         ProfileResponse.ProfileGame game = own().games().getFirst();
 
-        assertThat(game.stats()).isEqualTo(BLOCK.stats());
-        assertThat(game.entries()).isEqualTo(BLOCK.entries());
+        assertThat(game.summary()).isEqualTo(BLOCK.summary());
+        assertThat(game.sections()).isEqualTo(BLOCK.sections());
     }
 
     @Test
-    void aGameWithNothingAboutTheCallerIsShownEmpty() {
-        visibleGames(game("pokemon", true, false), game("wow-forever", true, false));
-        providers(provider("pokemon", user -> Optional.empty()));
+    void gamesWithoutDataGoLastKeepingTheOrderOfTheCatalog() {
+        visibleGames(game("empty-one", true, false), game("pokemon", true, false), game("empty-two", true, false),
+                game("wow-forever", true, false));
+        providers(provider("pokemon", user -> Optional.of(BLOCK)), provider("wow-forever", user -> Optional.of(BLOCK)),
+                provider("empty-one", user -> Optional.empty()));
 
-        assertThat(own().games()).hasSize(2).allSatisfy(game -> {
-            assertThat(game.stats()).isEmpty();
-            assertThat(game.entries()).isEmpty();
-        });
+        assertThat(own().games()).extracting(ProfileResponse.ProfileGame::id)
+                .containsExactly("pokemon", "wow-forever", "empty-one", "empty-two");
     }
 
     @Test
@@ -101,8 +101,8 @@ class ProfileServiceTest {
 
         List<ProfileResponse.ProfileGame> games = own().games();
 
-        assertThat(games.get(0).stats()).isEmpty();
-        assertThat(games.get(1).stats()).isEqualTo(BLOCK.stats());
+        assertThat(games.get(0).id()).isEqualTo("wow-forever");
+        assertThat(games.get(1).sections()).isEmpty();
     }
 
     private ProfileResponse own() {

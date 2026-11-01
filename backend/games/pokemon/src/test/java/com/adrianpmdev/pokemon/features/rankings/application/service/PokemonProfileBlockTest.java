@@ -51,37 +51,40 @@ class PokemonProfileBlockTest {
 
     @Test
     void thePlayerGetsTheirOwnRowOfTheRanking() {
-        PlayerStandingResponse other = mock(PlayerStandingResponse.class);
-        when(other.playerId()).thenReturn(UUID.randomUUID());
-        PlayerStandingResponse own = mock(PlayerStandingResponse.class);
-        when(own.playerId()).thenReturn(player.getId());
-        when(own.position()).thenReturn(2);
-        when(own.points()).thenReturn(40);
-        when(own.titles()).thenReturn(3);
-        when(own.tournaments()).thenReturn(6);
-        when(own.wins()).thenReturn(20);
-        when(own.losses()).thenReturn(5);
-        when(ranking.globalRanking()).thenReturn(List.of(other, own));
+        when(ranking.globalRanking()).thenReturn(List.of(
+                new PlayerStandingResponse(UUID.randomUUID(), "Other", 1, 90, 30, 1, 8, 5, 3),
+                new PlayerStandingResponse(player.getId(), "Ana", 2, 40, 20, 5, 6, 3, 2)));
 
-        assertThat(provider.block(ACCOUNT).orElseThrow().stats()).containsExactly(
+        ProfileBlock block = provider.block(ACCOUNT).orElseThrow();
+        ProfileBlock.Section section = block.sections().getFirst();
+
+        assertThat(block.summary()).containsExactly("#2 histórico", "40 puntos", "3 títulos");
+        assertThat(section.stats()).containsExactly(
                 new ProfileBlock.Stat("Puesto histórico", "#2"),
                 new ProfileBlock.Stat("Puntos", "40"),
                 new ProfileBlock.Stat("Títulos", "3"),
                 new ProfileBlock.Stat("Torneos", "6"),
-                new ProfileBlock.Stat("Series", "20 - 5"),
+                new ProfileBlock.Stat("Randomlockes", "2"),
                 new ProfileBlock.Stat("Pokémon muertos", "7"));
+        assertThat(section.bars()).containsExactly(new ProfileBlock.Bar("Series ganadas", 20, 25, null));
     }
 
     @Test
-    void aPlayerOutOfTheRankingStartsFromZero() {
+    void withoutSeriesThereIsNoBar() {
+        when(ranking.globalRanking()).thenReturn(List.of(
+                new PlayerStandingResponse(player.getId(), "Ana", 2, 0, 0, 0, 1, 0, 1)));
+
+        assertThat(provider.block(ACCOUNT).orElseThrow().sections().getFirst().bars()).isEmpty();
+    }
+
+    @Test
+    void aPlayerOutOfTheRankingStillShowsTheirDeaths() {
         when(ranking.globalRanking()).thenReturn(List.of());
 
-        assertThat(provider.block(ACCOUNT).orElseThrow().stats()).containsExactly(
-                new ProfileBlock.Stat("Puesto histórico", "—"),
-                new ProfileBlock.Stat("Puntos", "0"),
-                new ProfileBlock.Stat("Títulos", "0"),
-                new ProfileBlock.Stat("Torneos", "0"),
-                new ProfileBlock.Stat("Series", "0 - 0"),
-                new ProfileBlock.Stat("Pokémon muertos", "7"));
+        ProfileBlock block = provider.block(ACCOUNT).orElseThrow();
+
+        assertThat(block.summary()).containsExactly("Sin torneos jugados");
+        assertThat(block.sections().getFirst().stats())
+                .containsExactly(new ProfileBlock.Stat("Pokémon muertos", "7"));
     }
 }

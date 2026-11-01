@@ -10,13 +10,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 /**
- * What the Pokémon module shows on the profile of a player: their place in the all-time ranking and the Pokémon they
- * lost. An account without a linked player has nothing to show.
+ * What the Pokémon module shows on the profile of a player: their place in the all-time ranking, how their series went
+ * and the Pokémon they lost. An account without a linked player has nothing to show.
  *
  * @author adrianpmdev
  */
@@ -40,21 +41,41 @@ public class PokemonProfileBlock implements ProfileBlockProvider {
     }
 
     private ProfileBlock blockOf(Player player) {
-        Optional<PlayerStandingResponse> standing = rankingService.globalRanking().stream()
+        long deaths = lockeDeathRepository.countByPlayerId(player.getId());
+        Optional<PlayerStandingResponse> found = rankingService.globalRanking().stream()
                 .filter(row -> row.playerId().equals(player.getId()))
                 .findFirst();
 
-        return new ProfileBlock(List.of(
-                stat("Puesto histórico", standing.map(row -> "#" + row.position()).orElse("—")),
-                stat("Puntos", standing.map(row -> "" + row.points()).orElse("0")),
-                stat("Títulos", standing.map(row -> "" + row.titles()).orElse("0")),
-                stat("Torneos", standing.map(row -> "" + row.tournaments()).orElse("0")),
-                stat("Series", standing.map(row -> row.wins() + " - " + row.losses()).orElse("0 - 0")),
-                stat("Pokémon muertos", "" + lockeDeathRepository.countByPlayerId(player.getId()))
-        ), List.of());
+        if (found.isEmpty()) {
+            return new ProfileBlock(List.of("Sin torneos jugados"), List.of(section(List.of(
+                    stat("Pokémon muertos", deaths)), List.of())));
+        }
+
+        PlayerStandingResponse standing = found.get();
+        int series = standing.wins() + standing.losses();
+        List<ProfileBlock.Bar> bars = new ArrayList<>();
+
+        if (series > 0) {
+            bars.add(new ProfileBlock.Bar("Series ganadas", standing.wins(), series, null));
+        }
+
+        return new ProfileBlock(
+                List.of("#" + standing.position() + " histórico", standing.points() + " puntos",
+                        standing.titles() + " títulos"),
+                List.of(section(List.of(
+                        new ProfileBlock.Stat("Puesto histórico", "#" + standing.position()),
+                        stat("Puntos", standing.points()),
+                        stat("Títulos", standing.titles()),
+                        stat("Torneos", standing.tournaments()),
+                        stat("Randomlockes", standing.lockes()),
+                        stat("Pokémon muertos", deaths)), bars)));
     }
 
-    private static ProfileBlock.Stat stat(String label, String value) {
-        return new ProfileBlock.Stat(label, value);
+    private static ProfileBlock.Section section(List<ProfileBlock.Stat> stats, List<ProfileBlock.Bar> bars) {
+        return new ProfileBlock.Section("Histórico", stats, bars, List.of());
+    }
+
+    private static ProfileBlock.Stat stat(String label, long value) {
+        return new ProfileBlock.Stat(label, String.valueOf(value));
     }
 }

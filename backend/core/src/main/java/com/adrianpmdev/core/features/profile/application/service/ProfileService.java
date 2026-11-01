@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -64,10 +65,12 @@ public class ProfileService {
             if (game.accessible() && !game.upcoming()) {
                 ProfileBlock block = blockOf(game.id(), userId, gameProviders);
 
-                games.add(new ProfileResponse.ProfileGame(game.id(), game.name(), game.iconUrl(), block.stats(),
-                        block.entries()));
+                games.add(new ProfileResponse.ProfileGame(game.id(), game.name(), game.iconUrl(), game.coverUrl(),
+                        block.summary(), block.sections()));
             }
         }
+
+        games.sort(Comparator.comparing(game -> game.summary().isEmpty() && game.sections().isEmpty()));
 
         return new ProfileResponse(user.username(), user.email(), user.avatarUrl(), user.role(), user.createdAt(), games);
     }

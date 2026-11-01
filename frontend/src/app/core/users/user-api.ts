@@ -40,4 +40,23 @@ export class UserApi {
     setUserTags(id: string, tags: string[]): Observable<User> {
         return this.http.put<User>(`${this.baseUrl}/${id}/tags`, { tags });
     }
+
+    updateMe(request: UpdateUserRequest): Observable<User> {
+        return this.http.put<User>(`${this.baseUrl}/me`, request);
+    }
+
+    uploadMyAvatar(file: File): Observable<User> {
+        const body = new FormData();
+        body.append('file', file, file.name);
+
+        return this.http.put<User>(`${this.baseUrl}/me/avatar`, body);
+    }
+
+    deleteMyAvatar(): Observable<User> {
+        return this.http.delete<User>(`${this.baseUrl}/me/avatar`);
+    }
+
+    sendMyPasswordEmail(): Observable<void> {
+        return this.http.post<void>(`${this.baseUrl}/me/password-email`, {});
+    }
 }

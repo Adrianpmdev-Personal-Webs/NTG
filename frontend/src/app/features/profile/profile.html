@@ -1,64 +1,288 @@
-<section class="profile">
-    @if (loading()) {
-        <p class="state">Cargando…</p>
-    } @else if (failed() || !profile()) {
-        <p class="state error">No se ha podido cargar tu perfil. Inténtalo de nuevo más tarde.</p>
-    } @else {
-        @let current = profile()!;
-        <header class="account terminal-card">
-            @if (current.avatarUrl) {
-                <img class="avatar" [src]="current.avatarUrl" alt="" />
-            } @else {
-                <span class="avatar avatar-initial" aria-hidden="true">{{
-                    current.username.charAt(0).toUpperCase()
-                }}</span>
-            }
-            <div class="account-details">
-                <h1 class="username neon-text">{{ current.username }}</h1>
-                <p class="account-line">{{ current.email }}</p>
-                <p class="account-line">
-                    {{ current.role.toUpperCase() }} · Desde {{ current.createdAt | date: 'dd/MM/yyyy' }}
-                </p>
-            </div>
-        </header>
+@if (loading()) {
+    <p class="state">Cargando…</p>
+} @else if (failed() || !profile()) {
+    <p class="state error">No se ha podido cargar tu perfil. Inténtalo de nuevo más tarde.</p>
+} @else {
+    @let current = profile()!;
 
-        @for (game of current.games; track game.id) {
-            <article class="game terminal-card">
-                <h2 class="game-title">
-                    @if (game.iconUrl) {
-                        <img class="game-icon" [src]="game.iconUrl" alt="" />
-                    }
-                    <a class="game-link" [routerLink]="['/', game.id]">{{ game.name }}</a>
-                </h2>
-
-                @if (game.stats.length === 0 && game.entries.length === 0) {
-                    <p class="empty">Todavía no tienes datos en este juego.</p>
-                }
-
-                @if (game.stats.length > 0) {
-                    <dl class="stats">
-                        @for (stat of game.stats; track stat.label) {
-                            <div class="stat">
-                                <dt class="stat-label">{{ stat.label }}</dt>
-                                <dd class="stat-value">{{ stat.value }}</dd>
-                            </div>
-                        }
-                    </dl>
-                }
-
-                @if (game.entries.length > 0) {
-                    <ul class="entries">
-                        @for (entry of game.entries; track entry.title) {
-                            <li class="entry">
-                                <span class="entry-title">{{ entry.title }}</span>
-                                <span class="entry-detail">{{ entry.detail }}</span>
-                            </li>
-                        }
-                    </ul>
-                }
-            </article>
-        } @empty {
-            <p class="state">Todavía no tienes acceso a ningún juego.</p>
+    <ng-template #avatar let-size="size">
+        @if (current.avatarUrl) {
+            <img class="avatar" [class.avatar-small]="size === 'small'" [src]="current.avatarUrl" alt="" />
+        } @else {
+            <span class="avatar avatar-initial" [class.avatar-small]="size === 'small'" aria-hidden="true">{{
+                current.username.charAt(0).toUpperCase()
+            }}</span>
         }
+    </ng-template>
+
+    <ng-template #bar let-item>
+        <div class="bar">
+            <div class="bar-head">
+                @if (item.iconUrl) {
+                    <img class="bar-icon" [src]="item.iconUrl" alt="" loading="lazy" (error)="hideIcon($event)" />
+                }
+                <span class="bar-label">{{ item.label }}</span>
+                <span class="bar-value">{{ item.current ?? '—' }} / {{ item.max }}</span>
+            </div>
+            <div
+                class="bar-track"
+                role="progressbar"
+                [attr.aria-label]="item.label"
+                [attr.aria-valuenow]="item.current ?? 0"
+                aria-valuemin="0"
+                [attr.aria-valuemax]="item.max"
+            >
+                <span class="bar-fill" [style.width.%]="barPercent(item)"></span>
+            </div>
+        </div>
+    </ng-template>
+
+    <section class="profile">
+        <aside class="account terminal-card">
+            <ng-container [ngTemplateOutlet]="avatar" />
+            <h1 class="username neon-text">{{ current.username }}</h1>
+            <p class="role">{{ current.role.toUpperCase() }}</p>
+            <dl class="account-data">
+                <div>
+                    <dt>Email</dt>
+                    <dd>{{ current.email }}</dd>
+                </div>
+                <div>
+                    <dt>Miembro desde</dt>
+                    <dd>{{ current.createdAt | date: 'dd/MM/yyyy' }}</dd>
+                </div>
+                <div>
+                    <dt>Juegos</dt>
+                    <dd>{{ current.games.length }}</dd>
+                </div>
+            </dl>
+            <button class="btn-neon edit-button" type="button" (click)="editing.set(true)">EDITAR PERFIL</button>
+        </aside>
+
+        <div class="content">
+            <nav class="tabs" aria-label="Secciones del perfil">
+                <button
+                    class="tab"
+                    type="button"
+                    [class.active]="selected() === overview"
+                    (click)="selected.set(overview)"
+                >
+                    Resumen
+                </button>
+                @for (game of current.games; track game.id) {
+                    <button
+                        class="tab"
+                        type="button"
+                        [class.active]="selected() === game.id"
+                        (click)="selected.set(game.id)"
+                    >
+                        @if (game.iconUrl) {
+                            <img class="tab-icon" [src]="game.iconUrl" alt="" (error)="hideIcon($event)" />
+                        }
+                        {{ game.name }}
+                    </button>
+                }
+            </nav>
+
+            <label class="tab-select">
+                <span>Sección</span>
+                <select
+                    #sectionSelect
+                    class="neon-input"
+                    [value]="selected()"
+                    (change)="selected.set(sectionSelect.value)"
+                >
+                    <option [value]="overview">Resumen</option>
+                    @for (game of current.games; track game.id) {
+                        <option [value]="game.id">{{ game.name }}</option>
+                    }
+                </select>
+            </label>
+
+            @if (selectedGame(); as game) {
+                <article class="game terminal-card">
+                    <header
+                        class="game-header"
+                        [style.background-image]="game.coverUrl ? 'url(' + game.coverUrl + ')' : null"
+                    >
+                        <div class="game-header-text">
+                            <h2 class="game-title">{{ game.name }}</h2>
+                            @if (game.summary.length > 0) {
+                                <p class="game-summary">{{ game.summary.join(' · ') }}</p>
+                            }
+                        </div>
+                        <a class="btn-neon game-open" [routerLink]="['/', game.id]">ABRIR JUEGO</a>
+                    </header>
+
+                    <div class="game-body">
+                        @for (section of game.sections; track section.title) {
+                            <section class="section">
+                                <h3 class="section-title">{{ section.title }}</h3>
+
+                                @if (section.stats.length > 0) {
+                                    <dl class="stats">
+                                        @for (stat of section.stats; track stat.label) {
+                                            <div class="stat">
+                                                <dd class="stat-value">{{ stat.value }}</dd>
+                                                <dt class="stat-label">{{ stat.label }}</dt>
+                                            </div>
+                                        }
+                                    </dl>
+                                }
+
+                                @if (section.bars.length > 0) {
+                                    <div class="bars">
+                                        @for (item of section.bars; track item.label) {
+                                            <ng-container
+                                                [ngTemplateOutlet]="bar"
+                                                [ngTemplateOutletContext]="{ $implicit: item }"
+                                            />
+                                        }
+                                    </div>
+                                }
+
+                                @if (section.cards.length > 0) {
+                                    <div class="cards">
+                                        @for (card of section.cards; track card.title) {
+                                            <article class="card">
+                                                <header class="card-header">
+                                                    @if (card.iconUrl) {
+                                                        <img
+                                                            class="card-icon"
+                                                            [src]="card.iconUrl"
+                                                            alt=""
+                                                            loading="lazy"
+                                                            (error)="hideIcon($event)"
+                                                        />
+                                                    }
+                                                    <div class="card-title">
+                                                        <h4 class="card-name">{{ card.title }}</h4>
+                                                        <p class="card-subtitle">{{ card.subtitle }}</p>
+                                                    </div>
+                                                </header>
+                                                <div class="bars">
+                                                    @for (item of card.bars; track item.label) {
+                                                        <ng-container
+                                                            [ngTemplateOutlet]="bar"
+                                                            [ngTemplateOutletContext]="{ $implicit: item }"
+                                                        />
+                                                    }
+                                                </div>
+                                            </article>
+                                        }
+                                    </div>
+                                }
+                            </section>
+                        } @empty {
+                            <p class="empty">Todavía no tienes datos en este juego.</p>
+                        }
+                    </div>
+                </article>
+            } @else {
+                <div class="overview terminal-card">
+                    @for (game of current.games; track game.id) {
+                        <button class="overview-row" type="button" (click)="selected.set(game.id)">
+                            @if (game.iconUrl) {
+                                <img class="overview-icon" [src]="game.iconUrl" alt="" (error)="hideIcon($event)" />
+                            } @else {
+                                <span class="overview-icon" aria-hidden="true"></span>
+                            }
+                            <span class="overview-name">{{ game.name }}</span>
+                            <span class="overview-summary" [class.overview-empty]="game.summary.length === 0">
+                                {{ game.summary.length > 0 ? game.summary.join(' · ') : 'Sin datos todavía' }}
+                            </span>
+                            <span class="overview-arrow" aria-hidden="true">›</span>
+                        </button>
+                    } @empty {
+                        <p class="empty">Todavía no tienes acceso a ningún juego.</p>
+                    }
+                </div>
+            }
+        </div>
+    </section>
+
+    @if (editing()) {
+        <div class="modal-overlay" appModalOverlay (dismiss)="editing.set(false)">
+            <div
+                class="modal terminal-card animate-fade-up"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="edit-title"
+            >
+                <div class="modal-header">
+                    <span class="modal-title" id="edit-title">// EDITAR PERFIL</span>
+                    <button type="button" class="close-btn" aria-label="Cerrar" (click)="editing.set(false)">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-grid">
+                        <div class="form-field">
+                            <span class="field-label">// AVATAR</span>
+                            <div class="edit-avatar">
+                                <ng-container
+                                    [ngTemplateOutlet]="avatar"
+                                    [ngTemplateOutletContext]="{ size: 'small' }"
+                                />
+                                <label class="btn-neon upload" [class.disabled]="busy()">
+                                    SUBIR IMAGEN
+                                    <input
+                                        #avatarFile
+                                        type="file"
+                                        [accept]="accepted"
+                                        [disabled]="busy()"
+                                        (change)="uploadAvatar(avatarFile)"
+                                    />
+                                </label>
+                                @if (current.avatarUrl) {
+                                    <button
+                                        class="btn-neon btn-neon-danger"
+                                        type="button"
+                                        [disabled]="busy()"
+                                        (click)="removeAvatar()"
+                                    >
+                                        QUITAR
+                                    </button>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="form-field">
+                            <label class="field-label" for="profile-username">// NOMBRE</label>
+                            <div class="edit-row">
+                                <input
+                                    #usernameField
+                                    id="profile-username"
+                                    class="neon-input"
+                                    type="text"
+                                    [maxLength]="usernameMaxLength"
+                                    [value]="current.username"
+                                    (keydown.enter)="saveUsername(usernameField)"
+                                />
+                                <button
+                                    class="btn-neon"
+                                    type="button"
+                                    [disabled]="busy()"
+                                    (click)="saveUsername(usernameField)"
+                                >
+                                    GUARDAR
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-field">
+                            <span class="field-label">// EMAIL</span>
+                            <p class="edit-text">{{ current.email }}</p>
+                        </div>
+
+                        <div class="form-field">
+                            <span class="field-label">// CONTRASEÑA</span>
+                            <p class="edit-text">Te enviamos un enlace por email para elegir una nueva.</p>
+                            <button class="btn-neon" type="button" [disabled]="busy()" (click)="sendPasswordEmail()">
+                                ENVIARME EL ENLACE
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     }
-</section>
+}

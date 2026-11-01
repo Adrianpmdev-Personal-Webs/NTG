@@ -1,8 +1,8 @@
 /**
  * ProfileApi
  *
- * The profile of the signed-in user: their account and what each game they can open has about them. The texts of the
- * figures come ready from the backend, so this screen does not know any game.
+ * The profile of the signed-in user: their account and what each game they can open has about them. A game answers with
+ * sections made of common pieces (figures, bars and cards), so this screen draws any game without knowing it.
  *
  * @author @adrianpmdev
  */
@@ -17,17 +17,34 @@ export interface ProfileStat {
     value: string;
 }
 
-export interface ProfileEntry {
+export interface ProfileBar {
+    label: string;
+    current: number | null;
+    max: number;
+    iconUrl: string | null;
+}
+
+export interface ProfileCard {
     title: string;
-    detail: string;
+    subtitle: string;
+    iconUrl: string | null;
+    bars: ProfileBar[];
+}
+
+export interface ProfileSection {
+    title: string;
+    stats: ProfileStat[];
+    bars: ProfileBar[];
+    cards: ProfileCard[];
 }
 
 export interface ProfileGame {
     id: string;
     name: string;
     iconUrl: string | null;
-    stats: ProfileStat[];
-    entries: ProfileEntry[];
+    coverUrl: string | null;
+    summary: string[];
+    sections: ProfileSection[];
 }
 
 export interface Profile {

@@ -3,21 +3,42 @@ package com.adrianpmdev.platform.profile;
 import java.util.List;
 
 /**
- * What a game shows on the profile of a player. Its texts are ready to read, so the web clients only draw them.
+ * What a game shows on the profile of a player, made of the kinds of pieces every web client knows how to draw. A new
+ * game fills them with its own data and needs no change in the clients.
  *
- * @param stats   figures of the player, such as the points or the characters
- * @param entries things of the player, such as each character with its details
+ * @param summary  a few short texts for the line of the game in the overview, such as {@code 63 puntos}
+ * @param sections what the tab of the game shows, in order
  *
  * @author adrianpmdev
  */
-public record ProfileBlock(List<Stat> stats, List<Entry> entries) {
+public record ProfileBlock(List<String> summary, List<Section> sections) {
 
     /**
-     * Validates the block and copies the lists.
+     * Copies the lists.
      */
     public ProfileBlock {
-        stats = stats == null ? List.of() : List.copyOf(stats);
-        entries = entries == null ? List.of() : List.copyOf(entries);
+        summary = summary == null ? List.of() : List.copyOf(summary);
+        sections = sections == null ? List.of() : List.copyOf(sections);
+    }
+
+    /**
+     * A part of the tab of a game. Each list can be empty.
+     *
+     * @param title section title
+     * @param stats figures
+     * @param bars  values with a maximum
+     * @param cards things of the player
+     */
+    public record Section(String title, List<Stat> stats, List<Bar> bars, List<Card> cards) {
+
+        /**
+         * Copies the lists.
+         */
+        public Section {
+            stats = stats == null ? List.of() : List.copyOf(stats);
+            bars = bars == null ? List.of() : List.copyOf(bars);
+            cards = cards == null ? List.of() : List.copyOf(cards);
+        }
     }
 
     /**
@@ -30,11 +51,31 @@ public record ProfileBlock(List<Stat> stats, List<Entry> entries) {
     }
 
     /**
-     * A thing of the player.
+     * A value with a maximum, drawn as a bar.
      *
-     * @param title  its name
-     * @param detail what to tell about it
+     * @param label   what it measures
+     * @param current its value, or null when it is not known
+     * @param max     the largest value
+     * @param iconUrl icon, or null
      */
-    public record Entry(String title, String detail) {
+    public record Bar(String label, Integer current, int max, String iconUrl) {
+    }
+
+    /**
+     * A thing of the player, such as a character.
+     *
+     * @param title    its name
+     * @param subtitle what it is
+     * @param iconUrl  icon, or null
+     * @param bars     its values
+     */
+    public record Card(String title, String subtitle, String iconUrl, List<Bar> bars) {
+
+        /**
+         * Copies the list.
+         */
+        public Card {
+            bars = bars == null ? List.of() : List.copyOf(bars);
+        }
     }
 }

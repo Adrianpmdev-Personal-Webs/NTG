@@ -121,7 +121,9 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.GET, "/api/v1/profile/me").authenticated();
 
                     // Users: anyone logged in can edit their own profile; everything else is ADMIN.
-                    auth.requestMatchers(HttpMethod.PUT, "/api/v1/users/me").authenticated();
+                    auth.requestMatchers(HttpMethod.PUT, "/api/v1/users/me", "/api/v1/users/me/avatar").authenticated();
+                    auth.requestMatchers(HttpMethod.DELETE, "/api/v1/users/me/avatar").authenticated();
+                    auth.requestMatchers(HttpMethod.POST, "/api/v1/users/me/password-email").authenticated();
                     auth.requestMatchers("/api/v1/users", "/api/v1/users/**").hasRole(ADMIN_ROLE);
                     auth.requestMatchers("/api/v1/tags", "/api/v1/tags/**").hasRole(ADMIN_ROLE);
 

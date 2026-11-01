@@ -16,7 +16,7 @@ import java.util.UUID;
  *
  * @param ownerId     account that owns it, which only an admin can choose; null keeps the current owner, or the caller
  *                    on a new character
- * @param name        name in the game, only letters
+ * @param name        name and surname in the game: words of letters joined by a space, a hyphen or an apostrophe
  * @param classSlug   class
  * @param raceSlug    race
  * @param level       level
@@ -27,7 +27,7 @@ import java.util.UUID;
  */
 public record CharacterRequest(
         UUID ownerId,
-        @NotBlank @Size(min = 2, max = 12) @Pattern(regexp = "\\p{L}+") String name,
+        @NotBlank @Size(min = 2, max = 40) @Pattern(regexp = "\\p{L}+(?:[ '\\u2019-]\\p{L}+)*") String name,
         @NotBlank @Size(max = 40) String classSlug,
         @NotBlank @Size(max = 40) String raceSlug,
         @NotNull @Min(1) Integer level,

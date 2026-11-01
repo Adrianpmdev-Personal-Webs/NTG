@@ -37,7 +37,7 @@ public class GameCharacter {
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
-    @Column(length = 12, nullable = false)
+    @Column(length = 40, nullable = false)
     private String name;
 
     @Column(name = "class_slug", length = 40, nullable = false)

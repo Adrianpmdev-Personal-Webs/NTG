@@ -29,7 +29,7 @@ type DirectoryView = 'players' | 'professions';
 
 const SECONDARY_GROUP = 'secondary';
 const MAX_SKILL = 300;
-const NAME_PATTERN = /^\p{L}{2,12}$/u;
+const NAME_PATTERN = /^(?=.{2,40}$)\p{L}+(?:[ '’-]\p{L}+)*$/u;
 const DELETED_ACCOUNT = 'Cuenta eliminada';
 
 @Component({

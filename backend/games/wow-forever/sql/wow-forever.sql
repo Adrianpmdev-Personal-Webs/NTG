@@ -19,7 +19,7 @@ create table if not exists wow_forever.characters (
     id          uuid        not null default gen_random_uuid(),
     -- Platform account (core.user.id). A plain column, like every user reference in game schemas.
     user_id     uuid        not null,
-    name        varchar(12) not null,
+    name        varchar(40) not null,
     class_slug  varchar(40) not null,
     race_slug   varchar(40) not null,
     level       smallint    not null,
@@ -30,6 +30,9 @@ create table if not exists wow_forever.characters (
     constraint characters_pkey primary key (id),
     constraint characters_level_check check (level >= 1)
 );
+
+-- Names now include a surname; this widens the column of a table created before.
+alter table wow_forever.characters alter column name type varchar(40);
 
 create unique index if not exists characters_user_name_key on wow_forever.characters (user_id, lower(name));
 

@@ -5,6 +5,7 @@ import com.adrianpmdev.core.security.authorization.Authorities;
 import com.adrianpmdev.core.security.filter.SupabaseJwtAuthFilter;
 import com.adrianpmdev.core.config.AppProperties;
 import com.adrianpmdev.core.features.catalog.application.service.GameCatalogService;
+import com.adrianpmdev.core.security.authentication.UserActivityTracker;
 import com.adrianpmdev.core.security.authentication.UserAuthorityCache;
 import com.adrianpmdev.platform.module.GameModule;
 import org.springframework.context.annotation.Bean;
@@ -87,14 +88,17 @@ public class SecurityConfig {
      * @param userAuthorityCache role and tags of each user
      * @param gameCatalogService game catalog (upcoming games)
      * @param gameModules        game modules on the classpath
+     * @param userActivityTracker when each user was last active
      * @return configured security filter chain
      * @throws Exception if the security chain cannot be built
      */
     @Bean
     @Order(2)
     SecurityFilterChain apiChain(HttpSecurity http, JwtDecoder jwtDecoder, UserAuthorityCache userAuthorityCache,
-                                 GameCatalogService gameCatalogService, List<GameModule> gameModules) throws Exception {
-        SupabaseJwtAuthFilter jwtFilter = new SupabaseJwtAuthFilter(jwtDecoder, userAuthorityCache, gameCatalogService);
+                                 GameCatalogService gameCatalogService, List<GameModule> gameModules,
+                                 UserActivityTracker userActivityTracker) throws Exception {
+        SupabaseJwtAuthFilter jwtFilter = new SupabaseJwtAuthFilter(jwtDecoder, userAuthorityCache, gameCatalogService,
+                userActivityTracker);
 
         http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -122,6 +126,7 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.GET, "/api/v1/games").authenticated();
                     auth.requestMatchers("/api/v1/games", "/api/v1/games/**").hasRole(ADMIN_ROLE);
                     auth.requestMatchers("/api/v1/assets", "/api/v1/assets/**").hasRole(ADMIN_ROLE);
+                    auth.requestMatchers("/api/v1/dashboard", "/api/v1/dashboard/**").hasRole(ADMIN_ROLE);
 
                     // Music: every signed-in user reads the playlists they can hear; changes are ADMIN.
                     auth.requestMatchers(HttpMethod.GET, "/api/v1/music").authenticated();

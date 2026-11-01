@@ -70,6 +70,22 @@ public class GameDataSyncService {
     /** The read a previous run of the backend never ended; null until first asked, then fixed for this run. */
     private Optional<GameDataStore.Attempt> crashedRead;
 
+    /** How the checks are going since this backend started. */
+    private volatile Progress progress = new Progress(null, null, null, null, false);
+
+    /**
+     * How the checks are going since this backend started, for the admin dashboard.
+     *
+     * @param lastCheckAt when wago.tools was last asked, or null
+     * @param newestBuild newest build wago.tools answered, or null
+     * @param lastError   what went wrong the last time a check failed, or null
+     * @param lastErrorAt when that happened, or null
+     * @param failing     whether the last check failed
+     */
+    public record Progress(Instant lastCheckAt, String newestBuild, String lastError, Instant lastErrorAt,
+                           boolean failing) {
+    }
+
     /**
      * Builds the service on the system clock.
      *
@@ -103,11 +119,23 @@ public class GameDataSyncService {
         scheduler.schedule(this::checkAndReschedule, clock.instant());
     }
 
+    /** How the checks are going since this backend started. */
+    public Progress progress() {
+        return progress;
+    }
+
     private void checkAndReschedule() {
+        Progress current = progress;
+
         try {
             refresh();
+            current = progress;
+            progress = new Progress(clock.instant(), current.newestBuild(), current.lastError(), current.lastErrorAt(), false);
         } catch (IOException | RuntimeException exception) {
             log.warn("WoW Forever game data could not be updated: {}", exception.getMessage());
+            current = progress;
+            progress = new Progress(clock.instant(), current.newestBuild(), String.valueOf(exception.getMessage()),
+                    clock.instant(), true);
         } finally {
             Duration next = gameDataService.currentBuild().isPresent()
                     ? Duration.ofMinutes(gameDataService.getConfig().client().checkMinutes())
@@ -129,6 +157,9 @@ public class GameDataSyncService {
 
         GameDataConfig.Client settings = gameDataService.getConfig().client();
         Optional<String> newest = wagoClient.latestBuild(settings.product());
+        Progress current = progress;
+        progress = new Progress(current.lastCheckAt(), newest.orElse(current.newestBuild()), current.lastError(),
+                current.lastErrorAt(), current.failing());
 
         boolean upToDate = newest.equals(gameDataService.currentBuild())
                 && exporter().equals(gameDataService.currentExporter());

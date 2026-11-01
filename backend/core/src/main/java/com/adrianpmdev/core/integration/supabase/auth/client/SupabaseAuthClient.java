@@ -2,6 +2,7 @@ package com.adrianpmdev.core.integration.supabase.auth.client;
 
 import com.adrianpmdev.core.integration.supabase.auth.exception.SupabaseAuthException;
 import com.adrianpmdev.core.integration.supabase.config.SupabaseProperties;
+import com.adrianpmdev.core.integration.supabase.dto.SupabaseAdminUsersResponse;
 import com.adrianpmdev.core.integration.supabase.dto.SupabaseErrorResponse;
 import com.adrianpmdev.core.integration.supabase.dto.SupabaseTokenResponse;
 import com.adrianpmdev.core.integration.supabase.dto.SupabaseUserResponse;
@@ -139,6 +140,16 @@ public class SupabaseAuthClient {
         }
 
         return UUID.fromString(created.id());
+    }
+
+    /**
+     * Lists when each account last signed in, using the admin API. A closed group fits in one page.
+     *
+     * @return accounts with their last sign in
+     */
+    public SupabaseAdminUsersResponse adminListUsers() {
+        return execute(properties.authUrl() + "/admin/users?page=1&per_page=1000", HttpMethod.GET,
+                new HttpEntity<>(adminHeaders()), SupabaseAdminUsersResponse.class);
     }
 
     /**

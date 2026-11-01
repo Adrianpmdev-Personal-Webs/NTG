@@ -27,6 +27,10 @@ create table if not exists core."user" (
     constraint user_pkey primary key (id)
 );
 
+-- When the user last made a request, at most an hour old (admin dashboard). Written by the backend with plain SQL.
+
+alter table core."user" add column if not exists last_seen_at timestamptz;
+
 -- ─── tag ─────────────────────────────────────────────────────────────────────────────────────────
 -- The key of a game's tag is the game id (pokemon, wow-forever...) and becomes the authority TAG_<KEY>.
 

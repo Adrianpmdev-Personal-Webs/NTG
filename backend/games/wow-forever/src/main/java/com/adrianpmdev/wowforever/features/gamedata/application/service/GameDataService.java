@@ -131,6 +131,13 @@ public class GameDataService {
         return current == null ? Optional.empty() : Optional.ofNullable(current.root().path("build").asText(null));
     }
 
+    /** The day the file being served was generated, or empty while none is. */
+    public Optional<String> currentGenerated() {
+        GameData current = data;
+
+        return current == null ? Optional.empty() : Optional.ofNullable(current.root().path("generated").asText(null));
+    }
+
     /**
      * The fingerprint of the export that wrote the file being served (see GameDataExporter.fingerprint), or an empty
      * text when none is served or the file is older than fingerprints.

@@ -1,241 +1,196 @@
 <div class="dashboard">
     <div class="page-header">
-        <div class="header-left">
-            <div class="page-label">
-                @if (this.isAdmin) {
-                    // SISTEMA DE MONITOREO
-                }
-            </div>
-            <h1 class="page-title">
-                @if (this.isAdmin) {
-                    DASHBOARD
-                } @else {
-                    Bienvenido, NTG {{ authSession.getCurrentUser()?.username }}
-                }
-            </h1>
+        <div>
+            <div class="page-label">// ESTADO DEL SISTEMA</div>
+            <h1 class="page-title">DASHBOARD</h1>
         </div>
 
         <div class="header-right">
-            <div class="live-indicator">
-                <span class="live-dot"></span>
-                <span>LIVE</span>
+            <div class="server-facts">
+                <span class="fact"><app-nav-icon class="icon" name="clock" /> UPTIME: {{ uptime() }}</span>
+                <span class="fact">
+                    <app-nav-icon class="icon" name="package" /> VERSIÓN: {{ data()?.server?.version ?? 'local' }}
+                </span>
+                @if (readAt(); as read) {
+                    <span class="fact">
+                        <app-nav-icon class="icon" name="refresh" /> LEÍDO: {{ read | date: 'HH:mm:ss' }}
+                    </span>
+                }
             </div>
-            <div class="uptime">UPTIME: {{ uptime() }}</div>
+            <button class="btn-neon refresh-btn" type="button" [disabled]="loading()" (click)="refresh()">
+                <app-nav-icon class="icon" name="refresh" />
+                {{ loading() ? 'LEYENDO...' : 'ACTUALIZAR' }}
+            </button>
         </div>
     </div>
 
-    @if (this.isAdmin) {
+    @let dashboard = data();
+    @if (dashboard) {
         <div class="stats-grid">
-            @for (stat of stats(); track stat.label) {
-                <div class="stat-card terminal-card animate-fade-up">
+            @for (card of cards(); track card.label) {
+                <div class="stat-card terminal-card">
                     <div class="stat-top">
-                        <span
-                            class="stat-icon"
-                            [style.color]="stat.color"
-                            [style.text-shadow]="'0 0 10px ' + stat.color"
-                        >
-                            {{ stat.icon }}
-                        </span>
-                        <div class="stat-label">{{ stat.label }}</div>
+                        <app-nav-icon class="stat-icon" [name]="card.icon" [style.color]="usageColor(card.percent)" />
+                        <div class="stat-label">{{ card.label }}</div>
                     </div>
-
-                    <div class="stat-value" [style.color]="stat.color" [style.text-shadow]="'0 0 15px ' + stat.color">
-                        <span class="value-number">{{ stat.value }}</span>
-                        @if (stat.suffix) {
-                            <span class="value-suffix">{{ stat.suffix }}</span>
-                        }
-                    </div>
-
+                    <div class="stat-value" [style.color]="usageColor(card.percent)">{{ card.value }}</div>
+                    <div class="stat-detail">{{ card.detail }}</div>
                     <div class="stat-bar">
                         <div
                             class="stat-bar-fill"
-                            [style.background]="stat.color"
-                            [style.width]="getBarWidth(stat.value)"
+                            [style.background]="usageColor(card.percent)"
+                            [style.width.%]="card.percent ?? 0"
                         ></div>
                     </div>
                 </div>
             }
         </div>
 
-        <div class="charts-row">
-            <div class="chart-card terminal-card">
-                <div class="card-header">
-                    <span class="card-title">// DISTRIBUCIÓN DE ROLES</span>
-                    <span class="card-badge">SVG</span>
-                </div>
-
-                <div class="donut-container">
-                    <svg viewBox="0 0 200 200" class="donut-svg">
-                        <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(0,255,65,0.08)" stroke-width="24" />
-
-                        <circle
-                            cx="100"
-                            cy="100"
-                            r="70"
-                            fill="none"
-                            stroke="var(--neon-green)"
-                            stroke-width="24"
-                            [attr.stroke-dasharray]="usersArc() + ' ' + circumference"
-                            [attr.stroke-dashoffset]="circumference / 4"
-                            class="donut-seg"
-                            style="transition: stroke-dasharray 1s ease 0.3s"
-                        />
-
-                        <circle
-                            cx="100"
-                            cy="100"
-                            r="70"
-                            fill="none"
-                            stroke="var(--neon-cyan)"
-                            stroke-width="24"
-                            [attr.stroke-dasharray]="adminsArc() + ' ' + circumference"
-                            [attr.stroke-dashoffset]="-usersArc() + circumference / 4"
-                            class="donut-seg"
-                        />
-
-                        <text
-                            x="100"
-                            y="96"
-                            text-anchor="middle"
-                            fill="var(--neon-green)"
-                            font-family="Orbitron,monospace"
-                            font-size="26"
-                            font-weight="900"
-                        >
-                            {{ totalUsers() }}
-                        </text>
-                        <text
-                            x="100"
-                            y="116"
-                            text-anchor="middle"
-                            fill="rgba(0,255,65,0.5)"
-                            font-family="Share Tech Mono,monospace"
-                            font-size="10"
-                            letter-spacing="2"
-                        >
-                            TOTAL
-                        </text>
-                    </svg>
-
-                    <div class="donut-legend">
-                        <div class="legend-item">
-                            <span class="legend-dot" style="background: var(--neon-green)"></span>
-                            <span>USUARIOS</span>
-                            <span class="legend-val">{{ regularUsersCount() }}</span>
-                        </div>
-
-                        <div class="legend-item">
-                            <span class="legend-dot" style="background: var(--neon-cyan)"></span>
-                            <span>ADMINS</span>
-                            <span class="legend-val">{{ adminsCount() }}</span>
-                        </div>
+        <div class="panels">
+            @for (module of dashboard.modules; track module.title) {
+                <section class="panel terminal-card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <app-nav-icon class="title-icon" name="gamepad" /> {{ module.title.toUpperCase() }}
+                        </h2>
                     </div>
-                </div>
-            </div>
+                    <dl class="status-list">
+                        @for (line of module.lines; track line.label) {
+                            <div
+                                class="status-line"
+                                [class.warning]="line.level === 'WARNING'"
+                                [class.error]="line.level === 'ERROR'"
+                            >
+                                <dt><app-nav-icon class="icon" [name]="line.icon" /> {{ line.label }}</dt>
+                                <dd>{{ line.value }}</dd>
+                            </div>
+                        }
+                    </dl>
+                </section>
+            }
 
-            <div class="chart-card terminal-card activity-log">
+            <section class="panel terminal-card">
                 <div class="card-header">
-                    <span class="card-title">// LOG DE ACTIVIDAD</span>
-                    <span class="card-badge blink">LIVE</span>
+                    <h2 class="card-title"><app-nav-icon class="title-icon" name="storage" /> ESPACIO POR BUCKET</h2>
                 </div>
+                @if (dashboard.storage.buckets.length > 0) {
+                    <div class="metrics-list">
+                        @for (bucket of dashboard.storage.buckets; track bucket.name) {
+                            <div class="metric-row">
+                                <div class="metric-head">
+                                    <span class="metric-label">
+                                        <app-nav-icon class="icon" [name]="bucketIcon(bucket.name)" /> {{ bucket.name }}
+                                    </span>
+                                    <span class="metric-value">
+                                        {{ size(bucket.bytes) }} · {{ bucket.objects }}
+                                        {{ bucket.objects === 1 ? 'archivo' : 'archivos' }}
+                                    </span>
+                                </div>
+                                <div class="metric-bar-track">
+                                    <div
+                                        class="metric-bar-fill"
+                                        [style.width.%]="share(bucket.bytes, dashboard.storage.storageBytes ?? 0)"
+                                    ></div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                } @else {
+                    <p class="panel-empty">No se ha podido leer el espacio de los buckets</p>
+                }
+            </section>
 
-                <div class="log-container">
-                    @for (log of activityLogs(); track log.id) {
-                        <div class="log-entry" [class]="'log-' + log.level">
-                            <span class="log-time">{{ log.time }}</span>
-                            <span class="log-level">[{{ log.level.toUpperCase() }}]</span>
-                            <span class="log-msg">{{ log.msg }}</span>
-                        </div>
-                    }
-                </div>
-            </div>
-
-            <div class="chart-card terminal-card">
+            <section class="panel terminal-card">
                 <div class="card-header">
-                    <span class="card-title">// MÉTRICAS DEL SISTEMA</span>
+                    <h2 class="card-title"><app-nav-icon class="title-icon" name="users" /> USUARIOS</h2>
+                    <span class="card-badge">{{ dashboard.users.total }} TOTAL</span>
                 </div>
-
-                <div class="metrics-list">
-                    @for (metric of systemMetrics(); track metric.label) {
+                <dl class="status-list">
+                    <div class="status-line">
+                        <dt><app-nav-icon class="icon" name="admin" /> Admins</dt>
+                        <dd>{{ dashboard.users.admins }}</dd>
+                    </div>
+                    <div class="status-line">
+                        <dt><app-nav-icon class="icon" name="user" /> Jugadores</dt>
+                        <dd>{{ dashboard.users.players }}</dd>
+                    </div>
+                    <div class="status-line" [class.warning]="(dashboard.users.neverSignedIn ?? 0) > 0">
+                        <dt><app-nav-icon class="icon" name="userOff" /> Sin entrar nunca</dt>
+                        <dd>{{ dashboard.users.neverSignedIn ?? '—' }}</dd>
+                    </div>
+                </dl>
+                <div class="metrics-list metrics-list-compact">
+                    @for (game of dashboard.users.perGame; track game.name) {
                         <div class="metric-row">
-                            <span class="metric-label">{{ metric.label }}</span>
-
+                            <div class="metric-head">
+                                <span class="metric-label">
+                                    @if (game.iconUrl) {
+                                        <img class="game-icon" [src]="game.iconUrl" alt="" />
+                                    } @else {
+                                        <app-nav-icon class="icon" name="gamepad" />
+                                    }
+                                    {{ game.name }}
+                                </span>
+                                <span class="metric-value">{{ game.users }}</span>
+                            </div>
                             <div class="metric-bar-track">
                                 <div
                                     class="metric-bar-fill"
-                                    [style.width.%]="metric.value"
-                                    [style.background]="metric.color"
-                                    [style.box-shadow]="'0 0 6px ' + metric.color"
+                                    [style.width.%]="share(game.users, dashboard.users.total)"
                                 ></div>
                             </div>
-
-                            <span class="metric-value" [style.color]="metric.color">{{ metric.value }}%</span>
                         </div>
                     }
                 </div>
-            </div>
+            </section>
         </div>
 
-        <div class="terminal-card recent-users">
+        <section class="terminal-card accounts">
             <div class="card-header">
-                <span class="card-title">// ÚLTIMOS USUARIOS REGISTRADOS</span>
-                <span class="card-badge">{{ recentUsers().length }} ENTRIES</span>
+                <h2 class="card-title">
+                    <app-nav-icon class="title-icon" name="users" /> CUENTAS, DE MÁS NUEVA A MÁS ANTIGUA
+                </h2>
             </div>
-
-            @if (loading()) {
-                <div class="loading-state"><span>CARGANDO DATOS</span><span class="cursor"> </span></div>
-            } @else {
+            <div class="accounts-scroll">
                 <table class="neon-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>USERNAME</th>
-                            <th>EMAIL</th>
-                            <th>ROL</th>
-                            <th>ESTADO</th>
+                            <th><app-nav-icon class="icon" name="user" /> USUARIO</th>
+                            <th><app-nav-icon class="icon" name="mail" /> EMAIL</th>
+                            <th><app-nav-icon class="icon" name="admin" /> ROL</th>
+                            <th><app-nav-icon class="icon" name="calendar" /> CREADA</th>
+                            <th><app-nav-icon class="icon" name="clock" /> ÚLTIMA ACTIVIDAD</th>
                         </tr>
                     </thead>
-
                     <tbody>
-                        @for (user of recentUsers(); track user.id) {
-                            <tr class="animate-fade-up">
-                                <td class="id-col">{{ user.id.substring(0, 8) }}...</td>
-                                <td class="username-col">{{ user.username }}</td>
-                                <td>{{ user.email }}</td>
+                        @for (account of dashboard.users.accounts; track account.email) {
+                            <tr>
+                                <td class="username-col">{{ account.username }}</td>
+                                <td>{{ account.email }}</td>
                                 <td>
-                                    <span class="role-badge" [class.role-admin]="isAdminRole(user.role)">
-                                        {{ user.role.toUpperCase() }}
+                                    <span class="role-badge" [class.role-admin]="isAdminRole(account.role)">
+                                        {{ account.role.toUpperCase() }}
                                     </span>
                                 </td>
-                                <td><span class="status-online">● ACTIVO</span></td>
+                                <td>{{ account.createdAt | date: 'dd/MM/yyyy' }}</td>
+                                <td>
+                                    @if (account.lastActiveAt) {
+                                        {{ account.lastActiveAt | date: 'dd/MM/yyyy HH:mm' }}
+                                    } @else if (dashboard.users.signInsKnown) {
+                                        <span class="never">NUNCA</span>
+                                    } @else {
+                                        —
+                                    }
+                                </td>
                             </tr>
                         }
                     </tbody>
                 </table>
-            }
-        </div>
-    } @else {
-        <section class="games-section">
-            <div class="games-grid">
-                @for (game of availableGames(); track game.id) {
-                    <a class="game-card terminal-card animate-fade-up" [routerLink]="'/' + game.id">
-                        <div class="game-image-wrapper">
-                            @if (game.coverUrl) {
-                                <img class="game-image" [src]="game.coverUrl" [alt]="game.name" loading="lazy" />
-                            } @else {
-                                <div class="game-image game-image-empty">{{ game.name.charAt(0).toUpperCase() }}</div>
-                            }
-                        </div>
-
-                        <div class="game-name">
-                            {{ game.name }}
-                            @if (game.upcoming) {
-                                <span class="upcoming-mark" title="Próximamente: solo visible para admins">*</span>
-                            }
-                        </div>
-                    </a>
-                }
             </div>
         </section>
+    } @else if (loading()) {
+        <div class="terminal-card loading-state">LEYENDO DATOS...</div>
+    } @else {
+        <div class="terminal-card loading-state">NO SE HA PODIDO LEER EL ESTADO DEL SISTEMA</div>
     }
 </div>

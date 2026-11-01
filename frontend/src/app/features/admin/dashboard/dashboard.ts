@@ -1,173 +1,163 @@
 /**
  * Dashboard
  *
- * Dashboard page component.
- * Displays admin statistics or user game library depending on the current role.
+ * Admin dashboard, with real data only: the memory and CPU of the backend, the space used in Supabase, the state each
+ * module declares and the accounts with their last activity. It is read when the screen opens and with the refresh
+ * button, never on its own, so a forgotten tab costs nothing; between reads only the uptime advances, in the browser.
+ * A value the backend could not read shows as a dash.
  *
  * @author @adrianpmdev
  */
 
-import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { UserApi } from '@core/users/user-api';
-import { StatCard } from './dashboard-stats';
-import { User } from '@shared/models/user';
-import { AuthSession } from '@core/auth/auth-session';
-import { GameCatalog } from '@core/games/game-catalog';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { NotificationCenter } from '@core/notifications/notification-center';
+import { NavIcon, NavIconName } from '@shared/components/nav-icon/nav-icon';
+import { resolveApiError } from '@shared/utils/api-error';
+import { DashboardApi, DashboardData } from './dashboard-api';
+
+const WARNING_PERCENT = 70;
+const DANGER_PERCENT = 90;
+const CLOCK_INTERVAL_MS = 30_000;
+const BUCKET_ICONS: Readonly<Record<string, NavIconName>> = { 'public-music': 'music', 'public-assets': 'image' };
+
+interface UsageCard {
+    label: string;
+    value: string;
+    detail: string;
+    percent: number | null;
+    icon: NavIconName;
+}
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-dashboard',
-    imports: [RouterLink],
+    imports: [DatePipe, NavIcon],
     templateUrl: './dashboard.html',
     styleUrl: './dashboard.scss',
 })
-export class Dashboard implements OnInit {
-    private readonly userApi = inject(UserApi);
-    private readonly destroyRef = inject(DestroyRef);
-    protected readonly authSession = inject(AuthSession);
+export class Dashboard {
+    private readonly api = inject(DashboardApi);
+    private readonly notifications = inject(NotificationCenter);
 
+    protected readonly data = signal<DashboardData | null>(null);
     protected readonly loading = signal(true);
-    protected readonly isAdmin = this.authSession.isAdmin();
+    protected readonly readAt = signal<Date | null>(null);
+    private readonly now = signal(Date.now());
 
-    protected readonly stats = signal<StatCard[]>([]);
-    protected readonly recentUsers = signal<User[]>([]);
-    protected readonly totalUsers = signal(0);
-    protected readonly regularUsersCount = signal(0);
-    protected readonly adminsCount = signal(0);
-    protected readonly uptime = signal('00:00:00');
+    protected readonly uptime = computed(() => {
+        const seconds = this.data()?.server.uptimeSeconds;
+        const readAt = this.readAt();
 
-    protected readonly availableGames = inject(GameCatalog).games;
-
-    protected readonly circumference = 2 * Math.PI * 70;
-
-    protected readonly usersArc = signal(0);
-    protected readonly adminsArc = signal(0);
-
-    protected readonly activityLogs = signal([
-        { id: 1, time: this.ts(), level: 'info', msg: 'Sistema iniciado correctamente' },
-        { id: 2, time: this.ts(), level: 'success', msg: 'Conexión a base de datos establecida' },
-        { id: 3, time: this.ts(), level: 'info', msg: 'Módulo de autenticación activo' },
-        { id: 4, time: this.ts(), level: 'warn', msg: 'Token de refresh próximo a expirar' },
-        { id: 5, time: this.ts(), level: 'info', msg: 'Carga de usuarios completada' },
-        { id: 6, time: this.ts(), level: 'success', msg: 'Admin panel operativo' },
-    ]);
-
-    protected readonly systemMetrics = signal([
-        { label: 'CPU', value: 23, color: 'var(--neon-green)' },
-        { label: 'MEMORIA', value: 61, color: 'var(--neon-cyan)' },
-        { label: 'DISCO', value: 38, color: 'var(--neon-yellow)' },
-        { label: 'RED', value: 82, color: '#ff8c00' },
-        { label: 'API CALLS', value: 45, color: 'var(--neon-green)' },
-    ]);
-
-    private readonly startTime = Date.now();
-
-    ngOnInit(): void {
-        this.startUptimeTimer();
-
-        if (this.isAdmin) {
-            this.loadData();
-            this.startLogStream();
-
-            return;
+        if (seconds === undefined || !readAt) {
+            return '—';
         }
 
-        this.loading.set(false);
+        return formatUptime(seconds + Math.max(0, Math.floor((this.now() - readAt.getTime()) / 1_000)));
+    });
+
+    protected readonly cards = computed<UsageCard[]>(() => {
+        const data = this.data();
+
+        if (!data) {
+            return [];
+        }
+
+        const { server, storage } = data;
+        const memory = server.processBytes ?? server.heapUsedBytes;
+        const memoryLimit = server.processBytes === null ? server.heapMaxBytes : server.memoryLimitBytes;
+
+        return [
+            usage(server.processBytes === null ? 'HEAP JAVA' : 'MEMORIA RENDER', 'memory', memory, memoryLimit),
+            {
+                label: 'CPU',
+                value: server.cpuPercent === null ? '—' : `${Math.round(server.cpuPercent)}%`,
+                detail: 'en este momento',
+                percent: server.cpuPercent,
+                icon: 'cpu',
+            },
+            usage('BASE DE DATOS', 'database', storage.databaseBytes, storage.databaseLimitBytes),
+            usage('STORAGE', 'storage', storage.storageBytes, storage.storageLimitBytes),
+        ];
+    });
+
+    constructor() {
+        this.refresh();
+
+        const clock = setInterval(() => this.now.set(Date.now()), CLOCK_INTERVAL_MS);
+
+        inject(DestroyRef).onDestroy(() => clearInterval(clock));
     }
 
-    protected getBarWidth(value: number | string): string {
-        const numericValue = typeof value === 'string' ? parseInt(value) : value;
-        const max = 100;
+    protected refresh(): void {
+        this.loading.set(true);
+        this.api.get().subscribe({
+            next: (data) => {
+                this.data.set(data);
+                this.readAt.set(new Date());
+                this.now.set(Date.now());
+                this.loading.set(false);
+            },
+            error: (error) => {
+                this.loading.set(false);
+                this.notifications.error(resolveApiError(error, 'No se ha podido cargar el dashboard'));
+            },
+        });
+    }
 
-        return Math.min((numericValue / max) * 100, 100) + '%';
+    protected size(bytes: number): string {
+        return formatBytes(bytes);
+    }
+
+    protected share(part: number, whole: number): number {
+        return whole > 0 ? (part / whole) * 100 : 0;
+    }
+
+    protected usageColor(percent: number | null): string {
+        if (percent !== null && percent >= DANGER_PERCENT) {
+            return 'var(--neon-red)';
+        }
+
+        return percent !== null && percent >= WARNING_PERCENT ? 'var(--neon-yellow)' : 'var(--neon-green)';
+    }
+
+    protected bucketIcon(bucket: string): NavIconName {
+        return BUCKET_ICONS[bucket] ?? 'folder';
     }
 
     protected isAdminRole(role: string): boolean {
         return role.toLowerCase().replace('role_', '') === 'admin';
     }
+}
 
-    private loadData(): void {
-        this.userApi.getAllUsers().subscribe({
-            next: (users: User[]) => {
-                const admins = users.filter((user) => this.isAdminRole(user.role));
-                const regularUsers = users.filter((user) => !this.isAdminRole(user.role));
-                const total = users.length;
+function usage(label: string, icon: NavIconName, used: number | null, limit: number): UsageCard {
+    return {
+        label,
+        icon,
+        value: used === null ? '—' : formatBytes(used),
+        detail: `de ${formatBytes(limit)}`,
+        percent: used === null || limit <= 0 ? null : (used / limit) * 100,
+    };
+}
 
-                this.totalUsers.set(total);
-                this.adminsCount.set(admins.length);
-                this.regularUsersCount.set(regularUsers.length);
+function formatBytes(bytes: number): string {
+    const megabytes = bytes / 1024 / 1024;
 
-                const usersArc = total > 0 ? (regularUsers.length / total) * this.circumference : 0;
-                const adminsArc = total > 0 ? (admins.length / total) * this.circumference : 0;
-
-                this.usersArc.set(usersArc);
-                this.adminsArc.set(adminsArc);
-
-                this.stats.set([
-                    { label: 'TOTAL USUARIOS', value: total, icon: '◎', color: 'var(--neon-green)' },
-                    { label: 'ADMINS', value: admins.length, icon: '◈', color: 'var(--neon-cyan)' },
-                    { label: 'USUARIOS ACTIVOS', value: regularUsers.length, icon: '◉', color: 'var(--neon-green)' },
-                    { label: 'MÓDULOS ACTIVOS', value: 4, icon: '◇', color: 'var(--neon-yellow)' },
-                ]);
-
-                this.recentUsers.set(users.slice(0, 8));
-                this.loading.set(false);
-            },
-            error: () => {
-                this.stats.set([
-                    { label: 'TOTAL USUARIOS', value: 0, icon: '◎', color: 'var(--neon-green)' },
-                    { label: 'ADMINS', value: 0, icon: '◈', color: 'var(--neon-cyan)' },
-                    { label: 'USUARIOS ACTIVOS', value: 0, icon: '◉', color: 'var(--neon-green)' },
-                    { label: 'MÓDULOS ACTIVOS', value: 4, icon: '◇', color: 'var(--neon-yellow)' },
-                ]);
-
-                this.loading.set(false);
-            },
-        });
+    if (megabytes >= 1024) {
+        return `${(megabytes / 1024).toFixed(1)} GB`;
     }
 
-    private startUptimeTimer(): void {
-        const intervalId = setInterval(() => {
-            const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
-            const hours = Math.floor(elapsed / 3600)
-                .toString()
-                .padStart(2, '0');
-            const minutes = Math.floor((elapsed % 3600) / 60)
-                .toString()
-                .padStart(2, '0');
-            const seconds = (elapsed % 60).toString().padStart(2, '0');
-
-            this.uptime.set(`${hours}:${minutes}:${seconds}`);
-        }, 1000);
-
-        this.destroyRef.onDestroy(() => clearInterval(intervalId));
+    if (megabytes >= 100) {
+        return `${Math.round(megabytes)} MB`;
     }
 
-    private startLogStream(): void {
-        const messages = [
-            { level: 'info', msg: 'Petición GET /api/v1/users procesada' },
-            { level: 'success', msg: 'Autenticación JWT validada correctamente' },
-            { level: 'info', msg: 'Consulta a base de datos ejecutada' },
-            { level: 'warn', msg: 'Intento de acceso desde IP desconocida' },
-            { level: 'info', msg: 'Sincronización con Supabase completada' },
-            { level: 'success', msg: 'Cache actualizada correctamente' },
-        ];
+    return megabytes >= 1 ? `${megabytes.toFixed(1)} MB` : `${Math.round(bytes / 1024)} KB`;
+}
 
-        let index = 0;
+function formatUptime(seconds: number): string {
+    const days = Math.floor(seconds / 86_400);
+    const hours = Math.floor((seconds % 86_400) / 3_600);
+    const minutes = Math.floor((seconds % 3_600) / 60);
 
-        const intervalId = setInterval(() => {
-            const message = messages[index % messages.length];
-
-            this.activityLogs.update((logs) => [{ id: Date.now(), time: this.ts(), ...message }, ...logs.slice(0, 9)]);
-
-            index++;
-        }, 3500);
-
-        this.destroyRef.onDestroy(() => clearInterval(intervalId));
-    }
-
-    private ts(): string {
-        return new Date().toLocaleTimeString('es-ES', { hour12: false });
-    }
+    return `${days > 0 ? `${days}d ` : ''}${hours}h ${String(minutes).padStart(2, '0')}m`;
 }

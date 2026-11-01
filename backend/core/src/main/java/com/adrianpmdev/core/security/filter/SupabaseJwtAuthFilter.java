@@ -1,6 +1,7 @@
 package com.adrianpmdev.core.security.filter;
 
 import com.adrianpmdev.core.security.authentication.AuthenticatedUser;
+import com.adrianpmdev.core.security.authentication.UserActivityTracker;
 import com.adrianpmdev.core.security.authentication.UserAuthorityCache;
 import com.adrianpmdev.core.security.authorization.Authorities;
 import com.adrianpmdev.core.features.catalog.application.service.GameCatalogService;
@@ -53,6 +54,7 @@ public class SupabaseJwtAuthFilter extends OncePerRequestFilter {
     private final JwtDecoder jwtDecoder;
     private final UserAuthorityCache userAuthorityCache;
     private final GameCatalogService gameCatalogService;
+    private final UserActivityTracker userActivityTracker;
 
     /**
      * Builds the filter.
@@ -60,12 +62,14 @@ public class SupabaseJwtAuthFilter extends OncePerRequestFilter {
      * @param jwtDecoder         access token decoder
      * @param userAuthorityCache role and tags of each user
      * @param gameCatalogService game catalog (upcoming games)
+     * @param userActivityTracker when each user was last active
      */
     public SupabaseJwtAuthFilter(JwtDecoder jwtDecoder, UserAuthorityCache userAuthorityCache,
-                                 GameCatalogService gameCatalogService) {
+                                 GameCatalogService gameCatalogService, UserActivityTracker userActivityTracker) {
         this.jwtDecoder = jwtDecoder;
         this.userAuthorityCache = userAuthorityCache;
         this.gameCatalogService = gameCatalogService;
+        this.userActivityTracker = userActivityTracker;
     }
 
     @Override
@@ -109,6 +113,7 @@ public class SupabaseJwtAuthFilter extends OncePerRequestFilter {
                     new AuthenticatedUser(userId, role), null, authorities);
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            userActivityTracker.touch(userId);
         } catch (JwtException | IllegalArgumentException exception) {
             LOG.debug("Rejected access token: {}", exception.getMessage());
         }

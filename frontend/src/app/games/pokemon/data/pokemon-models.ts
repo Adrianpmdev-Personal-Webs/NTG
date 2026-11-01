@@ -86,6 +86,24 @@ export interface LockeDetail {
     standings: PlayerStanding[];
 }
 
+export interface LockeDeath {
+    id: string;
+    pokemon: string;
+}
+
+export interface PlayerDeaths {
+    player: Ref;
+    total: number;
+    canAdd: boolean;
+    canDelete: boolean;
+    deaths: LockeDeath[];
+}
+
+export interface LockeDeaths {
+    total: number;
+    players: PlayerDeaths[];
+}
+
 export interface LockeRequest {
     name: string;
     description: string | null;

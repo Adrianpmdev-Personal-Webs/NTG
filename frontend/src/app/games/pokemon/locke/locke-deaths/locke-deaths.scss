@@ -1,0 +1,124 @@
+@use '../../styles/pokemon' as pk;
+
+:host {
+    display: block;
+}
+
+.state {
+    @include pk.state;
+}
+
+.total {
+    margin: 0 0 14px;
+    color: var(--pk-muted);
+
+    strong {
+        color: var(--pk-yellow);
+        font-size: 1.2rem;
+    }
+}
+
+.players {
+    @include pk.grid(240px);
+}
+
+.player {
+    @include pk.card;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+}
+
+.player-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.player-name {
+    @include pk.section-title;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.player-total {
+    color: var(--pk-yellow);
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.deaths {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.death {
+    @include pk.chip;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+}
+
+.death-remove {
+    padding: 0 2px;
+    border: 0;
+    background: none;
+    color: var(--pk-red);
+    font: inherit;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+.empty {
+    margin: 0;
+    color: var(--pk-muted);
+    font-size: 0.85rem;
+}
+
+.add {
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+}
+
+.add-name {
+    flex: 1;
+    min-width: 0;
+    padding: 7px 10px;
+    border: 2px solid var(--pk-border);
+    border-radius: var(--pk-radius);
+    background: var(--pk-surface-2);
+    color: var(--pk-text);
+    font: inherit;
+    font-size: 0.85rem;
+}
+
+.add-button {
+    padding: 7px 12px;
+    border: 2px solid var(--pk-yellow);
+    border-radius: var(--pk-radius);
+    background: transparent;
+    color: var(--pk-yellow);
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}

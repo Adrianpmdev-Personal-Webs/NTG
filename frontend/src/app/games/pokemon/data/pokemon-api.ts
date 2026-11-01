@@ -17,6 +17,7 @@ import { TypeChart } from '../type-calculator/type-calculator-constants';
 import {
     Game,
     GameRequest,
+    LockeDeaths,
     LockeDetail,
     LockeRequest,
     LockeSummary,
@@ -87,6 +88,18 @@ export class PokemonApi {
 
     getLocke(id: string): Observable<LockeDetail> {
         return this.cachedGet<LockeDetail>(`${this.base}/lockes/${id}`);
+    }
+
+    getLockeDeaths(lockeId: string): Observable<LockeDeaths> {
+        return this.cachedGet<LockeDeaths>(`${this.base}/lockes/${lockeId}/deaths`);
+    }
+
+    addLockeDeath(lockeId: string, playerId: string, pokemon: string): Observable<LockeDeaths> {
+        return this.write(this.http.post<LockeDeaths>(`${this.base}/lockes/${lockeId}/deaths`, { playerId, pokemon }));
+    }
+
+    deleteLockeDeath(lockeId: string, deathId: string): Observable<LockeDeaths> {
+        return this.write(this.http.delete<LockeDeaths>(`${this.base}/lockes/${lockeId}/deaths/${deathId}`));
     }
 
     createLocke(request: LockeRequest): Observable<LockeDetail> {

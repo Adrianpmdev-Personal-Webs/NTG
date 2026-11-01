@@ -1,0 +1,60 @@
+@if (loading()) {
+    <p class="state">Cargando…</p>
+} @else if (failed() || !deaths()) {
+    <p class="state error">No se han podido cargar las muertes.</p>
+} @else {
+    @let current = deaths()!;
+    <p class="total">
+        Total del randomlocke: <strong>{{ current.total }}</strong>
+    </p>
+
+    <div class="players">
+        @for (row of current.players; track row.player.id) {
+            <article class="player">
+                <header class="player-head">
+                    <h2 class="player-name">{{ row.player.name }}</h2>
+                    <span class="player-total" [attr.aria-label]="row.total + ' muertes'">{{ row.total }}</span>
+                </header>
+
+                @if (row.deaths.length > 0) {
+                    <ul class="deaths">
+                        @for (death of row.deaths; track death.id) {
+                            <li class="death">
+                                <span>{{ death.pokemon }}</span>
+                                @if (row.canDelete) {
+                                    <button
+                                        class="death-remove"
+                                        type="button"
+                                        [attr.aria-label]="'Quitar ' + death.pokemon"
+                                        [disabled]="saving()"
+                                        (click)="remove(death)"
+                                    >
+                                        ×
+                                    </button>
+                                }
+                            </li>
+                        }
+                    </ul>
+                } @else {
+                    <p class="empty">Ninguna muerte.</p>
+                }
+
+                @if (row.canAdd) {
+                    <form class="add" (submit)="add($event, row.player.id, nameField)">
+                        <input
+                            #nameField
+                            class="add-name"
+                            type="text"
+                            placeholder="Pokémon"
+                            [attr.aria-label]="'Pokémon muerto de ' + row.player.name"
+                            [maxLength]="nameMaxLength"
+                        />
+                        <button class="add-button" type="submit" [disabled]="saving()">Apuntar</button>
+                    </form>
+                }
+            </article>
+        } @empty {
+            <p class="state">Sin jugadores.</p>
+        }
+    </div>
+}

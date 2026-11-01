@@ -2,7 +2,7 @@
  * LockePage
  *
  * One randomlocke: its tournaments in play order (with their game and champion), its cumulative
- * standings, its rules and its players.
+ * standings, the Pokémon each player lost, its rules and its players.
  *
  * @author @adrianpmdev
  */
@@ -16,13 +16,14 @@ import { LockeDetail } from '../data/pokemon-models';
 import { playerRows } from '../data/tournament-view';
 import { RulesView } from '../ui/rules-view/rules-view';
 import { StandingsTable } from '../ui/standings-table/standings-table';
+import { LockeDeathsView } from './locke-deaths/locke-deaths';
 
-type LockeTab = 'tournaments' | 'standings' | 'rules' | 'players';
+type LockeTab = 'tournaments' | 'standings' | 'deaths' | 'rules' | 'players';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-pokemon-locke',
-    imports: [RouterLink, StandingsTable, RulesView],
+    imports: [RouterLink, StandingsTable, RulesView, LockeDeathsView],
     templateUrl: './locke.html',
     styleUrl: './locke.scss',
 })
@@ -32,6 +33,7 @@ export class LockePage {
     protected readonly tabs: readonly { id: LockeTab; label: string }[] = [
         { id: 'tournaments', label: 'Torneos' },
         { id: 'standings', label: 'Clasificación' },
+        { id: 'deaths', label: 'Muertes' },
         { id: 'rules', label: 'Reglas' },
         { id: 'players', label: 'Jugadores' },
     ];

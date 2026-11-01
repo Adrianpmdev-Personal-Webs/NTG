@@ -68,6 +68,9 @@
                     <app-pokemon-standings-table [rows]="standingRows()" extraLabel="Títulos" />
                 </div>
             }
+            @case ('deaths') {
+                <app-pokemon-locke-deaths [lockeId]="current.id" />
+            }
             @case ('rules') {
                 <app-pokemon-rules-view [rules]="current.rules" />
             }

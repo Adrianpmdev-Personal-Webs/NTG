@@ -13,6 +13,7 @@
 --   matches              A best-of-3 series, placed by stage, round and slot.
 --   match_games          The games of a series. The score of a series is counted from them.
 --   rewards              The rewards of a tournament and the player who picked each one.
+--   locke_deaths         The Pokémon each player lost in a randomlocke (only the name of the Pokémon).
 -- Nothing derived is stored: standings, scores and winners are computed from match_games.
 --
 -- How to use: run it in the Supabase SQL editor of an empty project, after core.sql.
@@ -178,6 +179,23 @@ create table pokemon.rewards (
     constraint rewards_chosen_by_key unique (chosen_by)
 );
 
+-- ─── locke_deaths ────────────────────────────────────────────────────────────────────────────────
+-- Not tied to locke_players: taking a player out of the roster keeps the Pokémon they lost.
+
+create table pokemon.locke_deaths (
+    id         uuid        not null default gen_random_uuid(),
+    locke_id   uuid        not null,
+    player_id  uuid        not null,
+    pokemon    varchar(30) not null,
+    created_at timestamptz not null default now(),
+    constraint locke_deaths_pkey primary key (id),
+    constraint locke_deaths_locke_fkey foreign key (locke_id) references pokemon.lockes (id) on delete cascade,
+    constraint locke_deaths_player_fkey foreign key (player_id) references pokemon.players (id)
+);
+
+create index locke_deaths_locke_idx on pokemon.locke_deaths (locke_id, created_at);
+create index locke_deaths_player_idx on pokemon.locke_deaths (player_id);
+
 -- ─── Row level security ──────────────────────────────────────────────────────────────────────────
 -- The backend connects as the table owner, which bypasses RLS. Enabling it without policies closes
 -- the tables to the Supabase Data API (anon and authenticated roles) in case the schema is ever exposed.
@@ -191,6 +209,7 @@ alter table pokemon.tournament_players enable row level security;
 alter table pokemon.matches            enable row level security;
 alter table pokemon.match_games        enable row level security;
 alter table pokemon.rewards            enable row level security;
+alter table pokemon.locke_deaths       enable row level security;
 
 -- ─── Storage: team pictures ──────────────────────────────────────────────────────────────────────
 -- Private bucket pokemon-teams. Only the backend reads and writes it, with the service role key (which

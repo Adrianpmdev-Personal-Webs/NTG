@@ -2,7 +2,8 @@
  * Dashboard
  *
  * Admin dashboard, with real data only: the memory and CPU of the backend, the space used in Supabase, the state each
- * module declares and the accounts with their last activity. It is read when the screen opens and with the refresh
+ * module declares, the accounts with their last activity, and the traffic and latest warnings and errors since the
+ * last start. It is read when the screen opens and with the refresh
  * button, never on its own, so a forgotten tab costs nothing; between reads only the uptime advances, in the browser.
  * A value the backend could not read shows as a dash.
  *

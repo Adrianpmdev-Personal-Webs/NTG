@@ -7,6 +7,9 @@ import com.adrianpmdev.core.features.users.api.dto.response.UserResponse;
 import com.adrianpmdev.core.features.users.application.service.UserService;
 import com.adrianpmdev.core.integration.supabase.auth.client.SupabaseAuthClient;
 import com.adrianpmdev.core.integration.supabase.dto.SupabaseAdminUsersResponse;
+import com.adrianpmdev.core.logging.RecentLogs;
+import com.adrianpmdev.core.logging.TrafficStats;
+import com.adrianpmdev.core.security.authentication.UserActivityTracker;
 import com.adrianpmdev.core.security.authorization.RoleUtils;
 import com.adrianpmdev.platform.status.ModuleStatus;
 import com.adrianpmdev.platform.status.ModuleStatusProvider;
@@ -41,6 +44,7 @@ import java.util.Set;
  *     <li><b>Modules:</b> whatever each {@link ModuleStatusProvider} answers from memory.</li>
  *     <li><b>Users:</b> the local accounts, one query for their last activity (see UserActivityTracker) and one call
  *     to the admin API of Supabase Auth for the last sign ins, which also tells who has never entered.</li>
+ *     <li><b>Traffic and logs:</b> counters and the latest warnings and errors in memory, since the last start.</li>
  * </ul>
  * The plan limits are settings because they belong to the plan, not to this code.
  *
@@ -71,6 +75,9 @@ public class DashboardService {
     private final SupabaseAuthClient authClient;
     private final JdbcTemplate jdbcTemplate;
     private final ObjectProvider<ModuleStatusProvider> statusProviders;
+    private final TrafficStats trafficStats;
+    private final RecentLogs recentLogs;
+    private final UserActivityTracker activityTracker;
     private final String commit;
     private final long memoryLimitBytes;
     private final long databaseLimitBytes;
@@ -84,6 +91,9 @@ public class DashboardService {
      * @param authClient         last sign ins
      * @param jdbcTemplate       plain JDBC access for the sizes
      * @param statusProviders    modules that declare a state
+     * @param trafficStats       counters of the requests
+     * @param recentLogs         latest warnings and errors
+     * @param activityTracker    users connected now
      * @param commit             commit deployed, which Render gives to the process
      * @param memoryLimitMb      memory of the Render plan
      * @param databaseLimitMb    database space of the Supabase plan
@@ -91,7 +101,8 @@ public class DashboardService {
      */
     public DashboardService(UserService userService, GameCatalogService gameCatalogService,
                             SupabaseAuthClient authClient, JdbcTemplate jdbcTemplate,
-                            ObjectProvider<ModuleStatusProvider> statusProviders,
+                            ObjectProvider<ModuleStatusProvider> statusProviders, TrafficStats trafficStats,
+                            RecentLogs recentLogs, UserActivityTracker activityTracker,
                             @Value("${RENDER_GIT_COMMIT:}") String commit,
                             @Value("${app.dashboard.memory-limit-mb:512}") long memoryLimitMb,
                             @Value("${app.dashboard.database-limit-mb:500}") long databaseLimitMb,
@@ -101,6 +112,9 @@ public class DashboardService {
         this.authClient = authClient;
         this.jdbcTemplate = jdbcTemplate;
         this.statusProviders = statusProviders;
+        this.trafficStats = trafficStats;
+        this.recentLogs = recentLogs;
+        this.activityTracker = activityTracker;
         this.commit = commit;
         this.memoryLimitBytes = memoryLimitMb * MEGABYTE;
         this.databaseLimitBytes = databaseLimitMb * MEGABYTE;
@@ -113,7 +127,9 @@ public class DashboardService {
      * @return dashboard data
      */
     public DashboardResponse get() {
-        return new DashboardResponse(server(), storage(), modules(), users());
+        return new DashboardResponse(server(), storage(), modules(), users(),
+                new DashboardResponse.Traffic(trafficStats.snapshot(), activityTracker.connectedNow()),
+                recentLogs.entries());
     }
 
     /* ─── Server ─── */

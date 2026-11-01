@@ -11,7 +11,7 @@ import java.time.Duration;
 import java.util.UUID;
 
 /**
- * Remembers when each user was last active, for the admin dashboard. Sessions renew themselves, so the last sign in of
+ * Remembers when each user was last active and who is connected now, for the admin dashboard. Sessions renew themselves, so the last sign in of
  * Supabase says little about someone who stays signed in; this column says when they really used the site.
  * <p>
  * The token filter calls it on every authenticated request, so at most one write per user per
@@ -29,6 +29,7 @@ public class UserActivityTracker {
 
     static final long WRITE_EVERY_MINUTES = 60;
 
+    private static final Duration CONNECTED_FOR = Duration.ofMinutes(5);
     private static final long MAX_USERS = 1_000;
     private static final String UPDATE = "update core.\"user\" set last_seen_at = now() where id = ?";
 
@@ -36,6 +37,11 @@ public class UserActivityTracker {
 
     private final Cache<UUID, Boolean> recentlyWritten = Caffeine.newBuilder()
             .expireAfterWrite(Duration.ofMinutes(WRITE_EVERY_MINUTES))
+            .maximumSize(MAX_USERS)
+            .build();
+
+    private final Cache<UUID, Boolean> connected = Caffeine.newBuilder()
+            .expireAfterWrite(CONNECTED_FOR)
             .maximumSize(MAX_USERS)
             .build();
 
@@ -54,6 +60,8 @@ public class UserActivityTracker {
      * @param userId user id
      */
     public void touch(UUID userId) {
+        connected.put(userId, Boolean.TRUE);
+
         if (recentlyWritten.asMap().putIfAbsent(userId, Boolean.TRUE) != null) {
             return;
         }
@@ -63,5 +71,16 @@ public class UserActivityTracker {
         } catch (RuntimeException exception) {
             LOG.warn("The last activity of a user could not be saved: {}", exception.getMessage());
         }
+    }
+
+    /**
+     * How many users made a request in the last few minutes.
+     *
+     * @return users connected now
+     */
+    public long connectedNow() {
+        connected.cleanUp();
+
+        return connected.estimatedSize();
     }
 }

@@ -34,6 +34,9 @@ const PATHS = {
     clock: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2',
     alert: 'M12 3l10 18H2zM12 10v5M12 18h.01',
     download: 'M12 3v12M7 11l5 5 5-5M4 20h16',
+    activity: 'M3 12h4l3 8 4-16 3 8h4',
+    lock: 'M6 11h12v10H6zM8 11V7a4 4 0 0 1 8 0v4',
+    ban: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM5.6 5.6l12.8 12.8',
     refresh: 'M20 11a8 8 0 0 0-14-4.5L4 9M4 4v5h5M4 13a8 8 0 0 0 14 4.5L20 15M20 20v-5h-5',
 } as const;
 

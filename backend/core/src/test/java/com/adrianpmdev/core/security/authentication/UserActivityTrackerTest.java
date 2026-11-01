@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.sql.SQLException;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -34,6 +35,17 @@ class UserActivityTrackerTest {
         tracker.touch(user);
 
         verify(jdbcTemplate, times(1)).update(anyString(), any(Object.class));
+    }
+
+    @Test
+    void eachUserCountsOnceAsConnected() {
+        UUID user = UUID.randomUUID();
+
+        tracker.touch(user);
+        tracker.touch(user);
+        tracker.touch(UUID.randomUUID());
+
+        assertThat(tracker.connectedNow()).isEqualTo(2);
     }
 
     @Test

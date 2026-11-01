@@ -296,6 +296,51 @@
     color: var(--text-secondary);
 }
 
+.log-list {
+    display: flex;
+    flex-direction: column;
+    max-height: 320px;
+    margin: 0;
+    padding: 8px 0;
+    overflow-y: auto;
+    list-style: none;
+    font-size: 0.72rem;
+}
+
+.log-entry {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 12px;
+    padding: 6px 18px;
+    border-left: 2px solid var(--neon-yellow);
+    color: var(--text-secondary);
+
+    &.log-error {
+        border-left-color: var(--neon-red);
+
+        .log-level {
+            color: var(--neon-red);
+        }
+    }
+}
+
+.log-time,
+.log-source,
+.log-request {
+    color: var(--text-dim);
+}
+
+.log-level {
+    color: var(--neon-yellow);
+}
+
+.log-message {
+    flex: 1 1 320px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.logs,
 .accounts {
     padding: 0;
     overflow: hidden;

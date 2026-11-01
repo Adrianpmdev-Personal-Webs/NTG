@@ -73,11 +73,33 @@ export interface DashboardUsers {
     accounts: DashboardAccount[];
 }
 
+export interface DashboardTraffic {
+    counters: {
+        requests: number;
+        clientErrors: number;
+        serverErrors: number;
+        averageMillis: number;
+        failedLogins: number;
+        rateLimited: number;
+    };
+    connected: number;
+}
+
+export interface DashboardLog {
+    at: string;
+    level: string;
+    source: string;
+    message: string;
+    requestId: string | null;
+}
+
 export interface DashboardData {
     server: DashboardServer;
     storage: DashboardStorage;
     modules: DashboardModule[];
     users: DashboardUsers;
+    traffic: DashboardTraffic;
+    logs: DashboardLog[];
 }
 
 @Injectable({ providedIn: 'root' })

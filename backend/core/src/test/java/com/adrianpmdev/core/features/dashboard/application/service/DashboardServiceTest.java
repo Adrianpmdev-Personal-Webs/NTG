@@ -7,6 +7,9 @@ import com.adrianpmdev.core.features.users.api.dto.response.UserResponse;
 import com.adrianpmdev.core.features.users.application.service.UserService;
 import com.adrianpmdev.core.integration.supabase.auth.client.SupabaseAuthClient;
 import com.adrianpmdev.core.integration.supabase.dto.SupabaseAdminUsersResponse;
+import com.adrianpmdev.core.logging.RecentLogs;
+import com.adrianpmdev.core.logging.TrafficStats;
+import com.adrianpmdev.core.security.authentication.UserActivityTracker;
 import com.adrianpmdev.platform.status.ModuleStatus;
 import com.adrianpmdev.platform.status.ModuleStatusProvider;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,7 +56,8 @@ class DashboardServiceTest {
     private final ObjectProvider<ModuleStatusProvider> providers = mock(ObjectProvider.class);
 
     private final DashboardService service = new DashboardService(userService, catalog, authClient, jdbcTemplate,
-            providers, "abcdef1234567", 512, 500, 1024);
+            providers, new TrafficStats(), new RecentLogs(), new UserActivityTracker(jdbcTemplate), "abcdef1234567", 512,
+            500, 1024);
 
     @BeforeEach
     void setUp() {

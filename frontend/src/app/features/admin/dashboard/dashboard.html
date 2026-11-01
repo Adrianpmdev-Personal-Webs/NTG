@@ -143,7 +143,68 @@
                     }
                 </div>
             </section>
+
+            <section class="panel terminal-card">
+                <div class="card-header">
+                    <h2 class="card-title"><app-nav-icon class="title-icon" name="activity" /> TRÁFICO</h2>
+                    <span class="card-badge">DESDE EL ARRANQUE</span>
+                </div>
+                <dl class="status-list">
+                    <div class="status-line">
+                        <dt><app-nav-icon class="icon" name="user" /> Conectados ahora</dt>
+                        <dd>{{ dashboard.traffic.connected }}</dd>
+                    </div>
+                    <div class="status-line">
+                        <dt><app-nav-icon class="icon" name="activity" /> Peticiones</dt>
+                        <dd>{{ dashboard.traffic.counters.requests }}</dd>
+                    </div>
+                    <div class="status-line">
+                        <dt><app-nav-icon class="icon" name="clock" /> Tiempo medio</dt>
+                        <dd>{{ dashboard.traffic.counters.averageMillis }} ms</dd>
+                    </div>
+                    <div class="status-line" [class.error]="dashboard.traffic.counters.serverErrors > 0">
+                        <dt><app-nav-icon class="icon" name="alert" /> Errores del servidor (5xx)</dt>
+                        <dd>{{ dashboard.traffic.counters.serverErrors }}</dd>
+                    </div>
+                    <div class="status-line">
+                        <dt><app-nav-icon class="icon" name="alert" /> Peticiones rechazadas (4xx)</dt>
+                        <dd>{{ dashboard.traffic.counters.clientErrors }}</dd>
+                    </div>
+                    <div class="status-line" [class.warning]="dashboard.traffic.counters.failedLogins > 0">
+                        <dt><app-nav-icon class="icon" name="lock" /> Inicios de sesión fallidos</dt>
+                        <dd>{{ dashboard.traffic.counters.failedLogins }}</dd>
+                    </div>
+                    <div class="status-line" [class.warning]="dashboard.traffic.counters.rateLimited > 0">
+                        <dt><app-nav-icon class="icon" name="ban" /> Bloqueos por exceso (429)</dt>
+                        <dd>{{ dashboard.traffic.counters.rateLimited }}</dd>
+                    </div>
+                </dl>
+            </section>
         </div>
+
+        <section class="terminal-card logs">
+            <div class="card-header">
+                <h2 class="card-title"><app-nav-icon class="title-icon" name="alert" /> ERRORES RECIENTES</h2>
+                <span class="card-badge">DESDE EL ARRANQUE</span>
+            </div>
+            @if (dashboard.logs.length > 0) {
+                <ul class="log-list">
+                    @for (log of dashboard.logs; track $index) {
+                        <li class="log-entry" [class.log-error]="log.level === 'ERROR'">
+                            <span class="log-time">{{ log.at | date: 'dd/MM HH:mm:ss' }}</span>
+                            <span class="log-level">{{ log.level }}</span>
+                            <span class="log-source">{{ log.source }}</span>
+                            <span class="log-message">{{ log.message }}</span>
+                            @if (log.requestId) {
+                                <span class="log-request">{{ log.requestId }}</span>
+                            }
+                        </li>
+                    }
+                </ul>
+            } @else {
+                <p class="panel-empty">Sin avisos ni errores desde el último arranque</p>
+            }
+        </section>
 
         <section class="terminal-card accounts">
             <div class="card-header">

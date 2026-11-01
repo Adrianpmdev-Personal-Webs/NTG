@@ -1,5 +1,7 @@
 package com.adrianpmdev.core.features.dashboard.api.dto.response;
 
+import com.adrianpmdev.core.logging.RecentLogs;
+import com.adrianpmdev.core.logging.TrafficStats;
 import com.adrianpmdev.platform.status.ModuleStatus;
 
 import java.time.Instant;
@@ -13,6 +15,8 @@ import java.util.List;
  * @param storage space used in Supabase
  * @param modules state of the modules that declare one
  * @param users   the accounts
+ * @param traffic requests since this backend started
+ * @param logs    latest warnings and errors, newest first
  *
  * @author adrianpmdev
  */
@@ -20,8 +24,18 @@ public record DashboardResponse(
     Server server,
     Storage storage,
     List<ModuleStatus> modules,
-    Users users
+    Users users,
+    Traffic traffic,
+    List<RecentLogs.Entry> logs
 ) {
+
+    /**
+     * Requests since this backend started.
+     *
+     * @param counters what the requests answered
+     * @param connected users that made a request in the last few minutes
+     */
+    public record Traffic(TrafficStats.Snapshot counters, long connected) {}
 
     /**
      * The backend process.

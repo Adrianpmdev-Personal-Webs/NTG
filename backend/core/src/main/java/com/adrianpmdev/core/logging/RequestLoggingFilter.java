@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 
 /**
  * Assigns a request id (header {@code X-Request-Id}, put in the log context as {@code requestId})
- * and writes one readable access line per request. 
+ * and writes one readable access line per request, which also counts in {@link TrafficStats}.
  *
  * @author adrianpmdev
  */
@@ -33,6 +33,17 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
     private static final Logger LOG = LoggerFactory.getLogger("ACCESS");
     private static final Pattern VALID_REQUEST_ID = Pattern.compile("^[A-Za-z0-9-]{8,64}$");
     private static final String KEEP_ALIVE_PATH = "/keep-alive";
+
+    private final TrafficStats trafficStats;
+
+    /**
+     * Builds the filter.
+     *
+     * @param trafficStats counters of the requests
+     */
+    public RequestLoggingFilter(TrafficStats trafficStats) {
+        this.trafficStats = trafficStats;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response,
@@ -50,8 +61,10 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } finally {
             if (!KEEP_ALIVE_PATH.equals(request.getRequestURI())) {
-                LOG.info("{} {} -> {} ({} ms)", request.getMethod(), request.getRequestURI(),
-                        response.getStatus(), (System.nanoTime() - start) / 1_000_000);
+                long millis = (System.nanoTime() - start) / 1_000_000;
+
+                LOG.info("{} {} -> {} ({} ms)", request.getMethod(), request.getRequestURI(), response.getStatus(), millis);
+                trafficStats.record(request.getMethod(), request.getRequestURI(), response.getStatus(), millis);
             }
 
             MDC.remove(REQUEST_ID_KEY);

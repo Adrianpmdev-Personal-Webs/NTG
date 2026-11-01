@@ -3,7 +3,7 @@
  *
  * Talent calculator of WoW Forever: pick a class, set the level and spend points in its three trees, seeing the level
  * the spent points need. The talents of a class are downloaded when it is picked. The build lives in the URL so it can
- * be shared.
+ * be shared, and the player can keep builds of each class in slots of this browser.
  *
  * @author @adrianpmdev
  */
@@ -28,6 +28,8 @@ import { ClassPicker } from '../../ui/class-picker/class-picker';
 import { WowButton } from '../../ui/wow-button/wow-button';
 import { WowPage } from '../../ui/wow-page/wow-page';
 import { creditLine, hideBrokenIcon } from '../../wow-forever-config';
+import { SavedBuilds } from '../saved-builds/saved-builds';
+import { SavedBuild } from '../saved-builds-storage';
 import { TalentGrid } from '../talent-grid/talent-grid';
 import { TalentTooltip } from '../talent-tooltip/talent-tooltip';
 import { cssUrl, gameImages } from '../../game-data/game-images';
@@ -46,7 +48,7 @@ import { ClassTalents, Talent, TalentHover, TalentTree } from '../talents-models
 
 @Component({
     selector: 'app-talent-calculator',
-    imports: [ClassPicker, TalentGrid, TalentTooltip, WowButton, WowPage],
+    imports: [ClassPicker, SavedBuilds, TalentGrid, TalentTooltip, WowButton, WowPage],
     templateUrl: './talent-calculator.html',
     styleUrl: './talent-calculator.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -84,6 +86,9 @@ export class TalentCalculator implements OnInit {
     protected readonly pointsLeft = computed(() => this.pointsTotal() - this.pointsSpent());
     protected readonly treePoints = computed(() => this.trees().map((tree) => pointsInTree(tree, this.ranks())));
     protected readonly minLevel = computed(() => minLevelFor(this.levels(), this.pointsSpent()));
+    protected readonly currentBuild = computed(() =>
+        this.pointsSpent() > 0 ? encodeBuild(this.trees(), this.ranks()) : null,
+    );
 
     protected readonly hovered = computed(() => {
         const hover = this.hover();
@@ -182,6 +187,12 @@ export class TalentCalculator implements OnInit {
         this.syncUrl();
     }
 
+    protected loadSavedBuild(saved: SavedBuild): void {
+        this.level.set(Math.min(this.maxLevel(), Math.max(this.firstLevel(), saved.level)));
+        this.applyBuild(saved.build);
+        this.syncUrl();
+    }
+
     protected share(): void {
         const url = `${window.location.origin}${this.router.url}`;
 
@@ -247,11 +258,9 @@ export class TalentCalculator implements OnInit {
             return;
         }
 
-        const build = this.pointsSpent() > 0 ? encodeBuild(this.trees(), this.ranks()) : null;
-
         this.router.navigate([], {
             relativeTo: this.route,
-            queryParams: { class: gameClass.slug, level: this.level(), build },
+            queryParams: { class: gameClass.slug, level: this.level(), build: this.currentBuild() },
             replaceUrl: true,
         });
     }

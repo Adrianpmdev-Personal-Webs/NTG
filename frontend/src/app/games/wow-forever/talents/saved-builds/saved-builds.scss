@@ -1,0 +1,134 @@
+@use 'mixins' as *;
+@use '../../styles/wow-forever' as wow;
+
+:host {
+    display: block;
+}
+
+.saved-builds {
+    @include wow.panel;
+    margin-top: 12px;
+    padding: 10px 14px;
+}
+
+.title {
+    @include wow.section-title;
+    margin-bottom: 8px;
+}
+
+.note {
+    color: wow.$muted;
+    font-size: 0.75rem;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.slots {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.slot {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    padding: 8px;
+    border: 1px solid wow.$line;
+
+    &.current {
+        border-color: wow.$gold;
+    }
+}
+
+.name {
+    width: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 3px 6px;
+    border: 1px solid wow.$icon-border;
+    background: #0a0a0a;
+    color: wow.$text;
+    font: inherit;
+    font-size: 0.9rem;
+
+    &.empty {
+        border-color: transparent;
+        background: none;
+        color: wow.$dim;
+    }
+}
+
+.details {
+    margin: 0;
+    padding: 0 6px;
+    color: wow.$muted;
+    font-size: 0.8rem;
+
+    &.invalid {
+        color: wow.$red;
+    }
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    margin-top: auto;
+    padding-top: 4px;
+}
+
+.question {
+    flex-basis: 100%;
+    padding: 0 6px;
+    color: wow.$bright;
+    font-size: 0.8rem;
+}
+
+.action {
+    flex: 1;
+    padding: 3px 4px;
+    border: 1px solid wow.$icon-border;
+    background: #0a0a0a;
+    color: wow.$gold;
+    font: inherit;
+    font-size: 0.75rem;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+        border-color: wow.$gold;
+        color: wow.$bright;
+    }
+
+    &:disabled {
+        color: wow.$dim;
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+}
+
+@include tablet {
+    .slots {
+        grid-template-columns: none;
+        grid-auto-flow: column;
+        grid-auto-columns: 190px;
+        padding-bottom: 6px;
+        overflow-x: auto;
+        scroll-snap-type: x proximity;
+        scrollbar-color: wow.$icon-border transparent;
+        scrollbar-width: thin;
+    }
+
+    .slot {
+        scroll-snap-align: start;
+    }
+
+    .action {
+        padding: 6px 4px;
+    }
+}

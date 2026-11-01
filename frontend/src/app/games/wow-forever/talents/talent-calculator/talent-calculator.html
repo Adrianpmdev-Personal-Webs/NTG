@@ -59,6 +59,16 @@
         } @else if (trees().length === 0) {
             <p class="state">Todavía no hay talentos cargados para esta clase.</p>
         } @else {
+            @if (selectedClass(); as gameClass) {
+                <app-saved-builds
+                    [classSlug]="gameClass.slug"
+                    [trees]="trees()"
+                    [build]="currentBuild()"
+                    [level]="level()"
+                    (loadBuild)="loadSavedBuild($event)"
+                />
+            }
+
             <div class="tree-tabs" role="tablist">
                 @for (tree of trees(); track tree.id; let index = $index) {
                     <button

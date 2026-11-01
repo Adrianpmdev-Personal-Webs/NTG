@@ -1,0 +1,66 @@
+<section class="saved-builds" aria-labelledby="saved-builds-title">
+    <h2 id="saved-builds-title" class="title">Builds guardadas <span class="note">en este navegador</span></h2>
+
+    <ul class="slots">
+        @for (row of rows(); track row.index) {
+            <li class="slot" [class.current]="row.current">
+                @if (row.slot; as slot) {
+                    <input
+                        #nameField
+                        class="name"
+                        type="text"
+                        [attr.aria-label]="'Nombre de la build ' + (row.index + 1)"
+                        [maxLength]="nameMaxLength"
+                        [value]="slot.name"
+                        (change)="rename(row.index, nameField)"
+                    />
+
+                    @if (row.distribution; as distribution) {
+                        <p class="details">{{ distribution }} · Nivel {{ slot.level }}</p>
+                    } @else {
+                        <p class="details invalid">No válida tras un parche</p>
+                    }
+                } @else {
+                    <p class="name empty">Slot {{ row.index + 1 }}</p>
+                    <p class="details">Vacío</p>
+                }
+
+                @if (pending()?.index === row.index) {
+                    <div class="actions">
+                        <span class="question">{{
+                            pending()?.action === 'delete' ? '¿Borrar?' : '¿Sobrescribir?'
+                        }}</span>
+                        <button type="button" class="action" (click)="confirmPending()">Sí</button>
+                        <button type="button" class="action" (click)="pending.set(null)">No</button>
+                    </div>
+                } @else if (row.slot; as slot) {
+                    <div class="actions">
+                        <button
+                            type="button"
+                            class="action"
+                            [disabled]="!row.distribution"
+                            (click)="loadBuild.emit(slot)"
+                        >
+                            Cargar
+                        </button>
+                        <button
+                            type="button"
+                            class="action"
+                            [disabled]="!build()"
+                            (click)="requestOverwrite(row.index)"
+                        >
+                            Guardar
+                        </button>
+                        <button type="button" class="action" (click)="requestDelete(row.index)">Borrar</button>
+                    </div>
+                } @else {
+                    <div class="actions">
+                        <button type="button" class="action" [disabled]="!build()" (click)="save(row.index)">
+                            Guardar
+                        </button>
+                    </div>
+                }
+            </li>
+        }
+    </ul>
+</section>

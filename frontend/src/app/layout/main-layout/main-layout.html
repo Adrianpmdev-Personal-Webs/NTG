@@ -204,8 +204,8 @@
     <main class="main-content">
         <app-header (menuToggle)="toggleSidebar()" />
 
-        <div class="content-area">
-            <router-outlet />
+        <div class="content-area" [class.content-area-full]="fullPage()">
+            <router-outlet (activate)="fullPage.set(!!$event.fullPage)" />
         </div>
 
         <app-footer />

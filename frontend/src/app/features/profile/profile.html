@@ -103,7 +103,12 @@
                 <article class="game terminal-card">
                     <header
                         class="game-header"
-                        [style.background-image]="game.coverUrl ? 'url(' + game.coverUrl + ')' : null"
+                        [style.background-image]="
+                            coverImage(
+                                game.coverUrl,
+                                'linear-gradient(to top, rgba(5, 15, 6, 0.95), rgba(5, 15, 6, 0.1))'
+                            )
+                        "
                     >
                         <div class="game-header-text">
                             <h2 class="game-title">{{ game.name }}</h2>
@@ -181,7 +186,17 @@
             } @else {
                 <div class="overview terminal-card">
                     @for (game of current.games; track game.id) {
-                        <button class="overview-row" type="button" (click)="selected.set(game.id)">
+                        <button
+                            class="overview-row"
+                            type="button"
+                            [style.background-image]="
+                                coverImage(
+                                    game.coverUrl,
+                                    'linear-gradient(to right, rgba(5, 15, 6, 0.96) 35%, rgba(5, 15, 6, 0.4))'
+                                )
+                            "
+                            (click)="selected.set(game.id)"
+                        >
                             @if (game.iconUrl) {
                                 <img class="overview-icon" [src]="game.iconUrl" alt="" (error)="hideIcon($event)" />
                             } @else {
@@ -222,16 +237,6 @@
                                     [ngTemplateOutlet]="avatar"
                                     [ngTemplateOutletContext]="{ size: 'small' }"
                                 />
-                                <label class="btn-neon upload" [class.disabled]="busy()">
-                                    SUBIR IMAGEN
-                                    <input
-                                        #avatarFile
-                                        type="file"
-                                        [accept]="accepted"
-                                        [disabled]="busy()"
-                                        (change)="uploadAvatar(avatarFile)"
-                                    />
-                                </label>
                                 @if (current.avatarUrl) {
                                     <button
                                         class="btn-neon btn-neon-danger"
@@ -242,6 +247,47 @@
                                         QUITAR
                                     </button>
                                 }
+                            </div>
+                            <p class="edit-text">Elige una de las dos opciones:</p>
+                            <div class="avatar-option">
+                                <span class="option-title">1. Subir una imagen</span>
+                                <label class="btn-neon upload" [class.disabled]="busy()">
+                                    SUBIR IMAGEN
+                                    <input
+                                        #avatarFile
+                                        type="file"
+                                        [accept]="accepted"
+                                        [disabled]="busy()"
+                                        (change)="uploadAvatar(avatarFile)"
+                                    />
+                                </label>
+                                <span class="field-hint">PNG o JPEG de hasta 4 MB. Se comprime automáticamente.</span>
+                            </div>
+                            <div class="avatar-option">
+                                <label class="option-title" for="profile-avatar-link"
+                                    >2. O pegar el link de una imagen</label
+                                >
+                                <div class="edit-row">
+                                    <input
+                                        #avatarLink
+                                        id="profile-avatar-link"
+                                        class="neon-input"
+                                        type="url"
+                                        placeholder="https://..."
+                                        [maxLength]="avatarLinkMaxLength"
+                                        [value]="current.avatarUrl ?? ''"
+                                        (keydown.enter)="saveAvatarLink(avatarLink)"
+                                    />
+                                    <button
+                                        class="btn-neon"
+                                        type="button"
+                                        [disabled]="busy()"
+                                        (click)="saveAvatarLink(avatarLink)"
+                                    >
+                                        GUARDAR LINK
+                                    </button>
+                                </div>
+                                <span class="field-hint">Un link no se comprime: la imagen sigue en esa web.</span>
                             </div>
                         </div>
 

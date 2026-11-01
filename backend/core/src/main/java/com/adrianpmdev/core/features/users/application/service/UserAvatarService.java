@@ -27,7 +27,8 @@ import java.util.UUID;
 /**
  * Avatars uploaded by their owner. The server compresses them to a small picture and keeps them in the public bucket
  * as {@code avatars/<user id>-<random>.<ext>}, so a new avatar gets a new URL and browsers can cache each one for a
- * year. Only the owner's previous upload is ever deleted: an avatar typed as a URL points somewhere else.
+ * year. An avatar can also be a link, which is kept as it is and never compressed because the picture stays on that
+ * site. Only the owner's previous upload is ever deleted.
  *
  * @author adrianpmdev
  */
@@ -87,6 +88,19 @@ public class UserAvatarService {
         AUDIT.info("actor={} action=AVATAR_DELETED", id);
 
         return UserMapper.toResponse(user);
+    }
+
+    /**
+     * Deletes the upload of a user once their avatar is something else, such as a link.
+     *
+     * @param id       user id
+     * @param previous avatar they had, or null
+     * @param current  avatar they have now, or null
+     */
+    public void deleteReplacedUpload(UUID id, String previous, String current) {
+        if (previous != null && !previous.equals(current)) {
+            deleteOwnUpload(id, previous);
+        }
     }
 
     private User find(UUID id) {

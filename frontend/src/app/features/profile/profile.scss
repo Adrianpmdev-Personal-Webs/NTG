@@ -1,6 +1,13 @@
 @use 'mixins' as *;
 
+:host {
+    display: block;
+    height: 100%;
+    background: var(--bg-panel);
+}
+
 .state {
+    padding: 28px;
     color: var(--text-secondary);
 
     &.error {
@@ -10,27 +17,27 @@
 
 .profile {
     display: grid;
-    grid-template-columns: 300px minmax(0, 1fr);
-    align-items: start;
-    gap: 20px;
+    grid-template-columns: clamp(260px, 20vw, 360px) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    height: 100%;
 }
 
 .account {
-    position: sticky;
-    top: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
     min-width: 0;
     padding: 24px 20px;
+    border-width: 0 1px 0 0;
+    overflow-y: auto;
     text-align: center;
 }
 
 .avatar {
     flex: none;
-    width: 140px;
-    height: 140px;
+    width: clamp(110px, 20vh, 220px);
+    height: clamp(110px, 20vh, 220px);
     border: 1px solid var(--border-bright);
     border-radius: 8px;
     object-fit: cover;
@@ -42,7 +49,7 @@
     background: rgba(0, 255, 65, 0.06);
     color: var(--neon-green);
     font-family: var(--font-display);
-    font-size: 3.5rem;
+    font-size: clamp(3rem, 8vh, 5.5rem);
 }
 
 .avatar-small {
@@ -54,7 +61,7 @@
 .username {
     max-width: 100%;
     font-family: var(--font-display);
-    font-size: 1.4rem;
+    font-size: clamp(1.3rem, 3vh, 2rem);
     letter-spacing: 2px;
     overflow-wrap: anywhere;
 }
@@ -67,7 +74,9 @@
 
 .account-data {
     display: flex;
+    flex: 1;
     flex-direction: column;
+    justify-content: space-evenly;
     gap: 10px;
     width: 100%;
     margin: 8px 0;
@@ -76,33 +85,35 @@
     text-align: left;
 
     dt {
-        color: var(--text-dim);
-        font-size: 0.72rem;
+        color: var(--text-secondary);
+        font-size: 0.75rem;
     }
 
     dd {
         margin: 2px 0 0;
         color: var(--text-primary);
-        font-size: 0.88rem;
+        font-size: clamp(0.88rem, 1.8vh, 1.1rem);
         overflow-wrap: anywhere;
     }
 }
 
 .edit-button {
+    flex: none;
     width: 100%;
 }
 
 .content {
     display: flex;
     flex-direction: column;
-    gap: 14px;
     min-width: 0;
+    min-height: 0;
 }
 
 .tabs {
     display: flex;
+    flex: none;
     gap: 4px;
-    padding-bottom: 6px;
+    padding: 10px 12px 6px;
     border-bottom: 1px solid var(--border-color);
     overflow-x: auto;
     scrollbar-color: var(--border-bright) transparent;
@@ -142,28 +153,36 @@
 
 .tab-select {
     display: none;
+    flex: none;
     flex-direction: column;
     gap: 4px;
+    padding: 12px;
     color: var(--text-secondary);
     font-size: 0.75rem;
 }
 
 .overview {
     display: flex;
+    flex: 1;
     flex-direction: column;
     min-width: 0;
+    min-height: 0;
+    border-width: 0;
+    overflow-y: auto;
 }
 
 .overview-row {
     display: grid;
-    grid-template-columns: 36px minmax(120px, 220px) minmax(0, 1fr) 16px;
+    flex: 1 0 84px;
+    grid-template-columns: auto minmax(120px, 28%) minmax(0, 1fr) 20px;
+    align-content: center;
     align-items: center;
-    gap: 14px;
+    gap: clamp(12px, 2vw, 32px);
     width: 100%;
-    padding: 16px 18px;
+    padding: 14px clamp(16px, 2vw, 36px);
     border: 0;
     border-bottom: 1px solid var(--border-color);
-    background: none;
+    background: none center / cover no-repeat;
     color: var(--text-primary);
     font: inherit;
     text-align: left;
@@ -174,17 +193,19 @@
     }
 
     &:hover {
-        background: var(--bg-card-hover);
+        background-color: var(--bg-card-hover);
+        filter: brightness(1.15);
     }
 }
 
 .overview-icon {
-    width: 36px;
-    height: 36px;
+    width: clamp(36px, 7vh, 72px);
+    height: clamp(36px, 7vh, 72px);
     object-fit: contain;
 }
 
 .overview-name {
+    font-size: clamp(1rem, 2.4vh, 1.6rem);
     font-weight: 700;
     letter-spacing: 1px;
     overflow-wrap: anywhere;
@@ -192,42 +213,49 @@
 
 .overview-summary {
     color: var(--text-primary);
-    font-size: 0.9rem;
+    font-size: clamp(0.9rem, 2vh, 1.25rem);
     overflow-wrap: anywhere;
 }
 
 .overview-empty {
-    color: var(--text-dim);
+    color: var(--text-secondary);
 }
 
 .overview-arrow {
     color: var(--text-secondary);
-    font-size: 1.3rem;
+    font-size: 1.5rem;
 }
 
 .empty {
+    display: grid;
+    flex: 1;
+    place-items: center;
     padding: 18px;
     color: var(--text-secondary);
-    font-size: 0.88rem;
+    font-size: 1rem;
+    text-align: center;
 }
 
 .game {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
     min-width: 0;
-    overflow: hidden;
+    min-height: 0;
+    border-width: 0;
+    overflow-y: auto;
 }
 
 .game-header {
     display: flex;
+    flex: 0 0 clamp(130px, 24vh, 280px);
     flex-wrap: wrap;
     align-items: flex-end;
     justify-content: space-between;
     gap: 12px;
-    min-height: 150px;
     padding: 18px;
-    background-color: var(--bg-panel);
-    background-position: center;
-    background-size: cover;
-    box-shadow: inset 0 -120px 80px -40px rgba(0, 0, 0, 0.92);
+    background: var(--bg-card) center / cover no-repeat;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .game-header-text {
@@ -237,7 +265,7 @@
 .game-title {
     color: var(--neon-green);
     font-family: var(--font-display);
-    font-size: 1.5rem;
+    font-size: clamp(1.4rem, 4vh, 2.4rem);
     letter-spacing: 2px;
     overflow-wrap: anywhere;
 }
@@ -245,16 +273,18 @@
 .game-summary {
     margin-top: 4px;
     color: var(--text-primary);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     overflow-wrap: anywhere;
 }
 
 .game-open {
+    background: rgba(0, 0, 0, 0.6);
     text-decoration: none;
 }
 
 .game-body {
     display: flex;
+    flex: 1 0 auto;
     flex-direction: column;
     gap: 22px;
     padding: 18px;
@@ -262,12 +292,14 @@
 
 .section {
     display: flex;
+    flex: 1 0 auto;
     flex-direction: column;
     gap: 12px;
     min-width: 0;
 }
 
 .section-title {
+    flex: none;
     color: var(--text-secondary);
     font-size: 0.8rem;
     letter-spacing: 2px;
@@ -275,36 +307,43 @@
 }
 
 .stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    display: flex;
+    flex: 1 0 auto;
+    flex-wrap: wrap;
     gap: 10px;
     margin: 0;
 }
 
 .stat {
     display: flex;
+    flex: 1 1 150px;
     flex-direction: column;
-    gap: 4px;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     min-width: 0;
+    min-height: 96px;
     padding: 14px;
     border: 1px solid var(--border-color);
+    text-align: center;
 }
 
 .stat-value {
     margin: 0;
     color: var(--neon-green);
     font-family: var(--font-display);
-    font-size: 1.6rem;
+    font-size: clamp(1.5rem, 6vh, 3.8rem);
     overflow-wrap: anywhere;
 }
 
 .stat-label {
     color: var(--text-secondary);
-    font-size: 0.75rem;
+    font-size: clamp(0.75rem, 1.7vh, 1rem);
 }
 
 .bars {
     display: flex;
+    flex: none;
     flex-direction: column;
     gap: 10px;
     min-width: 0;
@@ -319,13 +358,13 @@
     align-items: center;
     gap: 6px;
     margin-bottom: 4px;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
 }
 
 .bar-icon {
     flex: none;
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     object-fit: cover;
 }
 
@@ -342,7 +381,7 @@
 }
 
 .bar-track {
-    height: 6px;
+    height: 8px;
     border: 1px solid var(--border-color);
     background: rgba(0, 255, 65, 0.04);
 }
@@ -355,18 +394,25 @@
 }
 
 .cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    display: flex;
+    flex: 1 0 auto;
+    flex-wrap: wrap;
     gap: 12px;
 }
 
 .card {
     display: flex;
+    flex: 1 1 min(300px, 100%);
     flex-direction: column;
-    gap: 12px;
+    gap: 14px;
     min-width: 0;
-    padding: 14px;
+    padding: 16px;
     border: 1px solid var(--border-color);
+
+    .bars {
+        flex: 1;
+        justify-content: space-evenly;
+    }
 }
 
 .card-header {
@@ -377,8 +423,8 @@
 
 .card-icon {
     flex: none;
-    width: 44px;
-    height: 44px;
+    width: clamp(44px, 8vh, 72px);
+    height: clamp(44px, 8vh, 72px);
     border: 1px solid var(--border-bright);
     object-fit: cover;
 }
@@ -389,13 +435,13 @@
 
 .card-name {
     color: var(--text-primary);
-    font-size: 1rem;
+    font-size: clamp(1rem, 2.4vh, 1.5rem);
     overflow-wrap: anywhere;
 }
 
 .card-subtitle {
     color: var(--text-secondary);
-    font-size: 0.8rem;
+    font-size: 0.85rem;
 }
 
 .edit-avatar {
@@ -405,7 +451,21 @@
     gap: 10px;
 }
 
+.avatar-option {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+}
+
+.option-title {
+    color: var(--text-primary);
+    font-size: 0.85rem;
+}
+
 .upload {
+    align-self: flex-start;
     cursor: pointer;
 
     &.disabled {
@@ -429,28 +489,67 @@
 }
 
 .edit-text {
-    margin-bottom: 6px;
+    margin-bottom: 2px;
     color: var(--text-secondary);
     font-size: 0.85rem;
     overflow-wrap: anywhere;
 }
 
 @include tablet {
+    :host {
+        height: auto;
+        min-height: 100%;
+        display: flex;
+    }
+
     .profile {
+        flex: 1;
         grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto minmax(0, 1fr);
+        height: auto;
+        min-width: 0;
     }
 
     .account {
-        position: static;
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: center;
+        gap: 4px 16px;
+        padding: 16px;
+        border-width: 0 0 1px;
+        overflow-y: visible;
+        text-align: left;
+
+        .avatar {
+            grid-row: 1 / span 2;
+            width: 96px;
+            height: 96px;
+            font-size: 2.5rem;
+        }
+    }
+
+    .account-data {
+        grid-column: 1 / -1;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 10px 28px;
+    }
+
+    .edit-button {
+        grid-column: 1 / -1;
+    }
+
+    .overview,
+    .game {
+        overflow-y: visible;
+    }
+
+    .stat-value {
+        font-size: clamp(1.4rem, 5vw, 2.6rem);
     }
 }
 
 @include mobile {
-    .avatar:not(.avatar-small) {
-        width: 96px;
-        height: 96px;
-    }
-
     .tabs {
         display: none;
     }
@@ -460,14 +559,16 @@
     }
 
     .overview-row {
-        grid-template-columns: 32px minmax(0, 1fr) 16px;
+        flex-basis: 76px;
+        grid-template-columns: 36px minmax(0, 1fr) 16px;
         gap: 4px 10px;
         padding: 12px;
     }
 
     .overview-icon {
-        width: 32px;
-        height: 32px;
+        width: 36px;
+        height: 36px;
+        grid-row: 1 / span 2;
     }
 
     .overview-summary {
@@ -480,16 +581,18 @@
         grid-row: 1 / span 2;
     }
 
+    .game-header {
+        flex-basis: auto;
+        min-height: 130px;
+    }
+
     .game-body {
-        padding: 14px;
+        padding: 12px;
     }
 
-    .cards {
-        grid-template-columns: minmax(0, 1fr);
-    }
-
-    .stat-value {
-        font-size: 1.3rem;
+    .stat {
+        flex-basis: 40%;
+        min-height: 84px;
     }
 
     .edit-row {

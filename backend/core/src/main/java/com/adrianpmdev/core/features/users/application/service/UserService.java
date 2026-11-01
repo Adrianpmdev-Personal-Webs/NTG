@@ -48,6 +48,7 @@ public class UserService {
     private final SupabaseAuthClient supabase;
     private final AppProperties appProperties;
     private final UserAuthorityCache userAuthorityCache;
+    private final UserAvatarService userAvatarService;
 
     /**
      * Builds the service with its dependencies.
@@ -57,15 +58,17 @@ public class UserService {
      * @param supabase       Supabase Auth client
      * @param appProperties      application settings
      * @param userAuthorityCache role and tags cached for the access token filter
+     * @param userAvatarService  avatars uploaded by their owner
      */
     public UserService(UserRepository userRepository, TagRepository tagRepository,
                        SupabaseAuthClient supabase, AppProperties appProperties,
-                       UserAuthorityCache userAuthorityCache) {
+                       UserAuthorityCache userAuthorityCache, UserAvatarService userAvatarService) {
         this.userRepository = userRepository;
         this.tagRepository = tagRepository;
         this.supabase = supabase;
         this.appProperties = appProperties;
         this.userAuthorityCache = userAuthorityCache;
+        this.userAvatarService = userAvatarService;
     }
 
     /**
@@ -140,8 +143,11 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Username '" + username + "' is already in use");
         }
 
+        String previousAvatar = user.getAvatarUrl();
+
         user.setUsername(username);
         user.setAvatarUrl(request.avatarUrl() == null || request.avatarUrl().isBlank() ? null : request.avatarUrl());
+        userAvatarService.deleteReplacedUpload(id, previousAvatar, user.getAvatarUrl());
         AUDIT.info("actor={} action=USER_UPDATED target={}", actorId, id);
 
         return UserMapper.toResponse(user);

@@ -102,6 +102,27 @@ class UserAvatarServiceTest {
     }
 
     @Test
+    void pastingALinkDeletesTheUploadItReplaces() {
+        service.deleteReplacedUpload(ID, OWN_UPLOAD, "https://elsewhere.example/me.png");
+
+        verify(storage).delete("public-assets", List.of("avatars/" + ID + "-old.jpg"));
+    }
+
+    @Test
+    void savingTheSameAvatarDeletesNothing() {
+        service.deleteReplacedUpload(ID, OWN_UPLOAD, OWN_UPLOAD);
+
+        verify(storage, never()).delete(any(), any());
+    }
+
+    @Test
+    void changingALinkDeletesNothing() {
+        service.deleteReplacedUpload(ID, "https://elsewhere.example/a.png", "https://elsewhere.example/b.png");
+
+        verify(storage, never()).delete(any(), any());
+    }
+
+    @Test
     void anEmptyFileIsRefused() {
         MockMultipartFile empty = new MockMultipartFile("file", new byte[0]);
 

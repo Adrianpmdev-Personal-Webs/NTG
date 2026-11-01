@@ -478,6 +478,16 @@
     }
 }
 
+.content-area.content-area-full {
+    padding: 0;
+    overflow-y: hidden;
+    scrollbar-gutter: auto;
+
+    @media (max-width: 900px) {
+        overflow-y: auto;
+    }
+}
+
 @media (max-width: 900px) {
     .layout {
         position: relative;

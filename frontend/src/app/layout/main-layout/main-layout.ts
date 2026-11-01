@@ -77,6 +77,8 @@ export class MainLayout {
             }),
     );
 
+    protected readonly fullPage = signal(false);
+
     private readonly router = inject(Router);
     private readonly mobileSidebarBreakpoint = '(max-width: 900px)';
     private readonly currentUrl = toSignal(

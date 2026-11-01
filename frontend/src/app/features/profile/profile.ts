@@ -3,7 +3,9 @@
  *
  * The profile of the signed-in user, the only one anybody can see. Their account stays on one side; on the other, an
  * overview with one line per game and one tab per game, so the screen keeps its shape however many games there are.
- * From here they also change their name and avatar or ask for the email to choose a new password.
+ * It fills the whole page: the layout leaves out its margins and every block stretches to the space there is. From here
+ * they also change their name, set their avatar by uploading a picture or pasting a link, or ask for the email to
+ * choose a new password.
  *
  * @author @adrianpmdev
  */
@@ -23,6 +25,8 @@ import { Profile, ProfileApi, ProfileBar } from './profile-api';
 const OVERVIEW = 'overview';
 const USERNAME_MIN_LENGTH = 3;
 const USERNAME_MAX_LENGTH = 50;
+const AVATAR_LINK_MAX_LENGTH = 500;
+const AVATAR_LINK_PATTERN = /^https?:\/\/\S+$/;
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,6 +44,9 @@ export class ProfilePage implements OnInit {
     protected readonly overview = OVERVIEW;
     protected readonly accepted = ACCEPTED_IMAGE_TYPES;
     protected readonly usernameMaxLength = USERNAME_MAX_LENGTH;
+    protected readonly avatarLinkMaxLength = AVATAR_LINK_MAX_LENGTH;
+
+    readonly fullPage = true;
 
     protected readonly loading = signal(true);
     protected readonly failed = signal(false);
@@ -67,6 +74,10 @@ export class ProfilePage implements OnInit {
 
     protected barPercent(bar: ProfileBar): number {
         return bar.max > 0 ? Math.min(100, Math.round(((bar.current ?? 0) * 100) / bar.max)) : 0;
+    }
+
+    protected coverImage(coverUrl: string | null, shade: string): string | null {
+        return coverUrl ? `${shade}, url("${coverUrl}")` : null;
     }
 
     protected hideIcon(event: Event): void {
@@ -115,6 +126,26 @@ export class ProfilePage implements OnInit {
         this.userApi.uploadMyAvatar(file).subscribe({
             next: (user) => this.applied(user, 'Avatar actualizado'),
             error: (error) => this.failedAction(error, 'No se ha podido subir el avatar'),
+        });
+    }
+
+    protected saveAvatarLink(field: HTMLInputElement): void {
+        const current = this.profile();
+        const avatarUrl = field.value.trim();
+
+        if (!current || this.busy() || avatarUrl === current.avatarUrl) {
+            return;
+        }
+
+        if (!AVATAR_LINK_PATTERN.test(avatarUrl)) {
+            this.notifications.warning('El link debe empezar por http:// o https://');
+            return;
+        }
+
+        this.busy.set(true);
+        this.userApi.updateMe({ username: current.username, avatarUrl }).subscribe({
+            next: (user) => this.applied(user, 'Avatar actualizado'),
+            error: (error) => this.failedAction(error, 'No se ha podido guardar el link'),
         });
     }
 

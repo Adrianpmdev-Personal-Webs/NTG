@@ -2,13 +2,24 @@
  * SavedBuilds
  *
  * Slots of the talent calculator where a player keeps builds of the selected class in this browser: save the current
- * build, load it back, rename it or delete it. A build that no longer fits the talents of the class after a game patch
+ * build under a chosen name, load it back, rename it or delete it. A build that no longer fits the talents of the class after a game patch
  * is marked and cannot be loaded, but its slot can still be overwritten or deleted.
  *
  * @author @adrianpmdev
  */
 
-import { ChangeDetectionStrategy, Component, computed, inject, input, linkedSignal, output } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    ElementRef,
+    computed,
+    effect,
+    inject,
+    input,
+    linkedSignal,
+    output,
+    viewChild,
+} from '@angular/core';
 import { NotificationCenter } from '@core/notifications/notification-center';
 import {
     SAVED_BUILD_NAME_MAX_LENGTH,
@@ -20,7 +31,7 @@ import {
 import { decodeBuild, pointsInTree, totalPoints } from '../talents-logic';
 import { TalentTree } from '../talents-models';
 
-type SlotAction = 'overwrite' | 'delete';
+type SlotAction = 'save' | 'delete';
 
 interface PendingAction {
     index: number;
@@ -35,6 +46,7 @@ interface PendingAction {
 })
 export class SavedBuilds {
     private readonly notificationCenter = inject(NotificationCenter);
+    private readonly saveNameField = viewChild<ElementRef<HTMLInputElement>>('saveName');
 
     readonly classSlug = input.required<string>();
     readonly trees = input.required<readonly TalentTree[]>();
@@ -60,23 +72,34 @@ export class SavedBuilds {
         })),
     );
 
-    protected save(index: number): void {
+    constructor() {
+        effect(() => {
+            const field = this.saveNameField()?.nativeElement;
+
+            field?.focus();
+            field?.select();
+        });
+    }
+
+    protected requestSave(index: number): void {
+        if (this.build()) {
+            this.pending.set({ index, action: 'save' });
+        }
+    }
+
+    protected confirmSave(index: number, value: string): void {
         const build = this.build();
 
         if (!build) {
             return;
         }
 
-        const name = this.slots()[index]?.name ?? this.defaultName(index);
+        const name = this.cleanName(index, value);
+
+        this.pending.set(null);
 
         if (this.store(index, { name, level: this.level(), build })) {
-            this.notificationCenter.success(`Build guardada en ${name}`);
-        }
-    }
-
-    protected requestOverwrite(index: number): void {
-        if (this.build()) {
-            this.pending.set({ index, action: 'overwrite' });
+            this.notificationCenter.success(`Build guardada: ${name}`);
         }
     }
 
@@ -84,16 +107,9 @@ export class SavedBuilds {
         this.pending.set({ index, action: 'delete' });
     }
 
-    protected confirmPending(): void {
-        const pending = this.pending();
-
+    protected confirmDelete(index: number): void {
         this.pending.set(null);
-
-        if (pending?.action === 'overwrite') {
-            this.save(pending.index);
-        } else if (pending?.action === 'delete') {
-            this.store(pending.index, null);
-        }
+        this.store(index, null);
     }
 
     protected rename(index: number, field: HTMLInputElement): void {
@@ -103,14 +119,18 @@ export class SavedBuilds {
             return;
         }
 
-        const name = field.value.trim().slice(0, SAVED_BUILD_NAME_MAX_LENGTH) || this.defaultName(index);
+        const name = this.cleanName(index, field.value);
 
         field.value = name;
         this.store(index, { ...slot, name });
     }
 
-    private defaultName(index: number): string {
+    protected defaultName(index: number): string {
         return `Build ${index + 1}`;
+    }
+
+    private cleanName(index: number, value: string): string {
+        return value.trim().slice(0, SAVED_BUILD_NAME_MAX_LENGTH) || this.defaultName(index);
     }
 
     private distributionOf(slot: SavedBuild): string | null {

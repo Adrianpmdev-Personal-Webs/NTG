@@ -33,4 +33,12 @@ public interface LockeDeathRepository extends JpaRepository<LockeDeath, UUID> {
      */
     @EntityGraph(attributePaths = "player")
     Optional<LockeDeath> findByIdAndLockeId(UUID id, UUID lockeId);
+
+    /**
+     * How many Pokémon a player lost in every randomlocke.
+     *
+     * @param playerId player id
+     * @return number of deaths
+     */
+    long countByPlayerId(UUID playerId);
 }

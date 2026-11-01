@@ -1,0 +1,64 @@
+<section class="profile">
+    @if (loading()) {
+        <p class="state">Cargando…</p>
+    } @else if (failed() || !profile()) {
+        <p class="state error">No se ha podido cargar tu perfil. Inténtalo de nuevo más tarde.</p>
+    } @else {
+        @let current = profile()!;
+        <header class="account terminal-card">
+            @if (current.avatarUrl) {
+                <img class="avatar" [src]="current.avatarUrl" alt="" />
+            } @else {
+                <span class="avatar avatar-initial" aria-hidden="true">{{
+                    current.username.charAt(0).toUpperCase()
+                }}</span>
+            }
+            <div class="account-details">
+                <h1 class="username neon-text">{{ current.username }}</h1>
+                <p class="account-line">{{ current.email }}</p>
+                <p class="account-line">
+                    {{ current.role.toUpperCase() }} · Desde {{ current.createdAt | date: 'dd/MM/yyyy' }}
+                </p>
+            </div>
+        </header>
+
+        @for (game of current.games; track game.id) {
+            <article class="game terminal-card">
+                <h2 class="game-title">
+                    @if (game.iconUrl) {
+                        <img class="game-icon" [src]="game.iconUrl" alt="" />
+                    }
+                    <a class="game-link" [routerLink]="['/', game.id]">{{ game.name }}</a>
+                </h2>
+
+                @if (game.stats.length === 0 && game.entries.length === 0) {
+                    <p class="empty">Todavía no tienes datos en este juego.</p>
+                }
+
+                @if (game.stats.length > 0) {
+                    <dl class="stats">
+                        @for (stat of game.stats; track stat.label) {
+                            <div class="stat">
+                                <dt class="stat-label">{{ stat.label }}</dt>
+                                <dd class="stat-value">{{ stat.value }}</dd>
+                            </div>
+                        }
+                    </dl>
+                }
+
+                @if (game.entries.length > 0) {
+                    <ul class="entries">
+                        @for (entry of game.entries; track entry.title) {
+                            <li class="entry">
+                                <span class="entry-title">{{ entry.title }}</span>
+                                <span class="entry-detail">{{ entry.detail }}</span>
+                            </li>
+                        }
+                    </ul>
+                }
+            </article>
+        } @empty {
+            <p class="state">Todavía no tienes acceso a ningún juego.</p>
+        }
+    }
+</section>

@@ -1,0 +1,172 @@
+@use 'mixins' as *;
+
+.profile {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 960px;
+}
+
+.state {
+    color: var(--text-secondary);
+
+    &.error {
+        color: var(--neon-red);
+    }
+}
+
+.account {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    min-width: 0;
+    padding: 18px;
+}
+
+.avatar {
+    flex: none;
+    width: 72px;
+    height: 72px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.avatar-initial {
+    display: grid;
+    place-items: center;
+    color: var(--neon-green);
+    font-family: var(--font-display);
+    font-size: 2rem;
+}
+
+.account-details {
+    min-width: 0;
+}
+
+.username {
+    margin-bottom: 6px;
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    letter-spacing: 3px;
+    overflow-wrap: anywhere;
+}
+
+.account-line {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    overflow-wrap: anywhere;
+}
+
+.game {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+    padding: 18px;
+}
+
+.game-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.05rem;
+    letter-spacing: 2px;
+}
+
+.game-icon {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+}
+
+.game-link {
+    color: var(--neon-green);
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.empty {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+    margin: 0;
+}
+
+.stat {
+    min-width: 0;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+}
+
+.stat-value {
+    margin: 4px 0 0;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    overflow-wrap: anywhere;
+}
+
+.entries {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.entry {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 12px;
+    min-width: 0;
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+.entry-title {
+    color: var(--text-primary);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.entry-detail {
+    color: var(--text-secondary);
+    overflow-wrap: anywhere;
+}
+
+@include mobile {
+    .account {
+        padding: 14px;
+    }
+
+    .avatar {
+        width: 56px;
+        height: 56px;
+    }
+
+    .username {
+        font-size: 1.2rem;
+    }
+
+    .game {
+        padding: 14px;
+    }
+}

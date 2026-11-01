@@ -43,6 +43,10 @@ export const routes: Routes = [
                 loadChildren: () => import('@features/welcome/welcome.routes').then((m) => m.WELCOME_ROUTES),
             },
             {
+                path: 'profile',
+                loadComponent: () => import('@features/profile/profile').then((m) => m.ProfilePage),
+            },
+            {
                 path: 'admin',
                 canActivate: [adminGuard],
                 children: [

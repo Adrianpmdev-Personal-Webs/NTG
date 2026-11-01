@@ -3,6 +3,7 @@ package com.adrianpmdev.wowforever.features.characters.infrastructure.persistenc
 import com.adrianpmdev.wowforever.features.characters.infrastructure.persistence.entity.GameCharacter;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -38,4 +39,12 @@ public interface GameCharacterRepository extends JpaRepository<GameCharacter, UU
      * @return true when it has
      */
     boolean existsByUserIdAndNameIgnoreCaseAndIdNot(UUID userId, String name, UUID id);
+
+    /**
+     * The characters of an account by name.
+     *
+     * @param userId account id
+     * @return characters
+     */
+    List<GameCharacter> findByUserIdOrderByNameAsc(UUID userId);
 }

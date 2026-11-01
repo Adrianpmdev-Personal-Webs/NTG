@@ -4,6 +4,7 @@ import com.adrianpmdev.pokemon.features.players.infrastructure.persistence.entit
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -36,4 +37,12 @@ public interface PlayerRepository extends JpaRepository<Player, UUID> {
      * @return true when the name is taken
      */
     boolean existsByNameIgnoreCase(String name);
+
+    /**
+     * The player linked to a platform account.
+     *
+     * @param userId account id
+     * @return the player, if the account has one
+     */
+    Optional<Player> findByUserId(UUID userId);
 }

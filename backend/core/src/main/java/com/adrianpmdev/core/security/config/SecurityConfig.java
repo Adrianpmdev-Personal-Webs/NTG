@@ -117,6 +117,9 @@ public class SecurityConfig {
                     auth.requestMatchers(HttpMethod.PUT, "/api/v1/auth/set-password").permitAll();
                     auth.requestMatchers(HttpMethod.GET, "/api/v1/auth/me").authenticated();
 
+                    // Profile: anyone logged in reads their own; there is no route for somebody else's.
+                    auth.requestMatchers(HttpMethod.GET, "/api/v1/profile/me").authenticated();
+
                     // Users: anyone logged in can edit their own profile; everything else is ADMIN.
                     auth.requestMatchers(HttpMethod.PUT, "/api/v1/users/me").authenticated();
                     auth.requestMatchers("/api/v1/users", "/api/v1/users/**").hasRole(ADMIN_ROLE);

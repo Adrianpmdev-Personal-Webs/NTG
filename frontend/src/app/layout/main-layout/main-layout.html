@@ -35,6 +35,19 @@
         </div>
 
         <nav class="sidebar-nav">
+            <a
+                routerLink="/welcome"
+                routerLinkActive="active"
+                class="nav-item"
+                [title]="sidebarCollapsed() ? 'Inicio' : ''"
+                (click)="handleMenuItemNavigation()"
+            >
+                <app-nav-icon class="nav-icon" name="home" />
+                @if (!sidebarCollapsed()) {
+                    <span class="nav-label">INICIO</span>
+                }
+            </a>
+
             @if (authSession.isAdmin()) {
                 <a
                     routerLink="/admin/dashboard"
@@ -43,76 +56,45 @@
                     [title]="sidebarCollapsed() ? 'Dashboard' : ''"
                     (click)="handleMenuItemNavigation()"
                 >
-                    <span class="nav-icon">◈</span>
+                    <app-nav-icon class="nav-icon" name="dashboard" />
                     @if (!sidebarCollapsed()) {
                         <span class="nav-label">DASHBOARD</span>
                     }
                 </a>
 
-                <a
-                    routerLink="/admin/users"
-                    routerLinkActive="active"
-                    class="nav-item"
-                    [title]="sidebarCollapsed() ? 'Usuarios' : ''"
-                    (click)="handleMenuItemNavigation()"
-                >
-                    <span class="nav-icon">◎</span>
-                    @if (!sidebarCollapsed()) {
-                        <span class="nav-label">USUARIOS</span>
-                    }
-                </a>
+                <div class="nav-group">
+                    <button
+                        type="button"
+                        class="nav-item nav-parent"
+                        [class.active]="isAdminActive()"
+                        [class.open]="isSubmenuOpen(adminMenu)"
+                        [title]="sidebarCollapsed() ? 'Admin' : ''"
+                        (click)="toggleSubmenu(adminMenu)"
+                    >
+                        <app-nav-icon class="nav-icon" name="admin" />
 
-                <a
-                    routerLink="/admin/games"
-                    routerLinkActive="active"
-                    class="nav-item"
-                    [title]="sidebarCollapsed() ? 'Juegos' : ''"
-                    (click)="handleMenuItemNavigation()"
-                >
-                    <span class="nav-icon">▣</span>
-                    @if (!sidebarCollapsed()) {
-                        <span class="nav-label">JUEGOS</span>
-                    }
-                </a>
+                        @if (!sidebarCollapsed()) {
+                            <span class="nav-label">ADMIN</span>
+                            <span class="nav-caret">{{ isSubmenuOpen(adminMenu) ? '▾' : '▸' }}</span>
+                        }
+                    </button>
 
-                <a
-                    routerLink="/admin/images"
-                    routerLinkActive="active"
-                    class="nav-item"
-                    [title]="sidebarCollapsed() ? 'Imágenes' : ''"
-                    (click)="handleMenuItemNavigation()"
-                >
-                    <span class="nav-icon">▤</span>
-                    @if (!sidebarCollapsed()) {
-                        <span class="nav-label">IMÁGENES</span>
+                    @if (isSubmenuOpen(adminMenu) && !sidebarCollapsed()) {
+                        <div class="nav-submenu">
+                            @for (item of adminItems; track item.route) {
+                                <a
+                                    [routerLink]="item.route"
+                                    routerLinkActive="active"
+                                    class="nav-subitem"
+                                    (click)="handleSubmenuItemNavigation()"
+                                >
+                                    <app-nav-icon class="nav-subicon" [name]="item.icon" />
+                                    <span class="nav-sublabel">{{ item.label }}</span>
+                                </a>
+                            }
+                        </div>
                     }
-                </a>
-
-                <a
-                    routerLink="/admin/music"
-                    routerLinkActive="active"
-                    class="nav-item"
-                    [title]="sidebarCollapsed() ? 'Música' : ''"
-                    (click)="handleMenuItemNavigation()"
-                >
-                    <span class="nav-icon">♫</span>
-                    @if (!sidebarCollapsed()) {
-                        <span class="nav-label">MÚSICA</span>
-                    }
-                </a>
-            } @else {
-                <a
-                    routerLink="/welcome"
-                    routerLinkActive="active"
-                    class="nav-item"
-                    [title]="sidebarCollapsed() ? 'Inicio' : ''"
-                    (click)="handleMenuItemNavigation()"
-                >
-                    <span class="nav-icon">◈</span>
-                    @if (!sidebarCollapsed()) {
-                        <span class="nav-label">INICIO</span>
-                    }
-                </a>
+                </div>
             }
 
             @for (game of games(); track game.id) {
@@ -129,7 +111,7 @@
                         @if (game.iconUrl) {
                             <img class="nav-icon nav-game-icon" [src]="game.iconUrl" alt="" />
                         } @else {
-                            <span class="nav-icon">◎</span>
+                            <app-nav-icon class="nav-icon" name="gamepad" />
                         }
 
                         @if (!sidebarCollapsed()) {
@@ -153,7 +135,7 @@
                                     class="nav-subitem"
                                     (click)="handleSubmenuItemNavigation()"
                                 >
-                                    <span class="nav-subicon">▶</span>
+                                    <app-nav-icon class="nav-subicon" name="play" />
                                     <span class="nav-sublabel">JUGAR</span>
                                 </a>
                             }
@@ -166,7 +148,7 @@
                                         class="nav-subitem"
                                         (click)="handleSubmenuItemNavigation()"
                                     >
-                                        <span class="nav-subicon">{{ item.icon }}</span>
+                                        <app-nav-icon class="nav-subicon" [name]="item.icon" />
                                         <span class="nav-sublabel">{{ item.label }}</span>
                                     </a>
                                 }

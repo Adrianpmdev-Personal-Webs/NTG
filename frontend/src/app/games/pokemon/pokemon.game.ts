@@ -14,8 +14,8 @@ export const POKEMON_GAME: GameModule = {
     routes: () => import('./pokemon.routes').then((m) => m.POKEMON_ROUTES),
     adminRoutes: () => import('./pokemon-admin.routes').then((m) => m.POKEMON_ADMIN_ROUTES),
     adminItems: [
-        { label: 'RANDOMLOCKES', route: '/admin/pokemon/lockes', icon: '▣' },
-        { label: 'JUGADORES', route: '/admin/pokemon/players', icon: '◉' },
-        { label: 'JUEGOS', route: '/admin/pokemon/games', icon: '◈' },
+        { label: 'RANDOMLOCKES', route: '/admin/pokemon/lockes', icon: 'trophy' },
+        { label: 'JUGADORES', route: '/admin/pokemon/players', icon: 'users' },
+        { label: 'JUEGOS', route: '/admin/pokemon/games', icon: 'gamepad' },
     ],
 };

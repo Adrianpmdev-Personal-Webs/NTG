@@ -13,11 +13,12 @@
  */
 
 import { LoadChildrenCallback } from '@angular/router';
+import { NavIconName } from '@shared/components/nav-icon/nav-icon';
 
 export interface GameAdminItem {
     label: string;
     route: string;
-    icon: string;
+    icon: NavIconName;
 }
 
 export interface GameModule {

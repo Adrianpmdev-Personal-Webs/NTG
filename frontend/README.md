@@ -54,7 +54,7 @@ background music and game content.
 | ---------------- | ----------------- | ---------------------------------------------------------------------------------------------------- |
 | 🔑 Auth          | **Login**         | Sign in; restores the session automatically if one exists                                            |
 | 🔑 Auth          | **Set password**  | Landing page of the email link: the user chooses a password and enters directly                      |
-| 🏠 Platform      | **Welcome**       | Player home: cards for the games they can open, and the ones coming soon                             |
+| 🏠 Platform      | **Welcome**       | Inicio: cards for the games they can open, and the ones coming soon                                  |
 | 👑 Admin         | **Dashboard**     | Platform overview                                                                                    |
 | 👑 Admin         | **Users**         | Create users by email, assign tags, edit, resend the password email, delete                          |
 | 👑 Admin         | **Games**         | Game catalog: add a game (its tag is created too), order, cover, icon, release it to players         |
@@ -90,6 +90,9 @@ flowchart LR
     G -->|no| H["Back to home"]
     G -->|yes| P["✅ Game opens"]
 ```
+
+The sidebar shows **Inicio** and each accessible game to everyone; admins also get **Dashboard** and an **Admin** dropdown
+(users, games, pictures, music).
 
 The routes of the games are generated from the list in `games/games.ts`: every game is served at `/<id>` and its
 management area at `/admin/<id>`, so adding a game does not touch `app.routes.ts`.
@@ -137,7 +140,7 @@ frontend/
         │   ├── music/          MusicApi, MusicPlayer (the one background player)
         │   └── notifications/  NotificationCenter
         │
-        ├── shared/             ♻️ Reusable pieces (models, notification toasts, music control, modal behaviour, API error helper)
+        ├── shared/             ♻️ Reusable pieces (models, notification toasts, music control, nav icons, modal behaviour, API error helper)
         ├── layout/             🖼️ Terminal shell: sidebar, header, footer
         ├── features/           📦 Platform pages: auth, welcome, admin (dashboard, users, games, pictures, music)
         │

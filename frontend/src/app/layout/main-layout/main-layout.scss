@@ -262,17 +262,12 @@
         background: rgba(0, 255, 65, 0.08);
         border-color: rgba(0, 255, 65, 0.25);
         text-shadow: 0 0 6px rgba(0, 255, 65, 0.5);
-
-        .nav-icon {
-            text-shadow: 0 0 10px var(--neon-green);
-        }
     }
 }
 
 .nav-icon {
     width: 20px;
-    font-size: 1rem;
-    text-align: center;
+    height: 20px;
     flex-shrink: 0;
 }
 
@@ -283,7 +278,7 @@
     object-fit: contain;
 }
 
-.nav-parent.active .nav-game-icon {
+.nav-item.active .nav-icon {
     filter: drop-shadow(0 0 4px rgba(0, 255, 65, 0.6));
 }
 
@@ -319,10 +314,6 @@
         background: rgba(0, 255, 65, 0.08);
         border-color: rgba(0, 255, 65, 0.25);
         text-shadow: 0 0 6px rgba(0, 255, 65, 0.5);
-
-        .nav-icon {
-            text-shadow: 0 0 10px var(--neon-green);
-        }
     }
 }
 
@@ -369,7 +360,8 @@
 }
 
 .nav-subicon {
-    font-size: 0.72rem;
+    width: 14px;
+    height: 14px;
     color: var(--neon-green);
     flex-shrink: 0;
 }

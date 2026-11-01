@@ -15,6 +15,7 @@ import { GameAdminItem } from '@core/games/game-module';
 import { AuthSession } from '@core/auth/auth-session';
 import { GameCatalog } from '@core/games/game-catalog';
 import { GAME_MODULES } from '@games/games';
+import { NavIcon } from '@shared/components/nav-icon/nav-icon';
 import { Footer } from '../footer/footer';
 import { Header } from '../header/header';
 
@@ -33,7 +34,7 @@ interface SidebarGame {
     changeDetection: ChangeDetectionStrategy.OnPush,
     host: { class: 'terminal' },
     selector: 'app-main-layout',
-    imports: [RouterOutlet, RouterLink, RouterLinkActive, Header, Footer],
+    imports: [RouterOutlet, RouterLink, RouterLinkActive, Header, Footer, NavIcon],
     templateUrl: './main-layout.html',
     styleUrl: './main-layout.scss',
 })
@@ -41,8 +42,16 @@ export class MainLayout {
     protected readonly authSession = inject(AuthSession);
     private readonly catalog = inject(GameCatalog);
 
+    protected readonly adminMenu = 'admin';
+    protected readonly adminItems: readonly GameAdminItem[] = [
+        { label: 'USUARIOS', route: '/admin/users', icon: 'users' },
+        { label: 'JUEGOS', route: '/admin/games', icon: 'gamepad' },
+        { label: 'IMÁGENES', route: '/admin/images', icon: 'image' },
+        { label: 'MÚSICA', route: '/admin/music', icon: 'music' },
+    ];
+
     protected readonly sidebarCollapsed = signal(false);
-    private readonly openGameId = signal<string | null>(null);
+    private readonly openMenuId = signal<string | null>(null);
     protected readonly currentUser = toSignal(this.authSession.currentUser$, {
         initialValue: this.authSession.getCurrentUser(),
     });
@@ -91,7 +100,7 @@ export class MainLayout {
         effect(() => {
             const activeGame = this.games().find((game) => this.isGameActive(game));
 
-            this.openGameId.set(activeGame?.id ?? null);
+            this.openMenuId.set(activeGame?.id ?? (this.isAdminActive() ? this.adminMenu : null));
         });
     }
 
@@ -103,20 +112,32 @@ export class MainLayout {
         this.sidebarCollapsed.set(true);
     }
 
-    protected toggleSubmenu(gameId: string): void {
-        this.openGameId.update((openId) => (openId === gameId ? null : gameId));
+    protected toggleSubmenu(menuId: string): void {
+        if (this.sidebarCollapsed()) {
+            this.sidebarCollapsed.set(false);
+            this.openMenuId.set(menuId);
+            return;
+        }
+
+        this.openMenuId.update((openId) => (openId === menuId ? null : menuId));
     }
 
-    protected isSubmenuOpen(gameId: string): boolean {
-        return this.openGameId() === gameId;
+    protected isSubmenuOpen(menuId: string): boolean {
+        return this.openMenuId() === menuId;
     }
 
     protected isGameActive(game: SidebarGame): boolean {
         return this.currentUrl().split('?')[0].startsWith(game.adminRoute);
     }
 
+    protected isAdminActive(): boolean {
+        const url = this.currentUrl().split('?')[0];
+
+        return this.adminItems.some((item) => url.startsWith(item.route));
+    }
+
     protected handleMenuItemNavigation(): void {
-        this.openGameId.set(null);
+        this.openMenuId.set(null);
         this.closeSidebarOnMobile();
     }
 

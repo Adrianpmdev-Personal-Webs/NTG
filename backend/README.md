@@ -31,7 +31,7 @@ a game, and a game never depends on the platform**. Both only share a small modu
 
 | Module | Role |
 |---|---|
-| 📜 **`platform-api`** | Contracts shared by everyone: who is calling, file storage, picture compression, public pictures, how a game declares itself (`GameModule`), what it shows in the admin dashboard and helpers for cacheable JSON. No Spring Security, no Supabase. |
+| 📜 **`platform-api`** | Contracts shared by everyone: who is calling, file storage, picture compression, public pictures, how a game declares itself (`GameModule`), what it shows in the admin dashboard and on the profile, and helpers for cacheable JSON. No Spring Security, no Supabase. |
 | 🚀 **`core`** | The platform: identity (users, tags), the game catalog, public pictures, background music, security, the Supabase integration, logging and error handling. It implements the contracts of `platform-api`. |
 | 🎮 **`games/*`** | One module per game, with its own domain and REST endpoints. It depends **only on `platform-api`** and contains **no security code**: it declares its API path and tag, and `core` builds the access rules from that. |
 | 🧷 **`app`** | Boots `core` and every game together and builds the runnable `ntg.jar`. Adding a game to the application is adding one dependency here. |
@@ -66,11 +66,12 @@ backend/
 │
 ├── platform-api/                   📜 Contracts shared by core and the games
 │   └── com/adrianpmdev/platform/
-│       ├── port/                   CurrentUser, ObjectStorage
+│       ├── port/                   CurrentUser, UserDirectory, ObjectStorage
 │       ├── module/                 GameModule (API path, tag, player writes), GameHighlightProvider
 │       ├── image/                  ImageCompressor, ImageSpec, CompressedImage
 │       ├── asset/                  ImageSlot, ImageSlotProvider, PublicAssets
 │       ├── status/                 ModuleStatus, ModuleStatusProvider (a block of the admin dashboard)
+│       ├── profile/                ProfileBlock, ProfileBlockProvider (a game on the profile of a player)
 │       ├── error/                  ApiErrors (404, 409, 400, 403)
 │       └── web/                    JsonResponses (JSON with ETag and cache rules)
 │
@@ -93,7 +94,7 @@ backend/
 │
 ├── games/
 │   ├── pokemon/                    🎮 Pokémon (+ sql/pokemon.sql)
-│   └── wow-forever/                🎮 WoW Forever (no tables; data from the game client + sql/wow-forever.sql)
+│   └── wow-forever/                🎮 WoW Forever (characters in its schema; data from the game client; sql/wow-forever.sql)
 │
 └── app/                            🧷 Application.java, application.yml, ntg.jar
 ```
@@ -160,7 +161,7 @@ security headers (see the [frontend documentation](../frontend/README.md)).
 |---|---|---|
 | Session | `POST /auth/login`, `/auth/refresh`, `/auth/logout`, `PUT /auth/set-password` | Public (the last one needs the link token), with attempt limits |
 | Session | `GET /auth/me` | Any signed-in user |
-| Profile | `PUT /users/me` | Any signed-in user (own profile only) |
+| Profile | `GET /profile/me`, `PUT /users/me`, `PUT` · `DELETE /users/me/avatar`, `POST /users/me/password-email` | Any signed-in user (own account only) |
 | Catalog | `GET /games`, `GET /games/highlights` | Any signed-in user (each sees the games they can) |
 | Catalog | `POST` · `PUT` · `DELETE /games/**` | **Admin** |
 | Music | `GET /music` | Any signed-in user (the general playlist and the games they hold the tag for) |
@@ -203,6 +204,9 @@ security headers (see the [frontend documentation](../frontend/README.md)).
 - A game may declare a `GameHighlightProvider`: a short text about what is happening in it (a tournament being played,
   the build served), shown on its cover on the home page. Only the games the caller can open answer, once per visit to
   that page.
+- A game may declare a `ProfileBlockProvider`: a summary and sections made of common pieces (figures, bars and cards)
+  about a player. Each player only reads their own profile, with the games they can open, and a new game needs no change
+  in the web clients.
 
 ### 4. Pictures
 
@@ -245,7 +249,8 @@ All routes live under `/api/v1`.
 | Module | Resources |
 |---|---|
 | **Auth** | `auth` (login, refresh, logout, set-password, me) |
-| **Users** | `users` (create, list, update, delete, resend email), `users/{id}/tags`, `users/me` |
+| **Users** | `users` (create, list, update, delete, resend email), `users/{id}/tags`, `users/me`, `users/me/avatar`, `users/me/password-email` |
+| **Profile** | `profile/me` (the account of the caller and a block per game) |
 | **Tags** | `tags` |
 | **Catalog** | `games` (the games each user can see, and their management) |
 | **Pictures** | `assets` (expected pictures, upload, delete) |
@@ -366,7 +371,6 @@ From an IDE, run `com.adrianpmdev.Application` in the `app` module.
 
 ## 🗺️ Ideas for next steps
 
-- A screen for users to edit their own profile (the endpoint already exists).
 - More automated tests for the account flows.
 - More game modules following the same structure.
 

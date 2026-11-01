@@ -58,7 +58,7 @@ modules as they are developed.
 | Manage the **game catalog**: add games, order them, release them | Follow the activity of the games they take part in |
 | Upload **pictures** (covers, game icons, game artwork): the server compresses them | Upload their own team pictures where a game allows it |
 | Add **background music** to the web and to each game: the browser compresses the songs | Hear the music of each area on a computer, mute it or change its volume |
-| Manage the content of each game from the admin area | |
+| Manage the content of each game from the admin area | See their own **profile** with a block per game, and change their name, their avatar (upload or link) and their password |
 
 ### 🧪 Game modules
 

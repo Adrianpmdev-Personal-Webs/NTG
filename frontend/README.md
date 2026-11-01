@@ -55,6 +55,7 @@ background music and game content.
 | 🔑 Auth          | **Login**         | Sign in; restores the session automatically if one exists                                                   |
 | 🔑 Auth          | **Set password**  | Landing page of the email link: the user chooses a password and enters directly                             |
 | 🏠 Platform      | **Welcome**       | Inicio: continue on the last screen of a game, and every game as a large cover with what is happening in it |
+| 🏠 Platform      | **Profile**       | Own account and one tab per game, filling the page; edit name, avatar (upload or link) and password         |
 | 👑 Admin         | **Dashboard**     | Real state: memory, CPU, space, modules, traffic, recent errors and accounts, read on demand                |
 | 👑 Admin         | **Users**         | Create users by email, assign tags, edit, resend the password email, delete                                 |
 | 👑 Admin         | **Games**         | Game catalog: add a game (its tag is created too), order, cover, icon, release it to players                |
@@ -142,7 +143,7 @@ frontend/
         │
         ├── shared/             ♻️ Reusable pieces (models, notification toasts, music control, icons, modal behaviour, API error helper)
         ├── layout/             🖼️ Terminal shell: sidebar, header, footer
-        ├── features/           📦 Platform pages: auth, welcome, admin (dashboard, users, games, pictures, music)
+        ├── features/           📦 Platform pages: auth, welcome, profile, admin (dashboard, users, games, pictures, music)
         │
         └── games/              🎮 One folder per game
             ├── games.ts        The games built into this client
@@ -243,7 +244,6 @@ npm run format     # format the project with Prettier (format:check only checks 
 
 ## 🗺️ Ideas for next steps
 
-- A screen for users to edit their own profile.
 - Automated tests for guards, interceptor and key screens.
 - More game modules following the same structure.
 

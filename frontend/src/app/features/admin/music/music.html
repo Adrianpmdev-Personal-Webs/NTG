@@ -4,8 +4,8 @@
             <h1 class="admin-page-title">MÚSICA</h1>
             <p class="admin-page-subtitle">
                 Añade canciones en cualquier formato (MP3, WAV, FLAC, OGG, M4A...): el navegador las comprime antes de
-                subirlas. Hasta 10 minutos por canción. Suenan en este orden y vuelven a empezar; un área sin canciones
-                no suena.
+                subirlas. Hasta 10 minutos por canción. Suenan en orden aleatorio y no se repiten hasta que han sonado
+                todas; un área sin canciones no suena.
             </p>
         </div>
     </div>
@@ -43,10 +43,9 @@
                 }
 
                 @if (area.tracks.length > 0) {
-                    <ol class="track-list">
-                        @for (track of area.tracks; track track.id; let index = $index, last = $last) {
+                    <ul class="track-list">
+                        @for (track of area.tracks; track track.id) {
                             <li class="track">
-                                <span class="track-number">{{ index + 1 }}</span>
                                 <input
                                     class="track-title"
                                     type="text"
@@ -62,24 +61,6 @@
                                 <audio class="track-audio" controls preload="none" [src]="track.url"></audio>
                                 <div class="track-actions">
                                     <button
-                                        class="btn-neon action-btn"
-                                        type="button"
-                                        aria-label="Subir en la lista"
-                                        [disabled]="busy() || index === 0"
-                                        (click)="move(area, index, -1)"
-                                    >
-                                        ↑
-                                    </button>
-                                    <button
-                                        class="btn-neon action-btn"
-                                        type="button"
-                                        aria-label="Bajar en la lista"
-                                        [disabled]="busy() || last"
-                                        (click)="move(area, index, 1)"
-                                    >
-                                        ↓
-                                    </button>
-                                    <button
                                         class="btn-neon btn-neon-danger action-btn"
                                         type="button"
                                         [attr.aria-label]="'Eliminar ' + track.title"
@@ -91,7 +72,7 @@
                                 </div>
                             </li>
                         }
-                    </ol>
+                    </ul>
                 } @else {
                     <p class="admin-page-state">SIN CANCIONES: ESTA ÁREA NO SUENA</p>
                 }

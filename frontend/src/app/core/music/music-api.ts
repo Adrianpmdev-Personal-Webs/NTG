@@ -1,8 +1,8 @@
 /**
  * MusicApi
  *
- * HTTP service for the background music: the playlists the current user can hear and, for admins, adding, renaming,
- * ordering and deleting songs. Songs arrive here already compressed (see the admin music screen).
+ * HTTP service for the background music: the playlists the current user can hear and, for admins, adding, renaming
+ * and deleting songs. Songs arrive here already compressed (see the admin music screen).
  *
  * @author @adrianpmdev
  */
@@ -29,10 +29,6 @@ export class MusicApi {
         body.append('durationSeconds', String(durationSeconds));
 
         return this.http.post<MusicTrack>(`${this.baseUrl}/areas/${area}/tracks`, body);
-    }
-
-    reorder(area: string, ids: string[]): Observable<void> {
-        return this.http.put<void>(`${this.baseUrl}/areas/${area}/order`, { ids });
     }
 
     rename(id: string, title: string): Observable<MusicTrack> {

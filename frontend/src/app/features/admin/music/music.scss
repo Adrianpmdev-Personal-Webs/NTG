@@ -40,7 +40,7 @@
 
 .track {
     display: grid;
-    grid-template-columns: 28px minmax(0, 1fr) auto 260px auto;
+    grid-template-columns: minmax(0, 1fr) auto 260px auto;
     align-items: center;
     gap: 12px;
     padding: 8px 12px;
@@ -48,7 +48,7 @@
     background: var(--bg-card);
 
     @include tablet {
-        grid-template-columns: 28px minmax(0, 1fr) auto;
+        grid-template-columns: minmax(0, 1fr) auto;
 
         .track-audio {
             grid-column: 1 / -1;
@@ -60,13 +60,6 @@
             justify-content: flex-end;
         }
     }
-}
-
-.track-number {
-    font-family: var(--font-display);
-    font-size: 0.8rem;
-    color: var(--text-dim);
-    text-align: right;
 }
 
 .track-title {

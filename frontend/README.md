@@ -50,19 +50,19 @@ background music and game content.
 
 ## 🧭 Screens
 
-| Area             | Screen            | What it does                                                                                                |
-| ---------------- | ----------------- | ----------------------------------------------------------------------------------------------------------- |
-| 🔑 Auth          | **Login**         | Sign in; restores the session automatically if one exists                                                   |
-| 🔑 Auth          | **Set password**  | Landing page of the email link: the user chooses a password and enters directly                             |
-| 🏠 Platform      | **Welcome**       | Player home: cards for the games they can open, and the ones coming soon                                    |
-| 👑 Admin         | **Dashboard**     | Platform overview                                                                                           |
-| 👑 Admin         | **Users**         | Create users by email, assign tags, edit, resend the password email, delete                                 |
-| 👑 Admin         | **Games**         | Game catalog: add a game (its tag is created too), order, cover, icon, release it to players                |
-| 👑 Admin         | **Pictures**      | Every picture the platform and the games expect: upload the original, the server compresses it              |
-| 👑 Admin         | **Music**         | One playlist per area: add songs in any format (the browser compresses them), listen, rename, order, delete |
-| 🎵 Everywhere    | **Music control** | Floating button in the top right corner (computers only): mute, and a volume slider on hover                |
-| 🎮 Games         | **Game areas**    | Each game has its own layout, theme, views and tools, and opens only with its tag                           |
-| 🎮 Games (admin) | **Management**    | A game can add its own administration screens to the admin area                                             |
+| Area             | Screen            | What it does                                                                                         |
+| ---------------- | ----------------- | ---------------------------------------------------------------------------------------------------- |
+| 🔑 Auth          | **Login**         | Sign in; restores the session automatically if one exists                                            |
+| 🔑 Auth          | **Set password**  | Landing page of the email link: the user chooses a password and enters directly                      |
+| 🏠 Platform      | **Welcome**       | Player home: cards for the games they can open, and the ones coming soon                             |
+| 👑 Admin         | **Dashboard**     | Platform overview                                                                                    |
+| 👑 Admin         | **Users**         | Create users by email, assign tags, edit, resend the password email, delete                          |
+| 👑 Admin         | **Games**         | Game catalog: add a game (its tag is created too), order, cover, icon, release it to players         |
+| 👑 Admin         | **Pictures**      | Every picture the platform and the games expect: upload the original, the server compresses it       |
+| 👑 Admin         | **Music**         | One playlist per area: add songs in any format (the browser compresses them), listen, rename, delete |
+| 🎵 Everywhere    | **Music control** | Floating button in the top right corner (computers only): mute, and a volume slider on hover         |
+| 🎮 Games         | **Game areas**    | Each game has its own layout, theme, views and tools, and opens only with its tag                    |
+| 🎮 Games (admin) | **Management**    | A game can add its own administration screens to the admin area                                      |
 
 ---
 
@@ -178,7 +178,7 @@ the tag key** that unlocks it.
   tooltips stay on screen on touch devices.
 - **Background music:** one player for the whole app. The first segment of the URL picks the playlist (a game id
   plays that game's, anything else, admin screens included, the general one) and an area without songs plays
-  nothing. One song repeats; several play in order and start again. It only runs where the main input is a mouse or
+  nothing. One song repeats; several play shuffled, with no repeats until all have played. It only runs where the main input is a mouse or
   a trackpad (phones and tablets never ask for the playlists), starts at about 2% of the real volume, pauses when
   muted or at volume 0 and remembers both in the browser. Headers keep room for the control on computers
   (`--music-control-space`).

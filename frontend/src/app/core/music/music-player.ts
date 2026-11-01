@@ -5,8 +5,9 @@
  * phones and tablets it never asks for the playlists nor downloads a song.
  * The area comes from the first segment of the URL: a game id plays that game's playlist and anything else (welcome,
  * admin screens, including the management of a game) plays the general one. An area without songs plays nothing.
- * A single song repeats; several play in order and start again after the last one. Moving between screens of the same
- * area never restarts the music; changing area fades it out and starts the new playlist.
+ * A single song repeats; several play shuffled, none repeats until all have played, and then they are shuffled again
+ * (the last one never comes straight back). Moving between screens of the same area never restarts the music; changing
+ * area fades it out and starts the new playlist.
  * Muting or setting the volume to 0 pauses the song, so nothing keeps playing silently. The default volume is about 2%
  * of the real one. Mute and volume are remembered by this browser. Browsers refuse to play sound before the
  * user interacts with the page, so after a reload the music starts on the first click or key.
@@ -153,7 +154,7 @@ export class MusicPlayer {
     }
 
     private start(tracks: MusicTrack[]): void {
-        this.playlist = tracks;
+        this.playlist = shuffled(tracks);
         this.index = 0;
         this.failures = 0;
 
@@ -163,7 +164,7 @@ export class MusicPlayer {
             return;
         }
 
-        this.load(tracks[0]);
+        this.load(this.playlist[0]);
         this.play();
     }
 
@@ -192,7 +193,13 @@ export class MusicPlayer {
             return;
         }
 
-        this.index = (this.index + 1) % this.playlist.length;
+        this.index++;
+
+        if (this.index >= this.playlist.length) {
+            this.playlist = shuffled(this.playlist, this.playlist[this.playlist.length - 1]);
+            this.index = 0;
+        }
+
         this.load(this.playlist[this.index]);
         this.play();
     }
@@ -276,6 +283,22 @@ export class MusicPlayer {
 
         return this.audio;
     }
+}
+
+function shuffled(tracks: MusicTrack[], notFirst?: MusicTrack): MusicTrack[] {
+    const result = [...tracks];
+
+    for (let i = result.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+
+        [result[i], result[j]] = [result[j], result[i]];
+    }
+
+    if (result.length > 1 && result[0] === notFirst) {
+        [result[0], result[1]] = [result[1], result[0]];
+    }
+
+    return result;
 }
 
 function loudness(volume: number): number {

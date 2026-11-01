@@ -3,7 +3,7 @@
  *
  * Admin screen of the background music: one playlist for the general web and one per game, in the order the backend
  * gives them. The admin adds songs in any format the browser can read; each one is compressed here (see compressSong)
- * and only the small M4A is uploaded. Songs can be listened to, renamed, moved up or down and deleted. After every
+ * and only the small M4A is uploaded. Songs can be listened to, renamed and deleted. After every
  * change the player of this browser reads the playlists again.
  *
  * @author @adrianpmdev
@@ -114,28 +114,6 @@ export class Music {
                 this.busy.set(false);
                 input.value = track.title;
                 this.notifications.error(resolveApiError(error, 'No se ha podido renombrar la canción'));
-            },
-        });
-    }
-
-    protected move(area: MusicArea, index: number, offset: number): void {
-        const ids = area.tracks.map((track) => track.id);
-        const target = index + offset;
-
-        if (target < 0 || target >= ids.length) {
-            return;
-        }
-
-        [ids[index], ids[target]] = [ids[target], ids[index]];
-        this.busy.set(true);
-        this.musicApi.reorder(area.area, ids).subscribe({
-            next: () => {
-                this.busy.set(false);
-                this.changed();
-            },
-            error: (error) => {
-                this.busy.set(false);
-                this.notifications.error(resolveApiError(error, 'No se ha podido cambiar el orden'));
             },
         });
     }

@@ -16,14 +16,16 @@
 --   locke_deaths         The Pokémon each player lost in a randomlocke (only the name of the Pokémon).
 -- Nothing derived is stored: standings, scores and winners are computed from match_games.
 --
--- How to use: run it in the Supabase SQL editor of an empty project, after core.sql.
+-- How to use: run it in the Supabase SQL editor, after core.sql; it can be run again on an existing project, it
+-- only adds what is missing and keeps the data. A new column of an existing table needs its own
+-- "alter table ... add column if not exists".
 -- =====================================================================================================
 
 create schema if not exists pokemon;
 
 -- ─── games ───────────────────────────────────────────────────────────────────────────────────────
 
-create table pokemon.games (
+create table if not exists pokemon.games (
     id          uuid         not null default gen_random_uuid(),
     name        varchar(100) not null,
     description varchar(1000),
@@ -34,7 +36,7 @@ create table pokemon.games (
 
 -- ─── lockes ──────────────────────────────────────────────────────────────────────────────────────
 
-create table pokemon.lockes (
+create table if not exists pokemon.lockes (
     id          uuid         not null default gen_random_uuid(),
     name        varchar(100) not null,
     description varchar(1000),
@@ -45,7 +47,7 @@ create table pokemon.lockes (
 
 -- ─── players ─────────────────────────────────────────────────────────────────────────────────────
 
-create table pokemon.players (
+create table if not exists pokemon.players (
     id         uuid        not null default gen_random_uuid(),
     name       varchar(50) not null,
     -- Platform account (core.user.id). A plain column, like every user reference in game schemas.
@@ -58,7 +60,7 @@ create table pokemon.players (
 
 -- ─── locke_players ───────────────────────────────────────────────────────────────────────────────
 
-create table pokemon.locke_players (
+create table if not exists pokemon.locke_players (
     locke_id  uuid not null,
     player_id uuid not null,
     constraint locke_players_pkey primary key (locke_id, player_id),
@@ -66,11 +68,11 @@ create table pokemon.locke_players (
     constraint locke_players_player_fkey foreign key (player_id) references pokemon.players (id)
 );
 
-create index locke_players_player_idx on pokemon.locke_players (player_id);
+create index if not exists locke_players_player_idx on pokemon.locke_players (player_id);
 
 -- ─── tournaments ─────────────────────────────────────────────────────────────────────────────────
 
-create table pokemon.tournaments (
+create table if not exists pokemon.tournaments (
     id              uuid         not null default gen_random_uuid(),
     locke_id        uuid         not null,
     game_id         uuid         not null,
@@ -97,11 +99,11 @@ create table pokemon.tournaments (
     constraint tournaments_bracket_size_check check (bracket_size in (4, 8, 16, 32))
 );
 
-create index tournaments_game_idx on pokemon.tournaments (game_id);
+create index if not exists tournaments_game_idx on pokemon.tournaments (game_id);
 
 -- ─── tournament_players ──────────────────────────────────────────────────────────────────────────
 
-create table pokemon.tournament_players (
+create table if not exists pokemon.tournament_players (
     id                uuid         not null default gen_random_uuid(),
     tournament_id     uuid         not null,
     player_id         uuid         not null,
@@ -117,11 +119,11 @@ create table pokemon.tournament_players (
     constraint tournament_players_group_check check (group_name in ('A', 'B'))
 );
 
-create index tournament_players_player_idx on pokemon.tournament_players (player_id);
+create index if not exists tournament_players_player_idx on pokemon.tournament_players (player_id);
 
 -- ─── matches ─────────────────────────────────────────────────────────────────────────────────────
 
-create table pokemon.matches (
+create table if not exists pokemon.matches (
     id            uuid        not null default gen_random_uuid(),
     tournament_id uuid        not null,
     -- group and league series; upper, lower and grand_final for the double-elimination bracket.
@@ -143,12 +145,12 @@ create table pokemon.matches (
     constraint matches_players_check check (player1_id is null or player2_id is null or player1_id <> player2_id)
 );
 
-create index matches_player1_idx on pokemon.matches (player1_id);
-create index matches_player2_idx on pokemon.matches (player2_id);
+create index if not exists matches_player1_idx on pokemon.matches (player1_id);
+create index if not exists matches_player2_idx on pokemon.matches (player2_id);
 
 -- ─── match_games ─────────────────────────────────────────────────────────────────────────────────
 
-create table pokemon.match_games (
+create table if not exists pokemon.match_games (
     id          uuid         not null default gen_random_uuid(),
     match_id    uuid         not null,
     game_number smallint     not null,
@@ -165,7 +167,7 @@ create table pokemon.match_games (
 
 -- ─── rewards ─────────────────────────────────────────────────────────────────────────────────────
 
-create table pokemon.rewards (
+create table if not exists pokemon.rewards (
     id            uuid         not null default gen_random_uuid(),
     tournament_id uuid         not null,
     sort_order    smallint     not null,
@@ -182,7 +184,7 @@ create table pokemon.rewards (
 -- ─── locke_deaths ────────────────────────────────────────────────────────────────────────────────
 -- Not tied to locke_players: taking a player out of the roster keeps the Pokémon they lost.
 
-create table pokemon.locke_deaths (
+create table if not exists pokemon.locke_deaths (
     id         uuid        not null default gen_random_uuid(),
     locke_id   uuid        not null,
     player_id  uuid        not null,
@@ -193,8 +195,8 @@ create table pokemon.locke_deaths (
     constraint locke_deaths_player_fkey foreign key (player_id) references pokemon.players (id)
 );
 
-create index locke_deaths_locke_idx on pokemon.locke_deaths (locke_id, created_at);
-create index locke_deaths_player_idx on pokemon.locke_deaths (player_id);
+create index if not exists locke_deaths_locke_idx on pokemon.locke_deaths (locke_id, created_at);
+create index if not exists locke_deaths_player_idx on pokemon.locke_deaths (player_id);
 
 -- ─── Row level security ──────────────────────────────────────────────────────────────────────────
 -- The backend connects as the table owner, which bypasses RLS. Enabling it without policies closes

@@ -123,7 +123,7 @@ public class SecurityConfig {
                     auth.requestMatchers("/api/v1/tags", "/api/v1/tags/**").hasRole(ADMIN_ROLE);
 
                     // Catalog: every signed-in user reads the games they can see; changes and pictures are ADMIN.
-                    auth.requestMatchers(HttpMethod.GET, "/api/v1/games").authenticated();
+                    auth.requestMatchers(HttpMethod.GET, "/api/v1/games", "/api/v1/games/highlights").authenticated();
                     auth.requestMatchers("/api/v1/games", "/api/v1/games/**").hasRole(ADMIN_ROLE);
                     auth.requestMatchers("/api/v1/assets", "/api/v1/assets/**").hasRole(ADMIN_ROLE);
                     auth.requestMatchers("/api/v1/dashboard", "/api/v1/dashboard/**").hasRole(ADMIN_ROLE);

@@ -50,19 +50,19 @@ background music and game content.
 
 ## 🧭 Screens
 
-| Area             | Screen            | What it does                                                                                         |
-| ---------------- | ----------------- | ---------------------------------------------------------------------------------------------------- |
-| 🔑 Auth          | **Login**         | Sign in; restores the session automatically if one exists                                            |
-| 🔑 Auth          | **Set password**  | Landing page of the email link: the user chooses a password and enters directly                      |
-| 🏠 Platform      | **Welcome**       | Inicio: cards for the games they can open, and the ones coming soon                                  |
-| 👑 Admin         | **Dashboard**     | Real state: memory, CPU, space, modules, traffic, recent errors and accounts, read on demand         |
-| 👑 Admin         | **Users**         | Create users by email, assign tags, edit, resend the password email, delete                          |
-| 👑 Admin         | **Games**         | Game catalog: add a game (its tag is created too), order, cover, icon, release it to players         |
-| 👑 Admin         | **Pictures**      | Every picture the platform and the games expect: upload the original, the server compresses it       |
-| 👑 Admin         | **Music**         | One playlist per area: add songs in any format (the browser compresses them), listen, rename, delete |
-| 🎵 Everywhere    | **Music control** | Floating button in the top right corner (computers only): mute, and a volume slider on hover         |
-| 🎮 Games         | **Game areas**    | Each game has its own layout, theme, views and tools, and opens only with its tag                    |
-| 🎮 Games (admin) | **Management**    | A game can add its own administration screens to the admin area                                      |
+| Area             | Screen            | What it does                                                                                                |
+| ---------------- | ----------------- | ----------------------------------------------------------------------------------------------------------- |
+| 🔑 Auth          | **Login**         | Sign in; restores the session automatically if one exists                                                   |
+| 🔑 Auth          | **Set password**  | Landing page of the email link: the user chooses a password and enters directly                             |
+| 🏠 Platform      | **Welcome**       | Inicio: continue on the last screen of a game, and every game as a large cover with what is happening in it |
+| 👑 Admin         | **Dashboard**     | Real state: memory, CPU, space, modules, traffic, recent errors and accounts, read on demand                |
+| 👑 Admin         | **Users**         | Create users by email, assign tags, edit, resend the password email, delete                                 |
+| 👑 Admin         | **Games**         | Game catalog: add a game (its tag is created too), order, cover, icon, release it to players                |
+| 👑 Admin         | **Pictures**      | Every picture the platform and the games expect: upload the original, the server compresses it              |
+| 👑 Admin         | **Music**         | One playlist per area: add songs in any format (the browser compresses them), listen, rename, delete        |
+| 🎵 Everywhere    | **Music control** | Floating button in the top right corner (computers only): mute, and a volume slider on hover                |
+| 🎮 Games         | **Game areas**    | Each game has its own layout, theme, views and tools, and opens only with its tag                           |
+| 🎮 Games (admin) | **Management**    | A game can add its own administration screens to the admin area                                             |
 
 ---
 
@@ -135,7 +135,7 @@ frontend/
         ├── core/               🧱 App-wide singletons, grouped by area
         │   ├── api/            API base URL
         │   ├── auth/           AuthSession, auth interceptor, auth · admin · role-home guards
-        │   ├── games/          GameModule contract, GameCatalog, game guard
+        │   ├── games/          GameModule contract, GameCatalog, game guard, LastVisit
         │   ├── users/ · tags/ · assets/   UserApi, TagApi, AssetApi (pictures)
         │   ├── music/          MusicApi, MusicPlayer (the one background player)
         │   └── notifications/  NotificationCenter
@@ -156,7 +156,8 @@ frontend/
 ### Adding a game
 
 1. Create `games/<game>/` with its layout, theme, views, models and API service.
-2. Export a `GameModule` from `<game>.game.ts` (id, routes, admin routes and menu) and list it in `games/games.ts`.
+2. Export a `GameModule` from `<game>.game.ts` (id, routes, admin routes and menu) and list it in `games/games.ts`. Mark the
+   screens worth coming back to with `data: { visitLabel: '...' }`, so the home page can offer to continue there.
 3. Add the game in the admin **Games** screen (this creates its tag), upload its cover and its icon (shown in the sidebar) and untick _coming soon_
    when it is ready.
 

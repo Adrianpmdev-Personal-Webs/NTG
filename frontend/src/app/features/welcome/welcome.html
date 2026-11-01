@@ -1,18 +1,25 @@
 <section class="welcome">
-    <div class="welcome-card terminal-card animate-fade-up">
-        <p class="welcome-prompt">root&#64;ntg:~$ <span class="cursor"></span></p>
-        <h1 class="welcome-title neon-text">BIENVENIDO, {{ currentUser()?.username?.toUpperCase() }}</h1>
-        <p class="welcome-text">
-            Aquí encontrarás la información de los juegos a los que jugamos: torneos, jugadores y herramientas.
-        </p>
-    </div>
+    <header class="welcome-head">
+        <div class="welcome-greeting">
+            <p class="welcome-prompt">root&#64;ntg:~$ <span class="cursor"></span></p>
+            <h1 class="welcome-title neon-text">BIENVENIDO, {{ currentUser()?.username?.toUpperCase() }}</h1>
+        </div>
+
+        @if (continueVisit(); as visit) {
+            <a class="continue terminal-card" [routerLink]="visit.path">
+                <app-nav-icon class="continue-icon" name="play" />
+                <span class="continue-text">
+                    <span class="continue-label">CONTINUAR DONDE LO DEJASTE</span>
+                    <span class="continue-target">{{ visit.gameName }} · {{ visit.label }}</span>
+                </span>
+            </a>
+        }
+    </header>
 
     @if (hasNoTags()) {
-        <div class="welcome-card terminal-card">
-            <p class="welcome-text">
-                [AVISO] Todavía no tienes acceso a ningún juego. Pide a un administrador que te asigne la etiqueta
-                correspondiente.
-            </p>
+        <div class="welcome-notice terminal-card">
+            [AVISO] Todavía no tienes acceso a ningún juego. Pide a un administrador que te asigne la etiqueta
+            correspondiente.
         </div>
     }
 
@@ -20,30 +27,48 @@
         @for (game of games(); track game.id) {
             @if (game.upcoming && !isAdmin()) {
                 <div class="game-card terminal-card upcoming">
-                    @if (game.coverUrl) {
-                        <img class="game-image" [src]="game.coverUrl" [alt]="game.name" />
-                    } @else {
-                        <div class="game-image game-image-empty">{{ game.name.charAt(0).toUpperCase() }}</div>
-                    }
-                    <span class="game-name">{{ game.name.toUpperCase() }}</span>
-                    <span class="game-tag">PRÓXIMAMENTE</span>
+                    <ng-container [ngTemplateOutlet]="cover" [ngTemplateOutletContext]="{ $implicit: game }" />
+                    <div class="game-info">
+                        <ng-container [ngTemplateOutlet]="title" [ngTemplateOutletContext]="{ $implicit: game }" />
+                        <div class="game-foot">
+                            <span class="game-tag">PRÓXIMAMENTE</span>
+                        </div>
+                    </div>
                 </div>
             } @else {
                 <a class="game-card terminal-card" [routerLink]="'/' + game.id">
-                    @if (game.coverUrl) {
-                        <img class="game-image" [src]="game.coverUrl" [alt]="game.name" />
-                    } @else {
-                        <div class="game-image game-image-empty">{{ game.name.charAt(0).toUpperCase() }}</div>
-                    }
-                    <span class="game-name">
-                        {{ game.name.toUpperCase() }}
-                        @if (game.upcoming) {
-                            <span class="upcoming-mark" title="Próximamente: solo visible para admins">*</span>
-                        }
-                    </span>
-                    <span class="game-tag">ENTRAR ▶</span>
+                    <ng-container [ngTemplateOutlet]="cover" [ngTemplateOutletContext]="{ $implicit: game }" />
+                    <div class="game-info">
+                        <ng-container [ngTemplateOutlet]="title" [ngTemplateOutletContext]="{ $implicit: game }" />
+                        <div class="game-foot">
+                            @if (highlights()[game.id]; as highlight) {
+                                <span class="game-highlight"><span class="highlight-dot"></span>{{ highlight }}</span>
+                            }
+                            <span class="game-enter">ENTRAR <app-nav-icon class="enter-icon" name="play" /></span>
+                        </div>
+                    </div>
                 </a>
             }
         }
     </div>
 </section>
+
+<ng-template #cover let-game>
+    @if (game.coverUrl) {
+        <img class="game-image" [src]="game.coverUrl" alt="" />
+    } @else {
+        <div class="game-image game-image-empty">{{ game.name.charAt(0).toUpperCase() }}</div>
+    }
+</ng-template>
+
+<ng-template #title let-game>
+    <h2 class="game-name">
+        @if (game.iconUrl) {
+            <img class="game-icon" [src]="game.iconUrl" alt="" />
+        }
+        {{ game.name.toUpperCase() }}
+        @if (game.upcoming && isAdmin()) {
+            <span class="upcoming-mark" title="Próximamente: solo visible para admins">*</span>
+        }
+    </h2>
+</ng-template>

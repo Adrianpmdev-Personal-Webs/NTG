@@ -1,5 +1,6 @@
 package com.adrianpmdev.pokemon.features.tournaments.infrastructure.persistence.repository;
 
+import com.adrianpmdev.pokemon.features.tournaments.domain.TournamentStatus;
 import com.adrianpmdev.pokemon.features.tournaments.infrastructure.persistence.entity.Tournament;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,6 +17,14 @@ import java.util.UUID;
  * @author adrianpmdev
  */
 public interface TournamentRepository extends JpaRepository<Tournament, UUID> {
+
+    /**
+     * How many tournaments are in a state.
+     *
+     * @param status state
+     * @return number of tournaments
+     */
+    long countByStatus(TournamentStatus status);
 
     /**
      * One tournament with its randomlocke and game.

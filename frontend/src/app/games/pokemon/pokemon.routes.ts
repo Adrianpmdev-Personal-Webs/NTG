@@ -16,15 +16,29 @@ export const POKEMON_ROUTES: Routes = [
         children: [
             { path: '', pathMatch: 'full', redirectTo: 'games' },
             { path: 'games', loadComponent: () => import('./games/games').then((m) => m.Games) },
-            { path: 'games/:gameId', loadComponent: () => import('./game/game').then((m) => m.GamePage) },
-            { path: 'lockes/:lockeId', loadComponent: () => import('./locke/locke').then((m) => m.LockePage) },
+            {
+                path: 'games/:gameId',
+                data: { visitLabel: 'Juego' },
+                loadComponent: () => import('./game/game').then((m) => m.GamePage),
+            },
+            {
+                path: 'lockes/:lockeId',
+                data: { visitLabel: 'Randomlocke' },
+                loadComponent: () => import('./locke/locke').then((m) => m.LockePage),
+            },
             {
                 path: 'tournaments/:tournamentId',
+                data: { visitLabel: 'Torneo' },
                 loadComponent: () => import('./tournament/tournament').then((m) => m.TournamentPage),
             },
-            { path: 'ranking', loadComponent: () => import('./ranking/ranking').then((m) => m.RankingPage) },
+            {
+                path: 'ranking',
+                data: { visitLabel: 'Ranking' },
+                loadComponent: () => import('./ranking/ranking').then((m) => m.RankingPage),
+            },
             {
                 path: 'type-calculator',
+                data: { visitLabel: 'Calculadora de tipos' },
                 loadComponent: () => import('./type-calculator/type-calculator').then((m) => m.TypeCalculator),
             },
         ],

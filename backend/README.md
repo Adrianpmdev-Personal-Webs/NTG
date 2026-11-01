@@ -67,7 +67,7 @@ backend/
 ├── platform-api/                   📜 Contracts shared by core and the games
 │   └── com/adrianpmdev/platform/
 │       ├── port/                   CurrentUser, ObjectStorage
-│       ├── module/                 GameModule: API path, tag and player writes of a game
+│       ├── module/                 GameModule (API path, tag, player writes), GameHighlightProvider
 │       ├── image/                  ImageCompressor, ImageSpec, CompressedImage
 │       ├── asset/                  ImageSlot, ImageSlotProvider, PublicAssets
 │       ├── status/                 ModuleStatus, ModuleStatusProvider (a block of the admin dashboard)
@@ -161,7 +161,7 @@ security headers (see the [frontend documentation](../frontend/README.md)).
 | Session | `POST /auth/login`, `/auth/refresh`, `/auth/logout`, `PUT /auth/set-password` | Public (the last one needs the link token), with attempt limits |
 | Session | `GET /auth/me` | Any signed-in user |
 | Profile | `PUT /users/me` | Any signed-in user (own profile only) |
-| Catalog | `GET /games` | Any signed-in user (each sees the games they can) |
+| Catalog | `GET /games`, `GET /games/highlights` | Any signed-in user (each sees the games they can) |
 | Catalog | `POST` · `PUT` · `DELETE /games/**` | **Admin** |
 | Music | `GET /music` | Any signed-in user (the general playlist and the games they hold the tag for) |
 | Music | `/music/**` | **Admin** |
@@ -200,6 +200,9 @@ security headers (see the [frontend documentation](../frontend/README.md)).
   open only to admins.
 - An admin assigns the tag to users and, when the game is ready, unticks *coming soon*. From the next request,
   users with the tag can read the game's API. No deploy is needed.
+- A game may declare a `GameHighlightProvider`: a short text about what is happening in it (a tournament being played,
+  the build served), shown on its cover on the home page. Only the games the caller can open answer, once per visit to
+  that page.
 
 ### 4. Pictures
 

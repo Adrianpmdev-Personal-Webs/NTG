@@ -1,7 +1,8 @@
 /**
  * Game catalog models
  *
- * A game of the catalog as the backend gives it to the current user, and the data an admin sends to change it.
+ * A game of the catalog as the backend gives it to the current user, what is happening in it, and the data an admin
+ * sends to change it.
  *
  * @author @adrianpmdev
  */
@@ -14,6 +15,11 @@ export interface CatalogGame {
     upcoming: boolean;
     accessible: boolean;
     sortOrder: number;
+}
+
+export interface GameHighlight {
+    game: string;
+    text: string;
 }
 
 export interface CatalogGameRequest {

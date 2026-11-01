@@ -12,7 +12,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, catchError, distinctUntilChanged, map, of, shareReplay, tap, throwError } from 'rxjs';
 import { API_BASE_URL } from '@core/api/api';
-import { CatalogGame, CatalogGameRequest, CreateCatalogGameRequest } from '@shared/models/game';
+import { CatalogGame, CatalogGameRequest, CreateCatalogGameRequest, GameHighlight } from '@shared/models/game';
 import { AuthSession } from '../auth/auth-session';
 
 @Injectable({ providedIn: 'root' })
@@ -53,6 +53,10 @@ export class GameCatalog {
         this.load()
             .pipe(catchError(() => of([])))
             .subscribe();
+    }
+
+    getHighlights(): Observable<GameHighlight[]> {
+        return this.http.get<GameHighlight[]>(`${this.baseUrl}/highlights`);
     }
 
     canAccess(gameId: string): Observable<boolean> {

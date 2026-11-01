@@ -2,8 +2,10 @@ package com.adrianpmdev.core.features.catalog.api.controller;
 
 import com.adrianpmdev.core.features.catalog.api.dto.request.CreateGameRequest;
 import com.adrianpmdev.core.features.catalog.api.dto.request.UpdateGameRequest;
+import com.adrianpmdev.core.features.catalog.api.dto.response.GameHighlightResponse;
 import com.adrianpmdev.core.features.catalog.api.dto.response.GameResponse;
 import com.adrianpmdev.core.features.catalog.application.service.GameCatalogService;
+import com.adrianpmdev.core.features.catalog.application.service.GameHighlightService;
 import com.adrianpmdev.core.security.authentication.AuthenticatedUser;
 import com.adrianpmdev.core.security.authorization.Authorities;
 import jakarta.validation.Valid;
@@ -38,14 +40,17 @@ public class GameCatalogController {
     private static final String ROLE_ADMIN = Authorities.ROLE_PREFIX + "ADMIN";
 
     private final GameCatalogService gameCatalogService;
+    private final GameHighlightService gameHighlightService;
 
     /**
      * Builds the controller with its dependencies.
      *
-     * @param gameCatalogService catalog service
+     * @param gameCatalogService   catalog service
+     * @param gameHighlightService what each game tells on the home page
      */
-    public GameCatalogController(GameCatalogService gameCatalogService) {
+    public GameCatalogController(GameCatalogService gameCatalogService, GameHighlightService gameHighlightService) {
         this.gameCatalogService = gameCatalogService;
+        this.gameHighlightService = gameHighlightService;
     }
 
     /**
@@ -56,11 +61,28 @@ public class GameCatalogController {
      */
     @GetMapping
     public List<GameResponse> getVisible(Authentication authentication) {
-        Set<String> authorities = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toSet());
+        Set<String> authorities = authoritiesOf(authentication);
 
         return gameCatalogService.getVisible(authorities.contains(ROLE_ADMIN), authorities);
+    }
+
+    /**
+     * What is happening right now in the games the caller can open, for the home page.
+     *
+     * @param authentication current authentication
+     * @return highlights
+     */
+    @GetMapping("/highlights")
+    public List<GameHighlightResponse> getHighlights(Authentication authentication) {
+        Set<String> authorities = authoritiesOf(authentication);
+
+        return gameHighlightService.getVisible(authorities.contains(ROLE_ADMIN), authorities);
+    }
+
+    private static Set<String> authoritiesOf(Authentication authentication) {
+        return authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toSet());
     }
 
     /**

@@ -17,22 +17,27 @@ export const WOW_FOREVER_ROUTES: Routes = [
     },
     {
         path: 'talents',
+        data: { visitLabel: 'Calculadora de talentos' },
         loadComponent: () => import('./talents/talent-calculator/talent-calculator').then((m) => m.TalentCalculator),
     },
     {
         path: 'spellbook',
+        data: { visitLabel: 'Libro de hechizos' },
         loadComponent: () => import('./spellbook/spellbook-viewer/spellbook-viewer').then((m) => m.SpellbookViewer),
     },
     {
         path: 'legacy',
+        data: { visitLabel: 'Sistema Legacy' },
         loadComponent: () => import('./legacy/legacy-planner/legacy-planner').then((m) => m.LegacyPlanner),
     },
     {
         path: 'races',
+        data: { visitLabel: 'Razas' },
         loadComponent: () => import('./racials/racials-overview/racials-overview').then((m) => m.RacialsOverview),
     },
     {
         path: 'professions',
+        data: { visitLabel: 'Professions' },
         loadComponent: () =>
             import('./professions/professions-overview/professions-overview').then((m) => m.ProfessionsOverview),
     },

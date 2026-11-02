@@ -29,6 +29,10 @@
             <groupId>com.adrianpmdev</groupId>
             <artifactId>wow-forever</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.adrianpmdev</groupId>
+            <artifactId>lol</artifactId>
+        </dependency>
 
         <!-- Database driver -->
         <dependency>

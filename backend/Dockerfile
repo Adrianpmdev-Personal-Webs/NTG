@@ -11,6 +11,7 @@ COPY platform-api/pom.xml platform-api/pom.xml
 COPY core/pom.xml core/pom.xml
 COPY games/pokemon/pom.xml games/pokemon/pom.xml
 COPY games/wow-forever/pom.xml games/wow-forever/pom.xml
+COPY games/lol/pom.xml games/lol/pom.xml
 COPY app/pom.xml app/pom.xml
 
 # Copiar todo el código fuente
@@ -18,6 +19,7 @@ COPY platform-api/src platform-api/src
 COPY core/src core/src
 COPY games/pokemon/src games/pokemon/src
 COPY games/wow-forever/src games/wow-forever/src
+COPY games/lol/src games/lol/src
 COPY app/src app/src
 
 # Build: compila app (y core, los juegos y platform-api como dependencias)

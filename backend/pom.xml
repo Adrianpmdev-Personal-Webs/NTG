@@ -19,6 +19,7 @@
         <module>core</module>
         <module>games/pokemon</module>
         <module>games/wow-forever</module>
+        <module>games/lol</module>
         <module>app</module>
     </modules>
 
@@ -62,6 +63,11 @@
             <dependency>
                 <groupId>com.adrianpmdev</groupId>
                 <artifactId>wow-forever</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.adrianpmdev</groupId>
+                <artifactId>lol</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

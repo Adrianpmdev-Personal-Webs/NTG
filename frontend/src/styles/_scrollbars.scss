@@ -1,0 +1,85 @@
+$pk-header: 66px;
+$pk-shadow: 4px;
+
+@property --pk-header-left {
+    syntax: '<length>';
+    inherits: true;
+    initial-value: 0px;
+}
+
+@keyframes pk-header-leaves {
+    from {
+        --pk-header-left: #{$pk-header};
+    }
+
+    to {
+        --pk-header-left: #{-$pk-shadow};
+    }
+}
+
+@mixin bar($track, $thumb, $hover) {
+    &::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    &::-webkit-scrollbar-track,
+    &::-webkit-scrollbar-corner {
+        background: $track;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: $thumb;
+        border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background: $hover;
+    }
+
+    @supports not selector(::-webkit-scrollbar) {
+        scrollbar-width: thin;
+        scrollbar-color: $thumb $track;
+    }
+}
+
+@media (hover: hover) and (pointer: fine) {
+    body:has(app-pokemon-layout),
+    app-pokemon-layout * {
+        @include bar(#141b3d, #ffcb05, #ffde59);
+    }
+
+    @media (min-width: 901px) {
+        body:has(app-pokemon-layout) {
+            animation: pk-header-leaves linear both;
+            animation-timeline: scroll(self);
+            animation-range: 0 #{$pk-header + $pk-shadow};
+
+            &::-webkit-scrollbar {
+                background: #141b3d
+                    linear-gradient(
+                        #ee1515 calc(var(--pk-header-left) - #{$pk-shadow}),
+                        #b60f0f 0 var(--pk-header-left),
+                        rgba(0, 0, 0, 0.25) 0 calc(var(--pk-header-left) + #{$pk-shadow}),
+                        transparent 0
+                    );
+            }
+
+            &::-webkit-scrollbar-track {
+                margin-top: #{$pk-header + $pk-shadow};
+            }
+        }
+    }
+
+    body:has(app-wow-page),
+    body:has(app-wow-forever-home),
+    app-wow-page *,
+    app-wow-forever-home * {
+        @include bar(#050506, #8a7440, #d8b866);
+    }
+
+    body:has(app-lol-history),
+    app-lol-history * {
+        @include bar(#091428, #c8aa6e, #0ac8b9);
+    }
+}

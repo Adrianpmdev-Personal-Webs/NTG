@@ -39,6 +39,8 @@ background music and game content.
 - 📱 **Works on every screen size:** each screen was checked from 320 px phones to desktop.
 - 🎵 **Background music per area** on computers: the general web and each game play their own playlist, with one
   floating control to mute it or change the volume.
+- 📲 **Installable on a phone:** a web app manifest puts NTG on the home screen and opens it without the browser bar.
+  There is no service worker, so it needs a connection, like the website.
 - 🎨 **Two visual worlds:** a terminal look for the platform, and a custom identity for each game.
 
 > 🌍 **The interface is written in Spanish** (the audience is a Spanish-speaking group). Code and documentation are in
@@ -123,7 +125,7 @@ The session combines a short-lived access token kept in memory with a long-lived
 
 ```text
 frontend/
-├── public/                     favicon.png (Team NTG logo: browser tab and sidebar)
+├── public/                     favicon.png (Team NTG logo: browser tab and sidebar), manifest and icons to install the app
 ├── proxy.conf.json             ng serve: /api → localhost:8080 (like Vercel does in production)
 ├── vercel.json                 /api rewrite, SPA fallback, cache and security headers
 └── src/

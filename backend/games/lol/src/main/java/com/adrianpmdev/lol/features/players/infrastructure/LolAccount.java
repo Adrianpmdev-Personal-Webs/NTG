@@ -58,6 +58,12 @@ public class LolAccount {
     @Column(columnDefinition = "jsonb", nullable = false)
     private JsonNode ranks;
 
+    @Column(name = "profile_icon_id")
+    private Integer profileIconId;
+
+    @Column(name = "summoner_level")
+    private Integer summonerLevel;
+
     @Column(name = "synced_until")
     private Instant syncedUntil;
 

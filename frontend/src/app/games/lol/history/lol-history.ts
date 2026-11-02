@@ -8,7 +8,7 @@
  * @author @adrianpmdev
  */
 
-import { DecimalPipe } from '@angular/common';
+import { DecimalPipe, NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -23,7 +23,7 @@ const DAY = 24 * HOUR;
 
 @Component({
     selector: 'app-lol-history',
-    imports: [DecimalPipe, RouterLink],
+    imports: [DecimalPipe, NgTemplateOutlet, RouterLink],
     templateUrl: './lol-history.html',
     styleUrl: './lol-history.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -97,6 +97,15 @@ export class LolHistory implements OnInit {
                 this.detailLoad?.unsubscribe();
                 this.detail.set(detail);
                 this.updating.set(false);
+                this.data.update(
+                    (data) =>
+                        data && {
+                            ...data,
+                            players: data.players.map((player) =>
+                                player.userId === detail.player.userId ? detail.player : player,
+                            ),
+                        },
+                );
 
                 if (detail.error) {
                     this.notifications.warning(detail.error);

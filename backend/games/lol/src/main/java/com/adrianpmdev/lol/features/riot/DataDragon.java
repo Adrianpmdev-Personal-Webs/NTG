@@ -95,6 +95,19 @@ public class DataDragon {
         return image == null ? null : imageBase(current) + "/spell/" + image;
     }
 
+    /**
+     * Profile icon of a summoner.
+     *
+     * @param iconId profile icon, or null when it is not known yet
+     * @return its URL, or null when it is not known
+     */
+    public String profileIcon(Integer iconId) {
+        Catalog current = current();
+
+        return current.version().isEmpty() || iconId == null ? null
+                : imageBase(current) + "/profileicon/" + iconId + ".png";
+    }
+
     private static String imageBase(Catalog catalog) {
         return BASE + "/cdn/" + catalog.version() + "/img";
     }

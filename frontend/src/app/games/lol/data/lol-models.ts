@@ -14,6 +14,8 @@ export interface LolPlayerSummary {
     username: string | null;
     riotId: string;
     state: LolAccountState;
+    iconUrl: string | null;
+    level: number | null;
 }
 
 export interface LolPlayers {

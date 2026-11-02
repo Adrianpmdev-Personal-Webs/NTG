@@ -137,8 +137,8 @@ $cut: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100
 
 .player {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    align-items: center;
+    gap: 12px;
     width: 100%;
     padding: 10px 16px;
     border: 0;
@@ -160,9 +160,80 @@ $cut: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100
     }
 }
 
+.player-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
 .player-name {
     font-weight: 600;
     overflow-wrap: anywhere;
+}
+
+.summoner {
+    position: relative;
+    flex: none;
+    width: 40px;
+    height: 40px;
+}
+
+.summoner-large {
+    width: clamp(64px, 9vh, 84px);
+    height: clamp(64px, 9vh, 84px);
+
+    .summoner-initial {
+        font-size: 1.8rem;
+    }
+}
+
+.summoner-icon,
+.summoner-initial {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    border: 1px solid $gold;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.summoner-initial {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: $panel;
+    color: $gold;
+    font-family: Georgia, 'Times New Roman', serif;
+}
+
+.summoner-icon {
+    position: relative;
+    z-index: 1;
+}
+
+.summoner-level {
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    z-index: 2;
+    min-width: 22px;
+    padding: 0 4px;
+    border: 1px solid $gold-dark;
+    background: $navy;
+    color: $gold-bright;
+    font-size: 0.65rem;
+    line-height: 1.4;
+    text-align: center;
+    transform: translateX(-50%);
+}
+
+.identity-who {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
 }
 
 .player-riot {

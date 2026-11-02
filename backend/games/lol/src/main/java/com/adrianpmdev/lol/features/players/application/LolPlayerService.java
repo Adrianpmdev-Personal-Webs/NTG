@@ -400,7 +400,8 @@ public class LolPlayerService {
     }
 
     private LolResponses.PlayerSummary summaryOf(LolAccount account, String username) {
-        return new LolResponses.PlayerSummary(account.getUserId(), username, riotIdOf(account), stateOf(account));
+        return new LolResponses.PlayerSummary(account.getUserId(), username, riotIdOf(account), stateOf(account),
+                dataDragon.profileIcon(account.getProfileIconId()), account.getSummonerLevel());
     }
 
     private String stateOf(LolAccount account) {

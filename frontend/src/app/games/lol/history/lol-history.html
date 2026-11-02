@@ -18,6 +18,20 @@
     } @else {
         @let current = data()!;
 
+        <ng-template #summoner let-player let-large="large">
+            <span class="summoner" [class.summoner-large]="large">
+                <span class="summoner-initial" aria-hidden="true">{{
+                    playerName(player).charAt(0).toUpperCase()
+                }}</span>
+                @if (player.iconUrl) {
+                    <img class="summoner-icon" [src]="player.iconUrl" alt="" (error)="hideIcon($event)" />
+                }
+                @if (player.level) {
+                    <span class="summoner-level" [attr.aria-label]="'Nivel ' + player.level">{{ player.level }}</span>
+                }
+            </span>
+        </ng-template>
+
         <div class="layout">
             <aside class="rail">
                 <h2 class="rail-title">Jugadores</h2>
@@ -31,8 +45,14 @@
                                 [class.active]="selectedId() === player.userId"
                                 (click)="select(player.userId)"
                             >
-                                <span class="player-name">{{ playerName(player) }}</span>
-                                <span class="player-riot">{{ player.riotId }}</span>
+                                <ng-container
+                                    [ngTemplateOutlet]="summoner"
+                                    [ngTemplateOutletContext]="{ $implicit: player }"
+                                />
+                                <span class="player-text">
+                                    <span class="player-name">{{ playerName(player) }}</span>
+                                    <span class="player-riot">{{ player.riotId }}</span>
+                                </span>
                             </button>
                         </li>
                     } @empty {
@@ -78,14 +98,20 @@
             <section class="main">
                 @if (detail(); as info) {
                     <header class="identity">
-                        <div class="identity-name">
-                            <h2 class="name">{{ playerName(info.player) }}</h2>
-                            <p class="riot">
-                                {{ info.player.riotId }}
-                                @if (info.checkedAt) {
-                                    · comprobado {{ ago(info.checkedAt) }}
-                                }
-                            </p>
+                        <div class="identity-who">
+                            <ng-container
+                                [ngTemplateOutlet]="summoner"
+                                [ngTemplateOutletContext]="{ $implicit: info.player, large: true }"
+                            />
+                            <div class="identity-name">
+                                <h2 class="name">{{ playerName(info.player) }}</h2>
+                                <p class="riot">
+                                    {{ info.player.riotId }}
+                                    @if (info.checkedAt) {
+                                        · comprobado {{ ago(info.checkedAt) }}
+                                    }
+                                </p>
+                            </div>
                         </div>
                         <ul class="ranks">
                             @for (rank of info.ranks; track rank.queue) {

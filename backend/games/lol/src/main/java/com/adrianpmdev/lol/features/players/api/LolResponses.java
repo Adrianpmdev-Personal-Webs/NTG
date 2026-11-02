@@ -31,8 +31,11 @@ public final class LolResponses {
      * @param username name of the platform account, or null when it no longer exists
      * @param riotId   Riot ID
      * @param state    PENDING, QUEUED, PREPARING, LOADING, COMPLETE, ERROR or INTERRUPTED
+     * @param iconUrl  profile icon, or null until the first update
+     * @param level    summoner level, or null until the first update
      */
-    public record PlayerSummary(UUID userId, String username, String riotId, String state) {
+    public record PlayerSummary(UUID userId, String username, String riotId, String state, String iconUrl,
+                                Integer level) {
     }
 
     /**

@@ -335,6 +335,10 @@ public class LolSyncWorker {
 
         List<RiotModels.Rank> ranks = riotClient.ranks(account.getPuuid(), interactive);
 
+        riotClient.summoner(account.getPuuid(), interactive).ifPresent(summoner -> {
+            account.setProfileIconId(summoner.profileIconId());
+            account.setSummonerLevel(summoner.summonerLevel());
+        });
         account.setRanks(objectMapper.valueToTree(ranks));
         account.setSyncedUntil(startedAt.minus(MARGIN));
         account.setCheckedAt(Instant.now());

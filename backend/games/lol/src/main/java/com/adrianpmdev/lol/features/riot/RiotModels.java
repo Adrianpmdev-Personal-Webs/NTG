@@ -23,6 +23,15 @@ public final class RiotModels {
     }
 
     /**
+     * The summoner of an account.
+     *
+     * @param profileIconId profile icon
+     * @param summonerLevel summoner level
+     */
+    public record Summoner(int profileIconId, int summonerLevel) {
+    }
+
+    /**
      * An official rank.
      *
      * @param queueType    queue, such as RANKED_SOLO_5x5

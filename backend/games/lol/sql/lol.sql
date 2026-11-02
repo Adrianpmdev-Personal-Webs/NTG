@@ -28,6 +28,9 @@ create table if not exists lol.accounts (
     state        varchar(10)  not null default 'PENDING',
     -- Official rank by queue, as the backend last read it.
     ranks        jsonb        not null default '[]',
+    -- Profile icon and summoner level, as the backend last read them.
+    profile_icon_id integer,
+    summoner_level  integer,
     -- Games are complete up to this moment; the next check only asks for newer ones.
     synced_until timestamptz,
     checked_at   timestamptz,
@@ -37,6 +40,9 @@ create table if not exists lol.accounts (
     constraint accounts_puuid_key unique (puuid),
     constraint accounts_state_check check (state in ('PENDING', 'LOADING', 'COMPLETE', 'ERROR'))
 );
+
+alter table lol.accounts add column if not exists profile_icon_id integer;
+alter table lol.accounts add column if not exists summoner_level integer;
 
 -- ─── matches ─────────────────────────────────────────────────────────────────────────────────────────
 

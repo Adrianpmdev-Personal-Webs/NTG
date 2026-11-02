@@ -100,6 +100,19 @@ public class RiotClient {
     }
 
     /**
+     * The profile icon and level of a player.
+     *
+     * @param puuid       player
+     * @param interactive whether a player is waiting for it
+     * @return the summoner, or empty when Riot does not have it
+     */
+    public Optional<RiotModels.Summoner> summoner(String puuid, boolean interactive) {
+        String url = PLATFORM + "/lol/summoner/v4/summoners/by-puuid/" + encode(puuid);
+
+        return Optional.ofNullable(get(url, objectMapper.constructType(RiotModels.Summoner.class), interactive));
+    }
+
+    /**
      * The official rank of a player in each queue.
      *
      * @param puuid       player

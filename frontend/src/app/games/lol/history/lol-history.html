@@ -1,0 +1,276 @@
+<main class="page">
+    <header class="top">
+        <h1 class="brand">League of Legends</h1>
+        <div class="top-actions">
+            @if (selectedId()) {
+                <button type="button" class="action" [disabled]="updating()" (click)="update()">
+                    {{ updating() ? 'Actualizando…' : '↻ Actualizar' }}
+                </button>
+            }
+            <a class="action" routerLink="/">← NTG</a>
+        </div>
+    </header>
+
+    @if (loading()) {
+        <p class="state">Cargando…</p>
+    } @else if (failed() || !data()) {
+        <p class="state error">No se han podido cargar los jugadores. Inténtalo de nuevo más tarde.</p>
+    } @else {
+        @let current = data()!;
+
+        <div class="layout">
+            <aside class="rail">
+                <h2 class="rail-title">Jugadores</h2>
+
+                <ul class="players">
+                    @for (player of players(); track player.userId) {
+                        <li>
+                            <button
+                                type="button"
+                                class="player"
+                                [class.active]="selectedId() === player.userId"
+                                (click)="select(player.userId)"
+                            >
+                                <span class="player-name">{{ playerName(player) }}</span>
+                                <span class="player-riot">{{ player.riotId }}</span>
+                            </button>
+                        </li>
+                    } @empty {
+                        <li class="rail-empty">Nadie ha vinculado su cuenta todavía.</li>
+                    }
+                </ul>
+
+                <label class="player-select">
+                    <span>Jugador</span>
+                    <select #playerPicker [value]="selectedId() ?? ''" (change)="select(playerPicker.value)">
+                        @for (player of players(); track player.userId) {
+                            <option [value]="player.userId">{{ playerName(player) }}</option>
+                        }
+                    </select>
+                </label>
+
+                <div class="my-account">
+                    @if (current.myRiotId) {
+                        <p class="my-riot">Tu cuenta: {{ current.myRiotId }}</p>
+                        @if (confirmUnlink()) {
+                            <p class="warning">Se borrarán tus partidas guardadas.</p>
+                            <div class="my-actions">
+                                <button type="button" class="action" [disabled]="saving()" (click)="unlink()">
+                                    Desvincular
+                                </button>
+                                <button type="button" class="action" (click)="confirmUnlink.set(false)">
+                                    Cancelar
+                                </button>
+                            </div>
+                        } @else {
+                            <button type="button" class="link" (click)="confirmUnlink.set(true)">Cambiar cuenta</button>
+                        }
+                    } @else {
+                        <form class="link-form" (submit)="link($event, riotField)">
+                            <label class="link-label" for="lol-riot-id">Vincula tu cuenta de EUW</label>
+                            <input #riotField id="lol-riot-id" type="text" maxlength="30" placeholder="Nombre#TAG" />
+                            <button type="submit" class="action" [disabled]="saving()">Vincular</button>
+                        </form>
+                    }
+                </div>
+            </aside>
+
+            <section class="main">
+                @if (detail(); as info) {
+                    <header class="identity">
+                        <div class="identity-name">
+                            <h2 class="name">{{ playerName(info.player) }}</h2>
+                            <p class="riot">
+                                {{ info.player.riotId }}
+                                @if (info.checkedAt) {
+                                    · comprobado {{ ago(info.checkedAt) }}
+                                }
+                            </p>
+                        </div>
+                        <ul class="ranks">
+                            @for (rank of info.ranks; track rank.queue) {
+                                <li class="rank">
+                                    <span class="rank-queue">{{ rank.queue }}</span>
+                                    <strong class="rank-tier">{{ rank.tier }}</strong>
+                                    <span class="rank-lp">{{ rank.lp }} LP · {{ rank.wins }}V {{ rank.losses }}D</span>
+                                </li>
+                            } @empty {
+                                <li class="rank rank-none">Sin clasificar</li>
+                            }
+                        </ul>
+                    </header>
+
+                    @if (info.updating) {
+                        <p class="notice">Hay muchas partidas que traer. Pulsa Actualizar dentro de un momento.</p>
+                    }
+
+                    @switch (info.player.state) {
+                        @case ('PENDING') {
+                            <p class="notice">Pendiente de descarga: un administrador debe iniciarla.</p>
+                        }
+                        @case ('LOADING') {
+                            <p class="notice">Descargando las partidas de la temporada…</p>
+                        }
+                        @case ('INTERRUPTED') {
+                            <p class="notice">La descarga se interrumpió: un administrador debe reanudarla.</p>
+                        }
+                        @case ('ERROR') {
+                            <p class="notice">La descarga falló: un administrador debe reintentarla.</p>
+                        }
+                    }
+
+                    <nav class="tabs" aria-label="Modos de juego">
+                        @for (block of info.queues; track block.id) {
+                            <button
+                                type="button"
+                                class="tab"
+                                [class.active]="queue().id === block.id"
+                                (click)="queueId.set(block.id)"
+                            >
+                                {{ block.label }}
+                            </button>
+                        }
+                    </nav>
+
+                    @if (queue(); as block) {
+                        <div class="content">
+                            <div class="matches">
+                                @for (match of block.matches; track match.id) {
+                                    <article
+                                        class="match"
+                                        [class.win]="match.win && !match.remake"
+                                        [class.loss]="!match.win && !match.remake"
+                                        [class.remake]="match.remake"
+                                    >
+                                        <div class="match-champion">
+                                            @if (match.championIcon) {
+                                                <img
+                                                    class="champion-icon"
+                                                    [src]="match.championIcon"
+                                                    alt=""
+                                                    loading="lazy"
+                                                    (error)="hideIcon($event)"
+                                                />
+                                            }
+                                            <span class="champion-level">{{ match.level }}</span>
+                                            <div class="spells">
+                                                @for (spell of match.spells; track $index) {
+                                                    <img
+                                                        class="spell-icon"
+                                                        [src]="spell"
+                                                        alt=""
+                                                        loading="lazy"
+                                                        (error)="hideIcon($event)"
+                                                    />
+                                                }
+                                            </div>
+                                        </div>
+
+                                        <div class="match-result">
+                                            <strong class="result">{{
+                                                match.remake ? 'Remake' : match.win ? 'Victoria' : 'Derrota'
+                                            }}</strong>
+                                            <span class="muted">{{ match.champion }}</span>
+                                            <span class="muted"
+                                                >{{ ago(match.playedAt) }} · {{ duration(match.durationSeconds) }}</span
+                                            >
+                                        </div>
+
+                                        <div class="match-kda">
+                                            <strong
+                                                >{{ match.kills }} / {{ match.deaths }} / {{ match.assists }}</strong
+                                            >
+                                            <span class="muted">{{ matchKda(match) | number: '1.1-1' }} KDA</span>
+                                        </div>
+
+                                        <div class="match-stats">
+                                            <span
+                                                >{{ match.cs }} CS
+                                                <small>({{ csPerMinute(match) | number: '1.1-1' }}/min)</small></span
+                                            >
+                                            <span>{{ match.damage | number }} daño</span>
+                                            <span>{{ match.vision }} visión</span>
+                                        </div>
+
+                                        <div class="items">
+                                            @for (item of match.items; track $index) {
+                                                <img
+                                                    class="item-icon"
+                                                    [src]="item"
+                                                    alt=""
+                                                    loading="lazy"
+                                                    (error)="hideIcon($event)"
+                                                />
+                                            }
+                                        </div>
+                                    </article>
+                                } @empty {
+                                    <p class="empty">Sin partidas de {{ block.label }} esta temporada.</p>
+                                }
+                            </div>
+
+                            <aside class="season">
+                                <h3 class="season-title">Temporada</h3>
+                                <dl class="figures">
+                                    <div class="figure">
+                                        <dd>{{ block.stats.winRate }} %</dd>
+                                        <dt>Victorias</dt>
+                                    </div>
+                                    <div class="figure">
+                                        <dd>{{ block.stats.games }}</dd>
+                                        <dt>Partidas</dt>
+                                    </div>
+                                    <div class="figure">
+                                        <dd>{{ block.stats.kda | number: '1.2-2' }}</dd>
+                                        <dt>KDA</dt>
+                                    </div>
+                                    <div class="figure">
+                                        <dd>{{ block.stats.csPerMinute | number: '1.1-1' }}</dd>
+                                        <dt>CS por minuto</dt>
+                                    </div>
+                                </dl>
+                                <p class="averages">
+                                    {{ block.stats.kills | number: '1.1-1' }} /
+                                    {{ block.stats.deaths | number: '1.1-1' }} /
+                                    {{ block.stats.assists | number: '1.1-1' }} de media
+                                </p>
+
+                                <h3 class="season-title">Campeones</h3>
+                                <ul class="champions">
+                                    @for (champion of block.champions; track champion.name) {
+                                        <li class="champion">
+                                            @if (champion.icon) {
+                                                <img
+                                                    class="champion-small"
+                                                    [src]="champion.icon"
+                                                    alt=""
+                                                    loading="lazy"
+                                                    (error)="hideIcon($event)"
+                                                />
+                                            }
+                                            <span class="champion-name">{{ champion.name }}</span>
+                                            <span class="muted">{{ champion.games }} · {{ champion.winRate }} %</span>
+                                            <span class="muted">{{ champion.kda | number: '1.1-1' }} KDA</span>
+                                        </li>
+                                    } @empty {
+                                        <li class="muted">Sin datos todavía.</li>
+                                    }
+                                </ul>
+                            </aside>
+                        </div>
+                    }
+                } @else if (selectedId()) {
+                    <p class="state">Cargando…</p>
+                } @else {
+                    <p class="state">Vincula tu cuenta para empezar.</p>
+                }
+            </section>
+        </div>
+    }
+
+    <footer class="legal">
+        NTG System isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone
+        officially involved in producing or managing Riot Games properties. Riot Games, and all associated properties
+        are trademarks or registered trademarks of Riot Games, Inc.
+    </footer>
+</main>

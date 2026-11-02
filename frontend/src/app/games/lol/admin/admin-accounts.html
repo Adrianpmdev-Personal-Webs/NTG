@@ -1,0 +1,155 @@
+<div class="admin-page">
+    <div class="admin-section-head">
+        <div>
+            <h1 class="admin-page-title">LEAGUE OF LEGENDS :: CUENTAS</h1>
+            <p class="admin-page-subtitle">
+                Vincula el Riot ID de cada jugador y lanza la descarga de sus partidas. Sigue en el servidor aunque
+                cierres esta pantalla.
+            </p>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-neon" type="button" [disabled]="busy()" (click)="reload()">↻ ACTUALIZAR</button>
+            <button class="btn-neon" type="button" [disabled]="busy()" (click)="downloadAll()">DESCARGAR TODO</button>
+        </div>
+    </div>
+
+    <div class="terminal-card admin-section">
+        @if (loading()) {
+            <p class="admin-page-state">CARGANDO...</p>
+        } @else if (accounts().length === 0) {
+            <p class="admin-page-state">NINGÚN USUARIO TIENE LA ETIQUETA DE LEAGUE OF LEGENDS</p>
+        } @else {
+            <div class="admin-table-scroll">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>JUGADOR</th>
+                            <th>CUENTA</th>
+                            <th>ESTADO</th>
+                            <th>PARTIDAS</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (account of accounts(); track account.userId) {
+                            <tr>
+                                <td data-label="JUGADOR" class="strong">{{ account.username }}</td>
+                                <td data-label="CUENTA">{{ account.riotId ?? '—' }}</td>
+                                <td data-label="ESTADO">
+                                    {{ stateLabels[account.state] }}
+                                    @if (account.error) {
+                                        <br />{{ account.error }}
+                                    }
+                                </td>
+                                <td data-label="PARTIDAS">
+                                    {{ account.stored }}
+                                    @if (account.total !== null) {
+                                        ({{ account.saved }} / {{ account.total }})
+                                    }
+                                </td>
+                                <td>
+                                    <div class="modal-actions">
+                                        @if (canDownload(account)) {
+                                            <button
+                                                class="btn-neon"
+                                                type="button"
+                                                [disabled]="busy()"
+                                                (click)="download(account)"
+                                            >
+                                                DESCARGAR
+                                            </button>
+                                        }
+                                        @if (account.state === 'LOADING') {
+                                            <button
+                                                class="btn-neon"
+                                                type="button"
+                                                [disabled]="busy()"
+                                                (click)="pause(account)"
+                                            >
+                                                PAUSAR
+                                            </button>
+                                        }
+                                        <button
+                                            class="btn-neon"
+                                            type="button"
+                                            [disabled]="busy()"
+                                            (click)="linking.set(account)"
+                                        >
+                                            {{ account.riotId ? 'CAMBIAR' : 'VINCULAR' }}
+                                        </button>
+                                        @if (account.riotId) {
+                                            <button
+                                                class="btn-neon btn-neon-danger"
+                                                type="button"
+                                                [disabled]="busy()"
+                                                (click)="removing.set(account)"
+                                            >
+                                                QUITAR
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+@if (linking(); as account) {
+    <div class="modal-overlay" appModalOverlay (dismiss)="linking.set(null)">
+        <div class="modal modal-sm terminal-card" role="dialog" aria-modal="true">
+            <div class="modal-header">
+                <h2 class="modal-title">RIOT ID DE {{ account.username }}</h2>
+                <button class="close-btn" type="button" aria-label="Cerrar" (click)="linking.set(null)">✕</button>
+            </div>
+            <form class="modal-body" (submit)="saveLink($event, riotField)">
+                <div class="form-grid">
+                    <label class="form-field">
+                        <span class="field-label">CUENTA DE EUW</span>
+                        <input
+                            #riotField
+                            class="neon-input"
+                            type="text"
+                            maxlength="30"
+                            placeholder="Nombre#TAG"
+                            [value]="account.riotId ?? ''"
+                        />
+                        <span class="field-hint">Si cambias de cuenta, se borran las partidas guardadas.</span>
+                    </label>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-neon" type="submit" [disabled]="busy()">GUARDAR</button>
+                    <button class="btn-neon btn-neon-danger" type="button" (click)="linking.set(null)">CANCELAR</button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
+@if (removing(); as account) {
+    <div class="modal-overlay" appModalOverlay (dismiss)="removing.set(null)">
+        <div class="modal modal-sm terminal-card" role="dialog" aria-modal="true">
+            <div class="modal-header">
+                <h2 class="modal-title">QUITAR LA CUENTA DE {{ account.username }}</h2>
+                <button class="close-btn" type="button" aria-label="Cerrar" (click)="removing.set(null)">✕</button>
+            </div>
+            <div class="modal-body">
+                <p>Se borrará {{ account.riotId }} y sus {{ account.stored }} partidas guardadas.</p>
+                <div class="modal-actions">
+                    <button
+                        class="btn-neon btn-neon-danger"
+                        type="button"
+                        [disabled]="busy()"
+                        (click)="confirmRemove()"
+                    >
+                        QUITAR
+                    </button>
+                    <button class="btn-neon" type="button" (click)="removing.set(null)">CANCELAR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

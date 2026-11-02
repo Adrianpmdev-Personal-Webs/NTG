@@ -2,13 +2,13 @@
  * AdminAccounts
  *
  * Accounts of League of Legends: an admin links the Riot ID of each player with the tag and starts the download of their
- * games. Downloads run in the backend one after another, so this screen can be closed. Nothing is polled: the state is
- * read when the screen opens, after an action or when the button is pressed.
+ * games. Downloads run in the backend one after another, so this screen can be closed. While one is active and this
+ * screen is open, it reads the state every few seconds, which costs no call to Riot; it stops by itself when they end.
  *
  * @author @adrianpmdev
  */
 
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { Observable } from 'rxjs';
 import { NotificationCenter } from '@core/notifications/notification-center';
 import { ModalOverlay } from '@shared/directives/modal-overlay';
@@ -19,21 +19,29 @@ import { LolAccountState, LolAdminAccount } from '../data/lol-models';
 const STATE_LABELS: Readonly<Record<LolAccountState, string>> = {
     NOT_LINKED: 'SIN VINCULAR',
     PENDING: 'PENDIENTE',
+    QUEUED: 'EN COLA',
+    PREPARING: 'PREPARANDO',
     LOADING: 'DESCARGANDO',
     COMPLETE: 'COMPLETO',
     ERROR: 'ERROR',
     INTERRUPTED: 'INTERRUMPIDA',
 };
 
+const ACTIVE_STATES: readonly LolAccountState[] = ['QUEUED', 'PREPARING', 'LOADING'];
+const CHECK_EVERY_MS = 10_000;
+
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-lol-admin-accounts',
     imports: [ModalOverlay],
     templateUrl: './admin-accounts.html',
+    styleUrl: './admin-accounts.scss',
 })
 export class AdminAccounts implements OnInit {
     private readonly api = inject(LolApi);
     private readonly notifications = inject(NotificationCenter);
+
+    private nextCheck: ReturnType<typeof setTimeout> | null = null;
 
     protected readonly stateLabels = STATE_LABELS;
     protected readonly loading = signal(true);
@@ -41,6 +49,11 @@ export class AdminAccounts implements OnInit {
     protected readonly accounts = signal<LolAdminAccount[]>([]);
     protected readonly linking = signal<LolAdminAccount | null>(null);
     protected readonly removing = signal<LolAdminAccount | null>(null);
+    protected readonly downloading = computed(() => this.accounts().some((account) => this.isActive(account)));
+
+    constructor() {
+        inject(DestroyRef).onDestroy(() => this.cancelCheck());
+    }
 
     ngOnInit(): void {
         this.reload();
@@ -89,12 +102,26 @@ export class AdminAccounts implements OnInit {
         return ['PENDING', 'ERROR', 'INTERRUPTED'].includes(account.state);
     }
 
+    protected isActive(account: LolAdminAccount): boolean {
+        return ACTIVE_STATES.includes(account.state);
+    }
+
+    protected percent(account: LolAdminAccount): number {
+        return account.total ? Math.round(((account.saved ?? 0) * 100) / account.total) : 0;
+    }
+
+    protected timeLeft(account: LolAdminAccount): string {
+        const minutes = Math.ceil((account.secondsLeft ?? 0) / 60);
+
+        return minutes < 60 ? `${minutes} min` : `${Math.floor(minutes / 60)} h ${minutes % 60} min`;
+    }
+
     private run(request: Observable<LolAdminAccount[]>, fallback: string, done?: () => void): void {
+        this.cancelCheck();
         this.busy.set(true);
         request.subscribe({
             next: (accounts) => {
-                this.accounts.set(accounts);
-                this.loading.set(false);
+                this.show(accounts);
                 this.busy.set(false);
                 done?.();
             },
@@ -102,7 +129,34 @@ export class AdminAccounts implements OnInit {
                 this.loading.set(false);
                 this.busy.set(false);
                 this.notifications.error(resolveApiError(error, fallback));
+                this.scheduleCheck();
             },
         });
+    }
+
+    private show(accounts: LolAdminAccount[]): void {
+        this.accounts.set(accounts);
+        this.loading.set(false);
+        this.scheduleCheck();
+    }
+
+    private scheduleCheck(): void {
+        this.cancelCheck();
+
+        if (this.downloading()) {
+            this.nextCheck = setTimeout(() => {
+                this.api.getAccounts().subscribe({
+                    next: (accounts) => this.show(accounts),
+                    error: () => this.scheduleCheck(),
+                });
+            }, CHECK_EVERY_MS);
+        }
+    }
+
+    private cancelCheck(): void {
+        if (this.nextCheck !== null) {
+            clearTimeout(this.nextCheck);
+            this.nextCheck = null;
+        }
     }
 }

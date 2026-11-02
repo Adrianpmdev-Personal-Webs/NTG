@@ -6,6 +6,9 @@
                 Vincula el Riot ID de cada jugador y lanza la descarga de sus partidas. Sigue en el servidor aunque
                 cierres esta pantalla.
             </p>
+            @if (downloading()) {
+                <p class="live-note">Descarga activa: el progreso se actualiza solo cada 10 segundos.</p>
+            }
         </div>
         <div class="modal-actions">
             <button class="btn-neon" type="button" [disabled]="busy()" (click)="reload()">↻ ACTUALIZAR</button>
@@ -42,9 +45,26 @@
                                     }
                                 </td>
                                 <td data-label="PARTIDAS">
-                                    {{ account.stored }}
-                                    @if (account.total !== null) {
-                                        ({{ account.saved }} / {{ account.total }})
+                                    {{ account.stored }} guardadas
+                                    @if (account.state === 'LOADING' && account.total !== null) {
+                                        <div class="progress">
+                                            <div
+                                                class="progress-track"
+                                                role="progressbar"
+                                                aria-label="Progreso de la descarga"
+                                                [attr.aria-valuenow]="percent(account)"
+                                                aria-valuemin="0"
+                                                aria-valuemax="100"
+                                            >
+                                                <span class="progress-fill" [style.width.%]="percent(account)"></span>
+                                            </div>
+                                            <span class="progress-text">
+                                                {{ account.saved }} / {{ account.total }} nuevas ({{
+                                                    percent(account)
+                                                }}
+                                                %) · quedan unos {{ timeLeft(account) }}
+                                            </span>
+                                        </div>
                                     }
                                 </td>
                                 <td>
@@ -59,7 +79,7 @@
                                                 DESCARGAR
                                             </button>
                                         }
-                                        @if (account.state === 'LOADING') {
+                                        @if (isActive(account)) {
                                             <button
                                                 class="btn-neon"
                                                 type="button"

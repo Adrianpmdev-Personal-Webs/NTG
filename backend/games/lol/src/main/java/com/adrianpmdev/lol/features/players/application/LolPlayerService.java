@@ -51,6 +51,8 @@ public class LolPlayerService {
     private static final Pattern RIOT_ID = Pattern.compile("^\\s*([^#]{3,16})\\s*#\\s*([\\p{L}\\p{N}]{2,5})\\s*$");
     private static final long REFRESH_WAIT_SECONDS = 20;
     private static final int TOP_CHAMPIONS = 5;
+    /** A download makes 80 calls every 2 minutes at most, so a game takes about this long when alone. */
+    private static final int SECONDS_PER_GAME = 2;
     private static final String NOT_LINKED = "NOT_LINKED";
     private static final String INTERRUPTED = "INTERRUPTED";
     private static final String[] APEX = {"MASTER", "GRANDMASTER", "CHALLENGER"};
@@ -286,14 +288,16 @@ public class LolPlayerService {
 
     private LolResponses.AdminAccount adminAccountOf(UUID userId, String username, LolAccount account) {
         if (account == null) {
-            return new LolResponses.AdminAccount(userId, username, null, NOT_LINKED, 0, null, null, null);
+            return new LolResponses.AdminAccount(userId, username, null, NOT_LINKED, 0, null, null, null, null);
         }
 
         LolSyncWorker.Progress progress = worker.progressOf(userId).orElse(null);
 
         return new LolResponses.AdminAccount(userId, username, riotIdOf(account), stateOf(account),
                 matchRepository.countByUserId(userId), progress == null ? null : progress.saved(),
-                progress == null ? null : progress.total(), account.getLastError());
+                progress == null ? null : progress.total(),
+                progress == null ? null : (progress.total() - progress.saved()) * SECONDS_PER_GAME,
+                account.getLastError());
     }
 
     private LolResponses.PlayerDetail detailOf(LolAccount account, boolean updating, String error) {
@@ -399,8 +403,8 @@ public class LolPlayerService {
     }
 
     private String stateOf(LolAccount account) {
-        return LolAccount.LOADING.equals(account.getState()) && !worker.isDownloading(account.getUserId())
-                ? INTERRUPTED : account.getState();
+        return worker.phaseOf(account.getUserId())
+                .orElse(LolAccount.LOADING.equals(account.getState()) ? INTERRUPTED : account.getState());
     }
 
     private static String riotIdOf(LolAccount account) {

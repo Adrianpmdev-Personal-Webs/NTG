@@ -1,0 +1,31 @@
+.progress {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 170px;
+    margin-top: 4px;
+}
+
+.progress-track {
+    height: 8px;
+    border: 1px solid var(--border-bright);
+    background: rgba(0, 255, 65, 0.05);
+}
+
+.progress-fill {
+    display: block;
+    height: 100%;
+    background: var(--neon-green);
+    box-shadow: 0 0 8px var(--neon-green-glow);
+    transition: width 0.4s;
+}
+
+.progress-text {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+}
+
+.live-note {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+}

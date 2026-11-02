@@ -139,13 +139,21 @@ public class LolSyncWorker {
     }
 
     /**
-     * Whether a download is running or waiting.
+     * Where the download of a player is right now.
      *
      * @param userId player
-     * @return true when it is
+     * @return QUEUED, PREPARING while it lists the games, LOADING while it stores them, or empty without a download
      */
-    public synchronized boolean isDownloading(UUID userId) {
-        return userId.equals(downloading) || downloads.contains(userId);
+    public synchronized Optional<String> phaseOf(UUID userId) {
+        if (downloads.contains(userId)) {
+            return Optional.of("QUEUED");
+        }
+
+        if (userId.equals(downloading)) {
+            return Optional.of(progress.containsKey(userId) ? LolAccount.LOADING : "PREPARING");
+        }
+
+        return Optional.empty();
     }
 
     /**
@@ -309,6 +317,10 @@ public class LolSyncWorker {
         Map<String, UUID> linked = accountRepository.findAll().stream()
                 .collect(Collectors.toMap(LolAccount::getPuuid, LolAccount::getUserId));
         int saved = 0;
+
+        if (!interactive) {
+            progress.put(account.getUserId(), new Progress(0, missing.size()));
+        }
 
         for (String matchId : missing) {
             if (!interactive) {

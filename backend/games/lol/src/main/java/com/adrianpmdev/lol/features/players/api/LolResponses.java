@@ -30,7 +30,7 @@ public final class LolResponses {
      * @param userId   platform user id
      * @param username name of the platform account, or null when it no longer exists
      * @param riotId   Riot ID
-     * @param state    PENDING, LOADING, COMPLETE, ERROR or INTERRUPTED
+     * @param state    PENDING, QUEUED, PREPARING, LOADING, COMPLETE, ERROR or INTERRUPTED
      */
     public record PlayerSummary(UUID userId, String username, String riotId, String state) {
     }
@@ -134,13 +134,14 @@ public final class LolResponses {
      * @param userId   platform user id
      * @param username name of the platform account
      * @param riotId   Riot ID, or null when it is not linked
-     * @param state    NOT_LINKED, PENDING, LOADING, COMPLETE, ERROR or INTERRUPTED
+     * @param state    NOT_LINKED, PENDING, QUEUED, PREPARING, LOADING, COMPLETE, ERROR or INTERRUPTED
      * @param stored   games stored
      * @param saved    games stored in the running download, or null
      * @param total    games of the running download, or null
+     * @param secondsLeft rough time left of the running download, or null
      * @param error    why the download failed, or null
      */
     public record AdminAccount(UUID userId, String username, String riotId, String state, long stored, Integer saved,
-                               Integer total, String error) {
+                               Integer total, Integer secondsLeft, String error) {
     }
 }

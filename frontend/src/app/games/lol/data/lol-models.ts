@@ -6,7 +6,8 @@
  * @author @adrianpmdev
  */
 
-export type LolAccountState = 'NOT_LINKED' | 'PENDING' | 'LOADING' | 'COMPLETE' | 'ERROR' | 'INTERRUPTED';
+export type LolAccountState =
+    'NOT_LINKED' | 'PENDING' | 'QUEUED' | 'PREPARING' | 'LOADING' | 'COMPLETE' | 'ERROR' | 'INTERRUPTED';
 
 export interface LolPlayerSummary {
     userId: string;
@@ -94,5 +95,6 @@ export interface LolAdminAccount {
     stored: number;
     saved: number | null;
     total: number | null;
+    secondsLeft: number | null;
     error: string | null;
 }

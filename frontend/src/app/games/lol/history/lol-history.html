@@ -108,6 +108,12 @@
                         @case ('PENDING') {
                             <p class="notice">Pendiente de descarga: un administrador debe iniciarla.</p>
                         }
+                        @case ('QUEUED') {
+                            <p class="notice">Descarga en cola: empezará cuando acaben las anteriores.</p>
+                        }
+                        @case ('PREPARING') {
+                            <p class="notice">Preparando la descarga de las partidas de la temporada…</p>
+                        }
                         @case ('LOADING') {
                             <p class="notice">Descargando las partidas de la temporada…</p>
                         }

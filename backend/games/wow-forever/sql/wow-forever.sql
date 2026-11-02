@@ -1,7 +1,8 @@
 -- =====================================================================================================
 -- Schema wow_forever · WoW Forever module
 --
--- The only table holds the characters of the players. The game data is not in the database: it is built
+-- The tables hold what belongs to each player: their characters, their talent builds and their Legacy
+-- challenges. The game data is not in the database: it is built
 -- by the backend from the game client (through wago.tools) every time a new build comes out, and the last
 -- good copy is kept in a private bucket so a restart does not need to build it again.
 --
@@ -36,11 +37,39 @@ alter table wow_forever.characters alter column name type varchar(40);
 
 create unique index if not exists characters_user_name_key on wow_forever.characters (user_id, lower(name));
 
+-- ─── saved_builds ────────────────────────────────────────────────────────────────────────────────────
+-- The talent builds a player keeps, five per class. The class is a slug of the game data and the build a share
+-- code, which a game patch can leave out of date: the slot stays and the screen marks it.
+
+create table if not exists wow_forever.saved_builds (
+    user_id    uuid        not null,
+    class_slug varchar(40) not null,
+    slot       smallint    not null,
+    name       varchar(30) not null,
+    level      smallint    not null,
+    build      varchar(300) not null,
+    updated_at timestamptz not null default now(),
+    constraint saved_builds_pkey primary key (user_id, class_slug, slot),
+    constraint saved_builds_slot_check check (slot between 0 and 4)
+);
+
+-- ─── legacy_challenges ───────────────────────────────────────────────────────────────────────────────
+-- The Legacy challenges a player ticked, by name, because the game client gives them no stable id.
+
+create table if not exists wow_forever.legacy_challenges (
+    user_id      uuid         not null,
+    name         varchar(200) not null,
+    completed_at timestamptz  not null default now(),
+    constraint legacy_challenges_pkey primary key (user_id, name)
+);
+
 -- ─── Row level security ──────────────────────────────────────────────────────────────────────────────
 -- The backend connects as the table owner, which bypasses RLS. Enabling it without policies closes the
--- table to the Supabase Data API (anon and authenticated roles) in case the schema is ever exposed.
+-- tables to the Supabase Data API (anon and authenticated roles) in case the schema is ever exposed.
 
 alter table wow_forever.characters enable row level security;
+alter table wow_forever.saved_builds enable row level security;
+alter table wow_forever.legacy_challenges enable row level security;
 
 -- ─── Storage: game data ──────────────────────────────────────────────────────────────────────────────
 -- Private bucket wow-forever-data. Only the backend reads and writes it, with the service role key (which

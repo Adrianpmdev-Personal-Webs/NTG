@@ -3,8 +3,8 @@
  *
  * Legacy System of WoW Forever: the three perk trees, where a character spends its Legacy points (same rules as the
  * talent trees, with tree-wide point gates), and the account challenges that earn the points, one folding section per
- * group with its progress. The perk build lives in the URL so it can be shared; the ticked challenges are kept in this
- * browser.
+ * group with its progress. The perk build lives in the URL so it can be shared; the ticked challenges are kept on the
+ * account of the player.
  *
  * @author @adrianpmdev
  */
@@ -37,27 +37,8 @@ import { Talent, TalentHover, TalentTree } from '../../talents/talents-models';
 import { WowButton } from '../../ui/wow-button/wow-button';
 import { WowPage } from '../../ui/wow-page/wow-page';
 import { creditLine, hideBrokenIcon } from '../../wow-forever-config';
-import { COMPLETED_CHALLENGES_KEY } from '../legacy-config';
+import { PlayerProgressApi } from '../../progress/player-progress-api';
 import { ChallengeGroup, LegacyData } from '../legacy-models';
-
-const readCompleted = (): Set<string> => {
-    try {
-        const parsed: unknown = JSON.parse(localStorage.getItem(COMPLETED_CHALLENGES_KEY) ?? '[]');
-
-        return new Set(Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === 'string') : []);
-    } catch {
-        return new Set();
-    }
-};
-
-const writeCompleted = (completed: ReadonlySet<string>): boolean => {
-    try {
-        localStorage.setItem(COMPLETED_CHALLENGES_KEY, JSON.stringify([...completed]));
-        return true;
-    } catch {
-        return false;
-    }
-};
 
 @Component({
     selector: 'app-legacy-planner',
@@ -68,6 +49,7 @@ const writeCompleted = (completed: ReadonlySet<string>): boolean => {
 })
 export class LegacyPlanner implements OnInit {
     private readonly gameData = inject(GameDataApi);
+    private readonly progress = inject(PlayerProgressApi);
     private readonly route = inject(ActivatedRoute);
     private readonly router = inject(Router);
     private readonly notificationCenter = inject(NotificationCenter);
@@ -80,7 +62,8 @@ export class LegacyPlanner implements OnInit {
     protected readonly failed = signal(false);
     protected readonly hover = signal<TalentHover | null>(null);
     protected readonly activeTree = signal(0);
-    private readonly completed = signal<ReadonlySet<string>>(readCompleted());
+    private readonly completed = signal<ReadonlySet<string>>(new Set());
+    protected readonly challengesReady = signal(false);
 
     protected readonly trees = computed<TalentTree[]>(() => this.data()?.trees ?? []);
     protected readonly pointsTotal = computed(() => this.data()?.points ?? 0);
@@ -111,6 +94,14 @@ export class LegacyPlanner implements OnInit {
     protected readonly hideBrokenIcon = hideBrokenIcon;
 
     ngOnInit(): void {
+        this.progress.loadChallenges().subscribe({
+            next: (completed) => {
+                this.completed.set(completed);
+                this.challengesReady.set(true);
+            },
+            error: () => this.notificationCenter.error('No se han podido cargar tus retos'),
+        });
+
         this.gameData.getLegacy().subscribe({
             next: (data) => {
                 this.data.set(data);
@@ -180,16 +171,24 @@ export class LegacyPlanner implements OnInit {
     }
 
     protected toggleChallenge(name: string): void {
-        const next = new Set(this.completed());
+        const previous = this.completed();
+        const next = new Set(previous);
+        const completed = !next.has(name);
 
-        if (next.has(name)) {
-            next.delete(name);
-        } else {
+        if (completed) {
             next.add(name);
+        } else {
+            next.delete(name);
         }
 
         this.completed.set(next);
-        writeCompleted(next);
+        this.progress.setChallenge(name, completed).subscribe({
+            next: (saved) => this.completed.set(saved),
+            error: () => {
+                this.completed.set(previous);
+                this.notificationCenter.error('No se ha podido guardar el reto');
+            },
+        });
     }
 
     protected completedIn(group: ChallengeGroup): number {

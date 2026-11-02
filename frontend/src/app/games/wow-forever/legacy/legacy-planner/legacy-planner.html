@@ -94,7 +94,7 @@
                 </p>
             </header>
 
-            <p class="note">Marca los que ya tienes. Se guardan solo en este navegador.</p>
+            <p class="note">Marca los que ya tienes. Se guardan en tu cuenta.</p>
 
             <div class="groups">
                 @for (group of groups(); track group.name) {
@@ -116,6 +116,7 @@
                                         <input
                                             type="checkbox"
                                             [checked]="isCompleted(challenge.name)"
+                                            [disabled]="!challengesReady()"
                                             (change)="toggleChallenge(challenge.name)"
                                         />
                                         <span class="challenge-text">

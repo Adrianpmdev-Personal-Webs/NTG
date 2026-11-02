@@ -3,7 +3,7 @@
  *
  * Talent calculator of WoW Forever: pick a class, set the level and spend points in its three trees, seeing the level
  * the spent points need. The talents of a class are downloaded when it is picked. The build lives in the URL so it can
- * be shared, and the player can keep builds of each class in slots of this browser.
+ * be shared, and the player can keep builds of each class in slots of their account.
  *
  * @author @adrianpmdev
  */
@@ -29,7 +29,7 @@ import { WowButton } from '../../ui/wow-button/wow-button';
 import { WowPage } from '../../ui/wow-page/wow-page';
 import { creditLine, hideBrokenIcon } from '../../wow-forever-config';
 import { SavedBuilds } from '../saved-builds/saved-builds';
-import { SavedBuild } from '../saved-builds-storage';
+import { SavedBuild } from '../saved-builds-models';
 import { TalentGrid } from '../talent-grid/talent-grid';
 import { TalentTooltip } from '../talent-tooltip/talent-tooltip';
 import { cssUrl, gameImages } from '../../game-data/game-images';

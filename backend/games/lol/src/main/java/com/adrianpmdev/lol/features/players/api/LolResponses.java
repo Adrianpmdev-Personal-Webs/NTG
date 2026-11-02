@@ -45,12 +45,35 @@ public final class LolResponses {
      * @param checkedAt when Riot was last asked, or null
      * @param updating  whether new games are still on their way
      * @param error     why the last update failed, or null
-     * @param seasonStart first moment of the statistics
-     * @param ranks     official ranks
-     * @param queues    one block per queue
+     * @param season    the season shown
+     * @param current   whether it is the season being played
+     * @param seasons   the seasons of this player, newest first
+     * @param ranks     official ranks in that season; for a past one, the last known
+     * @param queues    one block per queue, of that season
      */
     public record PlayerDetail(PlayerSummary player, Instant checkedAt, boolean updating, String error,
-                               Instant seasonStart, List<Rank> ranks, List<QueueBlock> queues) {
+                               SeasonOption season, boolean current, List<SeasonOption> seasons, List<Rank> ranks,
+                               List<QueueBlock> queues) {
+    }
+
+    /**
+     * A season in the admin screen.
+     *
+     * @param key     short name
+     * @param label   name shown
+     * @param date    first day, as yyyy-MM-dd
+     * @param current whether it is the season being played
+     */
+    public record AdminSeason(String key, String label, String date, boolean current) {
+    }
+
+    /**
+     * A season to choose.
+     *
+     * @param key   short name
+     * @param label name shown
+     */
+    public record SeasonOption(String key, String label) {
     }
 
     /**

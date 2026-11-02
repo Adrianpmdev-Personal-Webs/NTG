@@ -4,6 +4,7 @@
  * Accounts of League of Legends: an admin links the Riot ID of each player with the tag and starts the download of their
  * games. Downloads run in the backend one after another, so this screen can be closed. While one is active and this
  * screen is open, it reads the state every few seconds, which costs no call to Riot; it stops by itself when they end.
+ * It also manages the seasons: which ones exist and the day each one starts.
  *
  * @author @adrianpmdev
  */
@@ -14,7 +15,7 @@ import { NotificationCenter } from '@core/notifications/notification-center';
 import { ModalOverlay } from '@shared/directives/modal-overlay';
 import { resolveApiError } from '@shared/utils/api-error';
 import { LolApi } from '../data/lol-api';
-import { LolAccountState, LolAdminAccount } from '../data/lol-models';
+import { LolAccountState, LolAdminAccount, LolAdminSeason } from '../data/lol-models';
 
 const STATE_LABELS: Readonly<Record<LolAccountState, string>> = {
     NOT_LINKED: 'SIN VINCULAR',
@@ -47,6 +48,7 @@ export class AdminAccounts implements OnInit {
     protected readonly loading = signal(true);
     protected readonly busy = signal(false);
     protected readonly accounts = signal<LolAdminAccount[]>([]);
+    protected readonly seasons = signal<LolAdminSeason[]>([]);
     protected readonly linking = signal<LolAdminAccount | null>(null);
     protected readonly removing = signal<LolAdminAccount | null>(null);
     protected readonly downloading = computed(() => this.accounts().some((account) => this.isActive(account)));
@@ -61,6 +63,41 @@ export class AdminAccounts implements OnInit {
 
     protected reload(): void {
         this.run(this.api.getAccounts(), 'No se han podido cargar las cuentas');
+        this.runSeasons(this.api.getSeasons(), 'No se han podido cargar las temporadas');
+    }
+
+    protected saveSeason(key: string, date: string): void {
+        if (date) {
+            this.runSeasons(
+                this.api.saveSeason(key, date),
+                'No se ha podido guardar la temporada',
+                'Temporada guardada',
+            );
+        }
+    }
+
+    protected deleteSeason(key: string): void {
+        this.runSeasons(this.api.deleteSeason(key), 'No se ha podido quitar la temporada', 'Temporada quitada');
+    }
+
+    protected addSeason(event: Event, keyField: HTMLInputElement, dateField: HTMLInputElement): void {
+        event.preventDefault();
+
+        const key = keyField.value.trim();
+
+        if (!/^\d{2}$/.test(key)) {
+            this.notifications.warning('La temporada debe ser un número de dos cifras, como 27');
+            return;
+        }
+
+        if (!dateField.value) {
+            this.notifications.warning('Elige el día en que empieza');
+            return;
+        }
+
+        this.saveSeason(key, dateField.value);
+        keyField.value = '';
+        dateField.value = '';
     }
 
     protected download(account: LolAdminAccount): void {
@@ -114,6 +151,19 @@ export class AdminAccounts implements OnInit {
         const minutes = Math.ceil((account.secondsLeft ?? 0) / 60);
 
         return minutes < 60 ? `${minutes} min` : `${Math.floor(minutes / 60)} h ${minutes % 60} min`;
+    }
+
+    private runSeasons(request: Observable<LolAdminSeason[]>, fallback: string, success?: string): void {
+        request.subscribe({
+            next: (seasons) => {
+                this.seasons.set(seasons);
+
+                if (success) {
+                    this.notifications.success(success);
+                }
+            },
+            error: (error) => this.notifications.error(resolveApiError(error, fallback)),
+        });
     }
 
     private run(request: Observable<LolAdminAccount[]>, fallback: string, done?: () => void): void {

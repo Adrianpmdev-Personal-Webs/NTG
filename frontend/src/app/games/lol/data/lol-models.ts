@@ -80,12 +80,24 @@ export interface LolQueueBlock {
     matches: LolMatch[];
 }
 
+export interface LolSeasonOption {
+    key: string;
+    label: string;
+}
+
+export interface LolAdminSeason extends LolSeasonOption {
+    date: string;
+    current: boolean;
+}
+
 export interface LolPlayerDetail {
     player: LolPlayerSummary;
     checkedAt: string | null;
     updating: boolean;
     error: string | null;
-    seasonStart: string;
+    season: LolSeasonOption;
+    current: boolean;
+    seasons: LolSeasonOption[];
     ranks: LolRank[];
     queues: LolQueueBlock[];
 }

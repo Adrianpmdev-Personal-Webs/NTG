@@ -116,6 +116,81 @@
             </div>
         }
     </div>
+
+    <div class="terminal-card admin-section">
+        <h2 class="admin-page-title">TEMPORADAS</h2>
+        <p class="admin-page-subtitle">
+            Cada partida pertenece a una temporada por su fecha, así que cambiar un día las recoloca solas. La actual es
+            la más reciente que ya ha empezado.
+        </p>
+
+        <div class="admin-table-scroll">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>TEMPORADA</th>
+                        <th>EMPIEZA EL</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (season of seasons(); track season.key) {
+                        <tr>
+                            <td data-label="TEMPORADA" class="strong">
+                                {{ season.label }}{{ season.current ? ' · ACTUAL' : '' }}
+                            </td>
+                            <td data-label="EMPIEZA EL">
+                                <input
+                                    #seasonDate
+                                    class="neon-input"
+                                    type="date"
+                                    [attr.aria-label]="'Inicio de ' + season.label"
+                                    [value]="season.date"
+                                />
+                            </td>
+                            <td>
+                                <div class="modal-actions">
+                                    <button
+                                        class="btn-neon"
+                                        type="button"
+                                        [disabled]="busy()"
+                                        (click)="saveSeason(season.key, seasonDate.value)"
+                                    >
+                                        GUARDAR
+                                    </button>
+                                    @if (seasons().length > 1) {
+                                        <button
+                                            class="btn-neon btn-neon-danger"
+                                            type="button"
+                                            [disabled]="busy()"
+                                            (click)="deleteSeason(season.key)"
+                                        >
+                                            QUITAR
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <form class="new-season" (submit)="addSeason($event, newKey, newDate)">
+            <label class="form-field">
+                <span class="field-label">NUEVA TEMPORADA</span>
+                <input #newKey class="neon-input" type="text" inputmode="numeric" maxlength="2" placeholder="27" />
+            </label>
+            <label class="form-field">
+                <span class="field-label">EMPIEZA EL</span>
+                <input #newDate class="neon-input" type="date" />
+            </label>
+            <button class="btn-neon" type="submit" [disabled]="busy()">AÑADIR</button>
+        </form>
+        <p class="live-note">
+            Si adelantas el inicio de la primera temporada, las partidas anteriores no se descargan solas.
+        </p>
+    </div>
 </div>
 
 @if (linking(); as account) {

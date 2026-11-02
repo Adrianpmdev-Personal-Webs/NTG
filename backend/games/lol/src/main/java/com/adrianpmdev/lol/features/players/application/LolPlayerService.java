@@ -3,10 +3,12 @@ package com.adrianpmdev.lol.features.players.application;
 import com.adrianpmdev.lol.LolModule;
 import com.adrianpmdev.lol.features.players.api.LolResponses;
 import com.adrianpmdev.lol.features.players.domain.LolQueue;
+import com.adrianpmdev.lol.features.players.domain.LolSeasons;
 import com.adrianpmdev.lol.features.players.infrastructure.LolAccount;
 import com.adrianpmdev.lol.features.players.infrastructure.LolAccountRepository;
 import com.adrianpmdev.lol.features.players.infrastructure.LolMatch;
 import com.adrianpmdev.lol.features.players.infrastructure.LolMatchRepository;
+import com.adrianpmdev.lol.features.players.infrastructure.LolSeasonRanks;
 import com.adrianpmdev.lol.features.riot.DataDragon;
 import com.adrianpmdev.lol.features.riot.RiotApiException;
 import com.adrianpmdev.lol.features.riot.RiotClient;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -64,6 +67,8 @@ public class LolPlayerService {
     private final LolAccountRepository accountRepository;
     private final LolMatchRepository matchRepository;
     private final LolSyncWorker worker;
+    private final LolSeasons seasons;
+    private final LolSeasonRanks seasonRanks;
     private final RiotClient riotClient;
     private final DataDragon dataDragon;
     private final CurrentUser currentUser;
@@ -95,10 +100,54 @@ public class LolPlayerService {
      * What is stored about a player.
      *
      * @param userId player
-     * @return their ranks, statistics and last games
+     * @param season short name of the season, or null for the current one
+     * @return their ranks, statistics and last games in that season
      */
-    public LolResponses.PlayerDetail detail(UUID userId) {
-        return detailOf(find(userId), false, null);
+    public LolResponses.PlayerDetail detail(UUID userId, String season) {
+        return detailOf(find(userId), season, false, null);
+    }
+
+    /**
+     * Every season, for the admin screen.
+     *
+     * @return seasons, newest first
+     */
+    public List<LolResponses.AdminSeason> adminSeasons() {
+        requireAdmin();
+
+        String current = seasons.current().key();
+
+        return seasons.all().reversed().stream()
+                .map(season -> new LolResponses.AdminSeason(season.key(), season.label(), season.date().toString(),
+                        season.key().equals(current)))
+                .toList();
+    }
+
+    /**
+     * Creates a season or changes the day it starts.
+     *
+     * @param key  short name
+     * @param date first day
+     * @return every season
+     */
+    public List<LolResponses.AdminSeason> saveSeason(String key, LocalDate date) {
+        requireAdmin();
+        seasons.save(key, date);
+
+        return adminSeasons();
+    }
+
+    /**
+     * Deletes a season; its games stay and go to the season that covers their date.
+     *
+     * @param key short name
+     * @return every season
+     */
+    public List<LolResponses.AdminSeason> deleteSeason(String key) {
+        requireAdmin();
+        seasons.delete(key);
+
+        return adminSeasons();
     }
 
     /**
@@ -106,21 +155,22 @@ public class LolPlayerService {
      * background and the answer says so.
      *
      * @param userId player
+     * @param season short name of the season to answer with, or null for the current one
      * @return what is stored after it
      */
-    public LolResponses.PlayerDetail refresh(UUID userId) {
+    public LolResponses.PlayerDetail refresh(UUID userId, String season) {
         CompletableFuture<Void> update = worker.refresh(find(userId));
 
         try {
             update.get(REFRESH_WAIT_SECONDS, TimeUnit.SECONDS);
-            return detailOf(find(userId), false, null);
+            return detailOf(find(userId), season, false, null);
         } catch (TimeoutException exception) {
-            return detailOf(find(userId), true, null);
+            return detailOf(find(userId), season, true, null);
         } catch (ExecutionException exception) {
-            return detailOf(find(userId), false, LolSyncWorker.reasonOf(exception.getCause()));
+            return detailOf(find(userId), season, false, LolSyncWorker.reasonOf(exception.getCause()));
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
-            return detailOf(find(userId), false, null);
+            return detailOf(find(userId), season, false, null);
         }
     }
 
@@ -300,19 +350,30 @@ public class LolPlayerService {
                 account.getLastError());
     }
 
-    private LolResponses.PlayerDetail detailOf(LolAccount account, boolean updating, String error) {
+    private LolResponses.PlayerDetail detailOf(LolAccount account, String seasonKey, boolean updating, String error) {
         UUID userId = account.getUserId();
         String username = userDirectory.usernames(List.of(userId)).get(userId);
+        LolSeasons.Season current = seasons.current();
+        LolSeasons.Season season = seasonKey == null ? current : seasons.find(seasonKey).orElse(current);
+        boolean isCurrent = season.key().equals(current.key());
         List<LolMatchRepository.ChampionTotals> totals =
-                matchRepository.championTotals(userId, worker.seasonStart());
-        List<LolResponses.QueueBlock> queues = LolQueue.ALL.stream().map(queue -> queueBlock(userId, queue, totals))
+                matchRepository.championTotals(userId, season.start(), season.end());
+        List<LolResponses.QueueBlock> queues = LolQueue.ALL.stream()
+                .map(queue -> queueBlock(userId, queue, season, totals))
                 .toList();
+        List<LolResponses.SeasonOption> options = seasons.all().reversed().stream()
+                .filter(option -> option.key().equals(current.key()) || option.key().equals(season.key())
+                        || matchRepository.existsByUserIdAndPlayedAtGreaterThanEqualAndPlayedAtLessThan(userId,
+                        option.start(), option.end()))
+                .map(option -> new LolResponses.SeasonOption(option.key(), option.label()))
+                .toList();
+        JsonNode ranks = isCurrent ? account.getRanks() : seasonRanks.find(userId, season.key());
 
         return new LolResponses.PlayerDetail(summaryOf(account, username), account.getCheckedAt(), updating, error,
-                worker.seasonStart(), ranksOf(account), queues);
+                new LolResponses.SeasonOption(season.key(), season.label()), isCurrent, options, ranksOf(ranks), queues);
     }
 
-    private LolResponses.QueueBlock queueBlock(UUID userId, LolQueue queue,
+    private LolResponses.QueueBlock queueBlock(UUID userId, LolQueue queue, LolSeasons.Season season,
                                                List<LolMatchRepository.ChampionTotals> totals) {
         List<LolMatchRepository.ChampionTotals> inQueue = totals.stream()
                 .filter(row -> row.getQueueId() == queue.id())
@@ -327,7 +388,8 @@ public class LolPlayerService {
                         kda(row.getKills(), row.getDeaths(), row.getAssists())))
                 .toList();
         List<LolResponses.Match> matches = matchRepository
-                .findTop20ByUserIdAndQueueIdOrderByPlayedAtDesc(userId, queue.id()).stream()
+                .findTop20ByUserIdAndQueueIdAndPlayedAtGreaterThanEqualAndPlayedAtLessThanOrderByPlayedAtDesc(userId,
+                        queue.id(), season.start(), season.end()).stream()
                 .map(this::matchOf)
                 .toList();
 
@@ -372,16 +434,16 @@ public class LolPlayerService {
     }
 
     /**
-     * The official ranks of an account, SoloQ first.
+     * Official ranks as they are stored, SoloQ first.
      *
-     * @param account the account
+     * @param stored the ranks kept
      * @return ranks
      */
-    static List<LolResponses.Rank> ranksOf(LolAccount account) {
+    static List<LolResponses.Rank> ranksOf(JsonNode stored) {
         List<LolResponses.Rank> ranks = new ArrayList<>();
 
         for (String queueType : List.of("RANKED_SOLO_5x5", "RANKED_FLEX_SR")) {
-            for (JsonNode rank : account.getRanks()) {
+            for (JsonNode rank : stored) {
                 if (queueType.equals(rank.path("queueType").asText())) {
                     ranks.add(new LolResponses.Rank(RANKED.get(queueType),
                             tierOf(rank.path("tier").asText(), rank.path("rank").asText()),

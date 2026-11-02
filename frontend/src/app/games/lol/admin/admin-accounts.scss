@@ -25,6 +25,14 @@
     font-size: 0.75rem;
 }
 
+.new-season {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+    margin-top: 14px;
+}
+
 .live-note {
     color: var(--text-secondary);
     font-size: 0.75rem;

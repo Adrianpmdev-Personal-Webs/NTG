@@ -3,7 +3,8 @@
  *
  * The games of each player of the group, by queue, with their official rank and the statistics of the season. What is
  * stored shows at once and the backend looks for new games when a player is opened, or when the update button is
- * pressed; moving between queues costs no call. Hextech look: navy, gold and teal, filling the whole screen.
+ * pressed; moving between queues costs no call. A selector shows past seasons, with the current one by default and the
+ * rank each player finished with. Hextech look: navy, gold and teal, filling the whole screen.
  *
  * @author @adrianpmdev
  */
@@ -42,6 +43,7 @@ export class LolHistory implements OnInit {
     protected readonly confirmUnlink = signal(false);
     protected readonly data = signal<LolPlayers | null>(null);
     protected readonly selectedId = signal<string | null>(null);
+    protected readonly seasonKey = signal<string | null>(null);
     protected readonly detail = signal<LolPlayerDetail | null>(null);
     protected readonly queueId = signal(420);
 
@@ -74,13 +76,20 @@ export class LolHistory implements OnInit {
 
     protected select(userId: string): void {
         this.selectedId.set(userId);
+        this.seasonKey.set(null);
         this.detail.set(null);
-        this.detailLoad?.unsubscribe();
-        this.detailLoad = this.api.getPlayer(userId).subscribe({
-            next: (detail) => this.detail.set(detail),
-            error: (error) => this.notifications.error(resolveApiError(error, 'No se ha podido cargar el jugador')),
-        });
+        this.loadDetail(userId);
         this.update();
+    }
+
+    protected selectSeason(key: string): void {
+        const userId = this.selectedId();
+
+        this.seasonKey.set(key);
+
+        if (userId) {
+            this.loadDetail(userId);
+        }
     }
 
     protected update(): void {
@@ -92,7 +101,7 @@ export class LolHistory implements OnInit {
 
         this.updating.set(true);
         this.refreshLoad?.unsubscribe();
-        this.refreshLoad = this.api.refresh(userId).subscribe({
+        this.refreshLoad = this.api.refresh(userId, this.seasonKey()).subscribe({
             next: (detail) => {
                 this.detailLoad?.unsubscribe();
                 this.detail.set(detail);
@@ -193,6 +202,14 @@ export class LolHistory implements OnInit {
 
     protected hideIcon(event: Event): void {
         (event.target as HTMLElement).style.visibility = 'hidden';
+    }
+
+    private loadDetail(userId: string): void {
+        this.detailLoad?.unsubscribe();
+        this.detailLoad = this.api.getPlayer(userId, this.seasonKey()).subscribe({
+            next: (detail) => this.detail.set(detail),
+            error: (error) => this.notifications.error(resolveApiError(error, 'No se ha podido cargar el jugador')),
+        });
     }
 
     private applyPlayers(data: LolPlayers, preferred?: string): void {

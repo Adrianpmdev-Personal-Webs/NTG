@@ -43,19 +43,33 @@ public interface LolMatchRepository extends JpaRepository<LolMatch, LolMatch.Key
     }
 
     /**
-     * The newest games of a player in a queue.
+     * The newest games of a player in a queue during a season.
      *
      * @param userId  player
      * @param queueId queue
+     * @param from    start of the season
+     * @param to      end of the season
      * @return up to 20 games
      */
-    List<LolMatch> findTop20ByUserIdAndQueueIdOrderByPlayedAtDesc(UUID userId, int queueId);
+    List<LolMatch> findTop20ByUserIdAndQueueIdAndPlayedAtGreaterThanEqualAndPlayedAtLessThanOrderByPlayedAtDesc(
+            UUID userId, int queueId, Instant from, Instant to);
 
     /**
-     * Totals of a player by queue and champion since a moment, without remakes.
+     * Whether a player has games in a season.
      *
      * @param userId player
      * @param from   start of the season
+     * @param to     end of the season
+     * @return true when they have
+     */
+    boolean existsByUserIdAndPlayedAtGreaterThanEqualAndPlayedAtLessThan(UUID userId, Instant from, Instant to);
+
+    /**
+     * Totals of a player by queue and champion during a season, without remakes.
+     *
+     * @param userId player
+     * @param from   start of the season
+     * @param to     end of the season
      * @return totals
      */
     @Query("""
@@ -64,10 +78,11 @@ public interface LolMatchRepository extends JpaRepository<LolMatch, LolMatch.Key
                    sum(m.kills) as kills, sum(m.deaths) as deaths, sum(m.assists) as assists,
                    sum(m.cs) as cs, sum(m.durationSeconds) as seconds
             from LolMatch m
-            where m.userId = :userId and m.remake = false and m.playedAt >= :from
+            where m.userId = :userId and m.remake = false and m.playedAt >= :from and m.playedAt < :to
             group by m.queueId, m.championId
             """)
-    List<ChampionTotals> championTotals(@Param("userId") UUID userId, @Param("from") Instant from);
+    List<ChampionTotals> championTotals(@Param("userId") UUID userId, @Param("from") Instant from,
+                                        @Param("to") Instant to);
 
     /**
      * Which of some games are already stored for a player.

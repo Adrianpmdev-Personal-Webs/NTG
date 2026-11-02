@@ -1,8 +1,10 @@
 package com.adrianpmdev.lol.features.players.api;
 
 import com.adrianpmdev.lol.features.players.application.LolPlayerService;
+import com.adrianpmdev.platform.error.ApiErrors;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,8 +14,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,19 +43,53 @@ public class LolController {
     public record LinkRequest(@NotBlank @Size(max = 30) String riotId) {
     }
 
+    /**
+     * The day a season starts.
+     *
+     * @param date first day, as yyyy-MM-dd
+     */
+    public record SeasonRequest(@NotBlank @Pattern(regexp = "\\d{4}-\\d{2}-\\d{2}") String date) {
+    }
+
+    @GetMapping("/admin/seasons")
+    public List<LolResponses.AdminSeason> adminSeasons() {
+        return service.adminSeasons();
+    }
+
+    @PutMapping("/admin/seasons/{key}")
+    public List<LolResponses.AdminSeason> saveSeason(@PathVariable String key,
+                                                     @Valid @RequestBody SeasonRequest request) {
+        if (!key.matches("\\d{2}")) {
+            throw ApiErrors.badRequest("La temporada debe ser un número de dos cifras, como 27");
+        }
+
+        try {
+            return service.saveSeason(key, LocalDate.parse(request.date()));
+        } catch (DateTimeParseException exception) {
+            throw ApiErrors.badRequest("Esa fecha no existe");
+        }
+    }
+
+    @DeleteMapping("/admin/seasons/{key}")
+    public List<LolResponses.AdminSeason> deleteSeason(@PathVariable String key) {
+        return service.deleteSeason(key);
+    }
+
     @GetMapping("/players")
     public LolResponses.Players players() {
         return service.players();
     }
 
     @GetMapping("/players/{userId}")
-    public LolResponses.PlayerDetail player(@PathVariable UUID userId) {
-        return service.detail(userId);
+    public LolResponses.PlayerDetail player(@PathVariable UUID userId,
+                                            @RequestParam(required = false) String season) {
+        return service.detail(userId, season);
     }
 
     @PostMapping("/players/{userId}/refresh")
-    public LolResponses.PlayerDetail refresh(@PathVariable UUID userId) {
-        return service.refresh(userId);
+    public LolResponses.PlayerDetail refresh(@PathVariable UUID userId,
+                                             @RequestParam(required = false) String season) {
+        return service.refresh(userId, season);
     }
 
     @PutMapping("/accounts/me")

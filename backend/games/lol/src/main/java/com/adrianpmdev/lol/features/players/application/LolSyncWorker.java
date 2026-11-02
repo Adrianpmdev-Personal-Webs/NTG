@@ -1,24 +1,23 @@
 package com.adrianpmdev.lol.features.players.application;
 
 import com.adrianpmdev.lol.features.players.domain.LolQueue;
+import com.adrianpmdev.lol.features.players.domain.LolSeasons;
 import com.adrianpmdev.lol.features.players.infrastructure.LolAccount;
 import com.adrianpmdev.lol.features.players.infrastructure.LolAccountRepository;
 import com.adrianpmdev.lol.features.players.infrastructure.LolMatchRepository;
+import com.adrianpmdev.lol.features.players.infrastructure.LolSeasonRanks;
 import com.adrianpmdev.lol.features.riot.RiotApiException;
 import com.adrianpmdev.lol.features.riot.RiotClient;
 import com.adrianpmdev.lol.features.riot.RiotModels;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
@@ -63,7 +62,8 @@ public class LolSyncWorker {
     private final LolAccountRepository accountRepository;
     private final LolMatchRepository matchRepository;
     private final JdbcTemplate jdbcTemplate;
-    private final Instant seasonStart;
+    private final LolSeasons seasons;
+    private final LolSeasonRanks seasonRanks;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final Map<UUID, CompletableFuture<Void>> refreshes = new LinkedHashMap<>();
@@ -92,25 +92,18 @@ public class LolSyncWorker {
      * @param accountRepository accounts
      * @param matchRepository   games
      * @param jdbcTemplate      inserts games with plain SQL
-     * @param seasonStart       first day of the season followed, as yyyy-MM-dd
+     * @param seasons           seasons followed
+     * @param seasonRanks       last rank of each season
      */
     public LolSyncWorker(RiotClient riotClient, LolAccountRepository accountRepository,
-                         LolMatchRepository matchRepository, JdbcTemplate jdbcTemplate,
-                         @Value("${lol.season-start:2026-01-08}") String seasonStart) {
+                         LolMatchRepository matchRepository, JdbcTemplate jdbcTemplate, LolSeasons seasons,
+                         LolSeasonRanks seasonRanks) {
         this.riotClient = riotClient;
         this.accountRepository = accountRepository;
         this.matchRepository = matchRepository;
         this.jdbcTemplate = jdbcTemplate;
-        this.seasonStart = LocalDate.parse(seasonStart).atStartOfDay(ZoneOffset.UTC).toInstant();
-    }
-
-    /**
-     * First moment of the season followed.
-     *
-     * @return the moment
-     */
-    public Instant seasonStart() {
-        return seasonStart;
+        this.seasons = seasons;
+        this.seasonRanks = seasonRanks;
     }
 
     /**
@@ -307,7 +300,8 @@ public class LolSyncWorker {
      */
     private void sync(LolAccount account, boolean interactive) {
         Instant startedAt = Instant.now();
-        long startTime = (account.getSyncedUntil() == null ? seasonStart : account.getSyncedUntil()).getEpochSecond();
+        long startTime = (account.getSyncedUntil() == null ? seasons.firstStart() : account.getSyncedUntil())
+                .getEpochSecond();
         Set<String> missing = new LinkedHashSet<>();
 
         for (LolQueue queue : LolQueue.ALL) {
@@ -340,6 +334,7 @@ public class LolSyncWorker {
             account.setSummonerLevel(summoner.summonerLevel());
         });
         account.setRanks(objectMapper.valueToTree(ranks));
+        seasonRanks.save(account.getUserId(), seasons.current().key(), account.getRanks());
         account.setSyncedUntil(startedAt.minus(MARGIN));
         account.setCheckedAt(Instant.now());
         accountRepository.save(account);

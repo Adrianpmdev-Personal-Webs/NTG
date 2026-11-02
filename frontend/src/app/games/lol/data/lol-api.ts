@@ -11,7 +11,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '@core/api/api';
-import { LolAdminAccount, LolPlayerDetail, LolPlayers } from './lol-models';
+import { LolAdminAccount, LolAdminSeason, LolPlayerDetail, LolPlayers } from './lol-models';
 
 @Injectable({ providedIn: 'root' })
 export class LolApi {
@@ -22,12 +22,28 @@ export class LolApi {
         return this.http.get<LolPlayers>(`${this.base}/players`);
     }
 
-    getPlayer(userId: string): Observable<LolPlayerDetail> {
-        return this.http.get<LolPlayerDetail>(`${this.base}/players/${userId}`);
+    getPlayer(userId: string, season: string | null): Observable<LolPlayerDetail> {
+        return this.http.get<LolPlayerDetail>(`${this.base}/players/${userId}`, { params: season ? { season } : {} });
     }
 
-    refresh(userId: string): Observable<LolPlayerDetail> {
-        return this.http.post<LolPlayerDetail>(`${this.base}/players/${userId}/refresh`, {});
+    refresh(userId: string, season: string | null): Observable<LolPlayerDetail> {
+        return this.http.post<LolPlayerDetail>(
+            `${this.base}/players/${userId}/refresh`,
+            {},
+            { params: season ? { season } : {} },
+        );
+    }
+
+    getSeasons(): Observable<LolAdminSeason[]> {
+        return this.http.get<LolAdminSeason[]>(`${this.base}/admin/seasons`);
+    }
+
+    saveSeason(key: string, date: string): Observable<LolAdminSeason[]> {
+        return this.http.put<LolAdminSeason[]>(`${this.base}/admin/seasons/${key}`, { date });
+    }
+
+    deleteSeason(key: string): Observable<LolAdminSeason[]> {
+        return this.http.delete<LolAdminSeason[]>(`${this.base}/admin/seasons/${key}`);
     }
 
     linkOwn(riotId: string): Observable<LolPlayers> {

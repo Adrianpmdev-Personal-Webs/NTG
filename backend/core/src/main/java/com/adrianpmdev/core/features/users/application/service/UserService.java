@@ -15,6 +15,7 @@ import com.adrianpmdev.core.integration.supabase.auth.client.SupabaseAuthClient;
 import com.adrianpmdev.core.integration.supabase.auth.exception.SupabaseAuthException;
 import lombok.extern.slf4j.Slf4j;
 import com.adrianpmdev.core.security.authentication.UserAuthorityCache;
+import com.adrianpmdev.platform.module.UserDataCleaner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -49,6 +50,7 @@ public class UserService {
     private final AppProperties appProperties;
     private final UserAuthorityCache userAuthorityCache;
     private final UserAvatarService userAvatarService;
+    private final List<UserDataCleaner> userDataCleaners;
 
     /**
      * Builds the service with its dependencies.
@@ -59,16 +61,19 @@ public class UserService {
      * @param appProperties      application settings
      * @param userAuthorityCache role and tags cached for the access token filter
      * @param userAvatarService  avatars uploaded by their owner
+     * @param userDataCleaners   what each game does when an account is deleted
      */
     public UserService(UserRepository userRepository, TagRepository tagRepository,
                        SupabaseAuthClient supabase, AppProperties appProperties,
-                       UserAuthorityCache userAuthorityCache, UserAvatarService userAvatarService) {
+                       UserAuthorityCache userAuthorityCache, UserAvatarService userAvatarService,
+                       List<UserDataCleaner> userDataCleaners) {
         this.userRepository = userRepository;
         this.tagRepository = tagRepository;
         this.supabase = supabase;
         this.appProperties = appProperties;
         this.userAuthorityCache = userAuthorityCache;
         this.userAvatarService = userAvatarService;
+        this.userDataCleaners = userDataCleaners;
     }
 
     /**
@@ -154,7 +159,8 @@ public class UserService {
     }
 
     /**
-     * Deletes a user from Supabase Auth first and then from the local schema.
+     * Deletes a user: first what each game keeps about them, so a failure stops here and the deletion can be retried,
+     * then the Supabase Auth account, the local profile and their uploaded avatar.
      *
      * @param id      user to delete
      * @param actorId admin performing the action
@@ -164,9 +170,11 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot delete your own account");
         }
 
-        if (!userRepository.existsById(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND_MESSAGE);
-        }
+        String avatar = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, USER_NOT_FOUND_MESSAGE))
+                .getAvatarUrl();
+
+        userDataCleaners.forEach(cleaner -> cleaner.removeUser(id));
 
         try {
             supabase.adminDeleteUser(id);
@@ -177,6 +185,7 @@ public class UserService {
 
         userRepository.deleteById(id);
         userAuthorityCache.evict(id);
+        userAvatarService.deleteReplacedUpload(id, avatar, null);
         AUDIT.info("actor={} action=USER_DELETED target={}", actorId, id);
     }
 

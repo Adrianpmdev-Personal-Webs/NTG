@@ -331,7 +331,12 @@ public class LolPlayerService {
         accountRepository.save(account);
     }
 
-    private void unlink(UUID userId) {
+    /**
+     * Stops the download of a player and removes their link; the database removes their games and final ranks with it.
+     *
+     * @param userId player
+     */
+    void unlink(UUID userId) {
         worker.pause(userId);
         accountRepository.findById(userId).ifPresent(accountRepository::delete);
     }

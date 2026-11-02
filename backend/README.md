@@ -31,7 +31,7 @@ a game, and a game never depends on the platform**. Both only share a small modu
 
 | Module | Role |
 |---|---|
-| 📜 **`platform-api`** | Contracts shared by everyone: who is calling, file storage, picture compression, public pictures, how a game declares itself (`GameModule`), what it shows in the admin dashboard and on the profile, and helpers for cacheable JSON. No Spring Security, no Supabase. |
+| 📜 **`platform-api`** | Contracts shared by everyone: who is calling, file storage, picture compression, public pictures, how a game declares itself (`GameModule`), what it shows in the admin dashboard and on the profile, what it does when an account is deleted, and helpers for cacheable JSON. No Spring Security, no Supabase. |
 | 🚀 **`core`** | The platform: identity (users, tags), the game catalog, public pictures, background music, the own profile, the admin dashboard, security, the Supabase integration, logging and error handling. It implements the contracts of `platform-api`. |
 | 🎮 **`games/*`** | One module per game, with its own domain and REST endpoints. It depends **only on `platform-api`** and contains **no security code**: it declares its API path and tag, and `core` builds the access rules from that. |
 | 🧷 **`app`** | Boots `core` and every game together and builds the runnable `ntg.jar`. Adding a game to the application is adding one dependency here. |
@@ -67,7 +67,7 @@ backend/
 ├── platform-api/                   📜 Contracts shared by core and the games
 │   └── com/adrianpmdev/platform/
 │       ├── port/                   CurrentUser, UserDirectory, ObjectStorage
-│       ├── module/                 GameModule (API path, tag, player writes), GameHighlightProvider
+│       ├── module/                 GameModule (API path, tag, player writes), GameHighlightProvider, UserDataCleaner
 │       ├── image/                  ImageCompressor, ImageSpec, CompressedImage
 │       ├── asset/                  ImageSlot, ImageSlotProvider, PublicAssets
 │       ├── status/                 ModuleStatus, ModuleStatusProvider (a block of the admin dashboard)
@@ -188,6 +188,10 @@ security headers (see the [frontend documentation](../frontend/README.md)).
 - If saving the profile fails, the Supabase account is removed again, so no half-created users are left behind.
 - If only the email fails (provider limits, for example), the user is still created and the admin is told, so the
   email can be **resent** later.
+- Deleting a user asks each game first, through `UserDataCleaner`: what only belongs to that person is deleted (WoW
+  Forever characters, the League of Legends link and games) and what others need for their history stays without the
+  link (a Pokémon player and their results). If a game fails, the account is kept and the deletion can be retried. Then
+  go the Supabase account, the local profile and the uploaded avatar.
 
 ### 2. Staying signed in
 

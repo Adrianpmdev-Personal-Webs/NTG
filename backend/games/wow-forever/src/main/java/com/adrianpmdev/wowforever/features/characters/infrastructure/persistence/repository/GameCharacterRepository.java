@@ -47,4 +47,11 @@ public interface GameCharacterRepository extends JpaRepository<GameCharacter, UU
      * @return characters
      */
     List<GameCharacter> findByUserIdOrderByNameAsc(UUID userId);
+
+    /**
+     * Deletes the characters of an account.
+     *
+     * @param userId account id
+     */
+    void deleteByUserId(UUID userId);
 }

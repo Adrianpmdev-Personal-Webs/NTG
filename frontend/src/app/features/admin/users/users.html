@@ -297,7 +297,8 @@
                             <div class="warning-desc">
                                 Esta acción eliminará permanentemente al usuario
                                 <span class="highlight">{{ editTarget()?.username }}</span>
-                                de Supabase y de la base de datos local. Esta acción no se puede deshacer.
+                                de Supabase y de la base de datos local, junto con sus datos en los juegos, salvo lo que
+                                forme parte del historial de otros jugadores. Esta acción no se puede deshacer.
                             </div>
                             <div class="warning-id">EMAIL: {{ editTarget()?.email }}</div>
                             <div class="warning-id">UUID: {{ editTarget()?.id }}</div>

@@ -21,7 +21,9 @@
                     </div>
                 </div>
 
-                <button class="collapse-btn" type="button" (click)="toggleSidebar()" title="Cerrar menú">◀</button>
+                <button class="collapse-btn" type="button" (click)="toggleSidebar()" title="Cerrar menú">
+                    <app-nav-icon name="chevronLeft" />
+                </button>
             }
         </div>
 
@@ -75,7 +77,9 @@
 
                         @if (!sidebarCollapsed()) {
                             <span class="nav-label">ADMIN</span>
-                            <span class="nav-caret">{{ isSubmenuOpen(adminMenu) ? '▾' : '▸' }}</span>
+                            <span class="nav-caret"
+                                ><app-nav-icon [name]="isSubmenuOpen(adminMenu) ? 'chevronDown' : 'chevronRight'"
+                            /></span>
                         }
                     </button>
 
@@ -122,7 +126,9 @@
                                 }
                             </span>
                             @if (game.hasLinks) {
-                                <span class="nav-caret">{{ isSubmenuOpen(game.id) ? '▾' : '▸' }}</span>
+                                <span class="nav-caret"
+                                    ><app-nav-icon [name]="isSubmenuOpen(game.id) ? 'chevronDown' : 'chevronRight'"
+                                /></span>
                             }
                         }
                     </button>
@@ -186,12 +192,12 @@
                 class="logout-btn btn-neon btn-neon-danger"
                 type="button"
                 (click)="logout()"
+                aria-label="Cerrar sesión"
                 [title]="sidebarCollapsed() ? 'Cerrar sesión' : ''"
             >
-                @if (sidebarCollapsed()) {
-                    ⏻
-                } @else {
-                    ⏻ SALIR
+                <app-nav-icon class="logout-icon" name="power" />
+                @if (!sidebarCollapsed()) {
+                    <span>SALIR</span>
                 }
             </button>
         </div>

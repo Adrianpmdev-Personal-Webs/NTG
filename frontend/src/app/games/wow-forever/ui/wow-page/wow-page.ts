@@ -12,10 +12,11 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { WowButton } from '../wow-button/wow-button';
 import { WowFrame } from '../wow-frame/wow-frame';
 import { WowNavLink, WowNavMenu } from '../wow-nav-menu/wow-nav-menu';
+import { NavIcon } from '@shared/components/nav-icon/nav-icon';
 
 @Component({
     selector: 'app-wow-page',
-    imports: [WowButton, WowFrame, WowNavMenu],
+    imports: [NavIcon, WowButton, WowFrame, WowNavMenu],
     templateUrl: './wow-page.html',
     styleUrl: './wow-page.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -26,7 +27,7 @@ export class WowPage {
     readonly compactNav = input(false);
 
     protected readonly links: readonly WowNavLink[] = [
-        { label: '← Lanzador', link: '/wow-forever' },
-        { label: '← NTG', link: '/' },
+        { label: 'Lanzador', link: '/wow-forever' },
+        { label: 'NTG', link: '/' },
     ];
 }

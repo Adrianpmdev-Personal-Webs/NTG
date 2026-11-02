@@ -3,7 +3,9 @@
         <p class="admin-page-state">CARGANDO...</p>
     } @else if (detail()) {
         @let t = detail()!;
-        <a class="admin-page-subtitle" [routerLink]="['/admin/pokemon/lockes', t.locke.id]">← {{ t.locke.name }}</a>
+        <a class="admin-page-subtitle" [routerLink]="['/admin/pokemon/lockes', t.locke.id]"
+            ><app-nav-icon class="before-text" name="arrowLeft" />{{ t.locke.name }}</a
+        >
 
         <div class="admin-section-head">
             <div>
@@ -107,7 +109,7 @@
                                                     type="button"
                                                     (click)="removePlayer(player)"
                                                 >
-                                                    ✕ QUITAR
+                                                    <app-nav-icon class="before-text" name="x" />QUITAR
                                                 </button>
                                             </div>
                                         </td>
@@ -342,7 +344,7 @@
                                                         [attr.aria-label]="'Quitar ' + reward.name"
                                                         (click)="removeReward(reward)"
                                                     >
-                                                        ✕
+                                                        <app-nav-icon name="x" />
                                                     </button>
                                                 </div>
                                             </td>
@@ -460,11 +462,13 @@
         <div class="modal modal-sm terminal-card" role="dialog" aria-modal="true">
             <div class="modal-header">
                 <h2 class="modal-title danger-title">{{ c.title }}</h2>
-                <button class="close-btn" type="button" aria-label="Cerrar" (click)="confirmation.set(null)">✕</button>
+                <button class="close-btn" type="button" aria-label="Cerrar" (click)="confirmation.set(null)">
+                    <app-nav-icon name="x" />
+                </button>
             </div>
             <div class="modal-body">
                 <div class="delete-warning">
-                    <span class="warning-icon">⚠</span>
+                    <span class="warning-icon"><app-nav-icon name="alert" /></span>
                     <p class="warning-desc">{{ c.message }}</p>
                 </div>
                 <div class="modal-actions">

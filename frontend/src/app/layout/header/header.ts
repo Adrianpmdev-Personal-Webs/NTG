@@ -11,10 +11,12 @@ import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, outpu
 import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, map } from 'rxjs';
+import { NavIcon } from '@shared/components/nav-icon/nav-icon';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-header',
+    imports: [NavIcon],
     templateUrl: './header.html',
     styleUrl: './header.scss',
 })

@@ -17,6 +17,7 @@ import { NotificationCenter } from '@core/notifications/notification-center';
 import { resolveApiError } from '@shared/utils/api-error';
 import { LolApi } from '../data/lol-api';
 import { LolMatch, LolPlayerDetail, LolPlayers } from '../data/lol-models';
+import { NavIcon } from '@shared/components/nav-icon/nav-icon';
 
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
@@ -24,7 +25,7 @@ const DAY = 24 * HOUR;
 
 @Component({
     selector: 'app-lol-history',
-    imports: [DecimalPipe, NgTemplateOutlet, RouterLink],
+    imports: [NavIcon, DecimalPipe, NgTemplateOutlet, RouterLink],
     templateUrl: './lol-history.html',
     styleUrl: './lol-history.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,

@@ -21,6 +21,7 @@ import { ModalOverlay } from '@shared/directives/modal-overlay';
 import { User } from '@shared/models/user';
 import { resolveApiError } from '@shared/utils/api-error';
 import { Profile, ProfileApi, ProfileBar } from './profile-api';
+import { NavIcon } from '@shared/components/nav-icon/nav-icon';
 
 const OVERVIEW = 'overview';
 const USERNAME_MIN_LENGTH = 3;
@@ -31,7 +32,7 @@ const AVATAR_LINK_PATTERN = /^https:\/\/\S+$/;
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-profile',
-    imports: [DatePipe, ModalOverlay, NgTemplateOutlet, RouterLink],
+    imports: [NavIcon, DatePipe, ModalOverlay, NgTemplateOutlet, RouterLink],
     templateUrl: './profile.html',
     styleUrl: './profile.scss',
 })

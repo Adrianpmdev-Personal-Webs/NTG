@@ -17,11 +17,12 @@ import { PokemonApi } from '../../data/pokemon-api';
 import { FORMAT_LABELS, FORMAT_OPTIONS, STATUS_LABELS } from '../../data/pokemon-labels';
 import { Game, LockeDetail, Player, TournamentCreateRequest } from '../../data/pokemon-models';
 import { ModalOverlay } from '@shared/directives/modal-overlay';
+import { NavIcon } from '@shared/components/nav-icon/nav-icon';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-pokemon-admin-locke',
-    imports: [ModalOverlay, FormsModule, RouterLink],
+    imports: [NavIcon, ModalOverlay, FormsModule, RouterLink],
     templateUrl: './admin-locke.html',
 })
 export class AdminLocke {

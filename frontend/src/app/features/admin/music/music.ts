@@ -18,6 +18,7 @@ import { MusicArea, MusicTrack } from '@shared/models/music';
 import { resolveApiError } from '@shared/utils/api-error';
 import { ModalOverlay } from '@shared/directives/modal-overlay';
 import { SongError, compressSong } from './song-compressor';
+import { NavIcon } from '@shared/components/nav-icon/nav-icon';
 
 const MAX_TITLE_LENGTH = 100;
 
@@ -29,7 +30,7 @@ interface Progress {
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-admin-music',
-    imports: [ModalOverlay],
+    imports: [NavIcon, ModalOverlay],
     templateUrl: './music.html',
     styleUrl: './music.scss',
 })

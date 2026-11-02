@@ -13,12 +13,14 @@ import { NotificationCenter } from '@core/notifications/notification-center';
 import { resolveApiError } from '@shared/utils/api-error';
 import { PokemonApi } from '../../data/pokemon-api';
 import { LockeDeath, LockeDeaths } from '../../data/pokemon-models';
+import { NavIcon } from '@shared/components/nav-icon/nav-icon';
 
 const POKEMON_NAME_MAX_LENGTH = 30;
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-pokemon-locke-deaths',
+    imports: [NavIcon],
     templateUrl: './locke-deaths.html',
     styleUrl: './locke-deaths.scss',
 })

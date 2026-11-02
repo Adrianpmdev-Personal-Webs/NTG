@@ -17,13 +17,14 @@ import { playerRows } from '../data/tournament-view';
 import { RulesView } from '../ui/rules-view/rules-view';
 import { StandingsTable } from '../ui/standings-table/standings-table';
 import { LockeDeathsView } from './locke-deaths/locke-deaths';
+import { NavIcon } from '@shared/components/nav-icon/nav-icon';
 
 type LockeTab = 'tournaments' | 'standings' | 'deaths' | 'rules' | 'players';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-pokemon-locke',
-    imports: [RouterLink, StandingsTable, RulesView, LockeDeathsView],
+    imports: [NavIcon, RouterLink, StandingsTable, RulesView, LockeDeathsView],
     templateUrl: './locke.html',
     styleUrl: './locke.scss',
 })

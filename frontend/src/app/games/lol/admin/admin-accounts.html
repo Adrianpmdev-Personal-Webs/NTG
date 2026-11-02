@@ -11,7 +11,9 @@
             }
         </div>
         <div class="modal-actions">
-            <button class="btn-neon" type="button" [disabled]="busy()" (click)="reload()">↻ ACTUALIZAR</button>
+            <button class="btn-neon" type="button" [disabled]="busy()" (click)="reload()">
+                <app-nav-icon class="before-text" name="refresh" />ACTUALIZAR
+            </button>
             <button class="btn-neon" type="button" [disabled]="busy()" (click)="downloadAll()">DESCARGAR TODO</button>
         </div>
     </div>
@@ -209,7 +211,9 @@
         <div class="modal modal-sm terminal-card" role="dialog" aria-modal="true">
             <div class="modal-header">
                 <h2 class="modal-title">RIOT ID DE {{ account.username }}</h2>
-                <button class="close-btn" type="button" aria-label="Cerrar" (click)="linking.set(null)">✕</button>
+                <button class="close-btn" type="button" aria-label="Cerrar" (click)="linking.set(null)">
+                    <app-nav-icon name="x" />
+                </button>
             </div>
             <form class="modal-body" (submit)="saveLink($event, riotField)">
                 <div class="form-grid">
@@ -240,7 +244,9 @@
         <div class="modal modal-sm terminal-card" role="dialog" aria-modal="true">
             <div class="modal-header">
                 <h2 class="modal-title">QUITAR LA CUENTA DE {{ account.username }}</h2>
-                <button class="close-btn" type="button" aria-label="Cerrar" (click)="removing.set(null)">✕</button>
+                <button class="close-btn" type="button" aria-label="Cerrar" (click)="removing.set(null)">
+                    <app-nav-icon name="x" />
+                </button>
             </div>
             <div class="modal-body">
                 <p>Se borrará {{ account.riotId }} y sus {{ account.stored }} partidas guardadas.</p>

@@ -164,7 +164,7 @@
                                     @for (gameClass of classes(); track gameClass.slug) {
                                         <td [class.yes]="canPlay(race, gameClass)">
                                             @if (canPlay(race, gameClass)) {
-                                                <span aria-label="Sí">✓</span>
+                                                <span aria-label="Sí"><app-nav-icon name="check" /></span>
                                             }
                                         </td>
                                     }

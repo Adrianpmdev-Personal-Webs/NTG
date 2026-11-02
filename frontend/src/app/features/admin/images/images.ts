@@ -16,6 +16,7 @@ import { NotificationCenter } from '@core/notifications/notification-center';
 import { Asset } from '@shared/models/asset';
 import { resolveApiError } from '@shared/utils/api-error';
 import { ModalOverlay } from '@shared/directives/modal-overlay';
+import { NavIcon } from '@shared/components/nav-icon/nav-icon';
 
 interface AssetGroup {
     name: string;
@@ -26,7 +27,7 @@ interface AssetGroup {
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-admin-images',
-    imports: [ModalOverlay, DatePipe],
+    imports: [NavIcon, ModalOverlay, DatePipe],
     templateUrl: './images.html',
     styleUrl: './images.scss',
 })

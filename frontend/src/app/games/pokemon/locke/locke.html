@@ -1,5 +1,5 @@
 <section class="page">
-    <a class="back" routerLink="/pokemon/games">← Juegos</a>
+    <a class="back" routerLink="/pokemon/games"><app-nav-icon class="before-text" name="arrowLeft" />Juegos</a>
 
     @if (loading()) {
         <p class="state">Cargando…</p>
@@ -54,7 +54,11 @@
                                         statusLabels[tournament.status]
                                     }}</span>
                                     @if (tournament.champion) {
-                                        <span class="champion">🏆 {{ tournament.champion.name }}</span>
+                                        <span class="champion"
+                                            ><app-nav-icon class="before-text" name="trophy" />{{
+                                                tournament.champion.name
+                                            }}</span
+                                        >
                                     }
                                 </div>
                             </a>

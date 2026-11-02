@@ -1,8 +1,9 @@
 /**
  * NavIcon
  *
- * The icons of the menus and the dashboard, drawn as SVG lines in the color of the text, so they look the same on every
- * device. Its size comes from the styles of whoever uses it.
+ * Every icon of the web, drawn as SVG lines in the color of the text, so they look the same on every device: a symbol
+ * written as text depends on the fonts of each one. It is as big as the text around it unless the styles of whoever
+ * uses it say otherwise, and the class before-text leaves room for the text that follows.
  *
  * @author @adrianpmdev
  */
@@ -37,6 +38,17 @@ const PATHS = {
     activity: 'M3 12h4l3 8 4-16 3 8h4',
     lock: 'M6 11h12v10H6zM8 11V7a4 4 0 0 1 8 0v4',
     ban: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM5.6 5.6l12.8 12.8',
+    power: 'M12 3v9M6.6 6.6a8 8 0 1 0 10.8 0',
+    x: 'M6 6l12 12M18 6L6 18',
+    edit: 'M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17zM14 8l3 3',
+    upload: 'M12 16V4M7 9l5-5 5 5M4 20h16',
+    arrowLeft: 'M20 12H4M10 6l-6 6 6 6',
+    arrowRight: 'M4 12h16M14 6l6 6-6 6',
+    check: 'M4 12l5 5 11-11',
+    menu: 'M4 6h16M4 12h16M4 18h16',
+    chevronLeft: 'M15 5l-7 7 7 7',
+    chevronRight: 'M9 5l7 7-7 7',
+    chevronDown: 'M5 9l7 7 7-7',
     refresh: 'M20 11a8 8 0 0 0-14-4.5L4 9M4 4v5h5M4 13a8 8 0 0 0 14 4.5L20 15M20 20v-5h-5',
 } as const;
 

@@ -1,5 +1,5 @@
 <section class="page">
-    <a class="back" routerLink="/pokemon/games">← Juegos</a>
+    <a class="back" routerLink="/pokemon/games"><app-nav-icon class="before-text" name="arrowLeft" />Juegos</a>
 
     @if (loading()) {
         <p class="state">Cargando…</p>
@@ -34,7 +34,15 @@
                             <span class="chip">{{ locke.playerCount }} jugadores</span>
                         </div>
                         @if (locke.games.length > 1) {
-                            <p class="locke-games">{{ locke.games.length }} juegos: {{ gameNames(locke) }}</p>
+                            <p class="locke-games">
+                                {{ locke.games.length }} juegos:
+                                @for (game of locke.games; track $index) {
+                                    @if (!$first) {
+                                        <app-nav-icon class="game-separator" name="arrowRight" />
+                                    }
+                                    {{ game.name }}
+                                }
+                            </p>
                         }
                     </a>
                 }

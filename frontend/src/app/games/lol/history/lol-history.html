@@ -4,10 +4,14 @@
         <div class="top-actions">
             @if (selectedId()) {
                 <button type="button" class="action" [disabled]="updating()" (click)="update()">
-                    {{ updating() ? 'Actualizando…' : '↻ Actualizar' }}
+                    @if (updating()) {
+                        Actualizando…
+                    } @else {
+                        <app-nav-icon class="before-text" name="refresh" />Actualizar
+                    }
                 </button>
             }
-            <a class="action" routerLink="/">← NTG</a>
+            <a class="action" routerLink="/"><app-nav-icon class="before-text" name="arrowLeft" />NTG</a>
         </div>
     </header>
 
@@ -62,9 +66,11 @@
 
                 <label class="player-select">
                     <span>Jugador</span>
-                    <select #playerPicker [value]="selectedId() ?? ''" (change)="select(playerPicker.value)">
+                    <select #playerPicker (change)="select(playerPicker.value)">
                         @for (player of players(); track player.userId) {
-                            <option [value]="player.userId">{{ playerName(player) }}</option>
+                            <option [value]="player.userId" [selected]="player.userId === selectedId()">
+                                {{ playerName(player) }}
+                            </option>
                         }
                     </select>
                 </label>

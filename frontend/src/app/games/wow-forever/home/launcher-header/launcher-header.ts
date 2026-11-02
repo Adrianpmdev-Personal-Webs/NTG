@@ -9,10 +9,11 @@
 import { ChangeDetectionStrategy, Component, computed } from '@angular/core';
 import { cssUrl, gameImages } from '../../game-data/game-images';
 import { WowButton } from '../../ui/wow-button/wow-button';
+import { NavIcon } from '@shared/components/nav-icon/nav-icon';
 
 @Component({
     selector: 'app-launcher-header',
-    imports: [WowButton],
+    imports: [NavIcon, WowButton],
     templateUrl: './launcher-header.html',
     styleUrl: './launcher-header.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,

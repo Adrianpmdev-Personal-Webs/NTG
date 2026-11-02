@@ -436,11 +436,21 @@
 }
 
 .logout-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     font-size: 0.7rem;
     padding: 8px 12px;
     letter-spacing: 2px;
     text-align: center;
     width: 100%;
+}
+
+.logout-icon {
+    flex: none;
+    width: 14px;
+    height: 14px;
 }
 
 .main-content {

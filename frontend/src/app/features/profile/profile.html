@@ -206,7 +206,7 @@
                             <span class="overview-summary" [class.overview-empty]="game.summary.length === 0">
                                 {{ game.summary.length > 0 ? game.summary.join(' · ') : 'Sin datos todavía' }}
                             </span>
-                            <span class="overview-arrow" aria-hidden="true">›</span>
+                            <span class="overview-arrow" aria-hidden="true"><app-nav-icon name="chevronRight" /></span>
                         </button>
                     } @empty {
                         <p class="empty">Todavía no tienes acceso a ningún juego.</p>
@@ -226,7 +226,9 @@
             >
                 <div class="modal-header">
                     <span class="modal-title" id="edit-title">// EDITAR PERFIL</span>
-                    <button type="button" class="close-btn" aria-label="Cerrar" (click)="editing.set(false)">✕</button>
+                    <button type="button" class="close-btn" aria-label="Cerrar" (click)="editing.set(false)">
+                        <app-nav-icon name="x" />
+                    </button>
                 </div>
                 <div class="modal-body">
                     <div class="form-grid">

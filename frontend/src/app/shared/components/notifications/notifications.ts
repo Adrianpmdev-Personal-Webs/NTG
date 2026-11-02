@@ -9,10 +9,12 @@
 
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { NotificationCenter } from '@core/notifications/notification-center';
+import { NavIcon } from '@shared/components/nav-icon/nav-icon';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-notifications',
+    imports: [NavIcon],
     templateUrl: './notifications.html',
     styleUrl: './notifications.scss',
 })

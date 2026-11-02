@@ -1,5 +1,13 @@
 :host {
     display: inline-flex;
+    flex: none;
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.125em;
+}
+
+:host(.before-text) {
+    margin-right: 0.45em;
 }
 
 svg {

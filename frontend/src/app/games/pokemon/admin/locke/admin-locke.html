@@ -1,5 +1,7 @@
 <div class="admin-page">
-    <a class="admin-page-subtitle" routerLink="/admin/pokemon/lockes">← RANDOMLOCKES</a>
+    <a class="admin-page-subtitle" routerLink="/admin/pokemon/lockes"
+        ><app-nav-icon class="before-text" name="arrowLeft" />RANDOMLOCKES</a
+    >
 
     @if (loading()) {
         <p class="admin-page-state">CARGANDO...</p>
@@ -50,7 +52,7 @@
                                             <a
                                                 class="action-btn btn-neon"
                                                 [routerLink]="['/admin/pokemon/tournaments', t.id]"
-                                                >▶ GESTIONAR</a
+                                                ><app-nav-icon class="before-text" name="play" />GESTIONAR</a
                                             >
                                         </div>
                                     </td>
@@ -91,7 +93,9 @@
         <div class="modal terminal-card" role="dialog" aria-modal="true">
             <div class="modal-header">
                 <h2 class="modal-title">NUEVO TORNEO</h2>
-                <button class="close-btn" type="button" aria-label="Cerrar" (click)="creating.set(false)">✕</button>
+                <button class="close-btn" type="button" aria-label="Cerrar" (click)="creating.set(false)">
+                    <app-nav-icon name="x" />
+                </button>
             </div>
             <form class="modal-body" (ngSubmit)="createTournament()" #tournamentForm="ngForm">
                 <div class="form-grid">

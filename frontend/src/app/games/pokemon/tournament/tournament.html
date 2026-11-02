@@ -5,7 +5,9 @@
         <p class="state error">No se ha podido cargar el torneo.</p>
     } @else {
         @let t = detail()!;
-        <a class="back" [routerLink]="['/pokemon/lockes', t.locke.id]">← {{ t.locke.name }}</a>
+        <a class="back" [routerLink]="['/pokemon/lockes', t.locke.id]"
+            ><app-nav-icon class="before-text" name="arrowLeft" />{{ t.locke.name }}</a
+        >
 
         <header class="head">
             <h1 class="heading">{{ t.name }}</h1>

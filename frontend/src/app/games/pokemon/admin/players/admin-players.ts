@@ -17,13 +17,14 @@ import { resolveApiError } from '@shared/utils/api-error';
 import { PokemonApi } from '../../data/pokemon-api';
 import { Player, PlayerRequest } from '../../data/pokemon-models';
 import { ModalOverlay } from '@shared/directives/modal-overlay';
+import { NavIcon } from '@shared/components/nav-icon/nav-icon';
 
 type Dialog = { mode: 'create' } | { mode: 'edit'; player: Player } | { mode: 'delete'; player: Player } | null;
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-pokemon-admin-players',
-    imports: [ModalOverlay, FormsModule],
+    imports: [NavIcon, ModalOverlay, FormsModule],
     templateUrl: './admin-players.html',
 })
 export class AdminPlayers {

@@ -30,14 +30,14 @@
                                 <td>
                                     <div class="actions">
                                         <button class="action-btn btn-neon" type="button" (click)="openEdit(player)">
-                                            ✎ EDITAR
+                                            <app-nav-icon class="before-text" name="edit" />EDITAR
                                         </button>
                                         <button
                                             class="action-btn btn-neon btn-neon-danger"
                                             type="button"
                                             (click)="openDelete(player)"
                                         >
-                                            ✕ ELIMINAR
+                                            <app-nav-icon class="before-text" name="x" />ELIMINAR
                                         </button>
                                     </div>
                                 </td>
@@ -56,7 +56,9 @@
         <div class="modal modal-sm terminal-card" role="dialog" aria-modal="true">
             <div class="modal-header">
                 <h2 class="modal-title">{{ d.mode === 'create' ? 'NUEVO JUGADOR' : 'EDITAR JUGADOR' }}</h2>
-                <button class="close-btn" type="button" aria-label="Cerrar" (click)="close()">✕</button>
+                <button class="close-btn" type="button" aria-label="Cerrar" (click)="close()">
+                    <app-nav-icon name="x" />
+                </button>
             </div>
             <form class="modal-body" (ngSubmit)="save()" #playerForm="ngForm">
                 <div class="form-grid">
@@ -91,11 +93,13 @@
         <div class="modal modal-sm terminal-card" role="dialog" aria-modal="true">
             <div class="modal-header">
                 <h2 class="modal-title danger-title">ELIMINAR JUGADOR</h2>
-                <button class="close-btn" type="button" aria-label="Cerrar" (click)="close()">✕</button>
+                <button class="close-btn" type="button" aria-label="Cerrar" (click)="close()">
+                    <app-nav-icon name="x" />
+                </button>
             </div>
             <div class="modal-body">
                 <div class="delete-warning">
-                    <span class="warning-icon">⚠</span>
+                    <span class="warning-icon"><app-nav-icon name="alert" /></span>
                     <div>
                         <p class="warning-title">
                             ¿Eliminar a <span class="highlight">{{ d.player.name }}</span

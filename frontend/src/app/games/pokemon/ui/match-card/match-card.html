@@ -32,11 +32,11 @@
                             rel="noopener noreferrer"
                             [title]="'Replay de la partida ' + game.number"
                             (click)="$event.stopPropagation()"
-                            >▶{{ game.number }}</a
+                            ><app-nav-icon class="before-text" name="play" />{{ game.number }}</a
                         >
                     } @else {
                         <span class="replay missing" [title]="'Partida ' + game.number + ' sin replay'"
-                            >▶{{ game.number }}</span
+                            ><app-nav-icon class="before-text" name="play" />{{ game.number }}</span
                         >
                     }
                 }

@@ -16,6 +16,7 @@ import { ModalOverlay } from '@shared/directives/modal-overlay';
 import { resolveApiError } from '@shared/utils/api-error';
 import { LolApi } from '../data/lol-api';
 import { LolAccountState, LolAdminAccount, LolAdminSeason } from '../data/lol-models';
+import { NavIcon } from '@shared/components/nav-icon/nav-icon';
 
 const STATE_LABELS: Readonly<Record<LolAccountState, string>> = {
     NOT_LINKED: 'SIN VINCULAR',
@@ -34,7 +35,7 @@ const CHECK_EVERY_MS = 10_000;
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-lol-admin-accounts',
-    imports: [ModalOverlay],
+    imports: [NavIcon, ModalOverlay],
     templateUrl: './admin-accounts.html',
     styleUrl: './admin-accounts.scss',
 })

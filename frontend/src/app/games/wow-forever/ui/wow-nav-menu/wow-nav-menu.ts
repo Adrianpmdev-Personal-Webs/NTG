@@ -20,6 +20,7 @@ import {
     viewChild,
 } from '@angular/core';
 import { WowButton } from '../wow-button/wow-button';
+import { NavIcon } from '@shared/components/nav-icon/nav-icon';
 
 export interface WowNavLink {
     label: string;
@@ -30,7 +31,7 @@ let nextId = 0;
 
 @Component({
     selector: 'app-wow-nav-menu',
-    imports: [WowButton],
+    imports: [NavIcon, WowButton],
     templateUrl: './wow-nav-menu.html',
     styleUrl: './wow-nav-menu.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,

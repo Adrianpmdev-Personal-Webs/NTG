@@ -143,7 +143,7 @@ frontend/
         │   ├── music/          MusicApi, MusicPlayer (the one background player)
         │   └── notifications/  NotificationCenter
         │
-        ├── shared/             ♻️ Reusable pieces (models, notification toasts, music control, icons, modal behaviour, API error helper)
+        ├── shared/             ♻️ Reusable pieces (models, notification toasts, music control, SVG icons, modal behaviour, API error helper)
         ├── layout/             🖼️ Terminal shell: sidebar, header, footer
         ├── features/           📦 Platform pages: auth, welcome, profile, admin (dashboard, users, games, pictures, music)
         │
@@ -214,6 +214,7 @@ the tag key** that unlocks it.
   `private`; inputs, outputs and anything other files use stay public.
 - **Modals:** every modal backdrop uses the `appModalOverlay` directive, which closes it with Escape or a click
   outside, keeps focus inside the dialog, names it after its title and gives focus back when it closes.
+- **Icons:** always the `NavIcon` SVG, never a symbol written as text, which depends on the fonts of each device.
 - **Path aliases:** `@core`, `@shared`, `@layout`, `@features`, `@games`.
 - Every `.ts` file starts with a short English header comment, and there are no other comments in the code,
   styles or templates.

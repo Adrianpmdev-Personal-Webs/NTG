@@ -17,13 +17,14 @@ import { parseRules, rulesToText } from '../../data/locke-rules';
 import { PokemonApi } from '../../data/pokemon-api';
 import { LockeSummary } from '../../data/pokemon-models';
 import { ModalOverlay } from '@shared/directives/modal-overlay';
+import { NavIcon } from '@shared/components/nav-icon/nav-icon';
 
 type Dialog = { mode: 'create' } | { mode: 'edit'; id: string } | { mode: 'delete'; locke: LockeSummary } | null;
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-pokemon-admin-lockes',
-    imports: [ModalOverlay, FormsModule, RouterLink],
+    imports: [NavIcon, ModalOverlay, FormsModule, RouterLink],
     templateUrl: './admin-lockes.html',
 })
 export class AdminLockes {

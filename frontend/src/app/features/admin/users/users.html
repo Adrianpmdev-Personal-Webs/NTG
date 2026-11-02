@@ -85,7 +85,7 @@
                                 </td>
                                 <td class="actions-col">
                                     <button class="action-btn btn-neon" (click)="openEdit(user)" title="Editar">
-                                        ✎ EDITAR
+                                        <app-nav-icon class="before-text" name="edit" />EDITAR
                                     </button>
                                     <button
                                         class="action-btn btn-neon btn-neon-accent"
@@ -94,9 +94,9 @@
                                         title="Reenviar el correo para elegir contraseña"
                                     >
                                         @if (inviting() === user.id) {
-                                            ⟳ ENVIANDO...
+                                            <app-nav-icon class="before-text" name="refresh" />ENVIANDO...
                                         } @else {
-                                            ✉ INVITAR
+                                            <app-nav-icon class="before-text" name="mail" />INVITAR
                                         }
                                     </button>
                                     <button
@@ -104,7 +104,7 @@
                                         (click)="openDelete(user)"
                                         title="Eliminar"
                                     >
-                                        ✕ ELIMINAR
+                                        <app-nav-icon class="before-text" name="x" />ELIMINAR
                                     </button>
                                 </td>
                             </tr>
@@ -119,7 +119,9 @@
         <div class="detail-panel terminal-card animate-slide-in">
             <div class="detail-header">
                 <span class="card-title">// DETALLES DEL NODO</span>
-                <button class="close-btn" type="button" aria-label="Cerrar" (click)="selectedUser.set(null)">✕</button>
+                <button class="close-btn" type="button" aria-label="Cerrar" (click)="selectedUser.set(null)">
+                    <app-nav-icon name="x" />
+                </button>
             </div>
             <div class="detail-grid">
                 <div class="detail-field">
@@ -165,7 +167,9 @@
             @if (modalMode() === 'create') {
                 <div class="modal-header">
                     <span class="modal-title">// CREAR NUEVO USUARIO</span>
-                    <button type="button" class="close-btn" aria-label="Cerrar" (click)="closeModal()">✕</button>
+                    <button type="button" class="close-btn" aria-label="Cerrar" (click)="closeModal()">
+                        <app-nav-icon name="x" />
+                    </button>
                 </div>
                 <div class="modal-body">
                     <div class="terminal-line">
@@ -218,7 +222,7 @@
                             @if (submitting()) {
                                 PROCESANDO...
                             } @else {
-                                ⟶ EJECUTAR
+                                <app-nav-icon class="before-text" name="arrowRight" />EJECUTAR
                             }
                         </button>
                         <button class="btn-neon btn-neon-danger" (click)="closeModal()">CANCELAR</button>
@@ -229,7 +233,9 @@
             @if (modalMode() === 'edit') {
                 <div class="modal-header">
                     <span class="modal-title">// MODIFICAR USUARIO :: {{ editTarget()?.username }}</span>
-                    <button type="button" class="close-btn" aria-label="Cerrar" (click)="closeModal()">✕</button>
+                    <button type="button" class="close-btn" aria-label="Cerrar" (click)="closeModal()">
+                        <app-nav-icon name="x" />
+                    </button>
                 </div>
                 <div class="modal-body">
                     <div class="form-grid">
@@ -276,7 +282,7 @@
                             @if (submitting()) {
                                 PROCESANDO...
                             } @else {
-                                ⟶ ACTUALIZAR
+                                <app-nav-icon class="before-text" name="arrowRight" />ACTUALIZAR
                             }
                         </button>
                         <button class="btn-neon btn-neon-danger" (click)="closeModal()">CANCELAR</button>
@@ -287,11 +293,13 @@
             @if (modalMode() === 'delete') {
                 <div class="modal-header">
                     <span class="modal-title danger-title">// ELIMINAR USUARIO</span>
-                    <button type="button" class="close-btn" aria-label="Cerrar" (click)="closeModal()">✕</button>
+                    <button type="button" class="close-btn" aria-label="Cerrar" (click)="closeModal()">
+                        <app-nav-icon name="x" />
+                    </button>
                 </div>
                 <div class="modal-body">
                     <div class="delete-warning">
-                        <div class="warning-icon">⚠</div>
+                        <div class="warning-icon"><app-nav-icon name="alert" /></div>
                         <div class="warning-text">
                             <div class="warning-title">[ALERTA] OPERACIÓN DESTRUCTIVA</div>
                             <div class="warning-desc">
@@ -309,7 +317,7 @@
                             @if (submitting()) {
                                 ELIMINANDO...
                             } @else {
-                                ⟶ CONFIRMAR ELIMINACIÓN
+                                <app-nav-icon class="before-text" name="arrowRight" />CONFIRMAR ELIMINACIÓN
                             }
                         </button>
                         <button class="btn-neon" (click)="closeModal()">CANCELAR</button>

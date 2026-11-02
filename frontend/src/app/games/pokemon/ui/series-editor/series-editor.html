@@ -2,7 +2,9 @@
     <div class="modal terminal-card" role="dialog" aria-modal="true" aria-labelledby="series-editor-title">
         <div class="modal-header">
             <h2 class="modal-title" id="series-editor-title">RESULTADO DE LA SERIE</h2>
-            <button class="close-btn" type="button" aria-label="Cerrar" (click)="dismiss.emit()">✕</button>
+            <button class="close-btn" type="button" aria-label="Cerrar" (click)="dismiss.emit()">
+                <app-nav-icon name="x" />
+            </button>
         </div>
 
         <div class="modal-body">

@@ -18,11 +18,12 @@ import { NotificationCenter } from '@core/notifications/notification-center';
 import { TagApi } from '@core/tags/tag-api';
 import { UserApi } from '@core/users/user-api';
 import { ModalOverlay } from '@shared/directives/modal-overlay';
+import { NavIcon } from '@shared/components/nav-icon/nav-icon';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-usuarios',
-    imports: [ModalOverlay, FormsModule],
+    imports: [NavIcon, ModalOverlay, FormsModule],
     templateUrl: './users.html',
     styleUrl: './users.scss',
 })

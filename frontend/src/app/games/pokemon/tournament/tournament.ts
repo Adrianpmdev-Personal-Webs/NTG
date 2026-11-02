@@ -18,13 +18,14 @@ import { BracketView } from '../ui/bracket-view/bracket-view';
 import { CalendarView } from '../ui/calendar-view/calendar-view';
 import { StandingsTable } from '../ui/standings-table/standings-table';
 import { TeamGallery } from '../ui/team-gallery/team-gallery';
+import { NavIcon } from '@shared/components/nav-icon/nav-icon';
 
 type TournamentTab = 'teams' | 'calendar' | 'bracket' | 'standings' | 'rewards';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-pokemon-tournament',
-    imports: [RouterLink, TeamGallery, CalendarView, BracketView, StandingsTable],
+    imports: [NavIcon, RouterLink, TeamGallery, CalendarView, BracketView, StandingsTable],
     templateUrl: './tournament.html',
     styleUrl: './tournament.scss',
 })

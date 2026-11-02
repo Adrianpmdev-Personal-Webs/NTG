@@ -41,6 +41,7 @@ import { SeriesEditor } from '../../ui/series-editor/series-editor';
 import { StandingsTable } from '../../ui/standings-table/standings-table';
 import { TeamGallery } from '../../ui/team-gallery/team-gallery';
 import { ModalOverlay } from '@shared/directives/modal-overlay';
+import { NavIcon } from '@shared/components/nav-icon/nav-icon';
 
 type AdminTab = 'players' | 'calendar' | 'bracket' | 'standings' | 'rewards' | 'settings';
 
@@ -54,6 +55,7 @@ interface Confirmation {
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-pokemon-admin-tournament',
     imports: [
+        NavIcon,
         ModalOverlay,
         FormsModule,
         RouterLink,

@@ -85,3 +85,7 @@
 .chip {
     @include pk.chip;
 }
+
+.game-separator {
+    margin: 0 0.35em;
+}

@@ -18,6 +18,7 @@ import { NotificationCenter } from '@core/notifications/notification-center';
 import { CatalogGame } from '@shared/models/game';
 import { resolveApiError } from '@shared/utils/api-error';
 import { ModalOverlay } from '@shared/directives/modal-overlay';
+import { NavIcon } from '@shared/components/nav-icon/nav-icon';
 
 interface GamePicture {
     kind: 'cover' | 'icon';
@@ -56,7 +57,7 @@ interface GameForm {
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-admin-games',
-    imports: [ModalOverlay, FormsModule],
+    imports: [NavIcon, ModalOverlay, FormsModule],
     templateUrl: './games.html',
     styleUrl: './games.scss',
 })

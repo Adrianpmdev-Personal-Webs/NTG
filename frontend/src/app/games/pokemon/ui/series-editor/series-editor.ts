@@ -11,6 +11,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, input, output, si
 import { FormsModule } from '@angular/forms';
 import { Match, MatchGameInput, TournamentPlayer } from '../../data/pokemon-models';
 import { ModalOverlay } from '@shared/directives/modal-overlay';
+import { NavIcon } from '@shared/components/nav-icon/nav-icon';
 
 const WINS_NEEDED = 2;
 const MAX_GAMES = 3;
@@ -23,7 +24,7 @@ interface GameDraft {
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-pokemon-series-editor',
-    imports: [ModalOverlay, FormsModule],
+    imports: [NavIcon, ModalOverlay, FormsModule],
     templateUrl: './series-editor.html',
 })
 export class SeriesEditor {

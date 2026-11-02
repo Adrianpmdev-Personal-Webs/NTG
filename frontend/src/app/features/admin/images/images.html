@@ -45,13 +45,13 @@
                             <div class="asset-actions">
                                 @if (asset.declared) {
                                     <label class="btn-neon action-btn" [class.disabled]="busyKey() === asset.key">
-                                        {{
-                                            busyKey() === asset.key
-                                                ? 'SUBIENDO...'
-                                                : asset.url
-                                                  ? '⟳ REEMPLAZAR'
-                                                  : '⬆ SUBIR'
-                                        }}
+                                        @if (busyKey() === asset.key) {
+                                            SUBIENDO...
+                                        } @else if (asset.url) {
+                                            <app-nav-icon class="before-text" name="refresh" />REEMPLAZAR
+                                        } @else {
+                                            <app-nav-icon class="before-text" name="upload" />SUBIR
+                                        }
                                         <input
                                             type="file"
                                             hidden
@@ -69,7 +69,7 @@
                                         [attr.aria-label]="'Eliminar ' + asset.label"
                                         (click)="askDelete(asset)"
                                     >
-                                        ✕
+                                        <app-nav-icon name="x" />
                                     </button>
                                 }
                             </div>
@@ -91,11 +91,13 @@
         <div class="modal modal-sm terminal-card" role="dialog" aria-modal="true">
             <div class="modal-header">
                 <h2 class="modal-title danger-title">ELIMINAR IMAGEN</h2>
-                <button class="close-btn" type="button" aria-label="Cerrar" (click)="closeDelete()">✕</button>
+                <button class="close-btn" type="button" aria-label="Cerrar" (click)="closeDelete()">
+                    <app-nav-icon name="x" />
+                </button>
             </div>
             <div class="modal-body">
                 <div class="delete-warning">
-                    <span class="warning-icon">⚠</span>
+                    <span class="warning-icon"><app-nav-icon name="alert" /></span>
                     <div>
                         <p class="warning-title">
                             ¿Eliminar <span class="highlight">{{ target.label }}</span

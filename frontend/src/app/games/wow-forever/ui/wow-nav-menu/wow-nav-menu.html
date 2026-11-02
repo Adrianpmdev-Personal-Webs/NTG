@@ -12,7 +12,9 @@
 @if (open()) {
     <nav #panel class="menu-panel" [id]="panelId" aria-label="Navegación">
         @for (item of links(); track item.link) {
-            <app-wow-button [link]="item.link" [block]="true" (click)="close()">{{ item.label }}</app-wow-button>
+            <app-wow-button [link]="item.link" [block]="true" (click)="close()"
+                ><app-nav-icon class="before-text" name="arrowLeft" />{{ item.label }}</app-wow-button
+            >
         }
     </nav>
 }

@@ -18,6 +18,7 @@ import { WowPage } from '../../ui/wow-page/wow-page';
 import { creditLine, hideBrokenIcon } from '../../wow-forever-config';
 import { Faction } from '../../wow-forever-models';
 import { Race, RacialsData } from '../racials-models';
+import { NavIcon } from '@shared/components/nav-icon/nav-icon';
 
 type FactionFilter = Faction | 'ALL';
 
@@ -29,7 +30,7 @@ interface AbilityHover {
 
 @Component({
     selector: 'app-racials-overview',
-    imports: [AbilityTooltip, WowPage],
+    imports: [NavIcon, AbilityTooltip, WowPage],
     templateUrl: './racials-overview.html',
     styleUrl: './racials-overview.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,

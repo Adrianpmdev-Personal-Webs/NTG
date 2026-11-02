@@ -5,9 +5,13 @@
                 @if (compactNav()) {
                     <app-wow-nav-menu class="page-menu" [links]="links" />
                 }
-                <app-wow-button class="page-back" link="/wow-forever">← Lanzador</app-wow-button>
+                <app-wow-button class="page-back" link="/wow-forever"
+                    ><app-nav-icon class="before-text" name="arrowLeft" />Lanzador</app-wow-button
+                >
                 <h1 class="title">{{ heading() }}</h1>
-                <app-wow-button class="page-back" link="/">← NTG</app-wow-button>
+                <app-wow-button class="page-back" link="/"
+                    ><app-nav-icon class="before-text" name="arrowLeft" />NTG</app-wow-button
+                >
             </header>
 
             <div class="content">

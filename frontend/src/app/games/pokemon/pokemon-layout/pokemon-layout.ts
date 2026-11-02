@@ -10,11 +10,12 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthSession } from '@core/auth/auth-session';
+import { NavIcon } from '@shared/components/nav-icon/nav-icon';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-pokemon-layout',
-    imports: [RouterOutlet, RouterLink, RouterLinkActive],
+    imports: [NavIcon, RouterOutlet, RouterLink, RouterLinkActive],
     templateUrl: './pokemon-layout.html',
     styleUrl: './pokemon-layout.scss',
 })

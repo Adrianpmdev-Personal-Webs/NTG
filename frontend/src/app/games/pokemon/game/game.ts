@@ -11,11 +11,12 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { forkJoin, switchMap } from 'rxjs';
 import { PokemonApi } from '../data/pokemon-api';
 import { Game, LockeSummary } from '../data/pokemon-models';
+import { NavIcon } from '@shared/components/nav-icon/nav-icon';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-pokemon-game',
-    imports: [RouterLink],
+    imports: [NavIcon, RouterLink],
     templateUrl: './game.html',
     styleUrl: './game.scss',
 })
@@ -49,9 +50,5 @@ export class GamePage {
                     this.loading.set(false);
                 },
             });
-    }
-
-    protected gameNames(locke: LockeSummary): string {
-        return locke.games.map((game) => game.name).join(' → ');
     }
 }

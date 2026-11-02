@@ -15,13 +15,14 @@ import { resolveApiError } from '@shared/utils/api-error';
 import { PokemonApi } from '../../data/pokemon-api';
 import { Game, GameRequest } from '../../data/pokemon-models';
 import { ModalOverlay } from '@shared/directives/modal-overlay';
+import { NavIcon } from '@shared/components/nav-icon/nav-icon';
 
 type Dialog = { mode: 'create' } | { mode: 'edit'; game: Game } | { mode: 'delete'; game: Game } | null;
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-pokemon-admin-games',
-    imports: [ModalOverlay, FormsModule],
+    imports: [NavIcon, ModalOverlay, FormsModule],
     templateUrl: './admin-games.html',
 })
 export class AdminGames {

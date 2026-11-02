@@ -10,10 +10,12 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { MATCH_STATUS_LABELS } from '../../data/pokemon-labels';
 import { Match, TournamentPlayer } from '../../data/pokemon-models';
+import { NavIcon } from '@shared/components/nav-icon/nav-icon';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-pokemon-match-card',
+    imports: [NavIcon],
     templateUrl: './match-card.html',
     styleUrl: './match-card.scss',
 })

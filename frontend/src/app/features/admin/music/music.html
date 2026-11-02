@@ -23,7 +23,7 @@
                         <span class="admin-hint">{{ area.tracks.length }} CANCIONES</span>
                         @if (area.declared) {
                             <label class="btn-neon action-btn" [class.disabled]="busy()">
-                                ⬆ AÑADIR
+                                <app-nav-icon class="before-text" name="upload" />AÑADIR
                                 <input
                                     type="file"
                                     accept="audio/*"
@@ -67,7 +67,7 @@
                                         [disabled]="busy()"
                                         (click)="askDelete(track)"
                                     >
-                                        ✕
+                                        <app-nav-icon name="x" />
                                     </button>
                                 </div>
                             </li>
@@ -87,11 +87,13 @@
         <div class="modal modal-sm terminal-card" role="dialog" aria-modal="true">
             <div class="modal-header">
                 <h2 class="modal-title danger-title">ELIMINAR CANCIÓN</h2>
-                <button class="close-btn" type="button" aria-label="Cerrar" (click)="closeDelete()">✕</button>
+                <button class="close-btn" type="button" aria-label="Cerrar" (click)="closeDelete()">
+                    <app-nav-icon name="x" />
+                </button>
             </div>
             <div class="modal-body">
                 <div class="delete-warning">
-                    <span class="warning-icon">⚠</span>
+                    <span class="warning-icon"><app-nav-icon name="alert" /></span>
                     <div>
                         <p class="warning-title">
                             ¿Eliminar <span class="highlight">{{ target.title }}</span

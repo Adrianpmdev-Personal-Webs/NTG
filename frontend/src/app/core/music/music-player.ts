@@ -6,8 +6,9 @@
  * The area comes from the first segment of the URL: a game id plays that game's playlist and anything else (welcome,
  * admin screens, including the management of a game) plays the general one. An area without songs plays nothing.
  * A single song repeats; several play shuffled, none repeats until all have played, and then they are shuffled again
- * (the last one never comes straight back). Moving between screens of the same area never restarts the music; changing
- * area fades it out and starts the new playlist.
+ * (the last one never comes straight back). Every song fades in during its first seconds and out during its last ones,
+ * also when a single song repeats. Moving between screens of the same area never restarts the music; changing area fades
+ * it out and starts the new playlist.
  * Muting or setting the volume to 0 pauses the song, so nothing keeps playing silently. The default volume is about 2%
  * of the real one. Mute and volume are remembered by this browser. Browsers refuse to play sound before the
  * user interacts with the page, so after a reload the music starts on the first click or key.
@@ -29,6 +30,7 @@ const VOLUME_KEY = 'ntg.music.volume';
 const DEFAULT_VOLUME = 0.27;
 const FADE_MS = 600;
 const FADE_STEPS = 12;
+const SONG_FADE_SECONDS = 3;
 
 @Injectable({ providedIn: 'root' })
 export class MusicPlayer {
@@ -88,7 +90,7 @@ export class MusicPlayer {
             return;
         }
 
-        this.audio.volume = loudness(volume);
+        this.applyVolume();
 
         if (volume === 0) {
             this.audio.pause();
@@ -171,9 +173,14 @@ export class MusicPlayer {
     private load(track: MusicTrack): void {
         const audio = this.element();
 
-        audio.loop = this.playlist.length === 1;
         audio.src = track.url;
-        audio.volume = loudness(this.volume());
+        audio.volume = 0;
+    }
+
+    private applyVolume(): void {
+        if (this.audio && !this.fadeTimer) {
+            this.audio.volume = loudness(this.volume()) * songFade(this.audio.currentTime, this.audio.duration);
+        }
     }
 
     private play(): void {
@@ -276,6 +283,7 @@ export class MusicPlayer {
         if (!this.audio) {
             this.audio = new Audio();
             this.audio.preload = 'auto';
+            this.audio.addEventListener('timeupdate', () => this.applyVolume());
             this.audio.addEventListener('ended', () => this.next());
             this.audio.addEventListener('playing', () => (this.failures = 0));
             this.audio.addEventListener('error', () => this.onError());
@@ -299,6 +307,12 @@ function shuffled(tracks: MusicTrack[], notFirst?: MusicTrack): MusicTrack[] {
     }
 
     return result;
+}
+
+function songFade(currentTime: number, duration: number): number {
+    const fromEnd = Number.isFinite(duration) ? duration - currentTime : SONG_FADE_SECONDS;
+
+    return Math.max(0, Math.min(1, currentTime / SONG_FADE_SECONDS, fromEnd / SONG_FADE_SECONDS));
 }
 
 function loudness(volume: number): number {

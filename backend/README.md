@@ -32,7 +32,7 @@ a game, and a game never depends on the platform**. Both only share a small modu
 | Module | Role |
 |---|---|
 | 📜 **`platform-api`** | Contracts shared by everyone: who is calling, file storage, picture compression, public pictures, how a game declares itself (`GameModule`), what it shows in the admin dashboard and on the profile, and helpers for cacheable JSON. No Spring Security, no Supabase. |
-| 🚀 **`core`** | The platform: identity (users, tags), the game catalog, public pictures, background music, security, the Supabase integration, logging and error handling. It implements the contracts of `platform-api`. |
+| 🚀 **`core`** | The platform: identity (users, tags), the game catalog, public pictures, background music, the own profile, the admin dashboard, security, the Supabase integration, logging and error handling. It implements the contracts of `platform-api`. |
 | 🎮 **`games/*`** | One module per game, with its own domain and REST endpoints. It depends **only on `platform-api`** and contains **no security code**: it declares its API path and tag, and `core` builds the access rules from that. |
 | 🧷 **`app`** | Boots `core` and every game together and builds the runnable `ntg.jar`. Adding a game to the application is adding one dependency here. |
 
@@ -76,7 +76,7 @@ backend/
 │       └── web/                    JsonResponses (JSON with ETag and cache rules)
 │
 ├── core/                           🚀 The platform
-│   ├── sql/core.sql                Schema core, public bucket and policies
+│   ├── sql/core.sql                Schema core, public buckets and policies
 │   └── com/adrianpmdev/core/
 │       ├── config/                 Typed settings, OpenAPI, HTTP client, upload limits
 │       ├── security/               🛡️ Who you are and what you may do
@@ -90,7 +90,7 @@ backend/
 │       ├── integration/supabase/   🔌 Supabase Auth and Storage clients
 │       ├── web/                    Health endpoint and global error handling
 │       ├── logging/                Request id, access log, traffic counters, recent warnings and errors
-│       └── features/               auth · users · tags · catalog · assets · music · dashboard
+│       └── features/               auth · users · tags · catalog · assets · music · profile · dashboard
 │
 ├── games/
 │   ├── pokemon/                    🎮 Pokémon (+ sql/pokemon.sql)
@@ -214,6 +214,8 @@ security headers (see the [frontend documentation](../frontend/README.md)).
 - An admin uploads the original picture for a slot that a module declared (a game cover, a game icon, a talent tree…). The
   server checks it, resizes it, re-encodes it as JPEG (PNG when it has transparency) and stores it in the public
   bucket. Its URL changes with every upload, so browsers can cache each version for a year.
+- An avatar is a link, kept as it is, or a picture its owner uploads: compressed to 256 px and 150 KB and stored in the
+  same bucket.
 
 ### 5. Music
 
@@ -238,6 +240,15 @@ security headers (see the [frontend documentation](../frontend/README.md)).
   and the last sign in of Supabase Auth. The column is plain SQL, outside the `User` entity, so a database that still
   lacks it only loses this value.
 - **Traffic and logs:** counters and the last 50 warnings and errors, in memory, since the last start.
+
+### 7. League of Legends
+
+- A player links their Riot ID, or an admin links it; an admin starts the download of the games of the season, which
+  runs on one thread, one account at a time, within the limits of a personal Riot key.
+- Opening a player or pressing the update button asks Riot for what is new, at most every 5 minutes per player. Nothing
+  runs on a schedule, and history and statistics are always read from the database.
+- Seasons, one per year, are managed from the web. Riot only tells the current rank, so each update keeps a copy: the
+  last one is the final rank of that season.
 
 ---
 
@@ -296,6 +307,7 @@ The site runs on the free plans of Render, Vercel and Supabase, so the backend a
 | **Dashboard read on demand** | One call when an admin opens or refreshes it, never on its own; traffic and logs are small counters and a fixed buffer in memory |
 | **Last activity once an hour** | At most one write per user per hour, however many requests they make |
 | **Songs compressed in the browser** | The server never decodes audio, so music costs no server memory; each song is downloaded once per browser |
+| **Riot read on demand** | Nothing runs on a schedule; one thread that sleeps when idle; only a small summary of each game is kept |
 | **Gzip** | JSON is compressed (the WoW data drops from about 1.8 MB to about 200 KB) |
 | **ETag on static JSON** | A browser that already has the data gets `304` with no body |
 | **Daily `select 1`** | The keep-alive call touches the database once a day, so Supabase never pauses the project |
@@ -352,6 +364,8 @@ Java 25 and Maven 3.9. Settings without secrets are versioned in `app/src/main/r
 | `app.frontend.url` | Where the email links point to |
 | `app.cors.allowed-origins` | Origins allowed to call the API |
 | `app.auth.*` | Session cookie options (`secure`, `same-site`, lifetime) |
+| `app.dashboard.*` | Plan limits the admin dashboard compares against |
+| `riot.api.key` | Riot personal API key (`RIOT_API_KEY` on Render); it never leaves the backend |
 
 ```bash
 mvn clean install                  # builds every module and runs the tests

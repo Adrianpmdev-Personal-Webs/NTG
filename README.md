@@ -92,7 +92,8 @@ flowchart LR
 - **Supabase Storage** keeps the pictures and the songs. Only the backend writes; public files are downloaded
   straight from Supabase, and private ones through short-lived signed links.
 - **The backend is the single source of data.** The web client only shows what the API sends, so another client
-  could be built on the same API.
+  could be built on the same API. When a game needs outside data (a game client, a news feed, the Riot API), only the
+  backend reads it.
 
 ### How a new user joins
 
@@ -134,7 +135,7 @@ sequenceDiagram
 NTG/
 ├── backend/            Spring Boot API · Maven multi-module
 │   ├── platform-api/   Contracts shared by the platform and the games
-│   ├── core/           Identity, security, catalog, pictures (+ sql/core.sql)
+│   ├── core/           Identity, security, catalog, pictures, music, profile, dashboard (+ sql/core.sql)
 │   ├── games/          One module per game (+ its own sql/ when it has tables)
 │   └── app/            Boots everything and builds the runnable jar
 ├── frontend/           Angular single-page application (src/app/games: one folder per game)

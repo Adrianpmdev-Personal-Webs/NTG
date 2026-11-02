@@ -78,7 +78,7 @@ to guard the game routes. The backend enforces the same rules, the frontend only
 | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------ |
 | `/login`, `/set-password`                                                           | Public                                                                          | Full-screen terminal                             |
 | `/`                                                                                 | Signed in                                                                       | Redirects: admin → dashboard, player → welcome   |
-| `/welcome`                                                                          | Signed in                                                                       | Terminal shell                                   |
+| `/welcome`, `/profile`                                                              | Signed in (each user only sees their own profile)                               | Terminal shell                                   |
 | `/admin/dashboard`, `/admin/users`, `/admin/games`, `/admin/images`, `/admin/music` | Admin                                                                           | Terminal shell                                   |
 | `/admin/<game>/**`                                                                  | Admin                                                                           | Terminal shell (code lives in the game's folder) |
 | `/<game>/**`                                                                        | Signed in **and** allowed by the catalog (game released and tag held, or admin) | The game's own layout                            |
@@ -128,7 +128,7 @@ frontend/
 ├── vercel.json                 /api rewrite, SPA fallback, cache and security headers
 └── src/
     ├── main.ts · index.html · styles.scss
-    ├── styles/                 Design tokens, breakpoints, reset, typography, terminal theme, shared admin styles
+    ├── styles/                 Design tokens, breakpoints, reset, typography, terminal theme, scrollbars, shared admin styles
     └── app/
         ├── app.config.ts       Zoneless change detection, router, HTTP client + interceptor
         ├── app.routes.ts       Platform routes + one route per game, built from the games list
@@ -183,10 +183,14 @@ the tag key** that unlocks it.
   tooltips stay on screen on touch devices.
 - **Background music:** one player for the whole app. The first segment of the URL picks the playlist (a game id
   plays that game's, anything else, admin screens included, the general one) and an area without songs plays
-  nothing. One song repeats; several play shuffled, with no repeats until all have played. It only runs where the main input is a mouse or
+  nothing. One song repeats; several play shuffled, with no repeats until all have played, and every song fades in and
+  out. It only runs where the main input is a mouse or
   a trackpad (phones and tablets never ask for the playlists), starts at about 2% of the real volume, pauses when
   muted or at volume 0 and remembers both in the browser. Headers keep room for the control on computers
   (`--music-control-space`).
+- **Scrollbars:** the platform uses the thin green bar of the terminal, and each game with a page that scrolls has its
+  own (`styles/_scrollbars.scss`): 8 px, no arrows, in the colours of the game, on computers only. The music control
+  sits 24 px from the edge, so it never touches one.
 - Design tokens are CSS custom properties, and global feedback (success, error, warning) goes through a single
   notification service.
 

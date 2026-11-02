@@ -12,13 +12,102 @@ All rights not expressly granted are reserved by the copyright holder.
 
 This notice applies only to original material owned by the copyright holder. Third-party libraries, dependencies, trademarks, game assets, and other third-party materials remain subject to their respective licenses and rights.
 
-The WoW Forever game data (talents, spellbooks, racials and the Legacy System) is read by the backend from the tables of the World of Warcraft: Forever and Classic Era game clients, as wago.tools (https://wago.tools) publishes them for every game build. The backend only reads the tables it needs and keeps one generated copy in its own private storage; it does not republish the game files. The web app credits the source on every page that uses the data. World of Warcraft names, icons, game data and game text belong to Blizzard Entertainment, Inc. This project is not affiliated with or endorsed by Blizzard Entertainment or wago.tools.
+====================================================================================================
+THIRD-PARTY GAMES AND CONTENT
+====================================================================================================
 
-The WoW Forever launcher news come from the public RSS feed of Wowhead (https://www.wowhead.com/news/rss/forever). The app only shows the title, the short summary, the date and the picture of each item, as the feed publishes them, with a link to the full article on Wowhead and a "Fuente: Wowhead" credit; it never copies the articles. The pictures are loaded straight from Wowhead's servers and are not stored. The race icons of the races screen are also loaded straight from Wowhead's icon servers (wow.zamimg.com), because Blizzard's icon host lacks some of them; they are game icons that belong to Blizzard Entertainment, Inc. Wowhead news, texts and pictures belong to Wowhead and their authors. This project is not affiliated with or endorsed by Wowhead.
+Every game below, its names, pictures and data belong to the companies listed with it. This project
+is an unofficial fan project and is not affiliated with or endorsed by any of them, nor by the
+services named as a source.
 
-The WoW Forever launcher blue posts come from the public Blizzard tracker of the official World of Warcraft forums (https://us.forums.blizzard.com/en/wow/groups/blizzard-tracker/activity/posts). The app only shows the topic title, the author, the date and the short excerpt of each post, as the forums publish them, with a link to the full post on the forums and a "Fuente: Blizzard Forums" credit; it never copies the posts. Forum posts belong to Blizzard Entertainment, Inc.
 
-Pokémon names, images, sprites and related game content are trademarks of Nintendo, Game Freak and The Pokémon Company. Links to external services such as Pokémon Showdown point to their own content. This project is not affiliated with or endorsed by any of these companies.
+----------------------------------------------------------------------------------------------------
+POKÉMON
+----------------------------------------------------------------------------------------------------
+
+Owners
+  Nintendo, Game Freak and The Pokémon Company.
+
+Their content
+  Pokémon names, images, sprites and related game content are their trademarks.
+
+External links
+  Links to external services such as Pokémon Showdown point to their own content.
+
+
+----------------------------------------------------------------------------------------------------
+WORLD OF WARCRAFT: FOREVER
+----------------------------------------------------------------------------------------------------
+
+Owner
+  Blizzard Entertainment, Inc. World of Warcraft names, icons, game data, game text and forum posts
+  belong to Blizzard Entertainment, Inc.
+
+Game data (talents, spellbooks, racials, professions and the Legacy System)
+  Source: the tables of the World of Warcraft: Forever and Classic Era game clients, as wago.tools
+  (https://wago.tools) publishes them for every game build.
+  Use: the backend only reads the tables it needs and keeps one generated copy in its own private
+  storage; it does not republish the game files. The web app credits the source on every page that
+  uses the data.
+
+Launcher news
+  Source: the public RSS feed of Wowhead (https://www.wowhead.com/news/rss/forever).
+  Use: the app only shows the title, the short summary, the date and the picture of each item, as
+  the feed publishes them, with a link to the full article on Wowhead and a "Fuente: Wowhead" credit;
+  it never copies the articles. The pictures are loaded straight from Wowhead's servers and are not
+  stored.
+  Rights: Wowhead news, texts and pictures belong to Wowhead and their authors.
+
+Launcher blue posts
+  Source: the public Blizzard tracker of the official World of Warcraft forums
+  (https://us.forums.blizzard.com/en/wow/groups/blizzard-tracker/activity/posts).
+  Use: the app only shows the topic title, the author, the date and the short excerpt of each post,
+  as the forums publish them, with a link to the full post on the forums and a "Fuente: Blizzard
+  Forums" credit; it never copies the posts.
+
+Icons
+  Game icons are loaded straight from Blizzard's icon host. The race icons of the races screen and
+  the camp item icons of the professions screen are loaded straight from Wowhead's icon servers
+  (wow.zamimg.com), because Blizzard's host lacks some of them. None are stored, and they are game
+  icons that belong to Blizzard Entertainment, Inc.
+
+
+----------------------------------------------------------------------------------------------------
+LEAGUE OF LEGENDS
+----------------------------------------------------------------------------------------------------
+
+Owner
+  Riot Games, Inc.
+
+Legal notice
+  NTG System isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or
+  anyone officially involved in producing or managing Riot Games properties. Riot Games, and all
+  associated properties are trademarks or registered trademarks of Riot Games, Inc.
+  The League of Legends screen shows this notice.
+
+Match history, ranks and profiles
+  Source: the Riot Games API (https://developer.riotgames.com), with a personal key.
+  Use: the backend keeps a small summary of each game of the players linked in this private group; it
+  does not keep the full game files or republish them. The key never leaves the backend.
+
+Names and icons of champions, items and summoner spells
+  Source: Data Dragon, the static files of Riot Games (https://ddragon.leagueoflegends.com).
+  Use: the backend reads the names once a day. The pictures are loaded straight from Riot's servers
+  and are not stored.
+
+
+----------------------------------------------------------------------------------------------------
+COUNTER-STRIKE 2
+----------------------------------------------------------------------------------------------------
+
+Owner
+  Valve Corporation.
+
+Use
+  Only its name is listed in the game catalog, as coming soon. This project holds no data of the game.
+
+
+====================================================================================================
 
 For permission requests, contact the copyright holder through the GitHub profile:
 https://github.com/adrianpmdev

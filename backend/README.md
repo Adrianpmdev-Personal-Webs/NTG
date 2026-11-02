@@ -94,7 +94,8 @@ backend/
 │
 ├── games/
 │   ├── pokemon/                    🎮 Pokémon (+ sql/pokemon.sql)
-│   └── wow-forever/                🎮 WoW Forever (characters in its schema; data from the game client; sql/wow-forever.sql)
+│   ├── wow-forever/                🎮 WoW Forever (characters in its schema; data from the game client; sql/wow-forever.sql)
+│   └── lol/                        🎮 League of Legends (data from the Riot API, sql/lol.sql)
 │
 └── app/                            🧷 Application.java, application.yml, ntg.jar
 ```
@@ -272,6 +273,8 @@ plus **one schema per game** that needs tables. Each module keeps its DDL next t
 
 - Each user shares its id with its Supabase Auth account and is linked to its tags through a join table.
 - A game owns the tables of its own schema and never exposes its entities: the API only returns DTOs.
+- League of Legends stores a small summary of each game: history and statistics are read from the database, and Riot is
+  only asked for new games when a player is opened, at most every 5 minutes per player, on one thread with its own limit.
 - Data that only changes with a release (the Pokémon type chart, the WoW Forever texts and rules) lives in JSON
   files inside the module, not in the database.
 - The WoW Forever game data is built by the backend from the game client (through wago.tools) every time a new

@@ -2,7 +2,7 @@
 
 .terminal {
     display: block;
-    min-height: 100dvh;
+    min-height: calc(100 * var(--dvh));
     background: var(--bg-black);
     color: var(--text-primary);
     font-family: var(--font-mono);
@@ -243,7 +243,7 @@
     }
 
     100% {
-        transform: translateY(100vh);
+        transform: translateY(calc(100 * var(--vh)));
         opacity: 0;
     }
 }

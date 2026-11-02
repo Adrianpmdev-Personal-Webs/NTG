@@ -190,6 +190,8 @@ the tag key** that unlocks it.
   a trackpad (phones and tablets never ask for the playlists), starts at about 2% of the real volume, pauses when
   muted or at volume 0 and remembers both in the browser. Headers keep room for the control on computers
   (`--music-control-space`).
+- **Large screens:** from 2400 × 1100 px the whole web is 33% bigger (`--screen-zoom`), so 2560 × 1440 looks like 1920 × 1080
+  in proportion. Smaller screens are not affected.
 - **Scrollbars:** the platform uses the thin green bar of the terminal, and each game with a page that scrolls has its
   own (`styles/_scrollbars.scss`): 8 px, no arrows, in the colours of the game, on computers only. The music control
   sits 24 px from the edge, so it never touches one.
@@ -214,6 +216,7 @@ the tag key** that unlocks it.
   `private`; inputs, outputs and anything other files use stay public.
 - **Modals:** every modal backdrop uses the `appModalOverlay` directive, which closes it with Escape or a click
   outside, keeps focus inside the dialog, names it after its title and gives focus back when it closes.
+- **Screen units:** `calc(100 * var(--dvh))`, `--vh` and `--vw` instead of `dvh`, `vh` and `vw`, which `zoom` would multiply.
 - **Icons:** always the `NavIcon` SVG, never a symbol written as text, which depends on the fonts of each device.
 - **Path aliases:** `@core`, `@shared`, `@layout`, `@features`, `@games`.
 - Every `.ts` file starts with a short English header comment, and there are no other comments in the code,

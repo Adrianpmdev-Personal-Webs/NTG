@@ -79,7 +79,7 @@
     position: absolute;
     left: 50%;
     top: calc((100% - 9px) / 2);
-    width: min(48vw, 620px);
+    width: min(calc(48 * var(--vw)), 620px);
     height: calc(100% - 17px);
     transform: translate(-50%, -50%);
     background:
@@ -113,7 +113,7 @@
     }
 
     .logo-placeholder {
-        width: min(50vw, 360px);
+        width: min(calc(50 * var(--vw)), 360px);
     }
 }
 
@@ -123,7 +123,7 @@
     }
 
     .logo-placeholder {
-        width: min(44vw, 260px);
+        width: min(calc(44 * var(--vw)), 260px);
     }
 }
 
@@ -133,6 +133,6 @@
     }
 
     .logo-placeholder {
-        width: min(42vw, 200px);
+        width: min(calc(42 * var(--vw)), 200px);
     }
 }

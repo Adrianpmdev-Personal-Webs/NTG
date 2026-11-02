@@ -21,6 +21,16 @@
     --font-display: 'Orbitron', monospace;
     --font-retro: 'VT323', monospace;
     --music-control-space: 0px;
+    --screen-zoom: 1;
+    --dvh: calc(1dvh / var(--screen-zoom));
+    --vh: calc(1vh / var(--screen-zoom));
+    --vw: calc(1vw / var(--screen-zoom));
+}
+
+@media (min-width: 2400px) and (min-height: 1100px) {
+    :root {
+        --screen-zoom: 1.3333;
+    }
 }
 
 @media (hover: hover) and (pointer: fine) {

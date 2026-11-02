@@ -17,7 +17,7 @@
     flex-direction: column;
     width: 520px;
     max-width: 100%;
-    max-height: calc(100dvh - 40px);
+    max-height: calc(calc(100 * var(--dvh)) - 40px);
     overflow: hidden;
     box-shadow: 0 0 40px rgba(0, 255, 65, 0.2);
 }
@@ -200,7 +200,7 @@ textarea.neon-input {
 
     .modal {
         width: 100%;
-        max-height: calc(100dvh - 24px);
+        max-height: calc(calc(100 * var(--dvh)) - 24px);
     }
 
     .modal-header {
@@ -267,7 +267,7 @@ textarea.neon-input {
     }
 
     .modal {
-        max-height: calc(100dvh - 16px);
+        max-height: calc(calc(100 * var(--dvh)) - 16px);
     }
 
     .modal-header {

@@ -213,7 +213,7 @@
 }
 
 .news-item--featured .news-thumb {
-    max-height: clamp(120px, 24vh, 230px);
+    max-height: clamp(120px, calc(24 * var(--vh)), 230px);
     width: 100%;
 }
 

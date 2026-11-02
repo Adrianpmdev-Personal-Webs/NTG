@@ -40,7 +40,7 @@
 
     display: flex;
     flex-direction: column;
-    min-height: 100dvh;
+    min-height: calc(100 * var(--dvh));
     background: radial-gradient(circle at 20% 0%, var(--pk-surface-2), var(--pk-bg) 55%);
     color: var(--pk-text);
     font-family: var(--pk-font-body);

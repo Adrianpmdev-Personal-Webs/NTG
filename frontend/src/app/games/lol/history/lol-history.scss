@@ -16,7 +16,7 @@ $cut: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100
 
 :host {
     display: block;
-    height: 100dvh;
+    height: calc(100 * var(--dvh));
 }
 
 .page {
@@ -43,7 +43,7 @@ $cut: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100
     margin: 0;
     color: $gold;
     font-family: Georgia, 'Times New Roman', serif;
-    font-size: clamp(1.1rem, 2.6vh, 1.6rem);
+    font-size: clamp(1.1rem, calc(2.6 * var(--vh)), 1.6rem);
     font-weight: normal;
     letter-spacing: 3px;
     text-transform: uppercase;
@@ -93,7 +93,7 @@ $cut: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100
 .layout {
     display: grid;
     flex: 1;
-    grid-template-columns: clamp(200px, 15vw, 280px) minmax(0, 1fr);
+    grid-template-columns: clamp(200px, calc(15 * var(--vw)), 280px) minmax(0, 1fr);
     min-height: 0;
 }
 
@@ -180,8 +180,8 @@ $cut: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100
 }
 
 .summoner-large {
-    width: clamp(64px, 9vh, 84px);
-    height: clamp(64px, 9vh, 84px);
+    width: clamp(64px, calc(9 * var(--vh)), 84px);
+    height: clamp(64px, calc(9 * var(--vh)), 84px);
 
     .summoner-initial {
         font-size: 1.8rem;
@@ -338,7 +338,7 @@ input {
     margin: 0;
     color: $gold-bright;
     font-family: Georgia, 'Times New Roman', serif;
-    font-size: clamp(1.3rem, 3.2vh, 2rem);
+    font-size: clamp(1.3rem, calc(3.2 * var(--vh)), 2rem);
     font-weight: normal;
     overflow-wrap: anywhere;
 }
@@ -429,7 +429,7 @@ input {
 .content {
     display: grid;
     flex: 1;
-    grid-template-columns: minmax(0, 1fr) clamp(240px, 20vw, 340px);
+    grid-template-columns: minmax(0, 1fr) clamp(240px, calc(20 * var(--vw)), 340px);
     min-height: 0;
 }
 
@@ -582,7 +582,7 @@ input {
     align-items: center;
     justify-content: center;
     gap: 2px;
-    min-height: clamp(70px, 11vh, 120px);
+    min-height: clamp(70px, calc(11 * var(--vh)), 120px);
     background: $panel;
     clip-path: $cut;
 
@@ -590,7 +590,7 @@ input {
         margin: 0;
         color: $teal;
         font-family: Georgia, 'Times New Roman', serif;
-        font-size: clamp(1.25rem, 3vh, 1.9rem);
+        font-size: clamp(1.25rem, calc(3 * var(--vh)), 1.9rem);
     }
 
     dt {
@@ -671,11 +671,11 @@ input {
 @include tablet {
     :host {
         height: auto;
-        min-height: 100dvh;
+        min-height: calc(100 * var(--dvh));
     }
 
     .page {
-        min-height: 100dvh;
+        min-height: calc(100 * var(--dvh));
     }
 
     .layout {

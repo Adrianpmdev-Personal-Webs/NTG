@@ -75,7 +75,7 @@
     z-index: 1000;
     display: grid;
     gap: 8px;
-    width: min(240px, calc(100vw - 32px));
+    width: min(240px, calc(calc(100 * var(--vw)) - 32px));
     padding: 10px;
     box-sizing: border-box;
     border: 2px solid #0d0b07;

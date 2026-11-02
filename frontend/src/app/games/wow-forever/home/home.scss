@@ -3,13 +3,13 @@
 :host {
     display: block;
     width: 100%;
-    height: 100dvh;
+    height: calc(100 * var(--dvh));
     min-height: 0;
     overflow: hidden;
 }
 
 .launcher-page {
-    height: 100dvh;
+    height: calc(100 * var(--dvh));
     min-height: 0;
     width: 100%;
     display: block;
@@ -228,7 +228,7 @@ app-news-panel {
 
     .launcher-screen {
         flex: none;
-        height: calc(100dvh - 16px);
+        height: calc(calc(100 * var(--dvh)) - 16px);
         grid-template-rows: auto minmax(0, 1fr) auto;
     }
 

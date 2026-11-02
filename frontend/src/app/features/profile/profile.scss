@@ -17,7 +17,7 @@
 
 .profile {
     display: grid;
-    grid-template-columns: clamp(260px, 20vw, 360px) minmax(0, 1fr);
+    grid-template-columns: clamp(260px, calc(20 * var(--vw)), 360px) minmax(0, 1fr);
     grid-template-rows: minmax(0, 1fr);
     height: 100%;
 }
@@ -36,8 +36,8 @@
 
 .avatar {
     flex: none;
-    width: clamp(110px, 20vh, 220px);
-    height: clamp(110px, 20vh, 220px);
+    width: clamp(110px, calc(20 * var(--vh)), 220px);
+    height: clamp(110px, calc(20 * var(--vh)), 220px);
     border: 1px solid var(--border-bright);
     border-radius: 8px;
     object-fit: cover;
@@ -49,7 +49,7 @@
     background: rgba(0, 255, 65, 0.06);
     color: var(--neon-green);
     font-family: var(--font-display);
-    font-size: clamp(3rem, 8vh, 5.5rem);
+    font-size: clamp(3rem, calc(8 * var(--vh)), 5.5rem);
 }
 
 .avatar-small {
@@ -61,7 +61,7 @@
 .username {
     max-width: 100%;
     font-family: var(--font-display);
-    font-size: clamp(1.3rem, 3vh, 2rem);
+    font-size: clamp(1.3rem, calc(3 * var(--vh)), 2rem);
     letter-spacing: 2px;
     overflow-wrap: anywhere;
 }
@@ -92,7 +92,7 @@
     dd {
         margin: 2px 0 0;
         color: var(--text-primary);
-        font-size: clamp(0.88rem, 1.8vh, 1.1rem);
+        font-size: clamp(0.88rem, calc(1.8 * var(--vh)), 1.1rem);
         overflow-wrap: anywhere;
     }
 }
@@ -177,9 +177,9 @@
     grid-template-columns: auto minmax(120px, 28%) minmax(0, 1fr) 20px;
     align-content: center;
     align-items: center;
-    gap: clamp(12px, 2vw, 32px);
+    gap: clamp(12px, calc(2 * var(--vw)), 32px);
     width: 100%;
-    padding: 14px clamp(16px, 2vw, 36px);
+    padding: 14px clamp(16px, calc(2 * var(--vw)), 36px);
     border: 0;
     border-bottom: 1px solid var(--border-color);
     background: none center / cover no-repeat;
@@ -200,13 +200,13 @@
 }
 
 .overview-icon {
-    width: clamp(36px, 7vh, 72px);
-    height: clamp(36px, 7vh, 72px);
+    width: clamp(36px, calc(7 * var(--vh)), 72px);
+    height: clamp(36px, calc(7 * var(--vh)), 72px);
     object-fit: contain;
 }
 
 .overview-name {
-    font-size: clamp(1rem, 2.4vh, 1.6rem);
+    font-size: clamp(1rem, calc(2.4 * var(--vh)), 1.6rem);
     font-weight: 700;
     letter-spacing: 1px;
     overflow-wrap: anywhere;
@@ -214,7 +214,7 @@
 
 .overview-summary {
     color: var(--text-primary);
-    font-size: clamp(0.9rem, 2vh, 1.25rem);
+    font-size: clamp(0.9rem, calc(2 * var(--vh)), 1.25rem);
     overflow-wrap: anywhere;
 }
 
@@ -249,7 +249,7 @@
 
 .game-header {
     display: flex;
-    flex: 0 0 clamp(130px, 24vh, 280px);
+    flex: 0 0 clamp(130px, calc(24 * var(--vh)), 280px);
     flex-wrap: wrap;
     align-items: flex-end;
     justify-content: space-between;
@@ -267,7 +267,7 @@
 .game-title {
     color: var(--neon-green);
     font-family: var(--font-display);
-    font-size: clamp(1.4rem, 4vh, 2.4rem);
+    font-size: clamp(1.4rem, calc(4 * var(--vh)), 2.4rem);
     letter-spacing: 2px;
     overflow-wrap: anywhere;
 }
@@ -334,13 +334,13 @@
     margin: 0;
     color: var(--neon-green);
     font-family: var(--font-display);
-    font-size: clamp(1.5rem, 6vh, 3.8rem);
+    font-size: clamp(1.5rem, calc(6 * var(--vh)), 3.8rem);
     overflow-wrap: anywhere;
 }
 
 .stat-label {
     color: var(--text-secondary);
-    font-size: clamp(0.75rem, 1.7vh, 1rem);
+    font-size: clamp(0.75rem, calc(1.7 * var(--vh)), 1rem);
 }
 
 .bars {
@@ -425,8 +425,8 @@
 
 .card-icon {
     flex: none;
-    width: clamp(44px, 8vh, 72px);
-    height: clamp(44px, 8vh, 72px);
+    width: clamp(44px, calc(8 * var(--vh)), 72px);
+    height: clamp(44px, calc(8 * var(--vh)), 72px);
     border: 1px solid var(--border-bright);
     object-fit: cover;
 }
@@ -437,7 +437,7 @@
 
 .card-name {
     color: var(--text-primary);
-    font-size: clamp(1rem, 2.4vh, 1.5rem);
+    font-size: clamp(1rem, calc(2.4 * var(--vh)), 1.5rem);
     overflow-wrap: anywhere;
 }
 
@@ -547,7 +547,7 @@
     }
 
     .stat-value {
-        font-size: clamp(1.4rem, 5vw, 2.6rem);
+        font-size: clamp(1.4rem, calc(5 * var(--vw)), 2.6rem);
     }
 }
 

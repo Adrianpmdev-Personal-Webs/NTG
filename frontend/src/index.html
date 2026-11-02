@@ -12,9 +12,19 @@
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-title" content="NTG" />
+        <style>
+            html {
+                background: #000;
+            }
+        </style>
     </head>
 
     <body>
-        <app-root></app-root>
+        <app-root>
+            <div class="loading-screen loading-screen-full" role="status">
+                <div class="loading-screen-label">[SYS] // INICIANDO SISTEMA</div>
+                <div class="loading-screen-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+            </div>
+        </app-root>
     </body>
 </html>

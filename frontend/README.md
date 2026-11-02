@@ -110,7 +110,8 @@ The session combines a short-lived access token kept in memory with a long-lived
 
 - **No token on disk.** The access token lives in memory; the long session is kept by an **HttpOnly cookie** that
   scripts cannot read.
-- **Reloads keep you signed in:** guards restore the session from the cookie before showing a page.
+- **Reloads keep you signed in:** guards restore the session from the cookie before showing a page. Until the first page
+  is ready, the web shows "INICIANDO SISTEMA" with three pulsing dots, on black from the first moment.
 - **Silent renewal:** a timer renews the token shortly before it expires, and an HTTP interceptor renews and
   retries once if the API answers 401. Concurrent renewals share a single request.
 - **Logout** closes the session on the backend and clears local state, including the cached catalog.
@@ -143,7 +144,7 @@ frontend/
         │   ├── music/          MusicApi, MusicPlayer (the one background player)
         │   └── notifications/  NotificationCenter
         │
-        ├── shared/             ♻️ Reusable pieces (models, notification toasts, music control, SVG icons, modal behaviour, API error helper)
+        ├── shared/             ♻️ Reusable pieces (models, notification toasts, loading screen, music control, SVG icons, modal behaviour, API error helper)
         ├── layout/             🖼️ Terminal shell: sidebar, header, footer
         ├── features/           📦 Platform pages: auth, welcome, profile, admin (dashboard, users, games, pictures, music)
         │

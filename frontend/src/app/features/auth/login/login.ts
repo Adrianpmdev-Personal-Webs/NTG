@@ -14,12 +14,13 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthSession } from '@core/auth/auth-session';
 import { NotificationCenter } from '@core/notifications/notification-center';
+import { LoadingScreen } from '@shared/components/loading-screen/loading-screen';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     host: { class: 'terminal' },
     selector: 'app-login',
-    imports: [FormsModule],
+    imports: [FormsModule, LoadingScreen],
     templateUrl: './login.html',
     styleUrl: './login.scss',
 })

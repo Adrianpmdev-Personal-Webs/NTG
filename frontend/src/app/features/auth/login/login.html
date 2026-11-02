@@ -14,8 +14,7 @@
 
     @if (checkingSession()) {
         <div class="session-check animate-fade-up">
-            <div class="sys-label">[SYS] // VERIFICANDO SESIÓN</div>
-            <div class="session-check-dots"><span></span><span></span><span></span></div>
+            <app-loading-screen text="VERIFICANDO SESIÓN" />
         </div>
     } @else {
         <div class="login-box animate-fade-up">

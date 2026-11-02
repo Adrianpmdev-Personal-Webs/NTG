@@ -331,7 +331,8 @@ public class LolPlayerService {
                 .map(this::matchOf)
                 .toList();
 
-        return new LolResponses.QueueBlock(queue.id(), queue.label(), statsOf(inQueue), champions, matches);
+        return new LolResponses.QueueBlock(queue.id(), queue.label(), queue.emptyNotice(), statsOf(inQueue), champions,
+                matches);
     }
 
     private static LolResponses.Stats statsOf(List<LolMatchRepository.ChampionTotals> rows) {

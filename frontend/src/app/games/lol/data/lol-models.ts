@@ -72,6 +72,7 @@ export interface LolMatch {
 export interface LolQueueBlock {
     id: number;
     label: string;
+    emptyNotice: string | null;
     stats: LolStats;
     champions: LolChampionStats[];
     matches: LolMatch[];

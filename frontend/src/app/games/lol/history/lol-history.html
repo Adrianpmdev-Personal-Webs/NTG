@@ -211,7 +211,9 @@
                                         </div>
                                     </article>
                                 } @empty {
-                                    <p class="empty">Sin partidas de {{ block.label }} esta temporada.</p>
+                                    <p class="empty">
+                                        {{ block.emptyNotice ?? 'Sin partidas de ' + block.label + ' esta temporada.' }}
+                                    </p>
                                 }
                             </div>
 

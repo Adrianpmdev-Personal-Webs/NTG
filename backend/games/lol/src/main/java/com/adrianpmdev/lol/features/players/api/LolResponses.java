@@ -67,11 +67,13 @@ public final class LolResponses {
      *
      * @param id        queue id
      * @param label     name of the queue
+     * @param emptyNotice what to tell while there are no games, or null for the usual text
      * @param stats     totals of the season
      * @param champions most played champions of the season
      * @param matches   last games
      */
-    public record QueueBlock(int id, String label, Stats stats, List<ChampionStats> champions, List<Match> matches) {
+    public record QueueBlock(int id, String label, String emptyNotice, Stats stats, List<ChampionStats> champions,
+                             List<Match> matches) {
     }
 
     /**

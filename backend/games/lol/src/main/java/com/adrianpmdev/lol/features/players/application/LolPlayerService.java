@@ -24,6 +24,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +36,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -56,6 +59,7 @@ public class LolPlayerService {
     private static final int TOP_CHAMPIONS = 5;
     /** A download makes 80 calls every 2 minutes at most, so a game takes about this long when alone. */
     private static final int SECONDS_PER_GAME = 2;
+    private static final Duration LINK_WAIT = Duration.ofSeconds(10);
     private static final String NOT_LINKED = "NOT_LINKED";
     private static final String INTERRUPTED = "INTERRUPTED";
     private static final String[] APEX = {"MASTER", "GRANDMASTER", "CHALLENGER"};
@@ -74,6 +78,7 @@ public class LolPlayerService {
     private final CurrentUser currentUser;
     private final UserDirectory userDirectory;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final Map<UUID, Instant> lastLinks = new ConcurrentHashMap<>();
 
     /**
      * The players with a linked account.
@@ -181,7 +186,15 @@ public class LolPlayerService {
      * @return the players
      */
     public LolResponses.Players linkOwn(String riotId) {
-        link(caller(), riotId);
+        UUID caller = caller();
+        Instant now = Instant.now();
+        Instant last = lastLinks.put(caller, now);
+
+        if (last != null && last.plus(LINK_WAIT).isAfter(now)) {
+            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "Espera unos segundos antes de volver a intentarlo");
+        }
+
+        link(caller, riotId);
 
         return players();
     }
@@ -272,6 +285,19 @@ public class LolPlayerService {
         accountRepository.findAll().stream()
                 .filter(account -> !LolAccount.COMPLETE.equals(account.getState()))
                 .forEach(account -> worker.download(account.getUserId()));
+
+        return adminAccounts();
+    }
+
+    /**
+     * Starts a download that reads the games again from the first season; the ones already stored are skipped.
+     *
+     * @param userId player
+     * @return every account
+     */
+    public List<LolResponses.AdminAccount> downloadAgain(UUID userId) {
+        requireAdmin();
+        worker.downloadAgain(find(userId).getUserId());
 
         return adminAccounts();
     }

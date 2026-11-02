@@ -22,6 +22,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -49,13 +50,23 @@ public class LolSyncWorker {
     private static final Duration MARGIN = Duration.ofHours(2);
     private static final int PAGE = 100;
     private static final int STORED_CHUNK = 500;
-    private static final int MAX_ERROR_LENGTH = 300;
+    /** Stores nothing if the player no longer has this account, so a game never lands on the wrong link. */
     private static final String INSERT = """
             insert into lol.matches (user_id, match_id, queue_id, played_at, duration_seconds, champion_id,
                 champion_name, win, remake, kills, deaths, assists, cs, damage, gold, vision, champion_level, items,
                 spell1, spell2)
-            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            select ?::uuid, ?, ?::smallint, ?::timestamptz, ?::integer, ?::integer, ?, ?::boolean, ?::boolean,
+                ?::smallint, ?::smallint, ?::smallint, ?::smallint, ?::integer, ?::integer, ?::smallint, ?::smallint,
+                ?, ?::smallint, ?::smallint
+            where exists (select 1 from lol.accounts where user_id = ?::uuid and puuid = ?)
             on conflict (user_id, match_id) do nothing
+            """;
+    private static final String MARK = "update lol.accounts set state = ?, last_error = ? where user_id = ? and puuid = ?";
+    private static final String FORGET_MARK = "update lol.accounts set synced_until = null where user_id = ? and puuid = ?";
+    private static final String CHECKED = """
+            update lol.accounts set ranks = ?::jsonb, profile_icon_id = ?, summoner_level = ?, synced_until = ?,
+                checked_at = ?, last_error = null
+            where user_id = ? and puuid = ?
             """;
 
     private final RiotClient riotClient;
@@ -64,6 +75,7 @@ public class LolSyncWorker {
     private final JdbcTemplate jdbcTemplate;
     private final LolSeasons seasons;
     private final LolSeasonRanks seasonRanks;
+    private final Set<UUID> downloadsAgain = new HashSet<>();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final Map<UUID, CompletableFuture<Void>> refreshes = new LinkedHashMap<>();
@@ -119,12 +131,26 @@ public class LolSyncWorker {
     }
 
     /**
+     * Adds a download that reads the games again from the first season, for what an account that is complete cannot get
+     * otherwise: an older season, or a queue Riot starts to give. Stored games are skipped.
+     *
+     * @param userId player
+     */
+    public synchronized void downloadAgain(UUID userId) {
+        if (!userId.equals(downloading)) {
+            downloadsAgain.add(userId);
+            download(userId);
+        }
+    }
+
+    /**
      * Takes a download out of the queue, or stops it after the current game.
      *
      * @param userId player
      */
     public synchronized void pause(UUID userId) {
         downloads.remove(userId);
+        downloadsAgain.remove(userId);
 
         if (userId.equals(downloading)) {
             stopCurrent = true;
@@ -245,11 +271,7 @@ public class LolSyncWorker {
             }
 
             try {
-                accountRepository.findById(userId).ifPresent(account -> {
-                    sync(account, true);
-                    account.setLastError(null);
-                    accountRepository.save(account);
-                });
+                accountRepository.findById(userId).ifPresent(account -> sync(account, true));
                 future.complete(null);
             } catch (RuntimeException exception) {
                 log.warn("The games of {} could not be updated: {}", userId, exception.getMessage());
@@ -264,18 +286,21 @@ public class LolSyncWorker {
         try {
             if (found.isPresent()) {
                 LolAccount account = found.get();
-                account.setState(LolAccount.LOADING);
-                account.setLastError(null);
-                accountRepository.save(account);
+
+                if (takeDownloadAgain(userId)) {
+                    jdbcTemplate.update(FORGET_MARK, userId, account.getPuuid());
+                    account.setSyncedUntil(null);
+                }
+
+                mark(account, LolAccount.LOADING, null);
                 sync(account, false);
-                account.setState(LolAccount.COMPLETE);
-                accountRepository.save(account);
+                mark(account, LolAccount.COMPLETE, null);
             }
         } catch (Stopped stopped) {
-            found.ifPresent(account -> changeState(userId, LolAccount.PENDING, null));
+            found.ifPresent(account -> mark(account, LolAccount.PENDING, null));
         } catch (RuntimeException exception) {
             log.warn("The download of {} stopped: {}", userId, exception.getMessage());
-            changeState(userId, LolAccount.ERROR, exception.getMessage());
+            found.ifPresent(account -> mark(account, LolAccount.ERROR, reasonOf(exception)));
         } finally {
             progress.remove(userId);
 
@@ -285,13 +310,13 @@ public class LolSyncWorker {
         }
     }
 
-    private void changeState(UUID userId, String state, String error) {
-        accountRepository.findById(userId).ifPresent(account -> {
-            account.setState(state);
-            account.setLastError(error == null || error.length() <= MAX_ERROR_LENGTH
-                    ? error : error.substring(0, MAX_ERROR_LENGTH));
-            accountRepository.save(account);
-        });
+    private synchronized boolean takeDownloadAgain(UUID userId) {
+        return downloadsAgain.remove(userId);
+    }
+
+    /** Writes only if the player still has this account: one changed or removed meanwhile is left as it is now. */
+    private void mark(LolAccount account, String state, String error) {
+        jdbcTemplate.update(MARK, state, error, account.getUserId(), account.getPuuid());
     }
 
     /**
@@ -334,10 +359,12 @@ public class LolSyncWorker {
             account.setSummonerLevel(summoner.summonerLevel());
         });
         account.setRanks(objectMapper.valueToTree(ranks));
-        seasonRanks.save(account.getUserId(), seasons.current().key(), account.getRanks());
+        seasonRanks.save(account.getUserId(), account.getPuuid(), seasons.current().key(), account.getRanks());
         account.setSyncedUntil(startedAt.minus(MARGIN));
         account.setCheckedAt(Instant.now());
-        accountRepository.save(account);
+        jdbcTemplate.update(CHECKED, account.getRanks().toString(), account.getProfileIconId(), account.getSummonerLevel(),
+                Timestamp.from(account.getSyncedUntil()), Timestamp.from(account.getCheckedAt()), account.getUserId(),
+                account.getPuuid());
     }
 
     private synchronized void checkStop(UUID userId) {
@@ -385,7 +412,7 @@ public class LolSyncWorker {
                 player.kills(), player.deaths(), player.assists(),
                 player.totalMinionsKilled() + player.neutralMinionsKilled(), player.totalDamageDealtToChampions(),
                 player.goldEarned(), player.visionScore(), player.champLevel(), itemsOf(player),
-                player.summoner1Id(), player.summoner2Id()));
+                player.summoner1Id(), player.summoner2Id(), userId, player.puuid()));
     }
 
     private static String itemsOf(RiotModels.Participant player) {

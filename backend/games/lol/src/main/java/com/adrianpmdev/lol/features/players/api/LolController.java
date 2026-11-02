@@ -122,6 +122,11 @@ public class LolController {
         return service.download(userId);
     }
 
+    @PostMapping("/admin/accounts/{userId}/download-again")
+    public List<LolResponses.AdminAccount> downloadAgain(@PathVariable UUID userId) {
+        return service.downloadAgain(userId);
+    }
+
     @PostMapping("/admin/accounts/{userId}/pause")
     public List<LolResponses.AdminAccount> pause(@PathVariable UUID userId) {
         return service.pause(userId);

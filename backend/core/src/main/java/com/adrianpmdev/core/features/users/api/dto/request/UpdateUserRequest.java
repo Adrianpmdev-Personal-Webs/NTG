@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
  * Request DTO for updating a user profile.
  *
  * @param username  user's display name
- * @param avatarUrl optional http(s) avatar URL
+ * @param avatarUrl optional https avatar URL
  *
  * @author adrianpmdev
  */
@@ -18,6 +18,6 @@ public record UpdateUserRequest(
     String username,
 
     @Size(max = 500, message = "Avatar URL is too long")
-    @Pattern(regexp = "^(https?://.+)?$", message = "Avatar URL must start with http:// or https://")
+    @Pattern(regexp = "^(https://.+)?$", message = "Avatar URL must start with https://")
     String avatarUrl
 ) {}

@@ -12,6 +12,7 @@ import com.adrianpmdev.core.security.authorization.Authorities;
 import com.adrianpmdev.platform.asset.ImageSlot;
 import com.adrianpmdev.platform.asset.ImageSlotProvider;
 import com.adrianpmdev.platform.image.ImageSpec;
+import com.adrianpmdev.platform.module.GameModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -32,7 +33,7 @@ import java.util.stream.Collectors;
  * <ul>
  *     <li><b>Who sees what:</b> admins see every game; players see the released games they have the tag for, and the
  *     upcoming ones as "coming soon" (listed but not accessible).</li>
- *     <li><b>Upcoming games:</b> the access token filter asks {@link #upcomingKeys()} and ignores the tag of an
+ *     <li><b>Upcoming games:</b> the access token filter asks {@link #closedKeys()} and ignores the tag of an
  *     upcoming game for non-admins, so its API stays closed to players even if they have the tag.</li>
  *     <li><b>Pictures:</b> each game declares two public pictures, uploaded by an admin: its cover
  *     {@code platform/games/<key>} and its icon {@code platform/game-icons/<key>} (shown small in the menus, so it is
@@ -60,6 +61,7 @@ public class GameCatalogService implements ImageSlotProvider {
     private final CatalogGameRepository gameRepository;
     private final TagRepository tagRepository;
     private final AssetService assetService;
+    private final List<GameModule> gameModules;
 
     /** Catalog in display order; null until first needed and after every change. */
     private volatile List<Entry> entries;
@@ -74,12 +76,15 @@ public class GameCatalogService implements ImageSlotProvider {
      * @param gameRepository catalog repository
      * @param tagRepository  tag repository (the tag of each new game)
      * @param assetService   public pictures (covers and icons)
+     * @param gameModules    the game modules of this application
      */
     public GameCatalogService(CatalogGameRepository gameRepository, TagRepository tagRepository,
-                              AssetService assetService) {
+                              AssetService assetService,
+                              List<GameModule> gameModules) {
         this.gameRepository = gameRepository;
         this.tagRepository = tagRepository;
         this.assetService = assetService;
+        this.gameModules = gameModules;
     }
 
     /**
@@ -105,12 +110,18 @@ public class GameCatalogService implements ImageSlotProvider {
     }
 
     /**
-     * Keys of the games that are still coming soon.
+     * Keys of the games closed to non-admins: those still coming soon and the modules with no entry in the catalog, such
+     * as a game whose entry was removed. Without the second part, removing a game would open its API to its tag.
      *
-     * @return upcoming game keys
+     * @return closed game keys
      */
-    public Set<String> upcomingKeys() {
-        return entries().stream().filter(Entry::upcoming).map(Entry::key).collect(Collectors.toUnmodifiableSet());
+    public Set<String> closedKeys() {
+        Set<String> listed = entries().stream().map(Entry::key).collect(Collectors.toSet());
+        Set<String> closed = entries().stream().filter(Entry::upcoming).map(Entry::key).collect(Collectors.toSet());
+
+        gameModules.stream().map(GameModule::tag).filter(tag -> !listed.contains(tag)).forEach(closed::add);
+
+        return Set.copyOf(closed);
     }
 
     /**

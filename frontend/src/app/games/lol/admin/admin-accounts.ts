@@ -104,6 +104,10 @@ export class AdminAccounts implements OnInit {
         this.run(this.api.download(account.userId), 'No se ha podido iniciar la descarga');
     }
 
+    protected downloadAgain(account: LolAdminAccount): void {
+        this.run(this.api.downloadAgain(account.userId), 'No se ha podido iniciar la descarga');
+    }
+
     protected pause(account: LolAdminAccount): void {
         this.run(this.api.pause(account.userId), 'No se ha podido pausar la descarga');
     }

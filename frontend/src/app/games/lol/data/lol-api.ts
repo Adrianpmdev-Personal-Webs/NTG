@@ -70,6 +70,10 @@ export class LolApi {
         return this.http.post<LolAdminAccount[]>(`${this.base}/admin/accounts/${userId}/download`, {});
     }
 
+    downloadAgain(userId: string): Observable<LolAdminAccount[]> {
+        return this.http.post<LolAdminAccount[]>(`${this.base}/admin/accounts/${userId}/download-again`, {});
+    }
+
     pause(userId: string): Observable<LolAdminAccount[]> {
         return this.http.post<LolAdminAccount[]>(`${this.base}/admin/accounts/${userId}/pause`, {});
     }

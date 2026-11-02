@@ -49,13 +49,13 @@ public class UserAvatarService {
     private final ObjectStorage storage;
 
     /**
-     * Replaces the avatar of a user with an uploaded picture.
+     * Replaces the avatar of a user with an uploaded picture. It holds no database connection while it compresses and
+     * uploads, because pictures wait their turn and the pool is small.
      *
      * @param id   user id
      * @param file the picture
      * @return updated user
      */
-    @Transactional
     public UserResponse upload(UUID id, MultipartFile file) {
         User user = find(id);
         CompressedImage image = imageCompressor.compress(readLimited(file), SPEC);
@@ -66,6 +66,7 @@ public class UserAvatarService {
         String previous = user.getAvatarUrl();
 
         user.setAvatarUrl(storage.publicUrl(BUCKET, objectName));
+        userRepository.save(user);
         deleteOwnUpload(id, previous);
         AUDIT.info("actor={} action=AVATAR_UPLOADED bytes={}", id, image.bytes().length);
 

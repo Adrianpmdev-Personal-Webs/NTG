@@ -25,18 +25,20 @@ public class LolSeasonRanks {
     private final JdbcTemplate jdbcTemplate;
 
     /**
-     * Keeps the rank of a player in a season.
+     * Keeps the rank of a player in a season, if they still have the account it was read from.
      *
      * @param userId player
+     * @param puuid  account the rank was read from
      * @param season short name of the season
      * @param ranks  official ranks
      */
-    public void save(UUID userId, String season, JsonNode ranks) {
+    public void save(UUID userId, String puuid, String season, JsonNode ranks) {
         jdbcTemplate.update("""
                 insert into lol.season_ranks (user_id, season, ranks, updated_at)
-                values (?, ?, ?::jsonb, now())
+                select ?::uuid, ?, ?::jsonb, now()
+                where exists (select 1 from lol.accounts where user_id = ?::uuid and puuid = ?)
                 on conflict (user_id, season) do update set ranks = excluded.ranks, updated_at = now()
-                """, userId, season, ranks.toString());
+                """, userId, season, ranks.toString(), userId, puuid);
     }
 
     /**

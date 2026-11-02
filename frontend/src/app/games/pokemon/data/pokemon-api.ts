@@ -4,15 +4,17 @@
  * HTTP service of the Pokémon module: one method per endpoint. Every admin action on a tournament
  * answers with the whole updated tournament, so screens just replace their copy with the response.
  * Reads are kept for a minute, so moving between screens does not ask the server again; any write empties
- * that memory, so a change made from this browser always shows up right away.
+ * that memory, so a change made from this browser always shows up right away, and so does a change of user, so nobody
+ * sees what the previous one could see.
  *
  * @author @adrianpmdev
  */
 
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, catchError, shareReplay, tap, throwError } from 'rxjs';
+import { Observable, catchError, distinctUntilChanged, map, shareReplay, tap, throwError } from 'rxjs';
 import { API_BASE_URL } from '@core/api/api';
+import { AuthSession } from '@core/auth/auth-session';
 import { TypeChart } from '../type-calculator/type-calculator-constants';
 import {
     Game,
@@ -43,6 +45,15 @@ export class PokemonApi {
     private typeChart$: Observable<TypeChart> | null = null;
 
     private readonly reads = new Map<string, { expiresAt: number; request: Observable<unknown> }>();
+
+    constructor() {
+        inject(AuthSession)
+            .currentUser$.pipe(
+                map((user) => user?.id ?? null),
+                distinctUntilChanged(),
+            )
+            .subscribe(() => this.reads.clear());
+    }
 
     getGames(): Observable<Game[]> {
         return this.cachedGet<Game[]>(`${this.base}/games`);

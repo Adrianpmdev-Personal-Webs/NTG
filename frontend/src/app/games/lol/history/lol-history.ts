@@ -99,12 +99,19 @@ export class LolHistory implements OnInit {
             return;
         }
 
+        const season = this.seasonKey();
+
         this.updating.set(true);
         this.refreshLoad?.unsubscribe();
-        this.refreshLoad = this.api.refresh(userId, this.seasonKey()).subscribe({
+        this.refreshLoad = this.api.refresh(userId, season).subscribe({
             next: (detail) => {
-                this.detailLoad?.unsubscribe();
-                this.detail.set(detail);
+                if (this.seasonKey() === season) {
+                    this.detailLoad?.unsubscribe();
+                    this.detail.set(detail);
+                } else {
+                    this.loadDetail(userId);
+                }
+
                 this.updating.set(false);
                 this.data.update(
                     (data) =>

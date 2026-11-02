@@ -26,7 +26,7 @@ const OVERVIEW = 'overview';
 const USERNAME_MIN_LENGTH = 3;
 const USERNAME_MAX_LENGTH = 50;
 const AVATAR_LINK_MAX_LENGTH = 500;
-const AVATAR_LINK_PATTERN = /^https?:\/\/\S+$/;
+const AVATAR_LINK_PATTERN = /^https:\/\/\S+$/;
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -138,7 +138,7 @@ export class ProfilePage implements OnInit {
         }
 
         if (!AVATAR_LINK_PATTERN.test(avatarUrl)) {
-            this.notifications.warning('El link debe empezar por http:// o https://');
+            this.notifications.warning('El link debe empezar por https://');
             return;
         }
 

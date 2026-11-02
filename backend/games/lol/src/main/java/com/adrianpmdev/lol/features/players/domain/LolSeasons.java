@@ -126,7 +126,7 @@ public class LolSeasons {
     }
 
     /**
-     * Deletes a season. Its games stay and go to the season that now covers their date.
+     * Deletes a season and the final ranks kept for it. Its games stay and go to the season that now covers their date.
      *
      * @param key short name
      */
@@ -139,7 +139,10 @@ public class LolSeasons {
             throw ApiErrors.conflict("Tiene que quedar al menos una temporada");
         }
 
-        jdbcTemplate.update("delete from lol.seasons where key = ?", key);
+        jdbcTemplate.update("""
+                with ranks as (delete from lol.season_ranks where season = ?)
+                delete from lol.seasons where key = ?
+                """, key, key);
         seasons = null;
     }
 

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -42,9 +43,11 @@ public class AuthRateLimiter {
     static final int REFRESH_PER_ADDRESS = 30;
     static final int PASSWORD_PER_ADDRESS = 5;
     static final int PASSWORD_GLOBAL = 20;
+    static final int PASSWORD_EMAIL_PER_USER = 3;
 
     private static final Duration FIFTEEN_MINUTES = Duration.ofMinutes(15);
     private static final Duration ONE_MINUTE = Duration.ofMinutes(1);
+    private static final Duration ONE_HOUR = Duration.ofHours(1);
     private static final String FORWARDED_FOR = "X-Forwarded-For";
     private static final String GLOBAL_KEY = "*";
 
@@ -87,6 +90,16 @@ public class AuthRateLimiter {
     public void checkSetPassword(HttpServletRequest request) {
         consume("password:address:" + clientAddress(request), PASSWORD_PER_ADDRESS, FIFTEEN_MINUTES);
         consume("password:" + GLOBAL_KEY, PASSWORD_GLOBAL, ONE_MINUTE);
+    }
+
+    /**
+     * Counts an email to choose a new password asked by its owner, because the emails of the free plan are few.
+     *
+     * @param userId who asks
+     * @throws TooManyRequestsException when the limit has been reached
+     */
+    public void checkPasswordEmail(UUID userId) {
+        consume("password-email:" + userId, PASSWORD_EMAIL_PER_USER, ONE_HOUR);
     }
 
     private void consume(String key, int attempts, Duration period) {

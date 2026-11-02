@@ -5,6 +5,7 @@ import com.adrianpmdev.core.features.tags.api.dto.request.UpdateTagRequest;
 import com.adrianpmdev.core.features.tags.api.dto.response.TagResponse;
 import com.adrianpmdev.core.features.tags.infrastructure.persistence.entity.Tag;
 import com.adrianpmdev.core.features.users.api.mapper.UserMapper;
+import com.adrianpmdev.core.features.catalog.infrastructure.persistence.repository.CatalogGameRepository;
 import com.adrianpmdev.core.features.tags.infrastructure.persistence.repository.TagRepository;
 import com.adrianpmdev.core.security.authentication.UserAuthorityCache;
 import org.slf4j.Logger;
@@ -30,16 +31,20 @@ public class TagService {
 
     private final TagRepository tagRepository;
     private final UserAuthorityCache userAuthorityCache;
+    private final CatalogGameRepository gameRepository;
 
     /**
      * Builds the service with its dependencies.
      *
      * @param tagRepository      tag repository
      * @param userAuthorityCache role and tags cached for the access token filter
+     * @param gameRepository     games of the catalog, whose tags must stay
      */
-    public TagService(TagRepository tagRepository, UserAuthorityCache userAuthorityCache) {
+    public TagService(TagRepository tagRepository, UserAuthorityCache userAuthorityCache,
+                      CatalogGameRepository gameRepository) {
         this.tagRepository = tagRepository;
         this.userAuthorityCache = userAuthorityCache;
+        this.gameRepository = gameRepository;
     }
 
     /**
@@ -100,6 +105,11 @@ public class TagService {
     @Transactional
     public void delete(String key, UUID actorId) {
         Tag tag = find(key);
+
+        if (gameRepository.existsById(tag.getKey())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "This tag belongs to a game of the catalog");
+        }
+
         tagRepository.delete(tag);
         userAuthorityCache.evictAll();
         AUDIT.info("actor={} action=TAG_DELETED tag={}", actorId, tag.getKey());

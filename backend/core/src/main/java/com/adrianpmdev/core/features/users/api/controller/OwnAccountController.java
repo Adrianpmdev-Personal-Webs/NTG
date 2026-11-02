@@ -4,6 +4,7 @@ import com.adrianpmdev.core.features.users.api.dto.response.UserResponse;
 import com.adrianpmdev.core.features.users.application.service.UserAvatarService;
 import com.adrianpmdev.core.features.users.application.service.UserService;
 import com.adrianpmdev.core.security.authentication.AuthenticatedUser;
+import com.adrianpmdev.core.security.ratelimit.AuthRateLimiter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -29,6 +30,7 @@ public class OwnAccountController {
 
     private final UserAvatarService userAvatarService;
     private final UserService userService;
+    private final AuthRateLimiter rateLimiter;
 
     /**
      * Replaces the avatar of the caller with an uploaded picture.
@@ -62,6 +64,7 @@ public class OwnAccountController {
     @PostMapping("/password-email")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void sendPasswordEmail(@AuthenticationPrincipal AuthenticatedUser current) {
+        rateLimiter.checkPasswordEmail(current.id());
         userService.resendPasswordEmail(current.id(), current.id());
     }
 }

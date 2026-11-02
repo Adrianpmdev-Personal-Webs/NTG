@@ -139,8 +139,8 @@ that are not signed in receive `401` and requests without permission receive `40
 | **Token verification** | Access tokens (JWT) are verified **locally**: signature, expiry, issuer and audience (`authenticated`, so only session tokens are accepted). No network call per request. |
 | **Fresh permissions** | Role and tags are kept in memory for at most 60 seconds and evicted the moment an admin changes them, so a removed tag or a deleted user takes effect **immediately**. |
 | **Authorization** | **Deny by default.** Every route must be listed; anything else is rejected. Game rules are built from the `GameModule` each game declares. |
-| **Game access** | Reading a game's endpoints needs its **tag** (or admin); writing needs **admin**, except the routes a game opens to players. The tag of a game that is still *coming soon* is ignored for non-admins, so its API stays closed. |
-| **Sign-in limits** | Login is limited per email, per client address and site-wide; session renewal and the email link per address. Too many attempts get `429` with `Retry-After`. |
+| **Game access** | Reading a game's endpoints needs its **tag** (or admin); writing needs **admin**, except the routes a game opens to players. The tag of a game that is still *coming soon*, or whose module has no entry in the catalog, is ignored for non-admins, so its API stays closed. |
+| **Sign-in limits** | Login is limited per email, per client address and site-wide; session renewal and the email link per address; the email to change a password per user. Too many attempts get `429` with `Retry-After`. |
 | **Sessions** | Short-lived access token kept in memory by the client, plus a long-lived **refresh token in an HttpOnly cookie** (scoped to the auth path, `Secure` and `SameSite` configurable). The refresh token **rotates** on every use and logout revokes it on Supabase. |
 | **Accounts** | **No public sign-up.** Only admins create users, and users choose their own password from a one-time email link. An admin cannot delete their own account. |
 | **Passwords** | Policy enforced on the way in (length, at least a letter and a number). A failed login gives a generic message that does not say whether the email exists. |
@@ -218,7 +218,7 @@ security headers (see the [frontend documentation](../frontend/README.md)).
 - An admin uploads the original picture for a slot that a module declared (a game cover, a game icon, a talent tree…). The
   server checks it, resizes it, re-encodes it as JPEG (PNG when it has transparency) and stores it in the public
   bucket. Its URL changes with every upload, so browsers can cache each version for a year.
-- An avatar is a link, kept as it is, or a picture its owner uploads: compressed to 256 px and 150 KB and stored in the
+- An avatar is an `https` link, kept as it is, or a picture its owner uploads: compressed to 256 px and 150 KB and stored in the
   same bucket.
 
 ### 5. Music
@@ -251,6 +251,8 @@ security headers (see the [frontend documentation](../frontend/README.md)).
   runs on one thread, one account at a time, within the limits of a personal Riot key.
 - Opening a player or pressing the update button asks Riot for what is new, at most every 5 minutes per player. Nothing
   runs on a schedule, and history and statistics are always read from the database.
+- An admin can download an account again, for what a complete account cannot get otherwise: an older season or a queue
+  Riot starts to give. Stored games are skipped.
 - Seasons, one per year, are managed from the web. Riot only tells the current rank, so each update keeps a copy: the
   last one is the final rank of that season.
 
@@ -315,7 +317,7 @@ The site runs on the free plans of Render, Vercel and Supabase, so the backend a
 | **Gzip** | JSON is compressed (the WoW data drops from about 1.8 MB to about 200 KB) |
 | **ETag on static JSON** | A browser that already has the data gets `304` with no body |
 | **Daily `select 1`** | The keep-alive call touches the database once a day, so Supabase never pauses the project |
-| **Small connection pool** | At most 5 connections to the Supabase pooler |
+| **Small connection pool** | At most 5 connections to the Supabase pooler; none is held while a picture is compressed or uploaded |
 | **JVM tuned for 512 MB** | Heap capped so the whole process fits, light garbage collector, memory given back after peaks, restart on out-of-memory |
 
 ---

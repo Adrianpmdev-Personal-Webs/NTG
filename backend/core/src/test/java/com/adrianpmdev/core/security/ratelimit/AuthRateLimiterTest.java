@@ -5,6 +5,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -16,6 +18,18 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class AuthRateLimiterTest {
 
     private final AuthRateLimiter limiter = new AuthRateLimiter();
+
+    @Test
+    void tooManyPasswordEmailsForOneUserAreRefused() {
+        UUID user = UUID.randomUUID();
+
+        for (int attempt = 0; attempt < AuthRateLimiter.PASSWORD_EMAIL_PER_USER; attempt++) {
+            limiter.checkPasswordEmail(user);
+        }
+
+        assertThatThrownBy(() -> limiter.checkPasswordEmail(user)).isInstanceOf(TooManyRequestsException.class);
+        limiter.checkPasswordEmail(UUID.randomUUID());
+    }
 
     @Test
     void tooManySignInsForOneEmailAreRefused() {

@@ -79,6 +79,17 @@
                                                 DESCARGAR
                                             </button>
                                         }
+                                        @if (account.state === 'COMPLETE') {
+                                            <button
+                                                class="btn-neon"
+                                                type="button"
+                                                title="Vuelve a buscar sus partidas desde la primera temporada; las que ya están no se repiten"
+                                                [disabled]="busy()"
+                                                (click)="downloadAgain(account)"
+                                            >
+                                                DESCARGAR DE NUEVO
+                                            </button>
+                                        }
                                         @if (isActive(account)) {
                                             <button
                                                 class="btn-neon"

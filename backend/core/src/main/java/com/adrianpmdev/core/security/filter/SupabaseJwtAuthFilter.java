@@ -99,7 +99,7 @@ public class SupabaseJwtAuthFilter extends OncePerRequestFilter {
             List<GrantedAuthority> authorities = new ArrayList<>();
             authorities.add(new SimpleGrantedAuthority(Authorities.ROLE_PREFIX + role));
 
-            Set<String> closedGames = ADMIN_ROLE.equals(role) ? Set.of() : gameCatalogService.upcomingKeys();
+            Set<String> closedGames = ADMIN_ROLE.equals(role) ? Set.of() : gameCatalogService.closedKeys();
 
             for (String tagKey : user.tagKeys()) {
                 if (closedGames.contains(tagKey)) {

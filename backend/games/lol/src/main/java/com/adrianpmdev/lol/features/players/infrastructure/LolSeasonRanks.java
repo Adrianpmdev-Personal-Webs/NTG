@@ -1,5 +1,6 @@
 package com.adrianpmdev.lol.features.players.infrastructure;
 
+import com.adrianpmdev.lol.features.players.domain.LolRankPeak;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,8 +12,8 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * The last official rank known of each player in each season. Riot only tells the current rank, so it is copied every
- * time a player is updated: what remains when the season changes is the rank they finished with.
+ * The last official rank known of each player in each season and the highest one seen. Riot only tells the current rank,
+ * so it is copied every time a player is updated: what remains when the season changes is the rank they finished with.
  *
  * @author adrianpmdev
  */
@@ -33,12 +34,14 @@ public class LolSeasonRanks {
      * @param ranks  official ranks
      */
     public void save(UUID userId, String puuid, String season, JsonNode ranks) {
+        JsonNode peak = LolRankPeak.best(read("peak", userId, season), read("ranks", userId, season), ranks);
+
         jdbcTemplate.update("""
-                insert into lol.season_ranks (user_id, season, ranks, updated_at)
-                select ?::uuid, ?, ?::jsonb, now()
+                insert into lol.season_ranks (user_id, season, ranks, peak, updated_at)
+                select ?::uuid, ?, ?::jsonb, ?::jsonb, now()
                 where exists (select 1 from lol.accounts where user_id = ?::uuid and puuid = ?)
-                on conflict (user_id, season) do update set ranks = excluded.ranks, updated_at = now()
-                """, userId, season, ranks.toString(), userId, puuid);
+                on conflict (user_id, season) do update set ranks = excluded.ranks, peak = excluded.peak, updated_at = now()
+                """, userId, season, ranks.toString(), peak.toString(), userId, puuid);
     }
 
     /**
@@ -49,8 +52,23 @@ public class LolSeasonRanks {
      * @return official ranks; empty when none was kept
      */
     public JsonNode find(UUID userId, String season) {
+        return read("ranks", userId, season);
+    }
+
+    /**
+     * The highest rank seen of a player in a season.
+     *
+     * @param userId player
+     * @param season short name of the season
+     * @return the highest rank of each queue; empty when none was seen
+     */
+    public JsonNode findPeak(UUID userId, String season) {
+        return read("peak", userId, season);
+    }
+
+    private JsonNode read(String column, UUID userId, String season) {
         List<String> found = jdbcTemplate.queryForList(
-                "select ranks::text from lol.season_ranks where user_id = ? and season = ?", String.class, userId,
+                "select " + column + "::text from lol.season_ranks where user_id = ? and season = ?", String.class, userId,
                 season);
 
         if (found.isEmpty()) {

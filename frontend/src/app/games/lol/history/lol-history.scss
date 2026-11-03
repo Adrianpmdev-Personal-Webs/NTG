@@ -361,17 +361,38 @@ input {
 
 .rank {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    gap: 10px;
     min-width: 140px;
     padding: 8px 14px;
     background: linear-gradient(135deg, $gold-dark, $panel 45%);
     clip-path: $cut;
 }
 
+.rank-icon {
+    flex: none;
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+}
+
+.rank-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
 .rank-queue,
 .rank-lp {
     color: $muted;
     font-size: 0.72rem;
+}
+
+.rank-peak {
+    margin-top: 2px;
+    color: $muted;
+    font-size: 0.66rem;
+    opacity: 0.85;
 }
 
 .rank-tier {

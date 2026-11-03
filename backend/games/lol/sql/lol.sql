@@ -6,7 +6,7 @@
 --   matches    A summary of each game of a player, never the whole file of the game. Games stay from one
 --              season to the next; each one belongs to a season by its date.
 --   seasons    The seasons, one per year, with the day each one starts.
---   season_ranks  The last official rank known of each player in each season.
+--   season_ranks  The last official rank known of each player in each season, and the highest one seen.
 --
 -- How to use: run it in the Supabase SQL editor, after core.sql; it can be run again on an existing
 -- project, it only adds what is missing and keeps the data. A new column of an existing table needs its
@@ -93,16 +93,19 @@ values ('26', '2026-01-08')
 on conflict (key) do nothing;
 
 -- ─── season_ranks ────────────────────────────────────────────────────────────────────────────────────
--- Riot only tells the current rank, so each update keeps a copy: the last one of a season is how it ended.
+-- Riot only tells the current rank, so each update keeps a copy and the highest seen: the last one of a season is how it ended.
 
 create table if not exists lol.season_ranks (
     user_id    uuid        not null,
     season     varchar(5)  not null,
     ranks      jsonb       not null default '[]',
+    peak       jsonb       not null default '[]',
     updated_at timestamptz not null default now(),
     constraint season_ranks_pkey primary key (user_id, season),
     constraint season_ranks_account_fkey foreign key (user_id) references lol.accounts (user_id) on delete cascade
 );
+
+alter table lol.season_ranks add column if not exists peak jsonb not null default '[]';
 
 -- ─── Row level security ──────────────────────────────────────────────────────────────────────────────
 -- The backend connects as the table owner, which bypasses RLS. Enabling it without policies closes the

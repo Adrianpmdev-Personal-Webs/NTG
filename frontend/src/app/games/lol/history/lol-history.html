@@ -132,11 +132,23 @@
                         <ul class="ranks">
                             @for (rank of info.ranks; track rank.queue) {
                                 <li class="rank">
-                                    <span class="rank-queue"
-                                        >{{ rank.queue }}{{ info.current ? '' : ' · rango final' }}</span
-                                    >
-                                    <strong class="rank-tier">{{ rank.tier }}</strong>
-                                    <span class="rank-lp">{{ rank.lp }} LP · {{ rank.wins }}V {{ rank.losses }}D</span>
+                                    @if (rank.iconUrl; as icon) {
+                                        <img class="rank-icon" [src]="icon" alt="" (error)="hideIcon($event)" />
+                                    }
+                                    <span class="rank-text">
+                                        <span class="rank-queue"
+                                            >{{ rank.queue }}{{ info.current ? '' : ' · rango final' }}</span
+                                        >
+                                        <strong class="rank-tier">{{ rank.tier }}</strong>
+                                        <span class="rank-lp"
+                                            >{{ rank.lp }} LP · {{ rank.wins }}V {{ rank.losses }}D</span
+                                        >
+                                        @if (rank.peak; as peak) {
+                                            <span class="rank-peak"
+                                                >Máx. registrado: {{ peak.tier }} · {{ peak.lp }} LP</span
+                                            >
+                                        }
+                                    </span>
                                 </li>
                             } @empty {
                                 <li class="rank rank-none">Sin clasificar</li>

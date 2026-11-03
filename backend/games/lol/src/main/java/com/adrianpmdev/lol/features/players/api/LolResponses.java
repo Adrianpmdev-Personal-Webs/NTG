@@ -84,8 +84,19 @@ public final class LolResponses {
      * @param lp     LP
      * @param wins   wins
      * @param losses losses
+     * @param iconUrl URL of the emblem of the tier, or null while it is not uploaded
+     * @param peak    highest rank seen in that season, or null when none was
      */
-    public record Rank(String queue, String tier, int lp, int wins, int losses) {
+    public record Rank(String queue, String tier, int lp, int wins, int losses, String iconUrl, PeakRank peak) {
+    }
+
+    /**
+     * The highest rank seen of a player in a queue.
+     *
+     * @param tier tier and division, in Spanish
+     * @param lp   LP
+     */
+    public record PeakRank(String tier, int lp) {
     }
 
     /**

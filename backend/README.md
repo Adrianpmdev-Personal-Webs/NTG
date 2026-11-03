@@ -254,7 +254,8 @@ security headers (see the [frontend documentation](../frontend/README.md)).
 - An admin can download an account again, for what a complete account cannot get otherwise: an older season or a queue
   Riot starts to give. Stored games are skipped.
 - Seasons, one per year, are managed from the web. Riot only tells the current rank, so each update keeps a copy: the
-  last one is the final rank of that season.
+  last one is the final rank of that season, and the highest one seen is shown as "Máx. registrado".
+- The emblem of each tier is a picture an admin uploads from the Pictures screen; the API sends its URL.
 
 ---
 

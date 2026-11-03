@@ -24,12 +24,19 @@ export interface LolPlayers {
     players: LolPlayerSummary[];
 }
 
+export interface LolPeakRank {
+    tier: string;
+    lp: number;
+}
+
 export interface LolRank {
     queue: string;
     tier: string;
     lp: number;
     wins: number;
     losses: number;
+    iconUrl: string | null;
+    peak: LolPeakRank | null;
 }
 
 export interface LolStats {

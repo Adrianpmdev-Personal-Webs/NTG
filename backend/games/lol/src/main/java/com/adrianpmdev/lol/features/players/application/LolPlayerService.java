@@ -60,6 +60,7 @@ public class LolPlayerService {
     /** A download makes 80 calls every 2 minutes at most, so a game takes about this long when alone. */
     private static final int SECONDS_PER_GAME = 2;
     private static final Duration LINK_WAIT = Duration.ofSeconds(10);
+    private static final JsonNode JSON_EMPTY = new ObjectMapper().createArrayNode();
     private static final String NOT_LINKED = "NOT_LINKED";
     private static final String INTERRUPTED = "INTERRUPTED";
     private static final String[] APEX = {"MASTER", "GRANDMASTER", "CHALLENGER"};
@@ -75,6 +76,7 @@ public class LolPlayerService {
     private final LolSeasonRanks seasonRanks;
     private final RiotClient riotClient;
     private final DataDragon dataDragon;
+    private final LolRankEmblems rankEmblems;
     private final CurrentUser currentUser;
     private final UserDirectory userDirectory;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -399,9 +401,10 @@ public class LolPlayerService {
                 .map(option -> new LolResponses.SeasonOption(option.key(), option.label()))
                 .toList();
         JsonNode ranks = isCurrent ? account.getRanks() : seasonRanks.find(userId, season.key());
+        JsonNode peak = seasonRanks.findPeak(userId, season.key());
 
         return new LolResponses.PlayerDetail(summaryOf(account, username), account.getCheckedAt(), updating, error,
-                new LolResponses.SeasonOption(season.key(), season.label()), isCurrent, options, ranksOf(ranks), queues);
+                new LolResponses.SeasonOption(season.key(), season.label()), isCurrent, options, ranksOf(ranks, peak, rankEmblems.urls()), queues);
     }
 
     private LolResponses.QueueBlock queueBlock(UUID userId, LolQueue queue, LolSeasons.Season season,
@@ -465,12 +468,24 @@ public class LolPlayerService {
     }
 
     /**
-     * Official ranks as they are stored, SoloQ first.
+     * Official ranks as they are stored, SoloQ first, without emblems or the highest rank.
      *
      * @param stored the ranks kept
      * @return ranks
      */
     static List<LolResponses.Rank> ranksOf(JsonNode stored) {
+        return ranksOf(stored, JSON_EMPTY, Map.of());
+    }
+
+    /**
+     * Official ranks as they are stored, SoloQ first.
+     *
+     * @param stored  the ranks kept
+     * @param peak    the highest rank seen of each queue
+     * @param emblems URLs of the uploaded emblems
+     * @return ranks
+     */
+    static List<LolResponses.Rank> ranksOf(JsonNode stored, JsonNode peak, Map<String, String> emblems) {
         List<LolResponses.Rank> ranks = new ArrayList<>();
 
         for (String queueType : List.of("RANKED_SOLO_5x5", "RANKED_FLEX_SR")) {
@@ -478,12 +493,24 @@ public class LolPlayerService {
                 if (queueType.equals(rank.path("queueType").asText())) {
                     ranks.add(new LolResponses.Rank(RANKED.get(queueType),
                             tierOf(rank.path("tier").asText(), rank.path("rank").asText()),
-                            rank.path("leaguePoints").asInt(), rank.path("wins").asInt(), rank.path("losses").asInt()));
+                            rank.path("leaguePoints").asInt(), rank.path("wins").asInt(), rank.path("losses").asInt(),
+                            LolRankEmblems.urlOf(emblems, rank.path("tier").asText()), peakOf(peak, queueType)));
                 }
             }
         }
 
         return ranks;
+    }
+
+    private static LolResponses.PeakRank peakOf(JsonNode peak, String queueType) {
+        for (JsonNode rank : peak) {
+            if (queueType.equals(rank.path("queueType").asText())) {
+                return new LolResponses.PeakRank(tierOf(rank.path("tier").asText(), rank.path("rank").asText()),
+                        rank.path("leaguePoints").asInt());
+            }
+        }
+
+        return null;
     }
 
     private static String tierOf(String tier, String division) {

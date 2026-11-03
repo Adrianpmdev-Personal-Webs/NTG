@@ -297,7 +297,9 @@ plus **one schema per game** that needs tables. Each module keeps its DDL next t
 - Data that only changes with a release (the Pokémon type chart, the WoW Forever texts and rules) lives in JSON
   files inside the module, not in the database.
 - The WoW Forever game data is built by the backend from the game client (through wago.tools) every time a new
-  build comes out, checked every hour; the last good copy is kept in a private Storage bucket.
+  build comes out, checked every hour; the last good copy is kept in a private Storage bucket. After a read whose copy
+  was kept, the backend restarts at 05:00 (Madrid) to give back the memory the read leaves; without a new build it does
+  not restart.
 - Pictures and songs are files in Supabase Storage; the database keeps only their object names.
 
 ---

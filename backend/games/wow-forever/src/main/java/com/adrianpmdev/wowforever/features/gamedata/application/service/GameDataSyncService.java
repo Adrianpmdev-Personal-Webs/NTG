@@ -17,6 +17,9 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 
 /**
@@ -44,6 +47,10 @@ import java.util.Optional;
  * the system after a full collection, which a quiet backend may not run for days. So every read ends with one (a
  * pause well under a second, once per new build): with the heap settings of the Dockerfile the backend returns to its
  * usual memory instead of keeping the peak reserved.
+ * <p>
+ * The classes and the compiled code of a read stay until the process ends, so the backend restarts at
+ * {@value #RESTART_HOUR}:00 (Madrid) after a read whose copy was kept. Only then: without a kept copy the restart would
+ * read the same build again. A backend run on a developer machine never restarts, as it keeps no copy.
  *
  * @author adrianpmdev
  */
@@ -57,10 +64,15 @@ public class GameDataSyncService {
     /** How long a build whose read stopped the backend waits before it is read again. */
     private static final int HOURS_AFTER_A_CRASH = 24;
 
+    /** Hour of the restart after a read, when nobody is expected to be playing. */
+    private static final int RESTART_HOUR = 5;
+    private static final ZoneId RESTART_ZONE = ZoneId.of("Europe/Madrid");
+
     private final GameDataService gameDataService;
     private final WagoClient wagoClient;
     private final GameDataStore store;
     private final TaskScheduler scheduler;
+    private final BackendRestart backendRestart;
     private final Clock clock;
     private final boolean keepCopy;
 
@@ -69,6 +81,9 @@ public class GameDataSyncService {
 
     /** The read a previous run of the backend never ended; null until first asked, then fixed for this run. */
     private Optional<GameDataStore.Attempt> crashedRead;
+
+    /** Whether the restart after a read is already planned: several reads in a night restart once. */
+    private boolean restartPlanned;
 
     /** How the checks are going since this backend started. */
     private volatile Progress progress = new Progress(null, null, null, null, false);
@@ -93,22 +108,24 @@ public class GameDataSyncService {
      * @param wagoClient      reads the builds and tables of the game clients
      * @param store           keeps the last good data file
      * @param scheduler       runs the checks
+     * @param backendRestart  restarts the backend after a read
      * @param keepCopy        whether this backend writes the copy and the marks in Storage (false on a developer
      *                        machine)
      */
     @Autowired
     public GameDataSyncService(GameDataService gameDataService, WagoClient wagoClient, GameDataStore store,
-                               TaskScheduler scheduler,
+                               TaskScheduler scheduler, BackendRestart backendRestart,
                                @Value("${wow-forever.sync.keep-copy:true}") boolean keepCopy) {
-        this(gameDataService, wagoClient, store, scheduler, Clock.systemUTC(), keepCopy);
+        this(gameDataService, wagoClient, store, scheduler, backendRestart, Clock.systemUTC(), keepCopy);
     }
 
     GameDataSyncService(GameDataService gameDataService, WagoClient wagoClient, GameDataStore store,
-                        TaskScheduler scheduler, Clock clock, boolean keepCopy) {
+                        TaskScheduler scheduler, BackendRestart backendRestart, Clock clock, boolean keepCopy) {
         this.gameDataService = gameDataService;
         this.wagoClient = wagoClient;
         this.store = store;
         this.scheduler = scheduler;
+        this.backendRestart = backendRestart;
         this.clock = clock;
         this.keepCopy = keepCopy;
     }
@@ -180,7 +197,7 @@ public class GameDataSyncService {
                     classicBuild(settings.classicProduct()), LocalDate.now(clock));
             gameDataService.publish(data);
             log.info("WoW Forever build {} is served (read in {} ms)", newest.get(), clock.millis() - start);
-            keep(data);
+            keepAndPlanRestart(data);
         } finally {
             unmarkRead();
             System.gc();
@@ -273,7 +290,8 @@ public class GameDataSyncService {
         }
     }
 
-    private void keep(ObjectNode data) {
+    /** Keeps the data just read and, when it was kept, plans the restart that gives back the memory of the read. */
+    synchronized void keepAndPlanRestart(ObjectNode data) {
         if (!keepCopy) {
             log.info("The WoW Forever game data is not kept in Storage (wow-forever.sync.keep-copy=false)");
             return;
@@ -283,6 +301,26 @@ public class GameDataSyncService {
             store.save(data);
         } catch (RuntimeException exception) {
             log.warn("The WoW Forever game data is served but could not be kept: {}", exception.getMessage());
+            return;
         }
+
+        if (!restartPlanned) {
+            restartPlanned = true;
+            Instant restartAt = nextRestart();
+            log.info("The backend restarts at {} to give back the memory of this read", restartAt);
+            scheduler.schedule(this::restart, restartAt);
+        }
+    }
+
+    private Instant nextRestart() {
+        ZonedDateTime now = clock.instant().atZone(RESTART_ZONE);
+        ZonedDateTime today = now.with(LocalTime.of(RESTART_HOUR, 0));
+
+        return (today.isAfter(now) ? today : today.plusDays(1)).toInstant();
+    }
+
+    /** Waits for a read in progress, so that it is never cut and mistaken for one that stopped the backend. */
+    private synchronized void restart() {
+        backendRestart.run();
     }
 }

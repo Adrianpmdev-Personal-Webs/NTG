@@ -101,7 +101,7 @@ public record GameDataConfig(
     /**
      * The official armory.
      *
-     * @param url             page the players are sent to; a character is found at {@code <url>?q=<name>}
+     * @param url             page the players are sent to; a character is at {@code <url>/character/<name>}
      * @param dataUrl         page the backend reads, in English like the game data
      * @param cooldownMinutes how long after a check opening the screen does not check again
      */

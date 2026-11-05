@@ -16,12 +16,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -269,7 +268,7 @@ public class CharacterService {
     }
 
     private String armoryUrl(GameCharacter character) {
-        return gameDataService.getConfig().armory().url() + "?q="
-                + URLEncoder.encode(character.getName(), StandardCharsets.UTF_8);
+        return gameDataService.getConfig().armory().url() + "/character/"
+                + character.getName().toLowerCase(Locale.ROOT).replace(' ', '-');
     }
 }

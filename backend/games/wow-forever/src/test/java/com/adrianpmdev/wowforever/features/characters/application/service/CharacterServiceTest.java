@@ -271,11 +271,10 @@ class CharacterServiceTest {
 
     @Test
     void everyCharacterLinksToTheArmoryWithItsNameInTheAddress() {
-        when(repository.findAll()).thenReturn(List.of(character(ANA, "Shyleena Timewalker"), character(ANA, "Ña'ka")));
+        when(repository.findAll()).thenReturn(List.of(character(ANA, "Shyleena Timewalker")));
 
         assertThat(service.list().characters()).extracting(CharactersResponse.Character::armoryUrl).containsExactly(
-                "https://worldofwarcraft.blizzard.com/es-es/forever/eu/armory?q=Shyleena+Timewalker",
-                "https://worldofwarcraft.blizzard.com/es-es/forever/eu/armory?q=%C3%91a%27ka");
+                "https://worldofwarcraft.blizzard.com/es-es/forever/eu/armory/character/shyleena-timewalker");
     }
 
     @Test

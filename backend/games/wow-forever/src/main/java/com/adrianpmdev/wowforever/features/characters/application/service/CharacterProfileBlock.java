@@ -3,6 +3,7 @@ package com.adrianpmdev.wowforever.features.characters.application.service;
 import com.adrianpmdev.platform.profile.ProfileBlock;
 import com.adrianpmdev.platform.profile.ProfileBlockProvider;
 import com.adrianpmdev.wowforever.WowForeverModule;
+import com.adrianpmdev.wowforever.features.characters.domain.ArmorySheet;
 import com.adrianpmdev.wowforever.features.characters.infrastructure.persistence.entity.GameCharacter;
 import com.adrianpmdev.wowforever.features.characters.infrastructure.persistence.repository.GameCharacterRepository;
 import com.adrianpmdev.wowforever.features.gamedata.application.service.GameDataService;
@@ -11,22 +12,19 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 /**
  * What WoW Forever shows on the profile of a player: one card per character with its race, class and icon, and bars for
- * its level and professions. While the game data cannot be read, the characters still show, with the slugs instead of
- * the names. A character the armory does not show yet has only its name.
+ * its level and professions, read from the official armory. A character the armory does not show, or an armory that
+ * cannot be read, says so with the name only.
  *
  * @author adrianpmdev
  */
@@ -35,14 +33,12 @@ import java.util.function.Supplier;
 public class CharacterProfileBlock implements ProfileBlockProvider {
 
     private static final ObjectMapper JSON = new ObjectMapper();
-    private static final int MAX_SKILL = 300;
-    private static final String NOT_IN_ARMORY = "Aún no está en la Armería";
+    private static final String NOT_IN_ARMORY = "No aparece en la Armería: sale a partir del nivel 10";
+    private static final String NOT_READ = "No se ha podido leer la Armería";
 
     private final GameCharacterRepository characterRepository;
+    private final ArmoryReader armoryReader;
     private final GameDataService gameDataService;
-
-    private record Item(String name, String icon) {
-    }
 
     @Override
     public String gameKey() {
@@ -50,7 +46,6 @@ public class CharacterProfileBlock implements ProfileBlockProvider {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Optional<ProfileBlock> block(UUID userId) {
         List<GameCharacter> characters = characterRepository.findByUserIdOrderByNameAsc(userId);
 
@@ -58,17 +53,16 @@ public class CharacterProfileBlock implements ProfileBlockProvider {
             return Optional.empty();
         }
 
-        Map<String, Item> classes = items(read(gameDataService::getIndex).path("classes"));
-        Map<String, Item> races = items(read(gameDataService::getRacials).path("races"));
-        Map<String, Item> professions = professionItems();
+        Map<String, ArmoryReader.Result> results = armoryReader.readAll(
+                characters.stream().map(GameCharacter::getName).toList());
         int maxLevel = gameDataService.getConfig().talents().lastPointLevel();
 
         List<ProfileBlock.Card> cards = characters.stream()
-                .map(character -> cardOf(character, classes, races, professions, maxLevel))
+                .map(character -> cardOf(character.getName(), results.get(character.getName()), maxLevel))
                 .toList();
-        OptionalInt highestLevel = characters.stream()
-                .filter(character -> character.getLevel() != null)
-                .mapToInt(GameCharacter::getLevel)
+        OptionalInt highestLevel = results.values().stream()
+                .filter(result -> result.sheet() != null)
+                .mapToInt(result -> result.sheet().level())
                 .max();
         String count = characters.size() == 1 ? "1 personaje" : characters.size() + " personajes";
         List<String> summary = highestLevel.isPresent()
@@ -79,59 +73,35 @@ public class CharacterProfileBlock implements ProfileBlockProvider {
                 List.of(new ProfileBlock.Section("Personajes", List.of(), List.of(), cards))));
     }
 
-    private static ProfileBlock.Card cardOf(GameCharacter character, Map<String, Item> classes, Map<String, Item> races,
-                                            Map<String, Item> professions, int maxLevel) {
-        if (character.getLevel() == null) {
-            return new ProfileBlock.Card(character.getName(), NOT_IN_ARMORY, null, List.of());
+    private ProfileBlock.Card cardOf(String name, ArmoryReader.Result result, int maxLevel) {
+        ArmorySheet sheet = result.sheet();
+
+        if (sheet == null) {
+            return new ProfileBlock.Card(name,
+                    result.status() == ArmoryReader.Status.NOT_FOUND ? NOT_IN_ARMORY : NOT_READ, null, List.of());
         }
 
-        Item gameClass = itemOf(classes, character.getClassSlug());
         List<ProfileBlock.Bar> bars = new ArrayList<>();
 
-        bars.add(new ProfileBlock.Bar("Nivel", (int) character.getLevel(), maxLevel, null));
+        bars.add(new ProfileBlock.Bar("Nivel", sheet.level(), maxLevel, null));
+        sheet.professions().forEach(known ->
+                bars.add(new ProfileBlock.Bar(known.name(), known.skill(), known.maxSkill(), known.icon())));
 
-        for (JsonNode known : character.getProfessions()) {
-            Item profession = itemOf(professions, known.path("slug").asText());
-            JsonNode skill = known.path("skill");
-
-            bars.add(new ProfileBlock.Bar(profession.name(), skill.isNumber() ? skill.asInt() : null,
-                    known.path("maxSkill").asInt(MAX_SKILL), profession.icon()));
-        }
-
-        return new ProfileBlock.Card(character.getName(),
-                itemOf(races, character.getRaceSlug()).name() + " " + gameClass.name(), gameClass.icon(), bars);
+        return new ProfileBlock.Card(sheet.name(), sheet.raceName() + " " + sheet.className(),
+                classIcon(sheet.classSlug()), bars);
     }
 
-    private static Item itemOf(Map<String, Item> items, String slug) {
-        return items.getOrDefault(slug, new Item(slug, null));
-    }
-
-    private Map<String, Item> professionItems() {
-        Map<String, Item> items = new HashMap<>();
-
-        for (JsonNode group : read(gameDataService::getProfessions).path("groups")) {
-            items.putAll(items(group.path("professions")));
-        }
-
-        return items;
-    }
-
-    private static Map<String, Item> items(JsonNode list) {
-        Map<String, Item> items = new HashMap<>();
-
-        for (JsonNode item : list) {
-            items.put(item.path("slug").asText(), new Item(item.path("name").asText(),
-                    item.path("icon").asText(null)));
-        }
-
-        return items;
-    }
-
-    private static JsonNode read(Supplier<String> source) {
+    private String classIcon(String classSlug) {
         try {
-            return JSON.readTree(source.get());
+            for (JsonNode gameClass : JSON.readTree(gameDataService.getIndex()).path("classes")) {
+                if (gameClass.path("slug").asText().equals(classSlug)) {
+                    return gameClass.path("icon").asText(null);
+                }
+            }
         } catch (JsonProcessingException | ResponseStatusException exception) {
-            return JSON.createObjectNode();
+            return null;
         }
+
+        return null;
     }
 }

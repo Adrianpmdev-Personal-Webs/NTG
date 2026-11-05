@@ -3,7 +3,7 @@
         <div class="wow-page">
             <header class="page-header" [class.page-header--compact]="compactNav()">
                 @if (compactNav()) {
-                    <app-wow-nav-menu class="page-menu" [links]="links" />
+                    <app-wow-nav-menu class="page-menu" [links]="links()" />
                 }
                 <app-wow-button class="page-back" link="/wow-forever"
                     ><app-nav-icon class="before-text" name="arrowLeft" />Lanzador</app-wow-button

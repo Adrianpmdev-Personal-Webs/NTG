@@ -5,7 +5,7 @@
     "armory": {
         "url": "https://worldofwarcraft.blizzard.com/es-es/forever/eu/armory",
         "dataUrl": "https://worldofwarcraft.blizzard.com/en-gb/forever/eu/armory",
-        "cooldownMinutes": 5
+        "cacheMinutes": 10
     },
 
     "factions": {

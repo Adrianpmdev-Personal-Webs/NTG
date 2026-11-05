@@ -69,8 +69,10 @@ Characters of the group
   Source: the public pages of the official World of Warcraft armory
   (https://worldofwarcraft.blizzard.com/en-gb/forever/eu/armory).
   Use: only for the characters the players of the group register, the backend reads the search and
-  the page of each one, one at a time, when somebody opens the screen or once a night, and keeps only
-  its name, level, class, race and professions. Each character links to the armory. The app does not use an official
+  the page of each one, a few at a time and only when somebody looks at them, and shows their level,
+  class, race, professions, equipped items, talents, statistics and pictures. Nothing of it is
+  stored: only the name is kept, and a read stays 10 minutes in memory. The pictures and icons are
+  loaded straight from Blizzard's servers. Each character links to the armory. The app does not use an official
   API for this and has no authorization from Blizzard Entertainment, Inc. for it.
 
 Icons

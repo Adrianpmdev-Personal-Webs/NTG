@@ -25,31 +25,12 @@
     @include wow.controls;
 }
 
-.tabs {
-    display: flex;
-    gap: 4px;
-}
-
-.tab {
-    padding: 6px 12px;
-    border: 1px solid wow.$icon-border;
-    background: #0a0a0a;
-    color: wow.$muted;
-    font: inherit;
-    font-size: 0.8rem;
-    cursor: pointer;
-
-    &.active {
-        border-color: wow.$gold;
-        color: wow.$gold;
-    }
-}
-
-.filters {
-    display: flex;
+.intro {
     flex: 1;
-    flex-wrap: wrap;
-    gap: 8px 12px;
+    min-width: 0;
+    margin: 0;
+    color: wow.$muted;
+    font-size: 0.85rem;
 }
 
 .field {
@@ -78,12 +59,6 @@
     }
 }
 
-.updating {
-    margin: 8px 0 0;
-    color: wow.$muted;
-    font-size: 0.8rem;
-}
-
 .character-form {
     @include wow.panel;
     margin-top: 12px;
@@ -97,13 +72,9 @@
 }
 
 .form-hint {
-    margin: 12px 0 0;
+    margin: 10px 0 0;
     color: wow.$muted;
     font-size: 0.8rem;
-}
-
-.notes {
-    margin-top: 12px;
 }
 
 .form-actions {
@@ -144,18 +115,63 @@
 }
 
 .block {
-    margin-top: 20px;
+    margin-top: 14px;
+}
+
+.fold {
+    @include wow.panel;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    color: wow.$gold;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+        border-color: wow.$gold;
+    }
+}
+
+.fold-name {
+    min-width: 0;
+    font-size: 0.95rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    overflow-wrap: anywhere;
+}
+
+.fold-arrow {
+    width: 8px;
+    height: 8px;
+    margin-left: auto;
+    border-right: 2px solid wow.$gold;
+    border-bottom: 2px solid wow.$gold;
+    transform: rotate(45deg);
+    transition: transform 0.15s ease;
+
+    .fold.open & {
+        transform: rotate(-135deg);
+    }
 }
 
 .characters {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 10px;
+    margin-top: 10px;
 }
 
-.character,
-.holder {
+.character {
+    @include wow.panel;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    padding: 10px;
 
     &:hover {
         border-color: wow.$gold;
@@ -175,15 +191,6 @@
         inset: 0;
         content: '';
     }
-}
-
-.character {
-    @include wow.panel;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    min-width: 0;
-    padding: 10px;
 }
 
 .character-header {
@@ -212,6 +219,22 @@
     margin: 0;
     color: wow.$muted;
     font-size: 0.8rem;
+
+    &.warning {
+        color: wow.$bright;
+    }
+}
+
+.notice {
+    margin: 8px 0 0;
+    padding: 6px 8px;
+    border-left: 2px solid wow.$bright;
+    color: wow.$text;
+    font-size: 0.8rem;
+
+    .character & {
+        margin: 0;
+    }
 }
 
 .professions {
@@ -252,14 +275,6 @@
     font-size: 0.8rem;
 }
 
-.notes-text {
-    margin: 0;
-    color: wow.$muted;
-    font-size: 0.8rem;
-    font-style: italic;
-    overflow-wrap: anywhere;
-}
-
 .character-actions {
     position: relative;
     z-index: 1;
@@ -276,54 +291,8 @@
     font-size: 0.8rem;
 }
 
-.profession-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.holders {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 6px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.holder {
-    @include wow.panel;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 0;
-    padding: 6px 10px;
-    font-size: 0.85rem;
-}
-
-.holder-name {
-    overflow-wrap: anywhere;
-}
-
-.holder-owner {
-    flex: 1;
-    min-width: 0;
-    color: wow.$muted;
-    font-size: 0.75rem;
-    overflow-wrap: anywhere;
-}
-
-.holder-skill {
-    color: wow.$bright;
-}
-
 @include mobile {
-    .tabs .tab {
-        flex: 1;
-    }
-
-    .characters,
-    .holders {
+    .characters {
         grid-template-columns: minmax(0, 1fr);
     }
 }

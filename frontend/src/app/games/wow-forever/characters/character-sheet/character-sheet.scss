@@ -1,0 +1,422 @@
+@use 'mixins' as *;
+@use '../../styles/wow-forever' as wow;
+
+$slot: 46px;
+
+:host {
+    display: block;
+}
+
+.state {
+    @include wow.state;
+}
+
+.section-title {
+    @include wow.section-title;
+    margin-bottom: 8px;
+}
+
+.note {
+    color: wow.$muted;
+    font-size: 0.75rem;
+}
+
+.sheet-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.official {
+    color: wow.$gold;
+    font-size: 0.85rem;
+
+    &:hover {
+        color: wow.$bright;
+    }
+}
+
+.notice {
+    @include wow.panel;
+    padding: 12px 14px;
+    border-left: 3px solid wow.$bright;
+    color: wow.$text;
+}
+
+.hero {
+    @include wow.panel;
+    position: relative;
+    display: grid;
+    grid-template-areas:
+        'identity identity identity'
+        'left figure right'
+        'bottom bottom bottom';
+    grid-template-columns: $slot minmax(0, 1fr) $slot;
+    gap: 10px 16px;
+    padding: 14px;
+    background-color: #0b0d14;
+    background-position: center;
+    background-size: cover;
+    border-top: 3px solid wow.$alliance;
+
+    &.horde {
+        border-top-color: wow.$horde;
+    }
+}
+
+.identity {
+    grid-area: identity;
+    text-shadow: 0 1px 3px #000;
+}
+
+.identity-name {
+    margin: 0;
+    color: wow.$text-strong;
+    font-size: 1.5rem;
+}
+
+.identity-meta {
+    margin: 2px 0 0;
+    color: wow.$text;
+    font-size: 0.85rem;
+}
+
+.gear {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.gear-left {
+    grid-area: left;
+}
+
+.gear-right {
+    grid-area: right;
+}
+
+.gear-bottom {
+    flex-direction: row;
+    grid-area: bottom;
+    justify-content: center;
+}
+
+// The render is a wide picture with the character standing low in the middle: only that part is shown, larger.
+.figure {
+    position: relative;
+    grid-area: figure;
+    height: 540px;
+    overflow: hidden;
+}
+
+.render {
+    position: absolute;
+    top: -13%;
+    left: 50%;
+    width: auto;
+    max-width: none;
+    height: 133%;
+    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.6));
+    transform: translateX(-50%);
+}
+
+.slot {
+    position: relative;
+    width: $slot;
+    height: $slot;
+    border: 2px solid #3a3a3a;
+    background: rgba(0, 0, 0, 0.55);
+    outline: none;
+
+    &.empty {
+        opacity: 0.5;
+    }
+
+    &[data-quality='POOR'] {
+        border-color: #9d9d9d;
+    }
+
+    &[data-quality='COMMON'] {
+        border-color: #d8d8d8;
+    }
+
+    &[data-quality='UNCOMMON'] {
+        border-color: #1eff00;
+    }
+
+    &[data-quality='RARE'] {
+        border-color: #0070dd;
+    }
+
+    &[data-quality='EPIC'] {
+        border-color: #a335ee;
+    }
+
+    &[data-quality='LEGENDARY'] {
+        border-color: #ff8000;
+    }
+
+    &:hover,
+    &:focus-visible {
+        z-index: 2;
+
+        .tooltip {
+            display: block;
+        }
+    }
+}
+
+.slot-icon {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.tooltip {
+    position: absolute;
+    top: 0;
+    left: calc(100% + 8px);
+    display: none;
+    width: 260px;
+    padding: 8px 10px;
+    border: 1px solid wow.$line-strong;
+    background: rgba(8, 10, 18, 0.96);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+    pointer-events: none;
+
+    .gear-right & {
+        right: calc(100% + 8px);
+        left: auto;
+    }
+
+    .gear-bottom & {
+        top: auto;
+        bottom: calc(100% + 8px);
+        left: 50%;
+        transform: translateX(-50%);
+    }
+}
+
+.tooltip-name {
+    margin: 0 0 4px;
+    font-size: 0.95rem;
+
+    &[data-quality='POOR'] {
+        color: #9d9d9d;
+    }
+
+    &[data-quality='COMMON'] {
+        color: #ffffff;
+    }
+
+    &[data-quality='UNCOMMON'] {
+        color: #1eff00;
+    }
+
+    &[data-quality='RARE'] {
+        color: #0070dd;
+    }
+
+    &[data-quality='EPIC'] {
+        color: #a335ee;
+    }
+
+    &[data-quality='LEGENDARY'] {
+        color: #ff8000;
+    }
+}
+
+.tooltip-line {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 0;
+    color: #ffffff;
+    font-size: 0.8rem;
+    line-height: 1.35;
+}
+
+.details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.panel {
+    @include wow.panel;
+    min-width: 0;
+    padding: 12px;
+}
+
+.small-icon {
+    @include wow.icon(22px);
+    flex: none;
+}
+
+.bar-row {
+    display: grid;
+    grid-template-columns: 22px minmax(70px, auto) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    color: wow.$text;
+    font-size: 0.85rem;
+}
+
+.bar {
+    height: 8px;
+    border: 1px solid wow.$line;
+    background: #0a0a0a;
+}
+
+.bar-fill {
+    display: block;
+    height: 100%;
+    background: wow.$gold;
+}
+
+.bar-value {
+    color: wow.$bright;
+    font-size: 0.8rem;
+}
+
+.spec + .spec {
+    margin-top: 12px;
+}
+
+.spec-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 6px;
+    color: wow.$text-strong;
+}
+
+// One small icon per learned talent with its rank; what it does only shows in its tooltip, so the panel stays the same
+// size at any level.
+.talents {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.talent {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    border: 1px solid wow.$icon-border;
+    outline: none;
+
+    &:hover,
+    &:focus-visible {
+        z-index: 2;
+        border-color: wow.$gold;
+
+        .tooltip {
+            display: block;
+        }
+    }
+}
+
+.talent-icon {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.talent-rank {
+    position: absolute;
+    right: -4px;
+    bottom: -4px;
+    min-width: 16px;
+    padding: 0 3px;
+    border: 1px solid wow.$icon-border;
+    background: #0a0a0a;
+    color: wow.$green;
+    font-size: 0.7rem;
+    line-height: 14px;
+    text-align: center;
+}
+
+.talent-tooltip {
+    top: auto;
+    bottom: calc(100% + 8px);
+    left: 0;
+}
+
+.talent-description {
+    display: block;
+    margin-top: 4px;
+    color: wow.$bright;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 4px 12px;
+    margin: 0;
+    font-size: 0.85rem;
+
+    dt {
+        color: wow.$muted;
+    }
+
+    dd {
+        margin: 0;
+        color: wow.$text-strong;
+        text-align: right;
+    }
+}
+
+.empty {
+    margin: 0;
+    color: wow.$dim;
+    font-size: 0.8rem;
+}
+
+// Below the tablet breakpoint the way back to the characters lives in the menu of the page.
+@include tablet {
+    .sheet-nav {
+        justify-content: center;
+    }
+
+    .sheet-back {
+        display: none;
+    }
+}
+
+@include mobile {
+    .hero {
+        grid-template-columns: 40px minmax(0, 1fr) 40px;
+        gap: 8px;
+        padding: 10px;
+    }
+
+    .slot {
+        width: 40px;
+        height: 40px;
+    }
+
+    .figure {
+        height: 360px;
+    }
+
+    .tooltip,
+    .gear-right .tooltip,
+    .gear-bottom .tooltip,
+    .talent-tooltip {
+        position: fixed;
+        top: auto;
+        right: 16px;
+        bottom: 16px;
+        left: 16px;
+        width: auto;
+        transform: none;
+    }
+}

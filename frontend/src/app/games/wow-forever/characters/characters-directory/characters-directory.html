@@ -1,64 +1,16 @@
-<app-wow-page heading="Personajes" [credit]="credit()" [compactNav]="true">
+<app-wow-page heading="Personajes" [credit]="credit" [compactNav]="true">
     @if (loading()) {
         <p class="state">Cargando…</p>
     } @else if (failed()) {
         <p class="state">No se han podido cargar los datos. Inténtalo de nuevo más tarde.</p>
     } @else {
         <section class="controls">
-            <div class="tabs" role="group" aria-label="Forma de ver los personajes">
-                <button type="button" class="tab" [class.active]="view() === 'players'" (click)="view.set('players')">
-                    Por jugador
-                </button>
-                <button
-                    type="button"
-                    class="tab"
-                    [class.active]="view() === 'professions'"
-                    (click)="view.set('professions')"
-                >
-                    Por profesión
-                </button>
-            </div>
-
-            <div class="filters">
-                <label class="field">
-                    <span>Jugador</span>
-                    <select #playerSelect [value]="playerFilter()" (change)="playerFilter.set(playerSelect.value)">
-                        <option value="">Todos</option>
-                        @for (player of players(); track player.id) {
-                            <option [value]="player.id">{{ player.name }}</option>
-                        }
-                    </select>
-                </label>
-                <label class="field">
-                    <span>Clase</span>
-                    <select #classSelect [value]="classFilter()" (change)="classFilter.set(classSelect.value)">
-                        <option value="">Todas</option>
-                        @for (gameClass of classes(); track gameClass.slug) {
-                            <option [value]="gameClass.slug">{{ gameClass.name }}</option>
-                        }
-                    </select>
-                </label>
-                <label class="field">
-                    <span>Profesión</span>
-                    <select
-                        #professionSelect
-                        [value]="professionFilter()"
-                        (change)="professionFilter.set(professionSelect.value)"
-                    >
-                        <option value="">Todas</option>
-                        @for (profession of allProfessions(); track profession.slug) {
-                            <option [value]="profession.slug">{{ profession.name }}</option>
-                        }
-                    </select>
-                </label>
-            </div>
-
+            <p class="intro">
+                Solo se guarda el nombre: el resto se lee de la Armería oficial al abrir cada jugador. Los personajes
+                salen en la Armería a partir del nivel 10.
+            </p>
             <app-wow-button (click)="openNew()">Nuevo personaje</app-wow-button>
         </section>
-
-        @if (updating()) {
-            <p class="updating">Comprobando la Armería…</p>
-        }
 
         @if (formOpen()) {
             <form class="character-form" [formGroup]="form" (ngSubmit)="save()">
@@ -87,15 +39,7 @@
                     </label>
                 </div>
 
-                <p class="form-hint">
-                    El nivel, la clase, la raza y las profesiones salen solos de la Armería, que muestra los personajes
-                    desde el nivel 10, y se actualizan al entrar en esta página.
-                </p>
-
-                <label class="field notes">
-                    <span>Notas</span>
-                    <input type="text" formControlName="notes" maxlength="200" />
-                </label>
+                <p class="form-hint">Escríbelo como en el juego, con su apellido.</p>
 
                 <div class="form-actions">
                     <button type="submit" class="action primary" [disabled]="form.invalid || saving()">Guardar</button>
@@ -104,13 +48,14 @@
             </form>
         }
 
-        <ng-template #card let-character>
+        <ng-template #card let-character let-player="player">
             <article class="character">
+                @let summary = summaryOf(player, character.id);
                 <header class="character-header">
-                    @if (character.classSlug) {
+                    @if (summary?.classSlug) {
                         <img
                             class="class-icon"
-                            [src]="classIcon(character.classSlug)"
+                            [src]="classIcon(summary!.classSlug)"
                             alt=""
                             loading="lazy"
                             (error)="hideBrokenIcon($event)"
@@ -118,54 +63,58 @@
                     }
                     <div class="character-title">
                         <h3 class="character-name">
-                            <a
-                                class="character-link"
-                                [href]="character.armoryUrl"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                >{{ character.name }}</a
-                            >
+                            <a class="character-link" [routerLink]="['/wow-forever/characters', character.id]">{{
+                                character.name
+                            }}</a>
                         </h3>
-                        <p class="character-meta">
-                            @if (character.level) {
-                                Nivel {{ character.level }} · {{ raceName(character.raceSlug) }}
-                                {{ className(character.classSlug) }}
-                            } @else {
-                                Aún no está en la Armería (aparece desde el nivel 10)
+                        @switch (summary?.status) {
+                            @case ('FOUND') {
+                                <p class="character-meta">
+                                    Nivel {{ summary!.level }} · {{ summary!.raceName }} {{ summary!.className }}
+                                </p>
                             }
-                        </p>
+                            @case ('NOT_FOUND') {
+                                <p class="character-meta warning">Aún no aparece en la Armería</p>
+                            }
+                            @case ('FAILED') {
+                                <p class="character-meta warning">No se ha podido leer la Armería</p>
+                            }
+                            @default {
+                                <p class="character-meta">Leyendo la Armería…</p>
+                            }
+                        }
                     </div>
                 </header>
 
-                @if (character.professions.length > 0) {
-                    <ul class="professions">
-                        @for (known of character.professions; track known.slug) {
-                            <li class="profession">
-                                <img
-                                    class="profession-icon"
-                                    [src]="professionIcon(known.slug)"
-                                    alt=""
-                                    loading="lazy"
-                                    (error)="hideBrokenIcon($event)"
-                                />
-                                {{ professionName(known.slug) }}
-                                @if (known.skill) {
+                @if (summary?.status === 'FOUND') {
+                    @if (summary!.professions.length > 0) {
+                        <ul class="professions">
+                            @for (known of summary!.professions; track known.slug) {
+                                <li class="profession">
+                                    @if (known.icon) {
+                                        <img
+                                            class="profession-icon"
+                                            [src]="known.icon"
+                                            alt=""
+                                            loading="lazy"
+                                            (error)="hideBrokenIcon($event)"
+                                        />
+                                    }
+                                    {{ known.name }}
                                     <strong
-                                        >{{ known.skill }}
-                                        @if (known.maxSkill) {
-                                            <span class="skill-max">/ {{ known.maxSkill }}</span>
-                                        }
-                                    </strong>
-                                }
-                            </li>
-                        }
-                    </ul>
-                } @else if (character.level) {
-                    <p class="empty">Sin profesiones.</p>
-                }
-
-                @if (character.notes) {
-                    <p class="notes-text">{{ character.notes }}</p>
+                                        >{{ known.skill }} <span class="skill-max">/ {{ known.maxSkill }}</span></strong
+                                    >
+                                </li>
+                            }
+                        </ul>
+                    } @else {
+                        <p class="empty">Sin profesiones.</p>
+                    }
+                } @else if (summary?.status === 'NOT_FOUND') {
+                    <p class="notice">
+                        Los personajes salen en la Armería a partir del nivel 10. Si ya lo es, revisa que el nombre esté
+                        bien escrito.
+                    </p>
                 }
 
                 @if (character.canEdit) {
@@ -187,64 +136,38 @@
             </article>
         </ng-template>
 
-        @if (characters().length === 0) {
-            <p class="state">Todavía no hay personajes. ¡Añade el primero!</p>
-        } @else if (view() === 'players') {
-            @for (player of byPlayer(); track player.id) {
-                <section class="block">
-                    <h2 class="section-title">
-                        {{ player.name }} <span class="note">{{ player.characters.length }} / {{ limit() }}</span>
-                    </h2>
-                    <div class="characters">
-                        @for (character of player.characters; track character.id) {
-                            <ng-container
-                                [ngTemplateOutlet]="card"
-                                [ngTemplateOutletContext]="{ $implicit: character }"
-                            />
+        @for (player of folds(); track player.id) {
+            <section class="block">
+                <button
+                    type="button"
+                    class="fold"
+                    [class.open]="opened().has(player.id)"
+                    [attr.aria-expanded]="opened().has(player.id)"
+                    (click)="toggle(player.id)"
+                >
+                    <span class="fold-name">{{ player.name }}</span>
+                    <span class="note">{{ player.characters.length }} / {{ limit() }}</span>
+                    <span class="fold-arrow" aria-hidden="true"></span>
+                </button>
+
+                @if (opened().has(player.id)) {
+                    @if (player.characters.length === 0) {
+                        <p class="state">Todavía no tienes personajes. ¡Añade el primero!</p>
+                    } @else {
+                        @if (summaries()[player.id]?.failed) {
+                            <p class="notice">No se ha podido leer la Armería. Vuelve a abrir el jugador más tarde.</p>
                         }
-                    </div>
-                </section>
-            } @empty {
-                <p class="state">Ningún personaje con esos filtros.</p>
-            }
-        } @else {
-            @for (row of byProfession(); track row.profession.slug) {
-                <section class="block">
-                    <h2 class="section-title profession-title">
-                        <img class="class-icon" [src]="row.profession.icon" alt="" (error)="hideBrokenIcon($event)" />
-                        {{ row.profession.name }} <span class="note">{{ row.holders.length }}</span>
-                    </h2>
-                    <ul class="holders">
-                        @for (holder of row.holders; track holder.character.id) {
-                            <li class="holder">
-                                <img
-                                    class="profession-icon"
-                                    [src]="classIcon(holder.character.classSlug)"
-                                    alt=""
-                                    loading="lazy"
-                                    (error)="hideBrokenIcon($event)"
+                        <div class="characters">
+                            @for (character of player.characters; track character.id) {
+                                <ng-container
+                                    [ngTemplateOutlet]="card"
+                                    [ngTemplateOutletContext]="{ $implicit: character, player: player.id }"
                                 />
-                                <a
-                                    class="character-link holder-name"
-                                    [href]="holder.character.armoryUrl"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    >{{ holder.character.name }}</a
-                                >
-                                <span class="holder-owner">{{ ownerName(holder.character) }}</span>
-                                <strong class="holder-skill"
-                                    >{{ holder.skill ?? '—' }}
-                                    @if (holder.maxSkill) {
-                                        <span class="skill-max">/ {{ holder.maxSkill }}</span>
-                                    }
-                                </strong>
-                            </li>
-                        }
-                    </ul>
-                </section>
-            } @empty {
-                <p class="state">Ningún personaje con esos filtros.</p>
-            }
+                            }
+                        </div>
+                    }
+                }
+            </section>
         }
     }
 </app-wow-page>

@@ -45,6 +45,6 @@ class CharacterRequestTest {
     }
 
     private static CharacterRequest request(String name) {
-        return new CharacterRequest(null, name, null);
+        return new CharacterRequest(null, name);
     }
 }

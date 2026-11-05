@@ -47,4 +47,9 @@ export const WOW_FOREVER_ROUTES: Routes = [
         loadComponent: () =>
             import('./characters/characters-directory/characters-directory').then((m) => m.CharactersDirectory),
     },
+    {
+        path: 'characters/:id',
+        data: { visitLabel: 'Personaje' },
+        loadComponent: () => import('./characters/character-sheet/character-sheet').then((m) => m.CharacterSheet),
+    },
 ];

@@ -1,0 +1,169 @@
+<app-wow-page [heading]="heading()" [credit]="credit" [compactNav]="true" [menuLinks]="menuLinks">
+    <div class="sheet-nav">
+        <app-wow-button class="sheet-back" link="/wow-forever/characters">Personajes</app-wow-button>
+        @if (data(); as character) {
+            <a class="official" [href]="character.armoryUrl" target="_blank" rel="noopener noreferrer"
+                >Ver en la Armería oficial</a
+            >
+        }
+    </div>
+
+    @if (loading()) {
+        <p class="state">Leyendo la Armería…</p>
+    } @else if (failed()) {
+        <p class="state">No se ha podido cargar el personaje. Inténtalo de nuevo más tarde.</p>
+    } @else if (data()?.status === 'NOT_FOUND') {
+        <p class="notice">{{ notInArmory }}</p>
+    } @else if (data()?.status === 'FAILED') {
+        <p class="notice">{{ armoryFailed }}</p>
+    } @else if (sheet(); as sheet) {
+        <ng-template #slotTemplate let-place>
+            @let item = itemIn(place.slot);
+            @if (item) {
+                <div class="slot" [attr.data-quality]="item.quality" tabindex="0" [attr.aria-label]="item.name">
+                    @if (item.icon) {
+                        <img class="slot-icon" [src]="item.icon" alt="" (error)="hideBrokenIcon($event)" />
+                    }
+                    <div class="tooltip" role="tooltip">
+                        <p class="tooltip-name" [attr.data-quality]="item.quality">{{ item.name }}</p>
+                        @for (line of item.lines; track $index) {
+                            <p class="tooltip-line" [style.color]="line.color">
+                                <span>{{ line.left }}</span>
+                                @if (line.right) {
+                                    <span>{{ line.right }}</span>
+                                }
+                            </p>
+                        }
+                    </div>
+                </div>
+            } @else {
+                <div class="slot empty" [attr.title]="place.label"></div>
+            }
+        </ng-template>
+
+        <section
+            class="hero"
+            [class.horde]="sheet.faction === 'HORDE'"
+            [style.background-image]="sheet.images.background ? 'url(' + sheet.images.background + ')' : null"
+        >
+            <div class="identity">
+                <p class="identity-name">{{ sheet.name }}</p>
+                <p class="identity-meta">
+                    Level {{ sheet.level }} {{ sheet.raceName }} {{ sheet.className }}
+                    @if (sheet.guild) {
+                        · &lt;{{ sheet.guild }}&gt;
+                    }
+                </p>
+                <p class="identity-meta">
+                    {{ sheet.averageItemLevel }} item level · {{ sheet.honorableKills }} honorable kills
+                </p>
+            </div>
+
+            <div class="gear gear-left">
+                @for (place of left; track place.slot) {
+                    <ng-container [ngTemplateOutlet]="slotTemplate" [ngTemplateOutletContext]="{ $implicit: place }" />
+                }
+            </div>
+
+            <div class="figure">
+                @if (sheet.images.render) {
+                    <img
+                        class="render"
+                        [src]="sheet.images.render"
+                        [alt]="sheet.name"
+                        (error)="hideBrokenIcon($event)"
+                    />
+                }
+            </div>
+
+            <div class="gear gear-right">
+                @for (place of right; track place.slot) {
+                    <ng-container [ngTemplateOutlet]="slotTemplate" [ngTemplateOutletContext]="{ $implicit: place }" />
+                }
+            </div>
+
+            <div class="gear gear-bottom">
+                @for (place of bottom; track place.slot) {
+                    <ng-container [ngTemplateOutlet]="slotTemplate" [ngTemplateOutletContext]="{ $implicit: place }" />
+                }
+            </div>
+        </section>
+
+        <div class="details">
+            <section class="panel">
+                <h2 class="section-title">Professions</h2>
+                @for (known of sheet.professions; track known.slug) {
+                    <div class="bar-row">
+                        @if (known.icon) {
+                            <img class="small-icon" [src]="known.icon" alt="" (error)="hideBrokenIcon($event)" />
+                        }
+                        <span class="bar-label">{{ known.name }}</span>
+                        <span class="bar">
+                            <span class="bar-fill" [style.width.%]="percent(known.skill, known.maxSkill)"></span>
+                        </span>
+                        <strong class="bar-value">{{ known.skill }} / {{ known.maxSkill }}</strong>
+                    </div>
+                } @empty {
+                    <p class="empty">No professions.</p>
+                }
+            </section>
+
+            <section class="panel">
+                <h2 class="section-title">Talents</h2>
+                @for (spec of sheet.specs; track spec.name) {
+                    <div class="spec">
+                        <p class="spec-head">
+                            @if (spec.icon) {
+                                <img class="small-icon" [src]="spec.icon" alt="" (error)="hideBrokenIcon($event)" />
+                            }
+                            {{ spec.name }} <span class="note">{{ spec.points }} points</span>
+                        </p>
+                        <div class="talents">
+                            @for (talent of spec.talents; track talent.name) {
+                                <div
+                                    class="talent"
+                                    tabindex="0"
+                                    [attr.aria-label]="talent.name + ', rank ' + talent.rank"
+                                >
+                                    @if (talent.icon) {
+                                        <img
+                                            class="talent-icon"
+                                            [src]="talent.icon"
+                                            alt=""
+                                            (error)="hideBrokenIcon($event)"
+                                        />
+                                    }
+                                    <span class="talent-rank">{{ talent.rank }}</span>
+                                    <div class="tooltip talent-tooltip" role="tooltip">
+                                        <p class="tooltip-name">{{ talent.name }}</p>
+                                        <p class="tooltip-line">
+                                            <span>Rank {{ talent.rank }}</span>
+                                            @if (talent.cast) {
+                                                <span>{{ talent.cast }}</span>
+                                            }
+                                        </p>
+                                        <p class="tooltip-line talent-description">{{ talent.description }}</p>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                } @empty {
+                    <p class="empty">No talents yet.</p>
+                }
+            </section>
+
+            @for (group of sheet.stats; track group.name) {
+                <section class="panel">
+                    <h2 class="section-title">{{ group.name }}</h2>
+                    <dl class="stats">
+                        @for (stat of group.stats; track stat.name) {
+                            <dt>{{ stat.name }}</dt>
+                            <dd>{{ stat.value }}</dd>
+                        }
+                    </dl>
+                </section>
+            }
+        </div>
+    }
+</app-wow-page>

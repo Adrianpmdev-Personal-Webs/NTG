@@ -14,36 +14,28 @@
 create schema if not exists wow_forever;
 
 -- ─── characters ──────────────────────────────────────────────────────────────────────────────────────
--- The class, the race and the professions are the slugs of the game data. The backend fills them, and the level, from
--- the official armory; they stay empty until the armory shows the character.
+-- Only the name and the owner: everything else is read from the official armory when somebody looks.
 
 create table if not exists wow_forever.characters (
     id          uuid        not null default gen_random_uuid(),
     -- Platform account (core.user.id). A plain column, like every user reference in game schemas.
     user_id     uuid        not null,
     name        varchar(40) not null,
-    class_slug  varchar(40),
-    race_slug   varchar(40),
-    level       smallint,
-    -- [{ "slug": "alchemy", "skill": 300, "maxSkill": 300 }]; the skills can be null.
-    professions jsonb       not null default '[]',
-    notes       varchar(200),
-    armory_slug varchar(80),
-    armory_updated_at timestamptz,
     created_at  timestamptz not null default now(),
-    constraint characters_pkey primary key (id),
-    constraint characters_level_check check (level >= 1)
+    constraint characters_pkey primary key (id)
 );
 
 -- Names now include a surname; this widens the column of a table created before.
 alter table wow_forever.characters alter column name type varchar(40);
 
--- Characters are now filled in from the armory; this adapts a table created before.
-alter table wow_forever.characters alter column class_slug drop not null;
-alter table wow_forever.characters alter column race_slug drop not null;
-alter table wow_forever.characters alter column level drop not null;
-alter table wow_forever.characters add column if not exists armory_slug varchar(80);
-alter table wow_forever.characters add column if not exists armory_updated_at timestamptz;
+-- What the armory says is no longer stored; this removes it from a table created before.
+alter table wow_forever.characters drop column if exists class_slug;
+alter table wow_forever.characters drop column if exists race_slug;
+alter table wow_forever.characters drop column if exists level;
+alter table wow_forever.characters drop column if exists professions;
+alter table wow_forever.characters drop column if exists notes;
+alter table wow_forever.characters drop column if exists armory_slug;
+alter table wow_forever.characters drop column if exists armory_updated_at;
 
 create unique index if not exists characters_user_name_key on wow_forever.characters (user_id, lower(name));
 

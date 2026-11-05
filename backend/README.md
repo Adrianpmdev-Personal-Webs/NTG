@@ -294,9 +294,9 @@ plus **one schema per game** that needs tables. Each module keeps its DDL next t
 - League of Legends stores a small summary of each game: history and statistics are read from the database, and Riot is
   only asked for new games when a player is opened, at most every 5 minutes per player, on one thread with its own limit.
 - What a player keeps in WoW Forever (characters, talent builds, ticked Legacy challenges) is in the database, on their
-  account, so any client on any device gets it through the API. A character only needs its name: the backend reads the
-  rest from the public pages of the official armory and checks, one by one, whether it changed when somebody opens the
-  screen (at most every 5 minutes) and at dawn if nobody did. What did not change is not written.
+  account, so any client on any device gets it through the API. A character is only its name and its owner: the backend
+  reads the rest from the public pages of the official armory when somebody looks at it, a few at a time, and keeps each
+  read 10 minutes in memory. Nothing of the armory is written.
 - Data that only changes with a release (the Pokémon type chart, the WoW Forever texts and rules) lives in JSON
   files inside the module, not in the database.
 - The WoW Forever game data is built by the backend from the game client (through wago.tools) every time a new

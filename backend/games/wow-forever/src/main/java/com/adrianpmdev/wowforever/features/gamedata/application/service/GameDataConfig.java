@@ -103,9 +103,9 @@ public record GameDataConfig(
      *
      * @param url             page the players are sent to; a character is at {@code <url>/character/<name>}
      * @param dataUrl         page the backend reads, in English like the game data
-     * @param cooldownMinutes how long after a check opening the screen does not check again
+     * @param cacheMinutes    how long a character read from the armory is kept in memory
      */
-    public record Armory(String url, String dataUrl, int cooldownMinutes) {
+    public record Armory(String url, String dataUrl, int cacheMinutes) {
     }
 
     /**

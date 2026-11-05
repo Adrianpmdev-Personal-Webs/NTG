@@ -35,6 +35,7 @@ public class WowForeverModule {
     GameModule wowForeverGameModule() {
         return new GameModule(TAG, "/api/v1/wow-forever", List.of(
                 new PlayerWrite(HttpMethod.POST, CHARACTERS),
+                new PlayerWrite(HttpMethod.POST, CHARACTERS + "/refresh"),
                 new PlayerWrite(HttpMethod.PUT, CHARACTERS + "/*"),
                 new PlayerWrite(HttpMethod.DELETE, CHARACTERS + "/*"),
                 new PlayerWrite(HttpMethod.PUT, OWN_BUILDS),

@@ -78,17 +78,16 @@
     }
 }
 
+.updating {
+    margin: 8px 0 0;
+    color: wow.$muted;
+    font-size: 0.8rem;
+}
+
 .character-form {
     @include wow.panel;
     margin-top: 12px;
     padding: 14px;
-}
-
-.form-subtitle {
-    margin: 14px 0 8px;
-    color: wow.$gold;
-    font-size: 0.85rem;
-    font-weight: normal;
 }
 
 .form-grid {
@@ -97,30 +96,10 @@
     gap: 10px 12px;
 }
 
-.profession-field {
-    display: flex;
-    align-items: flex-end;
-    gap: 8px;
-}
-
-.skill {
-    flex: 0 0 70px;
-    min-width: 70px;
-}
-
-.check {
-    display: flex;
-    flex: 1;
-    align-items: center;
-    gap: 6px;
-    min-height: 32px;
-    color: wow.$text;
-    font-size: 0.9rem;
-    cursor: pointer;
-
-    input {
-        accent-color: wow.$gold;
-    }
+.form-hint {
+    margin: 12px 0 0;
+    color: wow.$muted;
+    font-size: 0.8rem;
 }
 
 .notes {
@@ -254,6 +233,12 @@
     strong {
         color: wow.$bright;
     }
+}
+
+.skill-max {
+    color: wow.$muted;
+    font-size: 0.75rem;
+    font-weight: normal;
 }
 
 .profession-icon {

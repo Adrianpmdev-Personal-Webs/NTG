@@ -90,6 +90,22 @@ class CharacterProfileBlockTest {
         assertThat(card.bars().get(1).label()).isEqualTo("alchemy");
     }
 
+    @Test
+    void aCharacterTheArmoryDoesNotShowHasOnlyItsName() throws Exception {
+        GameCharacter pending = character("Alba", 1);
+        pending.setLevel(null);
+        when(repository.findByUserIdOrderByNameAsc(ACCOUNT)).thenReturn(List.of(pending));
+        when(gameData.getIndex()).thenReturn("{}");
+        when(gameData.getRacials()).thenReturn("{}");
+        when(gameData.getProfessions()).thenReturn("{}");
+
+        ProfileBlock block = provider.block(ACCOUNT).orElseThrow();
+
+        assertThat(block.summary()).containsExactly("1 personaje");
+        assertThat(block.sections().getFirst().cards()).containsExactly(
+                new ProfileBlock.Card("Alba", "Aún no está en la Armería", null, List.of()));
+    }
+
     private static GameCharacter character(String name, int level) throws Exception {
         GameCharacter character = new GameCharacter();
         character.setUserId(ACCOUNT);

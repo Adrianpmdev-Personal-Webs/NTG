@@ -22,6 +22,10 @@ export class CharactersApi {
         return this.http.get<CharactersData>(this.baseUrl);
     }
 
+    refresh(): Observable<CharactersData> {
+        return this.http.post<CharactersData>(`${this.baseUrl}/refresh`, null);
+    }
+
     create(request: CharacterRequest): Observable<CharactersData> {
         return this.http.post<CharactersData>(this.baseUrl, request);
     }

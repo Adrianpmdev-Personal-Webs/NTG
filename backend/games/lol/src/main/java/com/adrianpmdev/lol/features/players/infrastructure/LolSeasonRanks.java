@@ -26,7 +26,8 @@ public class LolSeasonRanks {
     private final JdbcTemplate jdbcTemplate;
 
     /**
-     * Keeps the rank of a player in a season, if they still have the account it was read from.
+     * Keeps the rank of a player in a season, if they still have the account it was read from. The same rank writes
+     * nothing: the highest one only moves when the rank does.
      *
      * @param userId player
      * @param puuid  account the rank was read from
@@ -34,7 +35,13 @@ public class LolSeasonRanks {
      * @param ranks  official ranks
      */
     public void save(UUID userId, String puuid, String season, JsonNode ranks) {
-        JsonNode peak = LolRankPeak.best(read("peak", userId, season), read("ranks", userId, season), ranks);
+        JsonNode kept = read("ranks", userId, season);
+
+        if (kept.equals(ranks)) {
+            return;
+        }
+
+        JsonNode peak = LolRankPeak.best(read("peak", userId, season), kept, ranks);
 
         jdbcTemplate.update("""
                 insert into lol.season_ranks (user_id, season, ranks, peak, updated_at)

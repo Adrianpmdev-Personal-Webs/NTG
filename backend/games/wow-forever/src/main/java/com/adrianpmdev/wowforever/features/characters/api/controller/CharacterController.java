@@ -41,6 +41,11 @@ public class CharacterController {
         return characterService.create(request);
     }
 
+    @PostMapping("/refresh")
+    public CharactersResponse refresh() {
+        return characterService.refresh();
+    }
+
     @PutMapping("/{id}")
     public CharactersResponse update(@PathVariable UUID id, @Valid @RequestBody CharacterRequest request) {
         return characterService.update(id, request);

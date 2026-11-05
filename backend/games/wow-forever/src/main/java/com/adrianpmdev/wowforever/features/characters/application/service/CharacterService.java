@@ -10,11 +10,12 @@ import com.adrianpmdev.wowforever.features.characters.infrastructure.persistence
 import com.adrianpmdev.wowforever.features.characters.infrastructure.persistence.repository.GameCharacterRepository;
 import com.adrianpmdev.wowforever.features.gamedata.application.service.GameDataService;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -24,23 +25,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 /**
  * The characters of the group: everybody with the tag sees all of them, a player changes their own and an admin can
- * correct anybody's or give one to another account. Every write answers with the updated list.
+ * correct anybody's or give one to another account. A player only gives its name and notes: everything else comes from
+ * the official armory, read when the name is saved and kept up to date by CharacterArmorySync. A character the armory
+ * does not show yet, or an armory that fails, never stops the save. No write holds a database connection during those
+ * reads. Every write answers with the updated list.
  *
  * @author adrianpmdev
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CharacterService {
 
-    private static final ObjectMapper JSON = new ObjectMapper();
     private static final int MAX_CHARACTERS_PER_ACCOUNT = 20;
+    private static final long REFRESH_WAIT_SECONDS = 20;
 
     private final GameCharacterRepository characterRepository;
-    private final CharacterRules characterRules;
+    private final CharacterArmory characterArmory;
+    private final CharacterArmorySync characterArmorySync;
     private final GameDataService gameDataService;
     private final CurrentUser currentUser;
     private final UserDirectory userDirectory;
@@ -69,24 +78,44 @@ public class CharacterService {
     }
 
     /**
+     * Checks the characters with the armory because somebody opened the screen, waiting a moment for it. A round that
+     * takes longer goes on in the background and shows the next time.
+     *
+     * @return the characters of the group
+     */
+    public CharactersResponse refresh() {
+        try {
+            characterArmorySync.refresh().get(REFRESH_WAIT_SECONDS, TimeUnit.SECONDS);
+        } catch (TimeoutException | ExecutionException exception) {
+            log.debug("The characters are still being updated from the armory");
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+        }
+
+        return list();
+    }
+
+    /**
      * Creates a character.
      *
      * @param request the character
      * @return the characters of the group
      */
-    @Transactional
     public CharactersResponse create(CharacterRequest request) {
         UUID ownerId = chooseOwner(request.ownerId(), caller());
+        String name = request.name().trim();
 
-        characterRules.check(request);
         requireRoomFor(ownerId);
 
-        if (characterRepository.existsByUserIdAndNameIgnoreCase(ownerId, request.name().trim())) {
+        if (characterRepository.existsByNameIgnoreCase(name)) {
             throw duplicatedName();
         }
 
         GameCharacter character = new GameCharacter();
+        character.setName(name);
+        characterArmory.clear(character);
         apply(character, ownerId, request);
+        fillFromArmory(character);
         characterRepository.saveAndFlush(character);
 
         return list();
@@ -99,25 +128,31 @@ public class CharacterService {
      * @param request the character
      * @return the characters of the group
      */
-    @Transactional
     public CharactersResponse update(UUID id, CharacterRequest request) {
         GameCharacter character = find(id);
+        String name = request.name().trim();
+        boolean renamed = !name.equalsIgnoreCase(character.getName());
 
         requireCanEdit(character);
 
         UUID ownerId = chooseOwner(request.ownerId(), character.getUserId());
 
-        characterRules.check(request);
-
         if (!ownerId.equals(character.getUserId())) {
             requireRoomFor(ownerId);
         }
 
-        if (characterRepository.existsByUserIdAndNameIgnoreCaseAndIdNot(ownerId, request.name().trim(), id)) {
+        if (renamed && characterRepository.existsByNameIgnoreCaseAndIdNot(name, id)) {
             throw duplicatedName();
         }
 
         apply(character, ownerId, request);
+
+        if (renamed) {
+            character.setName(name);
+            characterArmory.clear(character);
+            fillFromArmory(character);
+        }
+
         characterRepository.saveAndFlush(character);
 
         return list();
@@ -182,7 +217,7 @@ public class CharacterService {
     }
 
     private static RuntimeException duplicatedName() {
-        return ApiErrors.conflict("Ya hay un personaje con ese nombre en esa cuenta");
+        return ApiErrors.conflict("Ese personaje ya está en el grupo");
     }
 
     private List<CharactersResponse.Owner> assignableOwners() {
@@ -202,13 +237,16 @@ public class CharacterService {
                 .toList();
     }
 
+    private void fillFromArmory(GameCharacter character) {
+        try {
+            characterArmory.changesOf(character).ifPresent(armory -> characterArmory.apply(character, armory));
+        } catch (IOException exception) {
+            log.warn("A character could not be read from the armory: {}", exception.getMessage());
+        }
+    }
+
     private static void apply(GameCharacter character, UUID ownerId, CharacterRequest request) {
         character.setUserId(ownerId);
-        character.setName(request.name().trim());
-        character.setClassSlug(request.classSlug());
-        character.setRaceSlug(request.raceSlug());
-        character.setLevel(request.level().shortValue());
-        character.setProfessions(JSON.valueToTree(request.professions()));
         character.setNotes(request.notes() == null || request.notes().isBlank() ? null : request.notes().trim());
     }
 
@@ -216,20 +254,22 @@ public class CharacterService {
         List<CharactersResponse.Profession> professions = new ArrayList<>();
 
         for (JsonNode profession : character.getProfessions()) {
-            JsonNode skill = profession.path("skill");
-
             professions.add(new CharactersResponse.Profession(profession.path("slug").asText(),
-                    skill.isNumber() ? skill.asInt() : null));
+                    numberOf(profession.path("skill")), numberOf(profession.path("maxSkill"))));
         }
 
         return new CharactersResponse.Character(character.getId(),
                 new CharactersResponse.Owner(character.getUserId(), usernames.get(character.getUserId())),
-                character.getName(), character.getClassSlug(), character.getRaceSlug(), character.getLevel(),
-                professions, character.getNotes(), armoryUrl(character), canEdit(character));
+                character.getName(), character.getClassSlug(), character.getRaceSlug(),
+                character.getLevel() == null ? null : character.getLevel().intValue(), professions, character.getNotes(), armoryUrl(character), canEdit(character));
+    }
+
+    private static Integer numberOf(JsonNode value) {
+        return value.isNumber() ? value.asInt() : null;
     }
 
     private String armoryUrl(GameCharacter character) {
-        return gameDataService.getConfig().armoryUrl() + "?q="
+        return gameDataService.getConfig().armory().url() + "?q="
                 + URLEncoder.encode(character.getName(), StandardCharsets.UTF_8);
     }
 }

@@ -65,6 +65,14 @@ Launcher blue posts
   as the forums publish them, with a link to the full post on the forums and a "Fuente: Blizzard
   Forums" credit; it never copies the posts.
 
+Characters of the group
+  Source: the public pages of the official World of Warcraft armory
+  (https://worldofwarcraft.blizzard.com/en-gb/forever/eu/armory).
+  Use: only for the characters the players of the group register, the backend reads the search and
+  the page of each one, one at a time, when somebody opens the screen or once a night, and keeps only
+  its name, level, class, race and professions. Each character links to the armory. The app does not use an official
+  API for this and has no authorization from Blizzard Entertainment, Inc. for it.
+
 Icons
   Game icons are loaded straight from Blizzard's icon host. The race icons of the races screen and
   the camp item icons of the professions screen are loaded straight from Wowhead's icon servers

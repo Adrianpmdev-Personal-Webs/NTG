@@ -5,16 +5,19 @@ import com.adrianpmdev.platform.module.GameModule.PlayerWrite;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.List;
 
 /**
  * Declares the League of Legends module to the platform. Players with the tag read everything; the only writes open to
- * them are linking their own account and asking for the games of a player to be updated.
+ * them are linking their own account and asking for the games of a player to be updated. Scheduling is on for the
+ * update at dawn (LolDailyUpdate).
  *
  * @author adrianpmdev
  */
 @Configuration
+@EnableScheduling
 public class LolModule {
 
     /** Key of the tag that grants access to the game. */

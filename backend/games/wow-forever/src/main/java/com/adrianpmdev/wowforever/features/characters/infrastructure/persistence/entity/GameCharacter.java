@@ -18,7 +18,8 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * A character of a player. The class, the race and the professions are slugs of the game data.
+ * A character of a player. The class, the race and the professions are slugs of the game data, filled in from the
+ * official armory; they stay empty until the armory shows the character.
  *
  * @author adrianpmdev
  */
@@ -40,22 +41,29 @@ public class GameCharacter {
     @Column(length = 40, nullable = false)
     private String name;
 
-    @Column(name = "class_slug", length = 40, nullable = false)
+    @Column(name = "class_slug", length = 40)
     private String classSlug;
 
-    @Column(name = "race_slug", length = 40, nullable = false)
+    @Column(name = "race_slug", length = 40)
     private String raceSlug;
 
-    @Column(nullable = false)
-    private short level;
+    private Short level;
 
-    /** List of the professions: {@code [{ "slug": "alchemy", "skill": 300 }]}. */
+    /** List of the professions: {@code [{ "slug": "alchemy", "skill": 300, "maxSkill": 300 }]}. */
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb", nullable = false)
     private JsonNode professions;
 
     @Column(length = 200)
     private String notes;
+
+    /** Its id in the armory; null until the armory shows it. */
+    @Column(name = "armory_slug", length = 80)
+    private String armorySlug;
+
+    /** When the armory last changed it, as the armory tells it. */
+    @Column(name = "armory_updated_at")
+    private Instant armoryUpdatedAt;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

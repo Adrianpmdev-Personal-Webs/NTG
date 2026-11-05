@@ -56,6 +56,10 @@
             <app-wow-button (click)="openNew()">Nuevo personaje</app-wow-button>
         </section>
 
+        @if (updating()) {
+            <p class="updating">Comprobando la Armería…</p>
+        }
+
         @if (formOpen()) {
             <form class="character-form" [formGroup]="form" (ngSubmit)="save()">
                 <h2 class="section-title">
@@ -81,119 +85,12 @@
                         <span>Nombre</span>
                         <input type="text" formControlName="name" maxlength="40" placeholder="Nombre y apellido" />
                     </label>
-
-                    <label class="field">
-                        <span>Clase</span>
-                        <select formControlName="classSlug">
-                            <option value="">Elige una clase</option>
-                            @for (gameClass of classes(); track gameClass.slug) {
-                                <option [value]="gameClass.slug">{{ gameClass.name }}</option>
-                            }
-                        </select>
-                    </label>
-
-                    <label class="field">
-                        <span>Raza</span>
-                        <select formControlName="raceSlug">
-                            <option value="">
-                                {{ formValue().classSlug ? 'Elige una raza' : 'Elige antes la clase' }}
-                            </option>
-                            @for (race of racesOfClass(); track race.slug) {
-                                <option [value]="race.slug">{{ race.name }}</option>
-                            }
-                        </select>
-                    </label>
-
-                    <label class="field">
-                        <span>Nivel</span>
-                        <input type="number" formControlName="level" min="1" [max]="maxLevel()" />
-                    </label>
                 </div>
 
-                <h3 class="form-subtitle">Profesiones principales <span class="note">hasta dos</span></h3>
-                <div class="form-grid">
-                    <div class="profession-field">
-                        <label class="field">
-                            <span>Primera</span>
-                            <select formControlName="primaryOne">
-                                <option value="">Ninguna</option>
-                                @for (group of primaryGroups(); track group.id) {
-                                    <optgroup [label]="group.name">
-                                        @for (profession of group.professions; track profession.slug) {
-                                            <option [value]="profession.slug">{{ profession.name }}</option>
-                                        }
-                                    </optgroup>
-                                }
-                            </select>
-                        </label>
-                        @if (formValue().primaryOne) {
-                            <label class="field skill">
-                                <span>Nivel</span>
-                                <input
-                                    type="number"
-                                    formControlName="primaryOneSkill"
-                                    min="1"
-                                    [max]="maxSkill"
-                                    placeholder="1-300"
-                                />
-                            </label>
-                        }
-                    </div>
-
-                    <div class="profession-field">
-                        <label class="field">
-                            <span>Segunda</span>
-                            <select formControlName="primaryTwo">
-                                <option value="">Ninguna</option>
-                                @for (group of primaryGroups(); track group.id) {
-                                    <optgroup [label]="group.name">
-                                        @for (profession of group.professions; track profession.slug) {
-                                            @if (profession.slug !== formValue().primaryOne) {
-                                                <option [value]="profession.slug">{{ profession.name }}</option>
-                                            }
-                                        }
-                                    </optgroup>
-                                }
-                            </select>
-                        </label>
-                        @if (formValue().primaryTwo) {
-                            <label class="field skill">
-                                <span>Nivel</span>
-                                <input
-                                    type="number"
-                                    formControlName="primaryTwoSkill"
-                                    min="1"
-                                    [max]="maxSkill"
-                                    placeholder="1-300"
-                                />
-                            </label>
-                        }
-                    </div>
-                </div>
-
-                <h3 class="form-subtitle">Profesiones secundarias</h3>
-                <div class="form-grid" formArrayName="secondaries">
-                    @for (control of form.controls.secondaries.controls; track control; let index = $index) {
-                        <div class="profession-field secondary" [formGroupName]="index">
-                            <label class="check">
-                                <input type="checkbox" formControlName="known" />
-                                <span>{{ professionName(control.controls.slug.value) }}</span>
-                            </label>
-                            @if (formValue().secondaries[index]?.known) {
-                                <label class="field skill">
-                                    <span>Nivel</span>
-                                    <input
-                                        type="number"
-                                        formControlName="skill"
-                                        min="1"
-                                        [max]="maxSkill"
-                                        placeholder="1-300"
-                                    />
-                                </label>
-                            }
-                        </div>
-                    }
-                </div>
+                <p class="form-hint">
+                    El nivel, la clase, la raza y las profesiones salen solos de la Armería, que muestra los personajes
+                    desde el nivel 10, y se actualizan al entrar en esta página.
+                </p>
 
                 <label class="field notes">
                     <span>Notas</span>
@@ -210,13 +107,15 @@
         <ng-template #card let-character>
             <article class="character">
                 <header class="character-header">
-                    <img
-                        class="class-icon"
-                        [src]="classIcon(character.classSlug)"
-                        alt=""
-                        loading="lazy"
-                        (error)="hideBrokenIcon($event)"
-                    />
+                    @if (character.classSlug) {
+                        <img
+                            class="class-icon"
+                            [src]="classIcon(character.classSlug)"
+                            alt=""
+                            loading="lazy"
+                            (error)="hideBrokenIcon($event)"
+                        />
+                    }
                     <div class="character-title">
                         <h3 class="character-name">
                             <a
@@ -228,8 +127,12 @@
                             >
                         </h3>
                         <p class="character-meta">
-                            Nivel {{ character.level }} · {{ raceName(character.raceSlug) }}
-                            {{ className(character.classSlug) }}
+                            @if (character.level) {
+                                Nivel {{ character.level }} · {{ raceName(character.raceSlug) }}
+                                {{ className(character.classSlug) }}
+                            } @else {
+                                Aún no está en la Armería (aparece desde el nivel 10)
+                            }
                         </p>
                     </div>
                 </header>
@@ -247,12 +150,17 @@
                                 />
                                 {{ professionName(known.slug) }}
                                 @if (known.skill) {
-                                    <strong>{{ known.skill }}</strong>
+                                    <strong
+                                        >{{ known.skill }}
+                                        @if (known.maxSkill) {
+                                            <span class="skill-max">/ {{ known.maxSkill }}</span>
+                                        }
+                                    </strong>
                                 }
                             </li>
                         }
                     </ul>
-                } @else {
+                } @else if (character.level) {
                     <p class="empty">Sin profesiones.</p>
                 }
 
@@ -324,7 +232,12 @@
                                     >{{ holder.character.name }}</a
                                 >
                                 <span class="holder-owner">{{ ownerName(holder.character) }}</span>
-                                <strong class="holder-skill">{{ holder.skill ?? '—' }}</strong>
+                                <strong class="holder-skill"
+                                    >{{ holder.skill ?? '—' }}
+                                    @if (holder.maxSkill) {
+                                        <span class="skill-max">/ {{ holder.maxSkill }}</span>
+                                    }
+                                </strong>
                             </li>
                         }
                     </ul>

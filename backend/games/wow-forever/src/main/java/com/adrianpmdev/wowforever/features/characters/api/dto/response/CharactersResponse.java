@@ -29,24 +29,25 @@ public record CharactersResponse(int limit, List<Owner> owners, List<Character> 
      * @param id          character id
      * @param owner       account that owns it
      * @param name        name in the game
-     * @param classSlug   class
-     * @param raceSlug    race
-     * @param level       level
+     * @param classSlug   class, or null while the armory does not have it
+     * @param raceSlug    race, or null while the armory does not have it
+     * @param level       level, or null while the armory does not have it
      * @param professions professions
      * @param notes       free notes, or null
      * @param armoryUrl   where the official armory shows it
      * @param canEdit     whether the caller may change it
      */
-    public record Character(UUID id, Owner owner, String name, String classSlug, String raceSlug, int level,
+    public record Character(UUID id, Owner owner, String name, String classSlug, String raceSlug, Integer level,
                             List<Profession> professions, String notes, String armoryUrl, boolean canEdit) {
     }
 
     /**
      * A profession of a character.
      *
-     * @param slug  profession
-     * @param skill skill points, or null
+     * @param slug     profession
+     * @param skill    skill points, or null
+     * @param maxSkill skill points it can reach for now, or null
      */
-    public record Profession(String slug, Integer skill) {
+    public record Profession(String slug, Integer skill, Integer maxSkill) {
     }
 }

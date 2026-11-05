@@ -249,8 +249,8 @@ security headers (see the [frontend documentation](../frontend/README.md)).
 
 - A player links their Riot ID, or an admin links it; an admin starts the download of the games of the season, which
   runs on one thread, one account at a time, within the limits of a personal Riot key.
-- Opening a player or pressing the update button asks Riot for what is new, at most every 5 minutes per player. Nothing
-  runs on a schedule, and history and statistics are always read from the database.
+- Opening a player or pressing the update button asks Riot for what is new, at most every 5 minutes per player. At dawn
+  the players nobody opened in the last 20 hours are updated. History and statistics are always read from the database.
 - An admin can download an account again, for what a complete account cannot get otherwise: an older season or a queue
   Riot starts to give. Stored games are skipped.
 - Seasons, one per year, are managed from the web. Riot only tells the current rank, so each update keeps a copy: the
@@ -294,7 +294,9 @@ plus **one schema per game** that needs tables. Each module keeps its DDL next t
 - League of Legends stores a small summary of each game: history and statistics are read from the database, and Riot is
   only asked for new games when a player is opened, at most every 5 minutes per player, on one thread with its own limit.
 - What a player keeps in WoW Forever (characters, talent builds, ticked Legacy challenges) is in the database, on their
-  account, so any client on any device gets it through the API.
+  account, so any client on any device gets it through the API. A character only needs its name: the backend reads the
+  rest from the public pages of the official armory and checks, one by one, whether it changed when somebody opens the
+  screen (at most every 5 minutes) and at dawn if nobody did. What did not change is not written.
 - Data that only changes with a release (the Pokémon type chart, the WoW Forever texts and rules) lives in JSON
   files inside the module, not in the database.
 - The WoW Forever game data is built by the backend from the game client (through wago.tools) every time a new
@@ -318,7 +320,7 @@ The site runs on the free plans of Render, Vercel and Supabase, so the backend a
 | **Dashboard read on demand** | One call when an admin opens or refreshes it, never on its own; traffic and logs are small counters and a fixed buffer in memory |
 | **Last activity once an hour** | At most one write per user per hour, however many requests they make |
 | **Songs compressed in the browser** | The server never decodes audio, so music costs no server memory; each song is downloaded once per browser |
-| **Riot read on demand** | Nothing runs on a schedule; one thread that sleeps when idle; only a small summary of each game is kept |
+| **Riot read on demand** | Only when somebody looks, and once at dawn for who nobody looked at; one thread that sleeps when idle; only a small summary of each game is kept |
 | **Gzip** | JSON is compressed (the WoW data drops from about 1.8 MB to about 200 KB) |
 | **ETag on static JSON** | A browser that already has the data gets `304` with no body |
 | **Daily `select 1`** | The keep-alive call touches the database once a day, so Supabase never pauses the project |

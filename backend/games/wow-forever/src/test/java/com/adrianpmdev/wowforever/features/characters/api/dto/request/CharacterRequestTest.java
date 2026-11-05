@@ -5,7 +5,6 @@ import jakarta.validation.Validator;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -46,6 +45,6 @@ class CharacterRequestTest {
     }
 
     private static CharacterRequest request(String name) {
-        return new CharacterRequest(null, name, "warrior", "orc", 60, List.of(), null);
+        return new CharacterRequest(null, name, null);
     }
 }

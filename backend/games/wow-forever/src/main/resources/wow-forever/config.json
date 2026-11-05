@@ -2,7 +2,11 @@
     "iconBaseUrl": "https://render.worldofwarcraft.com/us/icons/56",
     "raceIconBaseUrl": "https://wow.zamimg.com/images/wow/icons/large",
     "fallbackIcon": "inv_misc_questionmark",
-    "armoryUrl": "https://worldofwarcraft.blizzard.com/es-es/forever/eu/armory",
+    "armory": {
+        "url": "https://worldofwarcraft.blizzard.com/es-es/forever/eu/armory",
+        "dataUrl": "https://worldofwarcraft.blizzard.com/en-gb/forever/eu/armory",
+        "cooldownMinutes": 5
+    },
 
     "factions": {
         "ALLIANCE": "Alianza",

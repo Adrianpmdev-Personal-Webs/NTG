@@ -4,6 +4,7 @@ import com.adrianpmdev.platform.port.CurrentUser;
 import com.adrianpmdev.platform.port.UserDirectory;
 import com.adrianpmdev.wowforever.features.characters.api.dto.request.CharacterRequest;
 import com.adrianpmdev.wowforever.features.characters.api.dto.response.CharactersResponse;
+import com.adrianpmdev.wowforever.features.characters.infrastructure.armory.ArmoryCharacter;
 import com.adrianpmdev.wowforever.features.characters.infrastructure.persistence.entity.GameCharacter;
 import com.adrianpmdev.wowforever.features.characters.infrastructure.persistence.repository.GameCharacterRepository;
 import com.adrianpmdev.wowforever.features.gamedata.application.service.GameDataService;
@@ -14,6 +15,7 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,14 +27,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Who may change which character, the limit per account and what the list tells each caller.
+ * Who may change which character, the limits, what the armory fills and what the list tells each caller.
  *
  * @author adrianpmdev
  */
@@ -43,10 +44,11 @@ class CharacterServiceTest {
     private static final UUID ADMIN = UUID.randomUUID();
 
     private final GameCharacterRepository repository = mock(GameCharacterRepository.class);
-    private final CharacterRules rules = mock(CharacterRules.class);
+    private final CharacterArmory armory = mock(CharacterArmory.class);
+    private final CharacterArmorySync sync = mock(CharacterArmorySync.class);
     private final CurrentUser currentUser = mock(CurrentUser.class);
     private final UserDirectory directory = mock(UserDirectory.class);
-    private final CharacterService service = new CharacterService(repository, rules, new GameDataService(),
+    private final CharacterService service = new CharacterService(repository, armory, sync, new GameDataService(),
             currentUser, directory);
 
     @BeforeEach
@@ -79,8 +81,64 @@ class CharacterServiceTest {
         GameCharacter saved = saved();
         assertThat(saved.getUserId()).isEqualTo(ANA);
         assertThat(saved.getName()).isEqualTo("Thrall");
-        assertThat(saved.getProfessions().path(0).path("slug").asText()).isEqualTo("alchemy");
-        assertThat(saved.getProfessions().path(0).path("skill").asInt()).isEqualTo(300);
+    }
+
+    @Test
+    void openingTheScreenWaitsForTheRoundAndAnswersTheList() {
+        when(sync.refresh()).thenReturn(java.util.concurrent.CompletableFuture.completedFuture(null));
+        when(repository.findAll()).thenReturn(List.of(character(ANA, "Alba")));
+
+        assertThat(service.refresh().characters()).extracting(CharactersResponse.Character::name).containsExactly("Alba");
+        verify(sync).refresh();
+    }
+
+    @Test
+    void aNewCharacterIsFilledFromTheArmory() throws Exception {
+        ArmoryCharacter data = new ArmoryCharacter("thrall", "Thrall", "Shaman", "Orc", 60, List.of(), null);
+        when(armory.changesOf(any())).thenReturn(Optional.of(data));
+
+        service.create(request(null, "Thrall"));
+
+        verify(armory).apply(any(), org.mockito.ArgumentMatchers.eq(data));
+    }
+
+    @Test
+    void aCharacterTheArmoryDoesNotShowIsSavedWithItsNameOnly() throws Exception {
+        when(armory.changesOf(any())).thenReturn(Optional.empty());
+
+        service.create(request(null, "Thrall"));
+
+        assertThat(saved().getName()).isEqualTo("Thrall");
+        verify(armory, never()).apply(any(), any());
+    }
+
+    @Test
+    void anArmoryThatFailsDoesNotStopTheSave() throws Exception {
+        when(armory.changesOf(any())).thenThrow(new IOException("down"));
+
+        service.create(request(null, "Thrall"));
+
+        assertThat(saved().getName()).isEqualTo("Thrall");
+    }
+
+    @Test
+    void renamingForgetsTheOldCharacterAndReadsTheNewOne() throws Exception {
+        GameCharacter character = stored(ANA, "Old");
+
+        service.update(character.getId(), request(null, "New"));
+
+        verify(armory).clear(character);
+        verify(armory).changesOf(character);
+    }
+
+    @Test
+    void changingOnlyTheNotesDoesNotAskTheArmory() throws Exception {
+        GameCharacter character = stored(ANA, "Old");
+
+        service.update(character.getId(), request(null, "old"));
+
+        verify(armory, never()).changesOf(any());
+        assertThat(saved().getName()).isEqualTo("Old");
     }
 
     @Test
@@ -108,15 +166,6 @@ class CharacterServiceTest {
     }
 
     @Test
-    void whatTheGameDoesNotAllowIsNotSaved() {
-        doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST)).when(rules).check(any());
-
-        assertThatThrownBy(() -> service.create(request(null, "Thrall"))).isInstanceOf(ResponseStatusException.class);
-
-        verify(repository, never()).saveAndFlush(any());
-    }
-
-    @Test
     void anAccountCannotHaveMoreThanTwentyCharacters() {
         when(repository.countByUserId(ANA)).thenReturn(20L);
 
@@ -124,8 +173,8 @@ class CharacterServiceTest {
     }
 
     @Test
-    void anAccountCannotRepeatAName() {
-        when(repository.existsByUserIdAndNameIgnoreCase(ANA, "Thrall")).thenReturn(true);
+    void theGroupCannotRepeatAName() {
+        when(repository.existsByNameIgnoreCase("Thrall")).thenReturn(true);
 
         assertConflict(() -> service.create(request(null, "Thrall")));
     }
@@ -267,8 +316,7 @@ class CharacterServiceTest {
     }
 
     private static CharacterRequest request(UUID owner, String name) {
-        return new CharacterRequest(owner, name, "warrior", "orc", 60,
-                List.of(new CharacterRequest.Profession("alchemy", 300)), null);
+        return new CharacterRequest(owner, name, null);
     }
 
     private static void assertForbidden(org.assertj.core.api.ThrowableAssert.ThrowingCallable call) {

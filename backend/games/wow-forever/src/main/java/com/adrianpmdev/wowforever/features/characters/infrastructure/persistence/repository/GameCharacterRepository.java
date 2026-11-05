@@ -22,23 +22,21 @@ public interface GameCharacterRepository extends JpaRepository<GameCharacter, UU
     long countByUserId(UUID userId);
 
     /**
-     * Whether an account already has a character with this name.
+     * Whether the group already has a character with this name.
      *
-     * @param userId account id
-     * @param name   character name, in any case
+     * @param name character name, in any case
      * @return true when it has
      */
-    boolean existsByUserIdAndNameIgnoreCase(UUID userId, String name);
+    boolean existsByNameIgnoreCase(String name);
 
     /**
-     * Whether an account has another character with this name.
+     * Whether the group has another character with this name.
      *
-     * @param userId account id
-     * @param name   character name, in any case
-     * @param id     character left out
+     * @param name character name, in any case
+     * @param id   character left out
      * @return true when it has
      */
-    boolean existsByUserIdAndNameIgnoreCaseAndIdNot(UUID userId, String name, UUID id);
+    boolean existsByNameIgnoreCaseAndIdNot(String name, UUID id);
 
     /**
      * The characters of an account by name.

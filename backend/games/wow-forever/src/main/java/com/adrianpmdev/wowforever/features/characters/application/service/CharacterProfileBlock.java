@@ -19,13 +19,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.UUID;
 import java.util.function.Supplier;
 
 /**
  * What WoW Forever shows on the profile of a player: one card per character with its race, class and icon, and bars for
  * its level and professions. While the game data cannot be read, the characters still show, with the slugs instead of
- * the names.
+ * the names. A character the armory does not show yet has only its name.
  *
  * @author adrianpmdev
  */
@@ -35,6 +36,7 @@ public class CharacterProfileBlock implements ProfileBlockProvider {
 
     private static final ObjectMapper JSON = new ObjectMapper();
     private static final int MAX_SKILL = 300;
+    private static final String NOT_IN_ARMORY = "Aún no está en la Armería";
 
     private final GameCharacterRepository characterRepository;
     private final GameDataService gameDataService;
@@ -64,15 +66,25 @@ public class CharacterProfileBlock implements ProfileBlockProvider {
         List<ProfileBlock.Card> cards = characters.stream()
                 .map(character -> cardOf(character, classes, races, professions, maxLevel))
                 .toList();
-        int highestLevel = characters.stream().mapToInt(GameCharacter::getLevel).max().orElse(0);
+        OptionalInt highestLevel = characters.stream()
+                .filter(character -> character.getLevel() != null)
+                .mapToInt(GameCharacter::getLevel)
+                .max();
         String count = characters.size() == 1 ? "1 personaje" : characters.size() + " personajes";
+        List<String> summary = highestLevel.isPresent()
+                ? List.of(count, "Nivel máximo " + highestLevel.getAsInt())
+                : List.of(count);
 
-        return Optional.of(new ProfileBlock(List.of(count, "Nivel máximo " + highestLevel),
+        return Optional.of(new ProfileBlock(summary,
                 List.of(new ProfileBlock.Section("Personajes", List.of(), List.of(), cards))));
     }
 
     private static ProfileBlock.Card cardOf(GameCharacter character, Map<String, Item> classes, Map<String, Item> races,
                                             Map<String, Item> professions, int maxLevel) {
+        if (character.getLevel() == null) {
+            return new ProfileBlock.Card(character.getName(), NOT_IN_ARMORY, null, List.of());
+        }
+
         Item gameClass = itemOf(classes, character.getClassSlug());
         List<ProfileBlock.Bar> bars = new ArrayList<>();
 
@@ -82,8 +94,8 @@ public class CharacterProfileBlock implements ProfileBlockProvider {
             Item profession = itemOf(professions, known.path("slug").asText());
             JsonNode skill = known.path("skill");
 
-            bars.add(new ProfileBlock.Bar(profession.name(), skill.isNumber() ? skill.asInt() : null, MAX_SKILL,
-                    profession.icon()));
+            bars.add(new ProfileBlock.Bar(profession.name(), skill.isNumber() ? skill.asInt() : null,
+                    known.path("maxSkill").asInt(MAX_SKILL), profession.icon()));
         }
 
         return new ProfileBlock.Card(character.getName(),

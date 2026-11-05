@@ -149,6 +149,16 @@ public class GameDataService {
     }
 
     /**
+     * The slug the game data gives to a name.
+     *
+     * @param name name of a class, a race or a profession, in English
+     * @return its slug
+     */
+    public static String slugOf(String name) {
+        return GameDataMapper.slugify(name);
+    }
+
+    /**
      * The texts and rules of the area, read once from config.json.
      *
      * @return the configuration

@@ -13,7 +13,7 @@ import java.util.Map;
  *                     races (Night Elf, Undead and the Skyborne of WoW Forever) and for new WoW Forever items such as
  *                     the campfire; the same as {@code iconBaseUrl} when left out
  * @param fallbackIcon icon for anything the data gives no icon for
- * @param armoryUrl    page of the official armory; a character is found at {@code <armoryUrl>?q=<name>}
+ * @param armory       the official armory, where the characters of the group are read from
  * @param factions     name of each faction ({@code ALLIANCE}, {@code HORDE})
  * @param features     tools of the area shown on its home
  * @param news         where the launcher news come from and how often they are read again
@@ -30,7 +30,7 @@ public record GameDataConfig(
         String iconBaseUrl,
         String raceIconBaseUrl,
         String fallbackIcon,
-        String armoryUrl,
+        Armory armory,
         Map<String, String> factions,
         List<Feature> features,
         News news,
@@ -96,6 +96,16 @@ public record GameDataConfig(
      * @param available   false while it is not built yet (shown as coming soon)
      */
     public record Feature(String id, String label, String description, boolean available) {
+    }
+
+    /**
+     * The official armory.
+     *
+     * @param url             page the players are sent to; a character is found at {@code <url>?q=<name>}
+     * @param dataUrl         page the backend reads, in English like the game data
+     * @param cooldownMinutes how long after a check opening the screen does not check again
+     */
+    public record Armory(String url, String dataUrl, int cooldownMinutes) {
     }
 
     /**

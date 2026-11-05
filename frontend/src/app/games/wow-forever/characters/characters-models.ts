@@ -25,6 +25,7 @@ export interface GameCharacter {
     level: number;
     professions: CharacterProfession[];
     notes: string | null;
+    armoryUrl: string;
     canEdit: boolean;
 }
 

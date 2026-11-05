@@ -174,6 +174,30 @@
     gap: 10px;
 }
 
+.character,
+.holder {
+    position: relative;
+
+    &:hover {
+        border-color: wow.$gold;
+
+        .character-link {
+            color: wow.$gold;
+        }
+    }
+}
+
+.character-link {
+    color: wow.$text-strong;
+    text-decoration: none;
+
+    &::after {
+        position: absolute;
+        inset: 0;
+        content: '';
+    }
+}
+
 .character {
     @include wow.panel;
     display: flex;
@@ -200,7 +224,6 @@
 
 .character-name {
     margin: 0;
-    color: wow.$text-strong;
     font-size: 1rem;
     font-weight: normal;
     overflow-wrap: anywhere;
@@ -253,6 +276,8 @@
 }
 
 .character-actions {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -292,7 +317,6 @@
 }
 
 .holder-name {
-    color: wow.$text-strong;
     overflow-wrap: anywhere;
 }
 

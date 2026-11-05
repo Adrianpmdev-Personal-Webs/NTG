@@ -34,10 +34,11 @@ public record CharactersResponse(int limit, List<Owner> owners, List<Character> 
      * @param level       level
      * @param professions professions
      * @param notes       free notes, or null
+     * @param armoryUrl   where the official armory shows it
      * @param canEdit     whether the caller may change it
      */
     public record Character(UUID id, Owner owner, String name, String classSlug, String raceSlug, int level,
-                            List<Profession> professions, String notes, boolean canEdit) {
+                            List<Profession> professions, String notes, String armoryUrl, boolean canEdit) {
     }
 
     /**

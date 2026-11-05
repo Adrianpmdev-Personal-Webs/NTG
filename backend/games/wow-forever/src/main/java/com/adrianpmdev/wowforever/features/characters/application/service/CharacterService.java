@@ -8,12 +8,15 @@ import com.adrianpmdev.wowforever.features.characters.api.dto.request.CharacterR
 import com.adrianpmdev.wowforever.features.characters.api.dto.response.CharactersResponse;
 import com.adrianpmdev.wowforever.features.characters.infrastructure.persistence.entity.GameCharacter;
 import com.adrianpmdev.wowforever.features.characters.infrastructure.persistence.repository.GameCharacterRepository;
+import com.adrianpmdev.wowforever.features.gamedata.application.service.GameDataService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -38,6 +41,7 @@ public class CharacterService {
 
     private final GameCharacterRepository characterRepository;
     private final CharacterRules characterRules;
+    private final GameDataService gameDataService;
     private final CurrentUser currentUser;
     private final UserDirectory userDirectory;
 
@@ -221,6 +225,11 @@ public class CharacterService {
         return new CharactersResponse.Character(character.getId(),
                 new CharactersResponse.Owner(character.getUserId(), usernames.get(character.getUserId())),
                 character.getName(), character.getClassSlug(), character.getRaceSlug(), character.getLevel(),
-                professions, character.getNotes(), canEdit(character));
+                professions, character.getNotes(), armoryUrl(character), canEdit(character));
+    }
+
+    private String armoryUrl(GameCharacter character) {
+        return gameDataService.getConfig().armoryUrl() + "?q="
+                + URLEncoder.encode(character.getName(), StandardCharsets.UTF_8);
     }
 }

@@ -48,7 +48,7 @@ class GameDataExporterTest {
         list.set(0, profession);
 
         return new GameDataConfig(config.iconBaseUrl(), config.raceIconBaseUrl(), config.fallbackIcon(),
-                config.factions(), config.features(), config.news(), config.bluePosts(), config.talents(),
+                config.armoryUrl(), config.factions(), config.features(), config.news(), config.bluePosts(), config.talents(),
                 config.spellbook(), config.legacy(), new GameDataConfig.Professions(config.professions().groups(),
                 list), config.client());
     }

@@ -218,7 +218,15 @@
                         (error)="hideBrokenIcon($event)"
                     />
                     <div class="character-title">
-                        <h3 class="character-name">{{ character.name }}</h3>
+                        <h3 class="character-name">
+                            <a
+                                class="character-link"
+                                [href]="character.armoryUrl"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                >{{ character.name }}</a
+                            >
+                        </h3>
                         <p class="character-meta">
                             Nivel {{ character.level }} · {{ raceName(character.raceSlug) }}
                             {{ className(character.classSlug) }}
@@ -308,7 +316,13 @@
                                     loading="lazy"
                                     (error)="hideBrokenIcon($event)"
                                 />
-                                <span class="holder-name">{{ holder.character.name }}</span>
+                                <a
+                                    class="character-link holder-name"
+                                    [href]="holder.character.armoryUrl"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    >{{ holder.character.name }}</a
+                                >
                                 <span class="holder-owner">{{ ownerName(holder.character) }}</span>
                                 <strong class="holder-skill">{{ holder.skill ?? '—' }}</strong>
                             </li>

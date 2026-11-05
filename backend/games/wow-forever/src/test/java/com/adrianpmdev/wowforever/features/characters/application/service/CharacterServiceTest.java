@@ -6,6 +6,7 @@ import com.adrianpmdev.wowforever.features.characters.api.dto.request.CharacterR
 import com.adrianpmdev.wowforever.features.characters.api.dto.response.CharactersResponse;
 import com.adrianpmdev.wowforever.features.characters.infrastructure.persistence.entity.GameCharacter;
 import com.adrianpmdev.wowforever.features.characters.infrastructure.persistence.repository.GameCharacterRepository;
+import com.adrianpmdev.wowforever.features.gamedata.application.service.GameDataService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,7 +46,8 @@ class CharacterServiceTest {
     private final CharacterRules rules = mock(CharacterRules.class);
     private final CurrentUser currentUser = mock(CurrentUser.class);
     private final UserDirectory directory = mock(UserDirectory.class);
-    private final CharacterService service = new CharacterService(repository, rules, currentUser, directory);
+    private final CharacterService service = new CharacterService(repository, rules, new GameDataService(),
+            currentUser, directory);
 
     @BeforeEach
     void setUp() {
@@ -216,6 +218,15 @@ class CharacterServiceTest {
         assertThat(response.characters()).extracting(CharactersResponse.Character::canEdit)
                 .containsExactly(true, true, false, false);
         assertThat(response.characters().get(3).owner().username()).isNull();
+    }
+
+    @Test
+    void everyCharacterLinksToTheArmoryWithItsNameInTheAddress() {
+        when(repository.findAll()).thenReturn(List.of(character(ANA, "Shyleena Timewalker"), character(ANA, "Ña'ka")));
+
+        assertThat(service.list().characters()).extracting(CharactersResponse.Character::armoryUrl).containsExactly(
+                "https://worldofwarcraft.blizzard.com/es-es/forever/eu/armory?q=Shyleena+Timewalker",
+                "https://worldofwarcraft.blizzard.com/es-es/forever/eu/armory?q=%C3%91a%27ka");
     }
 
     @Test

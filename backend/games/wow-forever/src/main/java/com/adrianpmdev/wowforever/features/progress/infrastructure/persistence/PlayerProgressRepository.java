@@ -32,9 +32,13 @@ public class PlayerProgressRepository {
     public Map<Integer, SavedBuildResponse> builds(UUID userId, String classSlug) {
         Map<Integer, SavedBuildResponse> builds = new LinkedHashMap<>();
 
-        jdbcTemplate.query("select slot, name, level, build from wow_forever.saved_builds where user_id = ? and class_slug = ?",
-                row -> {
-                    builds.put(row.getInt(1), new SavedBuildResponse(row.getString(2), row.getInt(3), row.getString(4)));
+        jdbcTemplate.query("""
+                select slot, name, level, build, point_order
+                from wow_forever.saved_builds
+                where user_id = ? and class_slug = ?
+                """, row -> {
+                    builds.put(row.getInt(1),
+                            new SavedBuildResponse(row.getString(2), row.getInt(3), row.getString(4), row.getString(5)));
                 }, userId, classSlug);
 
         return builds;
@@ -49,14 +53,16 @@ public class PlayerProgressRepository {
      * @param name      name
      * @param level     level
      * @param build     share code
+     * @param order     order the points were spent in, null when it was not recorded
      */
-    public void saveBuild(UUID userId, String classSlug, int slot, String name, int level, String build) {
+    public void saveBuild(UUID userId, String classSlug, int slot, String name, int level, String build, String order) {
         jdbcTemplate.update("""
-                insert into wow_forever.saved_builds (user_id, class_slug, slot, name, level, build)
-                values (?, ?, ?, ?, ?, ?)
+                insert into wow_forever.saved_builds (user_id, class_slug, slot, name, level, build, point_order)
+                values (?, ?, ?, ?, ?, ?, ?)
                 on conflict (user_id, class_slug, slot) do update
-                    set name = excluded.name, level = excluded.level, build = excluded.build, updated_at = now()
-                """, userId, classSlug, slot, name, level, build);
+                    set name = excluded.name, level = excluded.level, build = excluded.build,
+                        point_order = excluded.point_order, updated_at = now()
+                """, userId, classSlug, slot, name, level, build, order);
     }
 
     /**

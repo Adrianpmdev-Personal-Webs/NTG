@@ -1,0 +1,38 @@
+<section class="talent-order" aria-labelledby="talent-order-title">
+    <button
+        type="button"
+        class="toggle"
+        aria-controls="talent-order-body"
+        [attr.aria-expanded]="open()"
+        (click)="toggle()"
+    >
+        <h2 id="talent-order-title" class="title">Orden de talentos</h2>
+        <span class="arrow" [class.closed]="!open()" aria-hidden="true">▾</span>
+    </button>
+
+    @if (open()) {
+        <div id="talent-order-body">
+            @if (order() === null) {
+                <p class="details missing">
+                    Esta build no tiene el orden de los puntos. Reiníciala y vuelve a hacerla punto a punto para que el
+                    orden se guarde cuando la guardes de nuevo.
+                </p>
+            } @else if (steps().length === 0) {
+                <p class="details">Gasta puntos y aquí verás en qué nivel coger cada talento.</p>
+            } @else {
+                <ol class="steps">
+                    @for (step of steps(); track $index) {
+                        <li class="step">
+                            <span class="level">Nv. {{ step.level }}</span>
+                            <img class="icon" [src]="step.talent.icon" alt="" (error)="hideBrokenIcon($event)" />
+                            <span class="name">{{ step.talent.name }}</span>
+                            @if (step.talent.maxRanks > 1) {
+                                <span class="rank">Rango {{ step.rank }}</span>
+                            }
+                        </li>
+                    }
+                </ol>
+            }
+        </div>
+    }
+</section>

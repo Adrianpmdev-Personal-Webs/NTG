@@ -3,6 +3,9 @@
  *
  * Pure rules of a talent tree: unlocking, adding and removing points, points per level and the share code. The talent
  * calculator and the Legacy planner use the same rules; only what a point gate counts changes (see GateScope).
+ * The talent calculator also keeps the order the points were spent in, one talent per point, written in the same short
+ * code Wowhead uses: the tree index when the tree changes, then one letter per point, or a capital letter when every
+ * rank of a talent was taken in a row. An order is only valid when each point was allowed at the moment it was spent.
  *
  * @author @adrianpmdev
  */
@@ -11,11 +14,23 @@ import { Talent, TalentTree } from './talents-models';
 
 export type Ranks = Readonly<Record<number, number>>;
 
+export type PointOrder = readonly number[];
+
 export type TalentState = 'locked' | 'available' | 'partial' | 'maxed';
 
 const DIGITS = '0123456789abcdefghijklmnopqrstuv';
 const TREE_SEPARATOR = '-';
 const TREE_ID_SEPARATOR = '.';
+const ORDER_POINT = 'abcdefghjkmnpqrstvwzxyilou468-~!';
+const ORDER_FULL_RANKS = 'ABCDEFGHJKMNPQRSTVWZXYILOU579_^.';
+const ORDER_MAX_TREES = 4;
+
+interface PlacedTalent {
+    talent: Talent;
+    tree: TalentTree;
+    treeIndex: number;
+    position: number;
+}
 
 const rankOf = (ranks: Ranks, talent: Talent): number => ranks[talent.id] ?? 0;
 
@@ -128,4 +143,125 @@ export const decodeBuild = (trees: readonly TalentTree[], code: string): Ranks =
     }
 
     return ranks;
+};
+
+export const sameRanks = (first: Ranks, second: Ranks): boolean => {
+    const ids = new Set([...Object.keys(first), ...Object.keys(second)].map(Number));
+
+    return [...ids].every((id) => (first[id] ?? 0) === (second[id] ?? 0));
+};
+
+export const ranksFromOrder = (order: PointOrder): Ranks => {
+    const ranks: Record<number, number> = {};
+
+    for (const id of order) {
+        ranks[id] = (ranks[id] ?? 0) + 1;
+    }
+
+    return ranks;
+};
+
+const placeTalents = (trees: readonly TalentTree[]): Map<number, PlacedTalent> =>
+    new Map(
+        trees.flatMap((tree, treeIndex) =>
+            tree.talents.map((talent, position): [number, PlacedTalent] => [
+                talent.id,
+                { talent, tree, treeIndex, position },
+            ]),
+        ),
+    );
+
+export const isOrderValid = (trees: readonly TalentTree[], order: PointOrder): boolean => {
+    const placed = placeTalents(trees);
+    const ranks: Record<number, number> = {};
+
+    return order.every((id) => {
+        const found = placed.get(id);
+
+        if (
+            !found ||
+            rankOf(ranks, found.talent) >= found.talent.maxRanks ||
+            !isUnlocked(found.talent, found.tree, ranks)
+        ) {
+            return false;
+        }
+
+        ranks[id] = rankOf(ranks, found.talent) + 1;
+        return true;
+    });
+};
+
+export const withoutLastPoint = (order: PointOrder, talent: Talent): PointOrder => {
+    const last = order.lastIndexOf(talent.id);
+
+    return last < 0 ? order : [...order.slice(0, last), ...order.slice(last + 1)];
+};
+
+export const canRemoveFromOrder = (talent: Talent, trees: readonly TalentTree[], order: PointOrder): boolean =>
+    order.includes(talent.id) && isOrderValid(trees, withoutLastPoint(order, talent));
+
+export const encodeOrder = (trees: readonly TalentTree[], order: PointOrder): string | null => {
+    const placed = placeTalents(trees);
+    let code = '';
+    let treeIndex = -1;
+
+    if (trees.length > ORDER_MAX_TREES) {
+        return null;
+    }
+
+    for (const id of order) {
+        const found = placed.get(id);
+
+        if (!found || found.position >= ORDER_POINT.length) {
+            return null;
+        }
+
+        if (found.treeIndex !== treeIndex) {
+            treeIndex = found.treeIndex;
+            code += treeIndex;
+        }
+
+        const point = ORDER_POINT.charAt(found.position);
+        const fullRun = point.repeat(found.talent.maxRanks);
+
+        code += point;
+
+        if (found.talent.maxRanks > 1 && code.endsWith(fullRun)) {
+            code = code.slice(0, -fullRun.length) + ORDER_FULL_RANKS.charAt(found.position);
+        }
+    }
+
+    return code;
+};
+
+export const decodeOrder = (trees: readonly TalentTree[], code: string): PointOrder | null => {
+    const order: number[] = [];
+    let tree: TalentTree | undefined;
+
+    if (trees.length > ORDER_MAX_TREES) {
+        return null;
+    }
+
+    for (const char of code) {
+        const treeIndex = Number.parseInt(char, 10);
+
+        if (treeIndex < trees.length) {
+            tree = trees[treeIndex];
+            continue;
+        }
+
+        const point = ORDER_POINT.indexOf(char);
+        const fullRanks = ORDER_FULL_RANKS.indexOf(char);
+        const talent = tree?.talents[point >= 0 ? point : fullRanks];
+
+        if (!talent) {
+            return null;
+        }
+
+        for (let count = point >= 0 ? 1 : talent.maxRanks; count > 0; count--) {
+            order.push(talent.id);
+        }
+    }
+
+    return isOrderValid(trees, order) ? order : null;
 };

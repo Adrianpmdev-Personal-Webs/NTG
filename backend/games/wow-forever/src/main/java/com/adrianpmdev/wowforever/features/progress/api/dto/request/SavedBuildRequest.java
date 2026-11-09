@@ -12,12 +12,14 @@ import jakarta.validation.constraints.Size;
  * @param name  name the player gives it
  * @param level level of the build
  * @param build share code of the build
+ * @param order order the points were spent in, in the short code of the talent calculator; null when it was not recorded
  *
  * @author adrianpmdev
  */
 public record SavedBuildRequest(
         @NotBlank @Size(max = 30) String name,
         @Min(1) @Max(200) int level,
-        @NotBlank @Size(max = 300) @Pattern(regexp = "[0-9a-zA-Z.-]+") String build
+        @NotBlank @Size(max = 300) @Pattern(regexp = "[0-9a-zA-Z.-]+") String build,
+        @Size(min = 1, max = 200) @Pattern(regexp = "[0-9a-zA-Z.!_~^-]+") String order
 ) {
 }

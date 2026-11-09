@@ -1,0 +1,100 @@
+@use 'mixins' as *;
+@use '../../styles/wow-forever' as wow;
+
+:host {
+    display: block;
+}
+
+.talent-order {
+    @include wow.panel;
+    margin-top: 12px;
+    padding: 10px 14px;
+}
+
+.toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 0;
+    border: none;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    text-align: left;
+}
+
+.title {
+    @include wow.section-title;
+}
+
+.arrow {
+    color: wow.$gold;
+    transition: transform 0.15s;
+
+    &.closed {
+        transform: rotate(-90deg);
+    }
+}
+
+.details {
+    margin: 8px 0 0;
+    color: wow.$muted;
+    font-size: 0.85rem;
+
+    &.missing {
+        color: wow.$bright;
+    }
+}
+
+.steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 4px 16px;
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    padding: 2px 0;
+    border-bottom: 1px solid wow.$line;
+    font-size: 0.85rem;
+}
+
+.level {
+    flex: none;
+    width: 48px;
+    color: wow.$gold;
+    font-weight: bold;
+}
+
+.icon {
+    @include wow.icon(22px);
+    flex: none;
+}
+
+.name {
+    overflow: hidden;
+    color: wow.$text;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.rank {
+    flex: none;
+    margin-left: auto;
+    color: wow.$muted;
+    font-size: 0.75rem;
+}
+
+@include mobile {
+    .steps {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

@@ -49,6 +49,7 @@
             </div>
 
             <div class="actions">
+                <app-wow-button [disabled]="!canUndo()" (click)="undo()">Deshacer</app-wow-button>
                 <app-wow-button (click)="reset()">Reiniciar</app-wow-button>
                 <app-wow-button (click)="share()">Compartir</app-wow-button>
             </div>
@@ -64,6 +65,7 @@
                     [classSlug]="gameClass.slug"
                     [trees]="trees()"
                     [build]="currentBuild()"
+                    [order]="currentOrder()"
                     [level]="level()"
                     (loadBuild)="loadSavedBuild($event)"
                 />
@@ -117,8 +119,11 @@
                 />
             }
 
+            <app-talent-order [trees]="trees()" [order]="order()" [levels]="levels()" />
+
             <p class="hint">
-                Pulsa un talento para ganar un punto. Clic derecho, o mantén pulsado en el móvil, para quitarlo.
+                Pulsa un talento para ganar un punto. Clic derecho, o mantén pulsado en el móvil, para quitarlo: solo se
+                puede si los puntos que pusiste después siguen siendo válidos. Deshacer (Ctrl+Z) quita el último.
             </p>
         }
     }

@@ -69,7 +69,8 @@ public class PlayerProgressService {
     public List<SavedBuildResponse> saveBuild(String classSlug, int slot, SavedBuildRequest request) {
         requireSlot(slot);
         requireClass(classSlug);
-        repository.saveBuild(caller(), classSlug, slot, request.name().trim(), request.level(), request.build());
+        repository.saveBuild(caller(), classSlug, slot, request.name().trim(), request.level(), request.build(),
+                request.order());
 
         return builds(classSlug);
     }

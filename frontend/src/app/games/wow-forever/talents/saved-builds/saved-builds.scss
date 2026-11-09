@@ -74,6 +74,11 @@
     }
 }
 
+.no-order {
+    color: wow.$bright;
+    white-space: nowrap;
+}
+
 .actions {
     display: flex;
     flex-wrap: wrap;

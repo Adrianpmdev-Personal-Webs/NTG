@@ -35,7 +35,7 @@ import static org.mockito.Mockito.when;
 class PlayerProgressServiceTest {
 
     private static final UUID ANA = UUID.randomUUID();
-    private static final SavedBuildRequest BUILD = new SavedBuildRequest(" Raid ", 60, "161.5-162.3");
+    private static final SavedBuildRequest BUILD = new SavedBuildRequest(" Raid ", 60, "161.5-162.3", "0A1b");
 
     private final PlayerProgressRepository repository = mock(PlayerProgressRepository.class);
     private final GameDataService gameData = mock(GameDataService.class);
@@ -50,7 +50,7 @@ class PlayerProgressServiceTest {
 
     @Test
     void theBuildsAreAlwaysFiveSlotsWithTheEmptyOnesAsNull() {
-        SavedBuildResponse kept = new SavedBuildResponse("Raid", 60, "161.5");
+        SavedBuildResponse kept = new SavedBuildResponse("Raid", 60, "161.5", null);
         when(repository.builds(ANA, "warrior")).thenReturn(Map.of(2, kept));
 
         assertThat(service.builds("warrior")).containsExactly(null, null, kept, null, null);
@@ -62,7 +62,7 @@ class PlayerProgressServiceTest {
 
         service.saveBuild("warrior", 4, BUILD);
 
-        verify(repository).saveBuild(ANA, "warrior", 4, "Raid", 60, "161.5-162.3");
+        verify(repository).saveBuild(ANA, "warrior", 4, "Raid", 60, "161.5-162.3", "0A1b");
     }
 
     @Test
@@ -70,7 +70,7 @@ class PlayerProgressServiceTest {
         assertThatThrownBy(() -> service.saveBuild("warrior", 5, BUILD)).isInstanceOf(ResponseStatusException.class);
         assertThatThrownBy(() -> service.deleteBuild("warrior", -1)).isInstanceOf(ResponseStatusException.class);
 
-        verify(repository, never()).saveBuild(any(), any(), anyInt(), any(), anyInt(), any());
+        verify(repository, never()).saveBuild(any(), any(), anyInt(), any(), anyInt(), any(), any());
     }
 
     @Test

@@ -44,7 +44,12 @@
                             />
 
                             @if (row.distribution; as distribution) {
-                                <p class="details">{{ distribution }} · Nivel {{ slot.level }}</p>
+                                <p class="details">
+                                    {{ distribution }} · Nivel {{ slot.level }}
+                                    @if (!slot.order) {
+                                        · <span class="no-order">Sin orden</span>
+                                    }
+                                </p>
                             } @else {
                                 <p class="details invalid">No válida tras un parche</p>
                             }

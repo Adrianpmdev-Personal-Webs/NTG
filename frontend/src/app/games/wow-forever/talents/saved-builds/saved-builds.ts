@@ -3,7 +3,8 @@
  *
  * Slots of the talent calculator where a player keeps builds of the selected class on their account: save the current
  * build under a chosen name, load it back, rename it or delete it. A build that no longer fits the talents of the class after a game patch
- * is marked and cannot be loaded, but its slot can still be overwritten or deleted.
+ * is marked and cannot be loaded, but its slot can still be overwritten or deleted. A build kept without the order of
+ * its points is marked too, so the player knows to make it again.
  *
  * @author @adrianpmdev
  */
@@ -50,6 +51,7 @@ export class SavedBuilds {
     readonly classSlug = input.required<string>();
     readonly trees = input.required<readonly TalentTree[]>();
     readonly build = input.required<string | null>();
+    readonly order = input.required<string | null>();
     readonly level = input.required<number>();
     readonly loadBuild = output<SavedBuild>();
 
@@ -73,7 +75,7 @@ export class SavedBuilds {
             index,
             slot,
             distribution: slot ? this.distributionOf(slot) : null,
-            current: slot !== null && slot.build === this.build(),
+            current: slot !== null && slot.build === this.build() && slot.order === this.order(),
         })),
     );
 
@@ -124,7 +126,7 @@ export class SavedBuilds {
         const name = this.cleanName(index, value);
 
         this.pending.set(null);
-        this.store(index, { name, level: this.level(), build }, () =>
+        this.store(index, { name, level: this.level(), build, order: this.order() }, () =>
             this.notificationCenter.success(`Build guardada: ${name}`),
         );
     }

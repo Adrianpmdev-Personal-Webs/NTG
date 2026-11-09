@@ -3,7 +3,10 @@
  *
  * Talent calculator of WoW Forever: pick a class, set the level and spend points in its three trees, seeing the level
  * the spent points need. The talents of a class are downloaded when it is picked. The build lives in the URL so it can
- * be shared, and the player can keep builds of each class in slots of their account.
+ * be shared, and the player can keep builds of each class in slots of their account. Every point is recorded in the
+ * order it was spent, so the build can be followed level by level: a point can only be removed when the points spent
+ * after it would still have been allowed, and undo (also Ctrl+Z) takes back the last one. A build opened without its
+ * order keeps working as before and asks to be made again to record it.
  *
  * @author @adrianpmdev
  */
@@ -31,27 +34,36 @@ import { creditLine, hideBrokenIcon } from '../../wow-forever-config';
 import { SavedBuilds } from '../saved-builds/saved-builds';
 import { SavedBuild } from '../saved-builds-models';
 import { TalentGrid } from '../talent-grid/talent-grid';
+import { TalentOrder } from '../talent-order/talent-order';
 import { TalentTooltip } from '../talent-tooltip/talent-tooltip';
 import { cssUrl, gameImages } from '../../game-data/game-images';
 import {
+    PointOrder,
     Ranks,
     canAdd,
     canRemove,
+    canRemoveFromOrder,
     decodeBuild,
+    decodeOrder,
     encodeBuild,
+    encodeOrder,
     minLevelFor,
     pointsAtLevel,
     pointsInTree,
+    ranksFromOrder,
+    sameRanks,
     totalPoints,
+    withoutLastPoint,
 } from '../talents-logic';
 import { ClassTalents, Talent, TalentHover, TalentTree } from '../talents-models';
 
 @Component({
     selector: 'app-talent-calculator',
-    imports: [ClassPicker, SavedBuilds, TalentGrid, TalentTooltip, WowButton, WowPage],
+    imports: [ClassPicker, SavedBuilds, TalentGrid, TalentOrder, TalentTooltip, WowButton, WowPage],
     templateUrl: './talent-calculator.html',
     styleUrl: './talent-calculator.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
+    host: { '(document:keydown)': 'undoFromKeyboard($event)' },
 })
 export class TalentCalculator implements OnInit {
     private readonly gameData = inject(GameDataApi);
@@ -67,7 +79,13 @@ export class TalentCalculator implements OnInit {
     protected readonly selectedClass = signal<GameClass | null>(null);
     private readonly classTalents = signal<ClassTalents | null>(null);
     private readonly indexCredit = signal<DataCredit | null>(null);
-    protected readonly ranks = signal<Ranks>({});
+    protected readonly order = signal<PointOrder | null>([]);
+    private readonly unorderedRanks = signal<Ranks>({});
+    protected readonly ranks = computed<Ranks>(() => {
+        const order = this.order();
+
+        return order ? ranksFromOrder(order) : this.unorderedRanks();
+    });
     protected readonly level = signal(0);
     protected readonly loading = signal(true);
     protected readonly loadingTrees = signal(false);
@@ -77,7 +95,7 @@ export class TalentCalculator implements OnInit {
 
     protected readonly trees = computed<TalentTree[]>(() => this.classTalents()?.trees ?? []);
 
-    private readonly levels = signal<readonly number[]>([]);
+    protected readonly levels = signal<readonly number[]>([]);
     protected readonly firstLevel = computed(() => this.levels()[0] ?? 0);
     protected readonly maxLevel = computed(() => this.levels().at(-1) ?? 0);
 
@@ -89,6 +107,12 @@ export class TalentCalculator implements OnInit {
     protected readonly currentBuild = computed(() =>
         this.pointsSpent() > 0 ? encodeBuild(this.trees(), this.ranks()) : null,
     );
+    protected readonly currentOrder = computed(() => {
+        const order = this.order();
+
+        return order && order.length > 0 ? encodeOrder(this.trees(), order) : null;
+    });
+    protected readonly canUndo = computed(() => (this.order()?.length ?? 0) > 0);
 
     protected readonly hovered = computed(() => {
         const hover = this.hover();
@@ -122,10 +146,10 @@ export class TalentCalculator implements OnInit {
         });
     }
 
-    protected selectClass(gameClass: GameClass, build?: string, level?: number): void {
+    protected selectClass(gameClass: GameClass, build?: string, level?: number, order?: string): void {
         this.selectedClass.set(gameClass);
         this.classTalents.set(null);
-        this.ranks.set({});
+        this.clearPoints();
         this.hover.set(null);
         this.activeTree.set(0);
 
@@ -141,7 +165,7 @@ export class TalentCalculator implements OnInit {
                 this.loadingTrees.set(false);
 
                 if (build) {
-                    this.applyBuild(build);
+                    this.applyBuild(build, order);
                 }
 
                 this.syncUrl();
@@ -156,23 +180,53 @@ export class TalentCalculator implements OnInit {
     protected addPoint(talent: Talent): void {
         const tree = this.treeOf(talent);
 
-        if (tree && canAdd(talent, tree, this.ranks(), this.pointsLeft())) {
-            this.ranks.update((ranks) => ({ ...ranks, [talent.id]: (ranks[talent.id] ?? 0) + 1 }));
-            this.syncUrl();
+        if (!tree || !canAdd(talent, tree, this.ranks(), this.pointsLeft())) {
+            return;
         }
+
+        if (this.order()) {
+            this.order.update((order) => [...(order ?? []), talent.id]);
+        } else {
+            this.unorderedRanks.update((ranks) => ({ ...ranks, [talent.id]: (ranks[talent.id] ?? 0) + 1 }));
+        }
+
+        this.syncUrl();
     }
 
     protected removePoint(talent: Talent): void {
         const tree = this.treeOf(talent);
+        const order = this.order();
 
-        if (tree && canRemove(talent, tree, this.ranks())) {
-            this.ranks.update((ranks) => ({ ...ranks, [talent.id]: (ranks[talent.id] ?? 0) - 1 }));
+        if (order && canRemoveFromOrder(talent, this.trees(), order)) {
+            this.order.set(withoutLastPoint(order, talent));
+            this.syncUrl();
+        } else if (!order && tree && canRemove(talent, tree, this.ranks())) {
+            this.unorderedRanks.update((ranks) => ({ ...ranks, [talent.id]: (ranks[talent.id] ?? 0) - 1 }));
             this.syncUrl();
         }
     }
 
+    protected undo(): void {
+        if (this.canUndo()) {
+            this.order.update((order) => order?.slice(0, -1) ?? null);
+            this.syncUrl();
+        }
+    }
+
+    protected undoFromKeyboard(event: KeyboardEvent): void {
+        const target = event.target as HTMLElement | null;
+        const typing = target?.isContentEditable || ['INPUT', 'SELECT', 'TEXTAREA'].includes(target?.tagName ?? '');
+
+        if (!(event.ctrlKey || event.metaKey) || event.shiftKey || event.code !== 'KeyZ' || typing || !this.canUndo()) {
+            return;
+        }
+
+        event.preventDefault();
+        this.undo();
+    }
+
     protected reset(): void {
-        this.ranks.set({});
+        this.clearPoints();
         this.syncUrl();
     }
 
@@ -189,7 +243,7 @@ export class TalentCalculator implements OnInit {
 
     protected loadSavedBuild(saved: SavedBuild): void {
         this.level.set(Math.min(this.maxLevel(), Math.max(this.firstLevel(), saved.level)));
-        this.applyBuild(saved.build);
+        this.applyBuild(saved.build, saved.order ?? undefined);
         this.syncUrl();
     }
 
@@ -229,16 +283,29 @@ export class TalentCalculator implements OnInit {
         return this.trees().find((tree) => tree.id === talent.treeId);
     }
 
-    private applyBuild(build: string): void {
+    private clearPoints(): void {
+        this.order.set([]);
+        this.unorderedRanks.set({});
+    }
+
+    private applyBuild(build: string, orderCode?: string): void {
         const decoded = decodeBuild(this.trees(), build);
         const spent = totalPoints(this.trees(), decoded);
+        const order = orderCode ? decodeOrder(this.trees(), orderCode) : null;
 
         if (spent === 0) {
             return;
         }
 
         this.level.update((level) => Math.max(level, minLevelFor(this.levels(), spent)));
-        this.ranks.set(decoded);
+
+        if (order && sameRanks(ranksFromOrder(order), decoded)) {
+            this.order.set(order);
+            this.unorderedRanks.set({});
+        } else {
+            this.order.set(null);
+            this.unorderedRanks.set(decoded);
+        }
     }
 
     private openFromUrl(): void {
@@ -247,7 +314,12 @@ export class TalentCalculator implements OnInit {
         const fromUrl = classes.find((gameClass) => gameClass.slug === params.get('class')) ?? classes[0];
 
         if (fromUrl) {
-            this.selectClass(fromUrl, params.get('build') ?? undefined, Number(params.get('level')) || undefined);
+            this.selectClass(
+                fromUrl,
+                params.get('build') ?? undefined,
+                Number(params.get('level')) || undefined,
+                params.get('order') ?? undefined,
+            );
         }
     }
 
@@ -260,7 +332,12 @@ export class TalentCalculator implements OnInit {
 
         this.router.navigate([], {
             relativeTo: this.route,
-            queryParams: { class: gameClass.slug, level: this.level(), build: this.currentBuild() },
+            queryParams: {
+                class: gameClass.slug,
+                level: this.level(),
+                build: this.currentBuild(),
+                order: this.currentOrder(),
+            },
             replaceUrl: true,
         });
     }

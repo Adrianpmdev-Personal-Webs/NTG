@@ -41,7 +41,8 @@ create unique index if not exists characters_user_name_key on wow_forever.charac
 
 -- ─── saved_builds ────────────────────────────────────────────────────────────────────────────────────
 -- The talent builds a player keeps, five per class. The class is a slug of the game data and the build a share
--- code, which a game patch can leave out of date: the slot stays and the screen marks it.
+-- code, which a game patch can leave out of date: the slot stays and the screen marks it. point_order is the order
+-- the points were spent in (short code of the talent calculator), null on builds kept before it was recorded.
 
 create table if not exists wow_forever.saved_builds (
     user_id    uuid        not null,
@@ -54,6 +55,8 @@ create table if not exists wow_forever.saved_builds (
     constraint saved_builds_pkey primary key (user_id, class_slug, slot),
     constraint saved_builds_slot_check check (slot between 0 and 4)
 );
+
+alter table wow_forever.saved_builds add column if not exists point_order varchar(200);
 
 -- ─── legacy_challenges ───────────────────────────────────────────────────────────────────────────────
 -- The Legacy challenges a player ticked, by name, because the game client gives them no stable id.

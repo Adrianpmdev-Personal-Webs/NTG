@@ -3,6 +3,7 @@ package com.adrianpmdev.wowforever.features.gamedata.infrastructure.storage;
 import com.adrianpmdev.platform.port.ObjectStorage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -12,21 +13,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
-import java.time.Instant;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * Keeps the last good game data file in the private bucket {@code wow-forever-data} (see
- * {@code sql/wow-forever.sql}), compressed with gzip, so a restart of the backend serves it at once instead of
- * building it again from the game client.
- * <p>
- * It also keeps a small mark while a build is being read ({@value #ATTEMPT}), removed when the read ends, whether it
- * worked or not. A mark found at start means that build stopped the backend while it was being read (it ran out of
- * memory), so the sync service can avoid reading it again on every restart.
+ * Keeps in the private bucket {@code wow-forever-data} (see {@code sql/wow-forever.sql}), compressed with gzip:
+ * <ul>
+ *     <li>{@value #DATA}: the last good game data file, so a restart serves it at once instead of reading the game
+ *     client again;</li>
+ *     <li>{@value #CLASSIC}: the Classic reference, read once from the client of Classic Era, which does not
+ *     change;</li>
+ *     <li>{@value #PENDING}: the build waiting to be read on a clean start, and how many reads of it were started and
+ *     never ended well. It is removed once that build is served and kept.</li>
+ * </ul>
  *
  * @author adrianpmdev
  */
@@ -35,21 +36,13 @@ import java.util.zip.GZIPOutputStream;
 public class GameDataStore {
 
     static final String BUCKET = "wow-forever-data";
-    static final String OBJECT = "data.json.gz";
-    static final String ATTEMPT = "reading.json.gz";
+    static final String DATA = "data.json.gz";
+    static final String CLASSIC = "classic.json.gz";
+    static final String PENDING = "pending.json.gz";
     private static final String CONTENT_TYPE = "application/gzip";
 
     private final ObjectStorage storage;
     private final ObjectMapper objectMapper = new ObjectMapper();
-
-    /**
-     * A build that was being read.
-     *
-     * @param build     version of the build
-     * @param startedAt when its read started
-     */
-    public record Attempt(String build, Instant startedAt) {
-    }
 
     /**
      * The data file kept last time.
@@ -58,7 +51,7 @@ public class GameDataStore {
      * @throws UncheckedIOException when the kept file cannot be read
      */
     public Optional<JsonNode> load() {
-        return storage.download(BUCKET, OBJECT).map(this::read);
+        return storage.download(BUCKET, DATA).map(this::read);
     }
 
     /**
@@ -67,40 +60,61 @@ public class GameDataStore {
      * @param data the file
      */
     public void save(JsonNode data) {
-        storage.upload(BUCKET, OBJECT, write(data), CONTENT_TYPE);
+        storage.upload(BUCKET, DATA, write(data), CONTENT_TYPE);
     }
 
     /**
-     * The build whose read never ended, if any.
+     * The Classic reference kept last time.
      *
-     * @return the unfinished read, or empty when there is none (or the mark cannot be understood)
+     * @return the reference, or empty when none has been kept yet
+     * @throws UncheckedIOException when the kept reference cannot be read
      */
-    public Optional<Attempt> unfinishedRead() {
-        return storage.download(BUCKET, ATTEMPT).map(this::read).flatMap(mark -> {
-            try {
-                return Optional.of(new Attempt(mark.path("build").asText(),
-                        Instant.parse(mark.path("startedAt").asText())));
-            } catch (DateTimeParseException exception) {
-                return Optional.empty();
-            }
+    public Optional<JsonNode> loadClassic() {
+        return storage.download(BUCKET, CLASSIC).map(this::read);
+    }
+
+    /**
+     * Keeps the Classic reference, replacing the previous one.
+     *
+     * @param reference the reference
+     */
+    public void saveClassic(JsonNode reference) {
+        storage.upload(BUCKET, CLASSIC, write(reference), CONTENT_TYPE);
+    }
+
+    /**
+     * The build waiting to be read.
+     *
+     * @return the pending build, or empty when there is none (or its note cannot be understood)
+     */
+    public Optional<PendingBuild> pending() {
+        return storage.download(BUCKET, PENDING).map(this::read).flatMap(note -> {
+            String build = note.path("build").asText("");
+
+            return build.isEmpty() ? Optional.empty() : Optional.of(new PendingBuild(build,
+                    note.path("exporter").asText(""), note.path("deploy").asText(""),
+                    note.path("attempts").asInt(), note.path("lastError").asText(null)));
         });
     }
 
     /**
-     * Marks the start of the read of a build.
+     * Notes the build waiting to be read, replacing the previous note.
      *
-     * @param attempt the build and when its read starts
+     * @param pending the build and its attempts
      */
-    public void startRead(Attempt attempt) {
-        JsonNode mark = objectMapper.createObjectNode()
-                .put("build", attempt.build())
-                .put("startedAt", attempt.startedAt().toString());
-        storage.upload(BUCKET, ATTEMPT, write(mark), CONTENT_TYPE);
+    public void savePending(PendingBuild pending) {
+        ObjectNode note = objectMapper.createObjectNode()
+                .put("build", pending.build())
+                .put("exporter", pending.exporter())
+                .put("deploy", pending.deploy())
+                .put("attempts", pending.attempts())
+                .put("lastError", pending.lastError());
+        storage.upload(BUCKET, PENDING, write(note), CONTENT_TYPE);
     }
 
-    /** Removes the mark: the read has ended. */
-    public void endRead() {
-        storage.delete(BUCKET, List.of(ATTEMPT));
+    /** Removes the note of the pending build: it is served and kept. */
+    public void deletePending() {
+        storage.delete(BUCKET, List.of(PENDING));
     }
 
     private JsonNode read(byte[] compressed) {

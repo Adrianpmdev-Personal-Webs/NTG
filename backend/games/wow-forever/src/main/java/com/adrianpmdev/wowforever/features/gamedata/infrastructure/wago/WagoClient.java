@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
 
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -39,6 +40,7 @@ public class WagoClient {
     private static final String USER_AGENT = "NTG-System/1.0 (+https://github.com/adrianpmdev)";
     private static final Pattern VERSION = Pattern.compile("\\d+(\\.\\d+){3}");
     private static final String GZIP = "gzip";
+    private static final int TOO_MANY_REQUESTS = 429;
 
     /** Versions by number, part by part: 1.60.1.70658 before 1.60.1.70685. */
     private static final Comparator<String> BY_VERSION = Comparator.comparing(
@@ -91,6 +93,11 @@ public class WagoClient {
         };
     }
 
+    /**
+     * One answer of wago.tools. Not reaching it, a server error and an answer cut half way throw
+     * {@link WagoUnavailableException}, as they pass on their own; any other answer that is not 200 throws a plain
+     * IOException.
+     */
     private InputStream get(String path, Duration timeout) throws IOException {
         HttpRequest request = HttpRequest.newBuilder(URI.create(BASE_URL + path))
                 .timeout(timeout)
@@ -101,19 +108,61 @@ public class WagoClient {
 
         try {
             HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            int status = response.statusCode();
 
-            if (response.statusCode() != 200) {
+            if (status != 200) {
                 response.body().close();
-                throw new IOException("wago.tools answered " + response.statusCode() + " for " + path);
+                String message = "wago.tools answered " + status + " for " + path;
+                throw status >= 500 || status == TOO_MANY_REQUESTS ? new WagoUnavailableException(message, null)
+                        : new IOException(message);
             }
 
             boolean compressed = response.headers().firstValue("Content-Encoding")
                     .filter(GZIP::equalsIgnoreCase).isPresent();
 
-            return compressed ? new GZIPInputStream(response.body()) : response.body();
+            return new CutAnswer(compressed ? new GZIPInputStream(response.body()) : response.body(), path);
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
-            throw new IOException("The request to wago.tools was interrupted", exception);
+            throw new WagoUnavailableException("The request to wago.tools was interrupted", exception);
+        } catch (WagoUnavailableException exception) {
+            throw exception;
+        } catch (IOException exception) {
+            throw new WagoUnavailableException("wago.tools could not be reached for " + path + ": "
+                    + exception.getMessage(), exception);
+        }
+    }
+
+    /** An answer whose reading errors (the connection cut, a timeout) say that wago.tools was unavailable. */
+    private static final class CutAnswer extends FilterInputStream {
+
+        private final String path;
+
+        private CutAnswer(InputStream body, String path) {
+            super(body);
+            this.path = path;
+        }
+
+        @Override
+        public int read() throws IOException {
+            try {
+                return super.read();
+            } catch (IOException exception) {
+                throw cut(exception);
+            }
+        }
+
+        @Override
+        public int read(byte[] buffer, int offset, int length) throws IOException {
+            try {
+                return super.read(buffer, offset, length);
+            } catch (IOException exception) {
+                throw cut(exception);
+            }
+        }
+
+        private WagoUnavailableException cut(IOException exception) {
+            return new WagoUnavailableException("The answer of wago.tools for " + path + " was cut: "
+                    + exception.getMessage(), exception);
         }
     }
 }

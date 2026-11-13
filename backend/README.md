@@ -239,7 +239,8 @@ security headers (see the [frontend documentation](../frontend/README.md)).
   commit. **Space:** the database and the files per bucket, with two small queries, against the plan limits
   (`app.dashboard.*`).
 - **Modules:** each one may declare a `ModuleStatusProvider`. WoW Forever tells its served build, the newest one on
-  wago.tools and how the last check went.
+  wago.tools, the build waiting to be read and its attempts, the Classic Era build it is compared with and how the last
+  check went.
 - **Accounts:** the last activity is the latest of `core.user.last_seen_at` (written at most once an hour per user)
   and the last sign in of Supabase Auth. The column is plain SQL, outside the `User` entity, so a database that still
   lacks it only loses this value.
@@ -300,9 +301,10 @@ plus **one schema per game** that needs tables. Each module keeps its DDL next t
 - Data that only changes with a release (the Pokémon type chart, the WoW Forever texts and rules) lives in JSON
   files inside the module, not in the database.
 - The WoW Forever game data is built by the backend from the game client (through wago.tools) every time a new
-  build comes out, checked every hour; the last good copy is kept in a private Storage bucket. After a read whose copy
-  was kept, the backend restarts at 05:00 (Madrid) to give back the memory the read leaves; without a new build it does
-  not restart.
+  build comes out, checked every hour; the last good copy is kept in a private Storage bucket. A new build is only read
+  on a clean start: the backend notes it in the bucket and restarts, the new start reads it, keeps it and restarts again
+  to give back the memory of the read. A build whose read fails twice is left alone until a newer one or a new deploy.
+  Classic Era, which does not change, is read once and kept in the same bucket as the reference of the comparison.
 - Pictures and songs are files in Supabase Storage; the database keeps only their object names.
 
 ---
@@ -325,7 +327,8 @@ The site runs on the free plans of Render, Vercel and Supabase, so the backend a
 | **ETag on static JSON** | A browser that already has the data gets `304` with no body |
 | **Daily `select 1`** | The keep-alive call touches the database once a day, so Supabase never pauses the project |
 | **Small connection pool** | At most 5 connections to the Supabase pooler; none is held while a picture is compressed or uploaded |
-| **JVM tuned for 512 MB** | Heap capped so the whole process fits, light garbage collector, memory given back after peaks, restart on out-of-memory |
+| **JVM tuned for 512 MB** | Heap capped so the whole process fits, light garbage collector, memory given back after peaks, metaspace and compiled code capped, at most two native memory arenas, restart on out-of-memory |
+| **WoW builds read on a clean start** | A new game build is read right after a restart and followed by another one, so the read never runs on a process that has been up for days |
 
 ---
 

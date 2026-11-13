@@ -4,6 +4,7 @@ import com.adrianpmdev.platform.status.ModuleStatus;
 import com.adrianpmdev.platform.status.ModuleStatus.Level;
 import com.adrianpmdev.platform.status.ModuleStatus.Line;
 import com.adrianpmdev.platform.status.ModuleStatusProvider;
+import com.adrianpmdev.wowforever.features.gamedata.infrastructure.storage.PendingBuild;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -15,7 +16,8 @@ import java.util.Optional;
 
 /**
  * Tells the admin dashboard how the game data is doing: the build being served, when it was generated, the newest
- * build wago.tools has and how the last check went. Everything comes from memory, so it costs no call.
+ * build wago.tools has, the build waiting to be read, the Classic Era build it is compared with and how the last check
+ * went. Everything comes from memory, so it costs no call.
  *
  * @author adrianpmdev
  */
@@ -55,9 +57,28 @@ public class GameDataStatus implements ModuleStatusProvider {
                         behind ? Level.WARNING : Level.OK, "download"),
                 new Line("Última comprobación", date(progress.lastCheckAt()),
                         progress.lastCheckAt() == null ? Level.WARNING : Level.OK, "clock"),
+                pendingLine(progress.pending()),
+                new Line("Referencia de Classic Era", gameDataService.currentClassicBuild().orElse(NONE), Level.OK,
+                        "storage"),
                 new Line("Último error", progress.lastError() == null ? "Ninguno"
                         : date(progress.lastErrorAt()) + " · " + progress.lastError(),
                         progress.failing() ? Level.ERROR : Level.OK, "alert")));
+    }
+
+    /** The build waiting to be read: a warning while it is tried, an error once it is left alone. */
+    private static Line pendingLine(PendingBuild pending) {
+        if (pending == null) {
+            return new Line("Build pendiente", "Ninguna", Level.OK, "refresh");
+        }
+
+        boolean left = pending.attempts() >= GameDataSyncService.MAX_ATTEMPTS;
+        String state = left ? "abandonada tras " + pending.attempts() + " intentos"
+                : "intento " + pending.attempts() + " de " + GameDataSyncService.MAX_ATTEMPTS;
+        String error = pending.lastError() == null ? (pending.attempts() > 0 ? " · tumbó el backend" : "")
+                : " · " + pending.lastError();
+
+        return new Line("Build pendiente", pending.build() + " · " + state + error, left ? Level.ERROR : Level.WARNING,
+                "refresh");
     }
 
     private static String day(String isoDate) {

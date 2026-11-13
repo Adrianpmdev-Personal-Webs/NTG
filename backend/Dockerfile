@@ -41,6 +41,10 @@ USER app
 # Exponer puerto
 EXPOSE 8080
 
+# Como mucho dos zonas de memoria nativa de glibc. Por defecto glibc abre una por cada hilo que reserva memoria y no
+# las devuelve, así que un proceso que lleva días encendido va subiendo de memoria fuera del heap
+ENV MALLOC_ARENA_MAX=2
+
 # Comando de inicio. Ajustes para los 512 MB del plan gratuito de Render:
 #  - MaxRAMPercentage=55: el heap usa como mucho unos 280 MB. Fuera del heap la JVM ocupa unos 175 MB fijos (clases,
 #    código compilado, símbolos), medidos con la aplicación completa, así que el peor caso queda por debajo de 512 MB.
@@ -49,5 +53,8 @@ EXPOSE 8080
 #  - UseSerialGC: el recolector más ligero, el adecuado con 1 CPU y poca memoria
 #  - ShrinkHeapInSteps desactivado y Min/MaxHeapFreeRatio 20/40: tras una recolección completa el heap que sobra se
 #    devuelve al sistema de una vez, en vez de quedarse reservado tras un pico
+#  - MaxMetaspaceSize=128m y ReservedCodeCacheSize=64m: topes a las clases cargadas y al código compilado, medidos con
+#    la aplicación completa tras arrancar y leer una build de WoW (88 MB y 37 MB). Si el código compilado llenara su
+#    tope, la JVM solo deja de compilar más; no se cae
 #  - ExitOnOutOfMemoryError: si se queda sin memoria se cierra y Render lo arranca de nuevo, en vez de quedarse colgado
-ENTRYPOINT ["java", "-XX:MaxRAMPercentage=55", "-XX:+UseSerialGC", "-XX:-ShrinkHeapInSteps", "-XX:MinHeapFreeRatio=20", "-XX:MaxHeapFreeRatio=40", "-XX:+ExitOnOutOfMemoryError", "-jar", "ntg.jar"]
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=55", "-XX:+UseSerialGC", "-XX:-ShrinkHeapInSteps", "-XX:MinHeapFreeRatio=20", "-XX:MaxHeapFreeRatio=40", "-XX:MaxMetaspaceSize=128m", "-XX:ReservedCodeCacheSize=64m", "-XX:+ExitOnOutOfMemoryError", "-jar", "ntg.jar"]

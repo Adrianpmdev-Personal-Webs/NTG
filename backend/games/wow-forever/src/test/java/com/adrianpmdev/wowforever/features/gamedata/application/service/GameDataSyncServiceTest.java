@@ -2,8 +2,11 @@ package com.adrianpmdev.wowforever.features.gamedata.application.service;
 
 import com.adrianpmdev.wowforever.features.gamedata.application.service.export.GameDataExporter;
 import com.adrianpmdev.wowforever.features.gamedata.infrastructure.storage.GameDataStore;
+import com.adrianpmdev.wowforever.features.gamedata.infrastructure.storage.PendingBuild;
 import com.adrianpmdev.wowforever.features.gamedata.infrastructure.wago.WagoClient;
+import com.adrianpmdev.wowforever.features.gamedata.infrastructure.wago.WagoUnavailableException;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.scheduling.TaskScheduler;
@@ -12,6 +15,7 @@ import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
@@ -20,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -29,222 +32,366 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * When the game data is restored, rebuilt or kept as it is, and how a build whose read stopped the backend is kept
- * from stopping it again on every restart.
+ * When the game data is restored, read or kept as it is: a new build is only read on a clean start (the backend
+ * restarts to get one and again after the read), a build is never read without its note, and a build whose reads keep
+ * failing is left alone instead of stopping the backend again and again.
  *
  * @author adrianpmdev
  */
 class GameDataSyncServiceTest {
 
-    private static final Instant NOW = Instant.parse("2026-10-29T12:00:00Z");
+    private static final Instant START = Instant.parse("2026-11-13T02:00:00Z");
     private static final String KEPT_BUILD = GameDataFixtures.testData().path("build").asText();
+    private static final String NEW_BUILD = "9.9.9.9";
+    private static final String CLASSIC_BUILD = "1.15.9.70576";
+    private static final String DEPLOY = "commit-a";
 
     private final GameDataService gameDataService = new GameDataService();
+    private final String fingerprint = GameDataExporter.fingerprint(gameDataService.getConfig());
     private final WagoClient wagoClient = mock(WagoClient.class);
     private final GameDataStore store = mock(GameDataStore.class);
     private final TaskScheduler scheduler = mock(TaskScheduler.class);
     private final BackendRestart backendRestart = mock(BackendRestart.class);
-    private final GameDataSyncService sync = new GameDataSyncService(gameDataService, wagoClient, store, scheduler,
-            backendRestart, Clock.fixed(NOW, ZoneOffset.UTC), true);
+    private final GameDataExporter exporter = mock(GameDataExporter.class);
+    private final MovingClock clock = new MovingClock(START);
+    private final GameDataSyncService sync = service(true);
+
+    @BeforeEach
+    void keptCopyAndClassicReference() {
+        when(store.load()).thenReturn(Optional.of(kept(KEPT_BUILD)));
+        when(store.loadClassic()).thenReturn(Optional.of(classicReference()));
+        when(store.pending()).thenReturn(Optional.empty());
+    }
+
+    /* ─── Nothing to read ─── */
 
     @Test
-    void servesTheKeptCopyAndSkipsABuildItAlreadyHas() throws IOException {
-        ObjectNode kept = GameDataFixtures.testData();
-        kept.put("exporter", GameDataExporter.fingerprint(gameDataService.getConfig()));
-        when(store.load()).thenReturn(Optional.of(kept));
-        when(wagoClient.latestBuild("wowf")).thenReturn(Optional.of(KEPT_BUILD));
+    void servesTheKeptCopyAndReadsNothingWhenItIsTheNewest() throws IOException {
+        newest(KEPT_BUILD);
 
         sync.refresh();
 
         assertThat(gameDataService.currentBuild()).contains(KEPT_BUILD);
         verify(wagoClient, never()).tablesOf(anyString());
         verify(store, never()).save(any());
+        verify(backendRestart, never()).run();
+    }
+
+    @Test
+    void aNoteLeftBehindIsRemovedOnceItsBuildIsServed() throws IOException {
+        newest(KEPT_BUILD);
+        when(store.pending()).thenReturn(Optional.of(new PendingBuild(KEPT_BUILD, fingerprint, DEPLOY, 1, null)));
+
+        sync.refresh();
+
+        verify(store).deletePending();
+        verify(backendRestart, never()).run();
+    }
+
+    /* ─── A new build ─── */
+
+    @Test
+    void aBackendThatHasRunAWhileNotesTheNewBuildAndRestartsToReadIt() throws IOException {
+        newest(NEW_BUILD);
+        clock.advance(Duration.ofHours(3));
+
+        sync.refresh();
+
+        verify(store).savePending(new PendingBuild(NEW_BUILD, fingerprint, DEPLOY, 0, null));
+        verify(backendRestart).run();
+        verify(wagoClient, never()).tablesOf(anyString());
+        assertThat(gameDataService.currentBuild()).contains(KEPT_BUILD);
+    }
+
+    @Test
+    void aBuildThatCannotBeNotedDoesNotRestartTheBackend() throws IOException {
+        newest(NEW_BUILD);
+        clock.advance(Duration.ofHours(3));
+        doThrow(new IllegalStateException("Storage answered 500")).when(store).savePending(any());
+
+        sync.refresh();
+
+        verify(backendRestart, never()).run();
+    }
+
+    @Test
+    void aCleanStartReadsTheBuildKeepsItRemovesTheNoteAndRestarts() throws IOException {
+        newest(NEW_BUILD);
+        exports(NEW_BUILD);
+
+        sync.refresh();
+
+        assertThat(gameDataService.currentBuild()).contains(NEW_BUILD);
+        verify(store).savePending(new PendingBuild(NEW_BUILD, fingerprint, DEPLOY, 1, null));
+        verify(store).save(any());
+        verify(store).deletePending();
+        verify(backendRestart).run();
+        verify(exporter, never()).classicReference(any());
+    }
+
+    @Test
+    void aBuildIsNeverReadWithoutItsNote() throws IOException {
+        newest(NEW_BUILD);
+        doThrow(new IllegalStateException("Storage answered 500")).when(store).savePending(any());
+
+        sync.refresh();
+
+        verify(exporter, never()).export(any(), any(), any());
+        verify(backendRestart, never()).run();
+        assertThat(gameDataService.currentBuild()).contains(KEPT_BUILD);
     }
 
     @Test
     void aKeptCopyWrittenByAnotherVersionOfTheExportIsServedAndItsBuildReadAgain() throws IOException {
-        ObjectNode older = GameDataFixtures.testData();
+        ObjectNode older = kept(KEPT_BUILD);
         older.put("exporter", "another-version");
         when(store.load()).thenReturn(Optional.of(older));
-        when(wagoClient.latestBuild(anyString())).thenReturn(Optional.of(KEPT_BUILD));
-        when(wagoClient.tablesOf(anyString())).thenReturn((name, columns, keep) -> {
-            throw new IOException("wago.tools answered 500");
-        });
-
-        assertThatThrownBy(sync::refresh).isInstanceOf(RuntimeException.class);
-
-        assertThat(gameDataService.currentBuild()).contains(KEPT_BUILD);
-        verify(store).startRead(new GameDataStore.Attempt(KEPT_BUILD, NOW));
-    }
-
-    @Test
-    void aDeveloperMachineReadsTheKeptCopyButNeverWritesToStorage() throws IOException {
-        GameDataSyncService local = new GameDataSyncService(gameDataService, wagoClient, store, scheduler,
-                backendRestart, Clock.fixed(NOW, ZoneOffset.UTC), false);
-        when(store.load()).thenReturn(Optional.of(GameDataFixtures.testData()));
-        when(wagoClient.latestBuild(anyString())).thenReturn(Optional.of(KEPT_BUILD));
-        when(wagoClient.tablesOf(anyString())).thenReturn((name, columns, keep) -> {
-            throw new IOException("wago.tools answered 500");
-        });
-
-        assertThatThrownBy(local::refresh).isInstanceOf(RuntimeException.class);
-
-        assertThat(gameDataService.currentBuild()).contains(KEPT_BUILD);
-        verify(store, never()).startRead(any());
-        verify(store, never()).endRead();
-        verify(store, never()).save(any());
-    }
-
-    @Test
-    void aBuildThatCannotBeReadNeverReplacesTheServedOne() throws IOException {
-        when(store.load()).thenReturn(Optional.of(GameDataFixtures.testData()));
-        when(wagoClient.latestBuild(anyString())).thenReturn(Optional.of("9.9.9.9"));
-        when(wagoClient.tablesOf(anyString())).thenReturn((name, columns, keep) -> {
-            throw new IOException("wago.tools answered 500");
-        });
-
-        assertThatThrownBy(sync::refresh).isInstanceOf(RuntimeException.class);
-
-        assertThat(gameDataService.currentBuild()).contains(KEPT_BUILD);
-        verify(store, never()).save(any());
-        verify(store).startRead(new GameDataStore.Attempt("9.9.9.9", NOW));
-        verify(store).endRead();
-    }
-
-    @Test
-    void aBuildThatStoppedTheBackendIsNotReadAgainForADay() throws IOException {
-        when(store.load()).thenReturn(Optional.of(GameDataFixtures.testData()));
-        when(wagoClient.latestBuild(anyString())).thenReturn(Optional.of("9.9.9.9"));
-        when(store.unfinishedRead())
-                .thenReturn(Optional.of(new GameDataStore.Attempt("9.9.9.9", NOW.minus(Duration.ofHours(2)))));
+        newest(KEPT_BUILD);
+        exports(KEPT_BUILD);
 
         sync.refresh();
-        sync.refresh();
 
-        assertThat(gameDataService.currentBuild()).contains(KEPT_BUILD);
-        verify(wagoClient, never()).tablesOf(anyString());
-        verify(store, never()).startRead(any());
-        verify(store, times(1)).unfinishedRead();
-    }
-
-    @Test
-    void aBuildThatStoppedTheBackendIsReadAgainAfterADay() throws IOException {
-        when(store.load()).thenReturn(Optional.of(GameDataFixtures.testData()));
-        when(wagoClient.latestBuild(anyString())).thenReturn(Optional.of("9.9.9.9"));
-        when(store.unfinishedRead())
-                .thenReturn(Optional.of(new GameDataStore.Attempt("9.9.9.9", NOW.minus(Duration.ofHours(25)))));
-        when(wagoClient.tablesOf(anyString())).thenReturn((name, columns, keep) -> {
-            throw new IOException("wago.tools answered 500");
-        });
-
-        assertThatThrownBy(sync::refresh).isInstanceOf(RuntimeException.class);
-
-        verify(store).startRead(new GameDataStore.Attempt("9.9.9.9", NOW));
-        verify(store).endRead();
-    }
-
-    @Test
-    void anUnfinishedReadOfAnOlderBuildDoesNotStopANewOne() throws IOException {
-        when(store.load()).thenReturn(Optional.of(GameDataFixtures.testData()));
-        when(wagoClient.latestBuild(anyString())).thenReturn(Optional.of("9.9.9.10"));
-        when(store.unfinishedRead())
-                .thenReturn(Optional.of(new GameDataStore.Attempt("9.9.9.9", NOW.minus(Duration.ofHours(1)))));
-        when(wagoClient.tablesOf(anyString())).thenReturn((name, columns, keep) -> {
-            throw new IOException("wago.tools answered 500");
-        });
-
-        assertThatThrownBy(sync::refresh).isInstanceOf(RuntimeException.class);
-
-        verify(store).startRead(new GameDataStore.Attempt("9.9.9.10", NOW));
-    }
-
-    @Test
-    void aKeptReadRestartsTheBackendAtFiveInTheMorningInMadrid() {
-        ArgumentCaptor<Runnable> restart = ArgumentCaptor.forClass(Runnable.class);
-
-        sync.keepAndPlanRestart(GameDataFixtures.testData());
-
-        verify(store).save(any());
-        verify(scheduler).schedule(restart.capture(), eq(Instant.parse("2026-10-30T04:00:00Z")));
-        verify(backendRestart, never()).run();
-
-        restart.getValue().run();
-
+        verify(exporter).export(any(), any(), any());
+        assertThat(gameDataService.currentExporter()).isEqualTo(fingerprint);
         verify(backendRestart).run();
     }
 
+    /* ─── The Classic reference ─── */
+
     @Test
-    void aReadBeforeFiveRestartsTheSameMorningAlsoInSummerTime() {
-        GameDataSyncService summer = new GameDataSyncService(gameDataService, wagoClient, store, scheduler,
-                backendRestart, Clock.fixed(Instant.parse("2026-07-10T01:00:00Z"), ZoneOffset.UTC), true);
+    void theClassicReferenceIsReadOnceFromTheClientAndKept() throws IOException {
+        newest(NEW_BUILD);
+        exports(NEW_BUILD);
+        when(store.loadClassic()).thenReturn(Optional.empty());
+        when(wagoClient.latestBuild("wow_classic_era")).thenReturn(Optional.of(CLASSIC_BUILD));
+        ObjectNode reference = classicReference();
+        when(exporter.classicReference(any())).thenReturn(reference);
 
-        summer.keepAndPlanRestart(GameDataFixtures.testData());
+        sync.refresh();
 
-        verify(scheduler).schedule(any(Runnable.class), eq(Instant.parse("2026-07-10T03:00:00Z")));
+        verify(store).saveClassic(reference);
+        verify(exporter).export(any(), any(), any());
     }
 
     @Test
-    void severalReadsInANightRestartOnce() {
-        sync.keepAndPlanRestart(GameDataFixtures.testData());
-        sync.keepAndPlanRestart(GameDataFixtures.testData());
+    void aClassicReferenceWrittenByAnotherVersionOfTheExportIsReadAgain() throws IOException {
+        newest(NEW_BUILD);
+        exports(NEW_BUILD);
+        ObjectNode older = classicReference();
+        older.put("exporter", "another-version");
+        when(store.loadClassic()).thenReturn(Optional.of(older));
+        when(wagoClient.latestBuild("wow_classic_era")).thenReturn(Optional.of(CLASSIC_BUILD));
+        when(exporter.classicReference(any())).thenReturn(classicReference());
 
-        verify(store, times(2)).save(any());
-        verify(scheduler, times(1)).schedule(any(Runnable.class), any(Instant.class));
+        sync.refresh();
+
+        verify(exporter).classicReference(any());
+        verify(store).saveClassic(any());
+    }
+
+    /* ─── Reads that fail ─── */
+
+    @Test
+    void aReadThatStoppedTheBackendIsTriedOnceMore() throws IOException {
+        newest(NEW_BUILD);
+        exports(NEW_BUILD);
+        when(store.pending()).thenReturn(Optional.of(new PendingBuild(NEW_BUILD, fingerprint, DEPLOY, 1, null)));
+
+        sync.refresh();
+
+        verify(store).savePending(new PendingBuild(NEW_BUILD, fingerprint, DEPLOY, 2, null));
+        assertThat(gameDataService.currentBuild()).contains(NEW_BUILD);
     }
 
     @Test
-    void aCopyThatCouldNotBeKeptNeverRestartsTheBackend() {
-        doThrow(new IllegalStateException("Storage answered 500")).when(store).save(any());
+    void aBuildThatFailedTwiceIsLeftAloneAndShownOnTheDashboard() throws IOException {
+        newest(NEW_BUILD);
+        PendingBuild left = new PendingBuild(NEW_BUILD, fingerprint, DEPLOY, 2, null);
+        when(store.pending()).thenReturn(Optional.of(left));
 
-        sync.keepAndPlanRestart(GameDataFixtures.testData());
+        sync.refresh();
+        clock.advance(Duration.ofHours(3));
+        sync.refresh();
 
-        verify(scheduler, never()).schedule(any(Runnable.class), any(Instant.class));
+        verify(exporter, never()).export(any(), any(), any());
+        verify(store, never()).savePending(any());
         verify(backendRestart, never()).run();
+        assertThat(sync.progress().pending()).isEqualTo(left);
     }
 
     @Test
-    void aDeveloperMachineNeverRestarts() {
-        GameDataSyncService local = new GameDataSyncService(gameDataService, wagoClient, store, scheduler,
-                backendRestart, Clock.fixed(NOW, ZoneOffset.UTC), false);
+    void aNewDeployTriesALeftBuildAgain() throws IOException {
+        newest(NEW_BUILD);
+        exports(NEW_BUILD);
+        when(store.pending()).thenReturn(Optional.of(new PendingBuild(NEW_BUILD, fingerprint, "commit-before", 2, null)));
 
-        local.keepAndPlanRestart(GameDataFixtures.testData());
+        sync.refresh();
 
+        verify(store).savePending(new PendingBuild(NEW_BUILD, fingerprint, DEPLOY, 1, null));
+        assertThat(gameDataService.currentBuild()).contains(NEW_BUILD);
+    }
+
+    @Test
+    void aReadThatFailsCountsAsAnAttemptAndKeepsTheServedBuild() throws IOException {
+        newest(NEW_BUILD);
+        when(exporter.export(any(), any(), any())).thenThrow(new IllegalStateException("no column PosX"));
+
+        assertThatThrownBy(sync::refresh).isInstanceOf(IllegalStateException.class);
+
+        verify(store).savePending(new PendingBuild(NEW_BUILD, fingerprint, DEPLOY, 1, "no column PosX"));
         verify(store, never()).save(any());
-        verify(scheduler, never()).schedule(any(Runnable.class), any(Instant.class));
+        verify(backendRestart, never()).run();
+        assertThat(gameDataService.currentBuild()).contains(KEPT_BUILD);
     }
 
     @Test
-    void aReadThatFailsPlansNoRestart() throws IOException {
-        when(store.load()).thenReturn(Optional.of(GameDataFixtures.testData()));
-        when(wagoClient.latestBuild(anyString())).thenReturn(Optional.of("9.9.9.9"));
-        when(wagoClient.tablesOf(anyString())).thenReturn((name, columns, keep) -> {
-            throw new IOException("wago.tools answered 500");
-        });
+    void aReadThatFailsBecauseWagoWasUnavailableDoesNotCount() throws IOException {
+        newest(NEW_BUILD);
+        when(exporter.export(any(), any(), any())).thenThrow(new java.io.UncheckedIOException("table SpellName",
+                new WagoUnavailableException("wago.tools answered 502", null)));
 
         assertThatThrownBy(sync::refresh).isInstanceOf(RuntimeException.class);
 
-        verify(scheduler, never()).schedule(any(Runnable.class), any(Instant.class));
-        verify(backendRestart, never()).run();
+        verify(store).savePending(new PendingBuild(NEW_BUILD, fingerprint, DEPLOY, 0, "table SpellName"));
     }
 
     @Test
-    void checksAgainSoonWhileNothingIsServedAndHourlyAfterwards() throws IOException {
-        when(store.load()).thenReturn(Optional.empty()).thenReturn(Optional.of(GameDataFixtures.testData()));
-        when(wagoClient.latestBuild(anyString())).thenThrow(new IOException("unreachable"));
+    void aCopyThatCouldNotBeKeptIsKeptOnTheNextCheckBeforeRestarting() throws IOException {
+        newest(NEW_BUILD);
+        exports(NEW_BUILD);
+        doThrow(new IllegalStateException("Storage answered 500")).doNothing().when(store).save(any());
+
+        sync.refresh();
+
+        verify(backendRestart, never()).run();
+        verify(store, never()).deletePending();
+
+        clock.advance(Duration.ofHours(1));
+        sync.refresh();
+
+        verify(store, times(2)).save(any());
+        verify(store).deletePending();
+        verify(backendRestart).run();
+        verify(exporter, times(1)).export(any(), any(), any());
+    }
+
+    /* ─── A developer machine ─── */
+
+    @Test
+    void aDeveloperMachineReadsInPlaceAndNeverWritesToStorageNorRestarts() throws IOException {
+        GameDataSyncService local = service(false);
+        newest(NEW_BUILD);
+        exports(NEW_BUILD);
+        clock.advance(Duration.ofHours(3));
+
+        local.refresh();
+
+        assertThat(gameDataService.currentBuild()).contains(NEW_BUILD);
+        verify(store, never()).savePending(any());
+        verify(store, never()).save(any());
+        verify(store, never()).saveClassic(any());
+        verify(backendRestart, never()).run();
+    }
+
+    /* ─── When the checks run ─── */
+
+    @Test
+    void checksAgainSoonWhileNothingIsServedOrAFreshStartFailsAndHourlyAfterwards() throws IOException {
+        when(store.load()).thenReturn(Optional.empty()).thenReturn(Optional.of(kept(KEPT_BUILD)));
+        when(wagoClient.latestBuild(anyString())).thenThrow(new WagoUnavailableException("unreachable", null));
         ArgumentCaptor<Runnable> task = ArgumentCaptor.forClass(Runnable.class);
-        ArgumentCaptor<Instant> when = ArgumentCaptor.forClass(Instant.class);
+        ArgumentCaptor<Instant> at = ArgumentCaptor.forClass(Instant.class);
 
         sync.start();
-        verify(scheduler).schedule(task.capture(), when.capture());
+        verify(scheduler).schedule(task.capture(), at.capture());
         task.getValue().run();
-        verify(scheduler, times(2)).schedule(task.capture(), when.capture());
+        verify(scheduler, times(2)).schedule(task.capture(), at.capture());
         task.getValue().run();
-        verify(scheduler, times(3)).schedule(task.capture(), when.capture());
+        verify(scheduler, times(3)).schedule(task.capture(), at.capture());
+        clock.advance(Duration.ofMinutes(20));
+        task.getValue().run();
+        verify(scheduler, times(4)).schedule(task.capture(), at.capture());
 
-        List<Instant> times = when.getAllValues();
-        assertThat(times.getFirst()).isEqualTo(NOW);
-        assertThat(times.get(times.size() - 2)).isEqualTo(NOW.plus(Duration.ofMinutes(5)));
-        assertThat(times.getLast()).isEqualTo(NOW.plus(Duration.ofMinutes(60)));
+        List<Instant> times = at.getAllValues();
+        assertThat(times.getFirst()).isEqualTo(START);
+        assertThat(times.get(times.size() - 3)).isEqualTo(START.plus(Duration.ofMinutes(5)));
+        assertThat(times.get(times.size() - 2)).isEqualTo(START.plus(Duration.ofMinutes(5)));
+        assertThat(times.getLast()).isEqualTo(START.plus(Duration.ofMinutes(80)));
         assertThat(gameDataService.currentBuild()).contains(KEPT_BUILD);
+    }
+
+    @Test
+    void noCheckIsPlannedOnceTheBackendRestarts() throws IOException {
+        newest(NEW_BUILD);
+        clock.advance(Duration.ofHours(3));
+        ArgumentCaptor<Runnable> task = ArgumentCaptor.forClass(Runnable.class);
+
+        sync.start();
+        verify(scheduler).schedule(task.capture(), any(Instant.class));
+        task.getValue().run();
+
+        verify(backendRestart).run();
+        verify(scheduler, times(1)).schedule(any(Runnable.class), any(Instant.class));
+    }
+
+    /* ─── Helpers ─── */
+
+    private GameDataSyncService service(boolean keepCopy) {
+        return new GameDataSyncService(gameDataService, wagoClient, store, scheduler, backendRestart, clock, keepCopy,
+                DEPLOY, config -> exporter);
+    }
+
+    private void newest(String build) throws IOException {
+        when(wagoClient.latestBuild("wowf")).thenReturn(Optional.of(build));
+    }
+
+    private void exports(String build) {
+        when(exporter.export(any(), any(), any())).thenReturn(kept(build));
+    }
+
+    private ObjectNode kept(String build) {
+        ObjectNode data = GameDataFixtures.testData();
+        data.put("build", build);
+        data.put("exporter", fingerprint);
+
+        return data;
+    }
+
+    private ObjectNode classicReference() {
+        ObjectNode reference = GameDataFixtures.testData().objectNode();
+        reference.put("exporter", fingerprint);
+        reference.put("build", CLASSIC_BUILD);
+        reference.putObject("classes").putObject("Warrior");
+
+        return reference;
+    }
+
+    /** A clock the test moves forward. */
+    private static final class MovingClock extends Clock {
+
+        private Instant now;
+
+        private MovingClock(Instant now) {
+            this.now = now;
+        }
+
+        void advance(Duration duration) {
+            now = now.plus(duration);
+        }
+
+        @Override
+        public ZoneId getZone() {
+            return ZoneOffset.UTC;
+        }
+
+        @Override
+        public Clock withZone(ZoneId zone) {
+            return this;
+        }
+
+        @Override
+        public Instant instant() {
+            return now;
+        }
     }
 }

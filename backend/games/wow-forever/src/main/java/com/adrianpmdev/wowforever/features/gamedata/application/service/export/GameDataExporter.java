@@ -2,6 +2,7 @@ package com.adrianpmdev.wowforever.features.gamedata.application.service.export;
 
 import com.adrianpmdev.wowforever.features.gamedata.application.service.GameDataConfig;
 import com.adrianpmdev.wowforever.features.gamedata.infrastructure.wago.Db2Source;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.core.io.Resource;
@@ -24,16 +25,16 @@ import java.util.stream.Collectors;
  * has always read (sections {@code talents}, {@code spellbooks}, {@code spell_desc}, {@code racials},
  * {@code class_racials}, {@code class_abilities} and {@code legacy}), so the rest of the backend does not change, plus
  * {@code professions}. Every text is in English, as the client writes it, for a character of the top level with no
- * gear. The client has no notes on what changed for each class, so {@code class_abilities} is empty. When the tables
- * of Classic Era are given, talents and spells are compared with Classic (see ClassicComparison).
+ * gear. The client has no notes on what changed for each class, so {@code class_abilities} is empty. Talents and
+ * spells are compared with Classic Era (see ClassicComparison).
  * <p>
- * The file carries the {@link #fingerprint fingerprint} of the code and settings that wrote it ({@code exporter}). A
- * kept file with another fingerprint was written by an older (or newer) version of this export, so its build is read
- * again: any change to the export shows up on the next start, with nothing to remember.
+ * Classic Era does not change, so its client is read once into a {@link #classicReference Classic reference}, which
+ * the caller keeps; every build of WoW Forever is compared with that reference and only its own tables are read.
  * <p>
- * The tables of the two clients are never held at once: the whole file is built from the WoW Forever tables first,
- * and only then, with those tables already free, are the Classic tables read for the comparison. That halves the
- * memory the export needs, which matters on the free server.
+ * The file and the Classic reference carry the {@link #fingerprint fingerprint} of the code and settings that wrote
+ * them ({@code exporter}). A kept file or reference with another fingerprint was written by an older (or newer)
+ * version of this export, so it is read again: any change to the export shows up on the next start, with nothing to
+ * remember.
  *
  * @author adrianpmdev
  */
@@ -120,22 +121,50 @@ public final class GameDataExporter {
     }
 
     /**
-     * Exports one build.
+     * Reads the Classic reference from the client of Classic Era: what the comparison needs, with the build it was read
+     * from ({@code build}) and the fingerprint of this export ({@code exporter}).
+     *
+     * @param classic tables and version of the Classic Era build
+     * @return the reference, small enough to be kept
+     * @throws java.io.UncheckedIOException when a table cannot be read
+     */
+    public ObjectNode classicReference(Build classic) {
+        ObjectNode reference = JSON.objectNode();
+        reference.put("exporter", fingerprint(config));
+        reference.put("build", classic.version());
+        reference.set(ClassicReference.CLASSES, new ClassicReference(new ClientTables(classic.tables()),
+                config.talents().lastPointLevel(), config.spellbook().extraTabs()).read());
+
+        return reference;
+    }
+
+    /**
+     * Whether a kept Classic reference can be used by this version of the export: it was written by it and holds
+     * classes.
+     *
+     * @param reference   the kept reference
+     * @param fingerprint fingerprint of this version of the export
+     * @return true when it can be used as it is
+     */
+    public static boolean fits(JsonNode reference, String fingerprint) {
+        return fingerprint.equals(reference.path("exporter").asText())
+                && !reference.path("build").asText().isEmpty()
+                && !reference.path(ClassicReference.CLASSES).isEmpty();
+    }
+
+    /**
+     * Exports one build, compared with Classic Era.
      *
      * @param build   tables and version of the WoW Forever build
-     * @param classic tables and version of the Classic Era build to compare with, or null to skip the comparison
+     * @param classic the Classic reference (see {@link #classicReference})
      * @param date    day of the export
      * @return the data file
      * @throws java.io.UncheckedIOException when a table cannot be read
      */
-    public ObjectNode export(Build build, Build classic, LocalDate date) {
-        ObjectNode data = exportForever(build, classic == null ? null : classic.version(), date);
-
-        if (classic != null) {
-            new ClassicComparison(new ClientTables(classic.tables()), config.talents().lastPointLevel(),
-                    config.spellbook().extraTabs()).annotate((ObjectNode) data.get("talents"),
-                    (ObjectNode) data.get("spellbooks"), (ObjectNode) data.get("spell_desc"));
-        }
+    public ObjectNode export(Build build, JsonNode classic, LocalDate date) {
+        ObjectNode data = exportForever(build, classic.path("build").asText(), date);
+        new ClassicComparison(classic.path(ClassicReference.CLASSES)).annotate((ObjectNode) data.get("talents"),
+                (ObjectNode) data.get("spellbooks"), (ObjectNode) data.get("spell_desc"));
 
         return data;
     }

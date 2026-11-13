@@ -138,6 +138,14 @@ public class GameDataService {
         return current == null ? Optional.empty() : Optional.ofNullable(current.root().path("generated").asText(null));
     }
 
+    /** The Classic Era build the file being served is compared with, or empty while none is. */
+    public Optional<String> currentClassicBuild() {
+        GameData current = data;
+
+        return current == null ? Optional.empty()
+                : Optional.ofNullable(current.root().path("classicBuild").asText(null));
+    }
+
     /**
      * The fingerprint of the export that wrote the file being served (see GameDataExporter.fingerprint), or an empty
      * text when none is served or the file is older than fingerprints.

@@ -49,9 +49,8 @@
 }
 
 .steps {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 4px 16px;
+    columns: 260px;
+    column-gap: 16px;
     margin: 8px 0 0;
     padding: 0;
     list-style: none;
@@ -62,8 +61,10 @@
     align-items: center;
     gap: 8px;
     min-width: 0;
+    margin-bottom: 4px;
     padding: 2px 0;
     border-bottom: 1px solid wow.$line;
+    break-inside: avoid;
     font-size: 0.85rem;
 }
 
@@ -95,6 +96,6 @@
 
 @include mobile {
     .steps {
-        grid-template-columns: minmax(0, 1fr);
+        columns: 1;
     }
 }
